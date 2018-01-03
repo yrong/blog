@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tool on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/tool/</link>
+    <description>Recent content in Tool on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
+    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Thu, 03 Nov 2016 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/tool/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>多终端管理器tmux</title>
+      <link>https://yrong.github.io/blog/2016/11/03/tmux/</link>
+      <pubDate>Thu, 03 Nov 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/11/03/tmux/</guid>
+      <description>tmux 为什么要用tmux tmux是什么？tmux是linux中一种管理窗口的程序。那么问题来了：Mac自带的Iterm2很好用啊。既支持多标签，</description>
+    </item>
+    
+    <item>
+      <title>chrome上的vim:vimium</title>
+      <link>https://yrong.github.io/blog/2016/11/02/vimium/</link>
+      <pubDate>Wed, 02 Nov 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/11/02/vimium/</guid>
+      <description>页面滚动 浏览任何一个页面时，不管你想向上滚动，向下滚动，到页面最底部……都只用按一两个键就可以搞定： j：向下滚动一点 k：向上滚动一点 d：向下</description>
+    </item>
+    
+  </channel>
+</rss>

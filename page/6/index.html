@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>yrong blog</title>
+  <meta property="og:title" content="yrong blog" />
+  <meta name="twitter:title" content="yrong blog" />
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="/blog/blog/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.32-DEV" />
+  <link href="/blog/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
+  <link href="/blog/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <section class="list home-list">
+      <article class="article">
+        <a href="/blog/2016/07/21/nginx-under-the-hood/" class="article-titles">
+          <h2 class="article-title">nginx模块初始化</h2>
+          <h3 class="article-subtitle">nginx模块初始化</h3>
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>July 21, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/nginx/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              nginx
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          主要在函数ngx_init_cycle（src/ngx_cycle.c）中完成 ... for (i = 0; cycle-&gt;modules[i]; i++) { if (cycle-&gt;modules[i]-&gt;type != NGX_CORE_MODULE) { continue; } module = cycle-&gt;modules[i]-&gt;ctx; if (module-&gt;create_conf) { //只有ngx_co
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/07/21/nginx-under-the-hood/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2016/07/16/elasticsearch-analysis/" class="article-titles">
+          <h2 class="article-title">ElasticSearch源码解析之文档索引</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>July 16, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/elasticsearch/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              elasticsearch
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          es5.0版本主要改进应该是lucene版本升级到6.0,利用插件机制把netty从core中剥离出来接入NetworkModule,代码在
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/07/16/elasticsearch-analysis/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2016/07/13/tinyacs/" class="article-titles">
+          <h2 class="article-title">ACS CWMP协议基于异步开源框架vertx的实现</h2>
+          <h3 class="article-subtitle">A blazing fast TR-069 auto configuration server (ACS) built with Vertx, Redis, and MongoDB. </h3>
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>July 13, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/java/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              java
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/vertx/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              vertx
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          ACS CWMP A blazing fast TR-069 auto configuration server (ACS) built with Vertx, Redis, and MongoDB. I&rsquo;ve added the source code in github and welcome comments. Infrastructure and message flow for nbi request meteor stack send nbi request to acs nbi server by standard restful api and nbi server forward it to one cpe server by vertx eventbus api(eventbus send will choose one cpe server with round-robin algrithom) cpe server
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/07/13/tinyacs/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+    </section>
+    
+
+<ul class="pagination">
+    
+    <li>
+        <a href="/blog/" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+    </li>
+    
+    <li
+    >
+    <a href="/blog/page/5/" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+    </li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/blog/">1</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/blog/page/2/">2</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/blog/page/3/">3</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="disabled"><span aria-hidden="true">&hellip;</span></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/blog/page/5/">5</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    class="active"><a href="/blog/page/6/">6</a></li>
+    
+    
+    <li
+    class="disabled">
+    <a href="" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+    </li>
+    
+    <li>
+        <a href="/blog/page/6/" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    </li>
+    
+</ul>
+
+  </div>
+
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-rsslink">
+      <a href="/blog/index.xml" type="application/rss+xml" target="_blank" title="RSS">
+        <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#rss"></use></svg>
+      </a>
+    </li>
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a>
+  </div>
+</div>
+<script src="/blog/js/script.js"></script>
+<script src="/blog/js/custom.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>ElasticSearch的存储结构 - yrong blog</title>
+  <meta property="og:title" content="ElasticSearch的存储结构 - yrong blog" />
+  <meta name="twitter:title" content="ElasticSearch的存储结构 - yrong blog" />
+  <meta name="description" content="Elasticsearch的存储结构 Node Data Simply starting Elasticsearch from a empty data directory yields the following directory tree: $ tree data data └── elasticsearch └── nodes └── 0 ├── _state │ └── global-0.st └── node.lock The node.lock file is there to ensure that">
+  <meta property="og:description" content="Elasticsearch的存储结构 Node Data Simply starting Elasticsearch from a empty data directory yields the following directory tree: $ tree data data └── elasticsearch └── nodes └── 0 ├── _state │ └── global-0.st └── node.lock The node.lock file is there to ensure that">
+  <meta name="twitter:description" content="Elasticsearch的存储结构 Node Data Simply starting Elasticsearch from a empty data directory yields the following directory tree: $ tree data data └── elasticsearch └── nodes └── 0 ├── _state │ └── …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="/blog/2016/10/03/elasticsearch-storelayer/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.32-DEV" />
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">ElasticSearch的存储结构</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>October 3, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/elasticsearch/">
+            <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+            elasticsearch
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li><a href="#elasticsearch的存储结构">Elasticsearch的存储结构</a>
+<ul>
+<li><a href="#node-data">Node Data</a></li>
+<li><a href="#index-data">Index Data</a></li>
+<li><a href="#shard-data">Shard Data</a></li>
+<li><a href="#per-shard-transaction-log">Per-Shard Transaction Log</a></li>
+<li><a href="#lucene-index-files">Lucene Index Files</a></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      
+
+<h1 id="elasticsearch的存储结构">Elasticsearch的存储结构</h1>
+
+<h2 id="node-data">Node Data</h2>
+
+<p>Simply starting Elasticsearch from a empty data directory yields the following directory tree:</p>
+
+<pre><code>$ tree data
+data
+└── elasticsearch
+    └── nodes
+        └── 0
+            ├── _state
+            │   └── global-0.st
+            └── node.lock
+</code></pre>
+
+<p>The node.lock file is there to ensure that only one Elasticsearch installation is reading/writing from a single data directory at a time.</p>
+
+<p>More interesting is the global-0.st-file. The global-prefix indicates that this is a global state file while the .st extension indicates that this is a state file that contains metadata. As you might have guessed, this binary file contains global metadata about your cluster and the number after the prefix indicates the cluster metadata version, a strictly increasing versioning scheme that follows your cluster.</p>
+
+<h2 id="index-data">Index Data</h2>
+
+<p>Let’s create a single shard index and look at the files changed by Elasticsearch:</p>
+
+<pre><code>$ curl localhost:9200/foo -XPOST -d '{&quot;settings&quot;:{&quot;index.number_of_shards&quot;: 1}}'
+{&quot;acknowledged&quot;:true}
+
+$ tree -h data
+data
+└── [ 102]  elasticsearch
+    └── [ 102]  nodes
+        └── [ 170]  0
+            ├── [ 102]  _state
+            │   └── [ 109]  global-0.st
+            ├── [ 102]  indices
+            │   └── [ 136]  foo
+            │       ├── [ 170]  0
+            │       │   ├── .....
+            │       └── [ 102]  _state
+            │           └── [ 256]  state-0.st
+            └── [   0]  node.lock
+</code></pre>
+
+<p>We see that a new directory has been created corresponding to the index name. This directory has two sub-folders: _state and 0. The former contains what’s called a index state file (indices/{index-name}/_state/state-{version}.st), which contains metadata about the index, such as its creation timestamp. It also contains a unique identifier as well as the settings and the mappings for the index. The latter contains data relevant for the first (and only) shard of the index (shard 0). Next up, we’ll have a closer look at this.</p>
+
+<h2 id="shard-data">Shard Data</h2>
+
+<p>The shard data directory contains a state file for the shard that includes versioning as well as information about whether the shard is considered a primary shard or a replica.</p>
+
+<pre><code>$ tree -h data/elasticsearch/nodes/0/indices/foo/0
+data/elasticsearch/nodes/0/indices/foo/0
+├── [ 102]  _state
+│   └── [  81]  state-0.st
+├── [ 170]  index
+│   ├── [  36]  segments.gen
+│   ├── [  79]  segments_1
+│   └── [   0]  write.lock
+└── [ 102]  translog
+    └── [  17]  translog-1429697028120
+</code></pre>
+
+<p>The {shard_id}/index directory contains files owned by Lucene. Elasticsearch generally does not write directly to this folder. The files in these directories constitute the bulk of the size of any Elasticsearch data directory.</p>
+
+<p>Before we enter the world of Lucene, we’ll have a look at the Elasticsearch transaction log, which is unsurprisingly found in the per-shard translog directory with the prefix translog-. The transaction log is very important for the functionality and performance of Elasticsearch, so we’ll explain its use a bit closer in the next section.</p>
+
+<h2 id="per-shard-transaction-log">Per-Shard Transaction Log</h2>
+
+<p>The <a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html">Elasticsearch transaction log</a> makes sure that data can safely be indexed into Elasticsearch without having to perform <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/indices-flush.html">elasticsearch flush</a> which actually triggers a low-level Lucene commit for every document. Committing a Lucene index creates a new segment on the Lucene level which is fsync()-ed and results in a significant amount of disk I/O which affects performance.</p>
+
+<p>In order to accept a document for indexing and make it searchable without requiring a full Lucene commit, Elasticsearch adds it to the <a href="http://lucene.apache.org/core/5_1_0/core/org/apache/lucene/index/IndexWriter.html">Lucene IndexWriter</a> and appends it to the transaction log. After each <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration.html#configuration-index-settings">refresh_interval</a> it will call <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/indices-refresh.html">elasticsearch refresh</a> which actually triggers reopen() on the Lucene indexes and will make the data searchable without requiring a commit. This is part of the Lucene Near Real Time API. When the IndexWriter eventually commits due to either an automatic flush of the transaction log or due to an explicit flush operation, the previous transaction log is discarded and a new one takes its place.</p>
+
+<p>Should recovery be required, the segments written to disk in Lucene will be recovered first, then the transaction log will be replayed in order to prevent the loss of operations not yet fully committed to disk.</p>
+
+<h2 id="lucene-index-files">Lucene Index Files</h2>
+
+<p>Lucene has done a good job at documenting the files in the <a href="https://lucene.apache.org/core/5_1_0/core/org/apache/lucene/codecs/lucene50/package-summary.html">Lucene index directory</a>, reproduced here for your convenience:</p>
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Extension</th>
+<th>Brief Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Segments File</td>
+<td>segments_N</td>
+<td>Stores information about a commit point</td>
+</tr>
+
+<tr>
+<td>Lock File</td>
+<td>write.lock</td>
+<td>The Write lock prevents multiple IndexWriters from writing to the same file.</td>
+</tr>
+
+<tr>
+<td>Segment Info</td>
+<td>.si</td>
+<td>Stores metadata about a segment</td>
+</tr>
+
+<tr>
+<td>Compound File</td>
+<td>.cfs, .cfe</td>
+<td>An optional “virtual” file consisting of all the other index files for systems that frequently run out of file handles.</td>
+</tr>
+
+<tr>
+<td>Fields</td>
+<td>.fnm</td>
+<td>Stores information about the fields</td>
+</tr>
+
+<tr>
+<td>Field Index</td>
+<td>.fdx</td>
+<td>Contains pointers to field data</td>
+</tr>
+
+<tr>
+<td>Field Data</td>
+<td>.fdt</td>
+<td>The stored fields for documents</td>
+</tr>
+
+<tr>
+<td>Term Dictionary</td>
+<td>.tim</td>
+<td>The term dictionary, stores term info</td>
+</tr>
+
+<tr>
+<td>Term Index</td>
+<td>.tip</td>
+<td>The index into the Term Dictionary</td>
+</tr>
+
+<tr>
+<td>Frequencies</td>
+<td>.doc</td>
+<td>Contains the list of docs which contain each term along with frequency</td>
+</tr>
+
+<tr>
+<td>Positions</td>
+<td>.pos</td>
+<td>Stores position information about where a term occurs in the index</td>
+</tr>
+
+<tr>
+<td>Payloads</td>
+<td>.pay</td>
+<td>Stores additional per-position metadata information such as character offsets and user payloads</td>
+</tr>
+
+<tr>
+<td>Norms .nvd,</td>
+<td>.nvm</td>
+<td>Encodes length and boost factors for docs and fields</td>
+</tr>
+
+<tr>
+<td>Per-Document Values</td>
+<td>.dvd, .dvm</td>
+<td>Encodes additional scoring factors or other per-document information.</td>
+</tr>
+
+<tr>
+<td>Term Vector Index</td>
+<td>.tvx</td>
+<td>Stores offset into the document data file</td>
+</tr>
+
+<tr>
+<td>Term Vector Documents</td>
+<td>.tvd</td>
+<td>Contains information about each document that has term vectors</td>
+</tr>
+
+<tr>
+<td>Term Vector Fields</td>
+<td>.tvf</td>
+<td>The field level info about term vectors</td>
+</tr>
+
+<tr>
+<td>Live Documents</td>
+<td>.liv</td>
+<td>Info about what files are live</td>
+</tr>
+</tbody>
+</table>
+
+<blockquote>
+<p>When using the Compound File format (default in 1.4 and greater) all these files (except for the Segment info file, the Lock file, and Deleted documents file) are collapsed into a single .cfs file.</p>
+</blockquote>
+
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/2016/10/03/elasticsearch-storelayer/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <g:plus action="share"></g:plus>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/2016/10/09/meteor-internal-reactive/" data-toggle="tooltip" data-placement="top" title="meteor的响应式数据源和响应式执行环境">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/2016/09/10/redis/" data-toggle="tooltip" data-placement="top" title="redis object types">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a>
+  </div>
+</div>
+<script src="/blog/js/script.js"></script>
+<script src="/blog/js/custom.js"></script>
+
+
+</body>
+</html>

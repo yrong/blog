@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Elasticsearch on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/elasticsearch/</link>
+    <description>Recent content in Elasticsearch on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
+    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Thu, 13 Oct 2016 18:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/elasticsearch/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>ElasticSearch Query DSL</title>
+      <link>https://yrong.github.io/blog/2016/10/13/elasticsearch-query-dsl/</link>
+      <pubDate>Thu, 13 Oct 2016 18:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/10/13/elasticsearch-query-dsl/</guid>
+      <description>ElasticSearch Query DSL Examples 加载ik分词插件,配置开启inline脚本 script.inline: true script.indexed: true 建索引 curl -XDELETE &#39;localhost:9200/text&#39; curl -XPUT &#39;localhost:9200/text?pretty&#39; mapping定义 curl -XPOST http://localhost:9200/text/mytext/_mapping -d&#39; { &amp;quot;mytext&amp;quot;: { &amp;quot;_all&amp;quot;: { &amp;quot;analyzer&amp;quot;: &amp;quot;ik_max_word&amp;quot;, &amp;quot;search_analyzer&amp;quot;: &amp;quot;ik_max_word&amp;quot;, &amp;quot;term_vector&amp;quot;: &amp;quot;no&amp;quot;, &amp;quot;store&amp;quot;: &amp;quot;false&amp;quot; }, &amp;quot;properties&amp;quot;: { &amp;quot;content&amp;quot;: { &amp;quot;type&amp;quot;:</description>
+    </item>
+    
+    <item>
+      <title>ElasticSearch的存储结构</title>
+      <link>https://yrong.github.io/blog/2016/10/03/elasticsearch-storelayer/</link>
+      <pubDate>Mon, 03 Oct 2016 15:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/10/03/elasticsearch-storelayer/</guid>
+      <description>Elasticsearch的存储结构 Node Data Simply starting Elasticsearch from a empty data directory yields the following directory tree: $ tree data data └── elasticsearch └── nodes └── 0 ├── _state │ └── global-0.st └── node.lock The node.lock file is there to ensure that</description>
+    </item>
+    
+    <item>
+      <title>ElasticSearch源码解析之文档索引</title>
+      <link>https://yrong.github.io/blog/2016/07/16/elasticsearch-analysis/</link>
+      <pubDate>Sat, 16 Jul 2016 18:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/07/16/elasticsearch-analysis/</guid>
+      <description>es5.0版本主要改进应该是lucene版本升级到6.0,利用插件机制把netty从core中剥离出来接入NetworkModule,代码在</description>
+    </item>
+    
+  </channel>
+</rss>

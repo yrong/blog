@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>mocha异步测试源码分析 - yrong blog</title>
+  <meta property="og:title" content="mocha异步测试源码分析 - yrong blog" />
+  <meta name="twitter:title" content="mocha异步测试源码分析 - yrong blog" />
+  <meta name="description" content="使用简介 mocha是一款功能丰富的javascript单元测试框架，它既可以运行在nodejs环境中，也可以运行在浏览器环境中。 javasc">
+  <meta property="og:description" content="使用简介 mocha是一款功能丰富的javascript单元测试框架，它既可以运行在nodejs环境中，也可以运行在浏览器环境中。 javasc">
+  <meta name="twitter:description" content="使用简介 mocha是一款功能丰富的javascript单元测试框架，它既可以运行在nodejs环境中，也可以运行在浏览器环境中。 javasc">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="/blog/2016/11/15/mocha-async-support/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.32-DEV" />
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">mocha异步测试源码分析</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>November 15, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/javascript/">
+            <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+            javascript
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#使用简介">使用简介</a>
+<ul>
+<li><a href="#同步测试">同步测试</a></li>
+<li><a href="#异步测试">异步测试</a></li>
+</ul></li>
+<li><a href="#数据结构">数据结构</a></li>
+<li><a href="#源码分析部分">源码分析部分</a>
+<ul>
+<li><a href="#mocha-run-entrypoint">mocha run entrypoint</a></li>
+<li><a href="#run-test-suite-one-by-one">run test suite one by one</a></li>
+<li><a href="#run-test-case-one-by-one">run test case one by one</a></li>
+<li><a href="#run-each-test-case-with-async-support">run each test case with async support</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      
+
+<h3 id="使用简介">使用简介</h3>
+
+<p>mocha是一款功能丰富的javascript单元测试框架，它既可以运行在nodejs环境中，也可以运行在浏览器环境中。
+javascript是一门单线程语言，最显著的特点就是有很多异步执行。同步代码的测试比较简单，直接判断函数的返回值是否符合预期就行了，而异步的函数，就需要测试框架支持回调、promise或其他的方式来判断测试结果的正确性了。mocha可以良好的支持javascript异步的单元测试。mocha会串行地执行我们编写的测试用例，可以在将未捕获异常指向对应用例的同时，保证输出灵活准确的测试结果报告。</p>
+
+<h4 id="同步测试">同步测试</h4>
+
+<pre><code>var assert = require('chai').assert;
+describe('Array', function() { //Suite
+  describe('#indexOf()', function() {  //Suite could be hierarchically nested
+    it('should return -1 when the value is not present', function() { // Test　function
+      assert.equal(-1, [1,2,3].indexOf(5));
+      assert.equal(-1, [1,2,3].indexOf(0));
+    });
+  });
+});
+</code></pre>
+
+<blockquote>
+<p>describe函数的第一个参数会被输出在控制台中，作为一个用例集的描述，而且这个描述是可以根据自己的需求来嵌套输出的，称之为：用例集定义函数。</p>
+
+<p>it函数第一个参数用来输出一个用例的描述，第二个参数是一个函数，用来编写用例内容，用断言模块来判断结果的正确性，称之为用例函数。</p>
+</blockquote>
+
+<h4 id="异步测试">异步测试</h4>
+
+<p>只需要在用例函数里边加一个done回调，异步代码执行完毕后调用一下done，就可以通知mocha，去执行下一个用例函数吧，就像下面这样：</p>
+
+<pre><code>describe('User', function() {
+  describe('#save()', function() {
+    it('should save without error', function(done) {
+      var user = new User('Luna');
+      user.save(function(err) {
+        if (err) throw err;
+        done();
+      });
+    });
+  });
+});
+</code></pre>
+
+<h3 id="数据结构">数据结构</h3>
+
+<p><img src="{{ site.baseurl }}/img/mocha-data-structure.png" alt="" /></p>
+
+<h3 id="源码分析部分">源码分析部分</h3>
+
+<h4 id="mocha-run-entrypoint">mocha run entrypoint</h4>
+
+<pre><code>Mocha.prototype.run = function (fn) {
+	...
+
+	return runner.run(done);
+}
+
+Runner.prototype.run = function (fn) {
+
+	function start () {
+		...
+
+	    self.runSuite(rootSuite, function () {
+	      debug('finished running');
+	      self.emit('end');
+	    });
+	}
+	...
+
+	start()	
+}
+</code></pre>
+
+<h4 id="run-test-suite-one-by-one">run test suite one by one</h4>
+
+<pre><code>Runner.prototype.runSuite = function (suite, fn) {
+	
+	...
+	function next (errSuite) {
+		...
+		var curr = suite.suites[i++];
+	    if (!curr) {
+	      return done();
+	    }
+	    self.runSuite(curr, next);
+	}
+
+	function done (errSuite) {
+		...
+		self.hook('afterAll', function () {　//'afterAll' hook
+	        self.emit('suite end', suite);
+	        fn(errSuite);
+	    	});
+	}
+
+	this.hook('beforeAll', function (err) { //'beforeAll' hook
+	    if (err) {
+	      return done();
+	    }
+	    self.runTests(suite, next);
+	 });
+}
+</code></pre>
+
+<h4 id="run-test-case-one-by-one">run test case one by one</h4>
+
+<pre><code>Runner.prototype.runTests = function (suite, fn) {
+
+	function next (err, errSuite) {
+		// next test
+	    test = tests.shift();
+
+	    // all done
+	    if (!test) {
+	      return fn();
+	    }
+		...
+	    self.hookDown('beforeEach', function (err, errSuite) {//'beforeEach' hook
+			self.runTest(function (err) {
+				...
+				self.hookUp('afterEach', next);//'afterEach' hook
+			}
+	    }
+
+	}
+	next();
+}
+</code></pre>
+
+<h4 id="run-each-test-case-with-async-support">run each test case with async support</h4>
+
+<pre><code>Runner.prototype.runTest = function (suite, fn) {
+	var test = this.test;
+	test.run(fn);
+}
+
+Runnable.prototype.run = function (fn) {
+
+	if (this.async) {
+		this.resetTimeout();
+		try {
+	      callFnAsync(this.fn);//this.fn is Runable itself and not the callback fn
+	    } catch (err) {
+	      emitted = true;
+	      done(utils.getError(err));
+	    }
+	    return;
+	}
+
+	function done (err) {
+		var ms = self.timeout();
+	    if (self.timedOut) {
+	      return;
+	    }
+
+	    self.clearTimeout();
+	    self.duration = new Date() - start;
+	    finished = true;
+	    if (!err &amp;&amp; self.duration &gt; ms &amp;&amp; self._enableTimeouts) {
+	      err = new Error('Timeout of ' + ms +
+	      'ms exceeded. For async tests and hooks, ensure &quot;done()&quot; is called; if returning a Promise, ensure it resolves.');
+	    }
+	    fn(err);
+	}
+
+
+	function callFnAsync (fn) {
+	    var result = fn.call(ctx, function (err) {//this is the done function passed to async test code
+	      ...
+	      done();
+	    });
+	}
+
+}
+</code></pre>
+
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/2016/11/15/mocha-async-support/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <g:plus action="share"></g:plus>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/2016/11/17/es6-top10-features/" data-toggle="tooltip" data-placement="top" title="es6 top10 features">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/2016/11/11/neo4j-cypher/" data-toggle="tooltip" data-placement="top" title="Neo4j Cypher query">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a>
+  </div>
+</div>
+<script src="/blog/js/script.js"></script>
+<script src="/blog/js/custom.js"></script>
+
+
+</body>
+</html>

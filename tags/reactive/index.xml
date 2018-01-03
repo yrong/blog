@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Reactive on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/reactive/</link>
+    <description>Recent content in Reactive on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
+    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Fri, 20 Jan 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/reactive/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Reactive Programming with Spring Reactor</title>
+      <link>https://yrong.github.io/blog/2017/01/20/frp/</link>
+      <pubDate>Fri, 20 Jan 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/01/20/frp/</guid>
+      <description>Overview Stephane Maldini @ JOIN The new normal that is not new The Reactive Manifesto Latency &amp;amp; Blocking The Contract Reactive Types Testing &amp;amp; Debuging Other Changes RxJava Spring Framework 5 Conclusion &amp;amp; Do It Yourself Stephane Maldini @ JOIN 2016 On 5 October 2016, we had the pleasure to welcome Stephane Maldini at our JOIN event. A multi-tasker eating tech 24&amp;frasl;7, Stephane is interested in cloud computing, data science</description>
+    </item>
+    
+  </channel>
+</rss>

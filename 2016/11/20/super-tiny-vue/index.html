@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>super tiny vue - yrong blog</title>
+  <meta property="og:title" content="super tiny vue - yrong blog" />
+  <meta name="twitter:title" content="super tiny vue - yrong blog" />
+  <meta name="description" content="简介：一个迷你vue库，虽然小但功能全面，可以作为想了解vue背后思想以及想学习vue源码而又不知如何入手的入门学习资料。代码可参考deep">
+  <meta property="og:description" content="简介：一个迷你vue库，虽然小但功能全面，可以作为想了解vue背后思想以及想学习vue源码而又不知如何入手的入门学习资料。代码可参考deep">
+  <meta name="twitter:description" content="简介：一个迷你vue库，虽然小但功能全面，可以作为想了解vue背后思想以及想学习vue源码而又不知如何入手的入门学习资料。代码可参考deep">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="/blog/2016/11/20/super-tiny-vue/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.32-DEV" />
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">super tiny vue</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>November 20, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/javascript/">
+            <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+            javascript
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#功能解读">功能解读</a></li>
+<li><a href="#实现思路详解">实现思路详解</a>
+<ul>
+<li><a href="#指令节点查找">指令节点查找</a></li>
+<li><a href="#指令解析-绑定">指令解析，绑定</a>
+<ul>
+<li><a href="#指令解析">指令解析</a></li>
+<li><a href="#指令对应实现与当前节点的绑定-binddirective">指令对应实现与当前节点的绑定(bindDirective)</a></li>
+<li><a href="#响应式数据与节点的绑定-bindaccessors">响应式数据与节点的绑定(bindAccessors)</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#源码部分">源码部分</a></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      
+
+<p>简介：一个迷你vue库，虽然小但功能全面，可以作为想了解vue背后思想以及想学习vue源码而又不知如何入手的入门学习资料。代码可参考<a href="https://github.com/yrong/deep-in-vue">deep-in-vue</a></p>
+
+<p>特性：</p>
+
+<ul>
+<li>数据响应式更新</li>
+<li>指令模板</li>
+<li>MVVM</li>
+<li>轻量级</li>
+</ul>
+
+<h2 id="功能解读">功能解读</h2>
+
+<pre><code class="language-html">     &lt;templete&gt;
+        &lt;div id='app'&gt;
+            &lt;div&gt;
+                &lt;input v-model='counter' /&gt;
+                &lt;button v-on-click='add'&gt;add&lt;/button&gt;
+                &lt;p v-text='counter'&gt;&lt;/p&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+     &lt;/templete&gt;
+
+     &lt;script&gt;
+    var vm = new Vue({
+            id: 'counter',
+            data: {
+                counter: 1
+            },
+            methods: {
+                add: function () {
+                    this.counter += 1;
+                }
+            }
+        })
+     &lt;/script&gt;
+</code></pre>
+
+<p>如上为一段模板以及js脚本，我们所要实现的目标就是将 vm 实例与id为app的DOM节点关联起来，当更改vm data 的counter属性的时候，input的值和p标签的文本会响应式的改变，method中的add方法则和button的click事件绑定。</p>
+
+<p>简单的说就是, 当点击button按钮的时候，触发button的点击事件回调函数add,在add方法中使counter加1，counter变化后模板中的input和p标签会自动更新。vm与模板之间是如何关联的则是通过 v-model、v-on-click、v-text这样的指令声明的。</p>
+
+<h2 id="实现思路详解">实现思路详解</h2>
+
+<ul>
+<li>查找含指令的节点</li>
+<li>对查找所得的节点进行指令解析、指令所对应的实现与节点绑定、 节点指令值所对应的data属性与前一步关联的指令实现绑定、data属性值通过setter通知关联的指令进行更新操作</li>
+<li>含指令的每一个节点单独执行第二步</li>
+<li>绑定操作完成后，初始化vm实例属性值</li>
+</ul>
+
+<h3 id="指令节点查找">指令节点查找</h3>
+
+<p>首先来看第一步，含指令节点的查找，因为指令声明是以属性的形式，所以可以通过属性选择器来进行查找，如下所示：
+<code>&lt;input v-model='counter' type='text' /&gt;</code>则可通过 querySelectorAll(&rsquo;[v-model]&lsquo;)查找即可。</p>
+
+<pre><code>//root对于根节点，els对应于模板内含指令的节点。
+root = this.$el = document.getElementById(opts.el),
+els  = this.$els = root.querySelectorAll(getDirSelectors(Directives))
+</code></pre>
+
+<h3 id="指令解析-绑定">指令解析，绑定</h3>
+
+<h4 id="指令解析">指令解析</h4>
+
+<p>同样以<code>&lt;input v-model='counter' type='text' /&gt;</code>为例，解析即得到</p>
+
+<pre><code>//name对应指令名，value对应指令值。
+var directive = {
+name: 'v-model',
+value: 'counter'
+}
+</code></pre>
+
+<h4 id="指令对应实现与当前节点的绑定-binddirective">指令对应实现与当前节点的绑定(bindDirective)</h4>
+
+<p>指令实现可简单分为函数或是包含update函数的对象，如下便是<code>v-text</code>指令的实现代码：</p>
+
+<pre><code class="language-js">text: function (el, value) {
+    el.textContent = value || '';
+}
+</code></pre>
+
+<p>指令与节点的绑定即将该函数与节点绑定起来，即该函数负责该节点的更新操作，<code>v-text</code>的功能是更新文本值，所以如上所示
+更改节点的textContent属性值。</p>
+
+<h4 id="响应式数据与节点的绑定-bindaccessors">响应式数据与节点的绑定(bindAccessors)</h4>
+
+<p>响应式数据这里拆分为 data 和 methods 对象，分别用来存储数据值和方法。</p>
+
+<pre><code class="language-js">var vm = new Vue({
+    id: 'counter',
+    data: {
+        counter: 1
+    },
+    methods: {
+        add: function () {
+            this.counter += 1;
+        }
+    }
+})
+</code></pre>
+
+<p>我们上面解析得到 v-model 对于的指令值为 counter,所以这里将data中的counter与当前节点绑定。</p>
+
+<p>通过2、3两步实现了类型与 textDirective-&gt;el&lt;-data.counter 的关联，当data.counter发生set(具体查看defineProperty set 用法)操作时，
+data.counter得知自己被改变了，所以通知el元素需要进行更新操作，el则使用与其关联的指令(textDirective)对自身进行更新操作，从而实现了数据的
+响应式。</p>
+
+<p>以下三个是绑定的主体，数据发生更改，通知节点需要更新，节点通过指令更新自己。</p>
+
+<ul>
+<li>textDirective</li>
+<li>el</li>
+<li>data.counter</li>
+</ul>
+
+<h2 id="源码部分">源码部分</h2>
+
+<pre><code class="language-js">
+var prefix = 'v';
+
+ /**
+  * Directives
+  */
+
+var Directives = {
+
+    /**
+     * 对应于 v-text 指令
+     */
+    text: function (el, value) {
+        el.textContent = value || '';
+    },
+    show: function (el, value) {
+        el.style.display = value ? '' : 'none';
+    },
+
+    /**
+     * 对应于 v-model 指令
+     */
+    model: function (el, value, dirAgr, dir, vm, key) {
+        let eventName = 'keyup';
+        el.value = value || '';
+
+        /**
+         * 事件绑定控制
+         */
+        if (el.handlers &amp;&amp; el.handlers[eventName]) {
+            el.removeEventListener(eventName, el.handlers[eventName]);
+        } else {
+            el.handlers = {};
+        }
+
+        el.handlers[eventName] = function (e) {
+            vm[key] = e.target.value;
+        }
+
+        el.addEventListener(eventName, el.handlers[eventName]);
+    },
+    on: {
+        update: function (el, handler, eventName, directive) {
+            if (!directive.handlers) {
+                directive.handlers = {}
+            }
+
+            var handlers = directive.handlers;
+
+            if (handlers[eventName]) {
+                //绑定新的事件前移除原绑定的事件函数
+                el.removeEventListener(eventName, handlers[eventName]);
+            }
+            //绑定新的事件函数
+            if (handler) {
+                handler = handler.bind(el);
+                el.addEventListener(eventName, handler);
+                handlers[eventName] = handler;
+            }
+        }
+    }
+}
+
+
+/**
+ * MiniVue
+ */
+function TinyVue (opts) {
+    /**
+     * root/this.$el: 根节点
+     * els: 指令节点
+     * bindings: 指令与data关联的桥梁
+     */
+    var self = this,
+        root = this.$el = document.getElementById(opts.el),
+        els  = this.$els = root.querySelectorAll(getDirSelectors(Directives)),
+        bindings = {};
+    this._bindings = bindings;
+
+    /**
+     * 指令处理
+     */
+    [].forEach.call(els, processNode);
+    processNode(root);
+
+    /**
+     * vm响应式数据初始化
+     */
+
+    let _data = extend(opts.data, opts.methods);
+    for (var key in bindings) {
+        if (bindings.hasOwnProperty(key)) {
+            self[key] = _data[key];
+        }
+    }
+
+    function processNode (el) {
+        getAttributes(el.attributes).forEach(function (attr) {
+            var directive = parseDirective(attr);
+            if (directive) {
+                bindDirective(self, el, bindings, directive);
+            }
+        })
+    }
+
+    /**
+     * ready
+     */
+    if (opts.ready &amp;&amp; typeof opts.ready == 'function') {
+        this.ready = opts.ready;
+        this.ready();
+    }
+}
+
+/**************************************************************
+ * @privete
+ * helper methods
+ */
+
+/**
+ * 获取节点属性
+ * 'v-text'='counter' =&gt; {name: v-text, value: 'counter'}
+ */
+function getAttributes (attributes) {
+    return [].map.call(attributes, function (attr) {
+        return {
+            name: attr.name,
+            value: attr.value
+        }
+    })
+}
+
+/**
+ * 返回指令选择器，便于指令节点的查找
+ */
+function getDirSelectors (directives) {
+    /**
+     * 支持的事件指令
+     */
+    let eventArr = ['click', 'change', 'blur'];
+
+
+    return Object.keys(directives).map(function (directive) {
+        /**
+         * text =&gt; 'v-text'
+         */
+        return '[' + prefix + '-' + directive + ']';
+    }).join() + ',' + eventArr.map(function (eventName) {
+        return '[' + prefix + '-on-' + eventName + ']';
+    }).join();
+}
+
+/**
+ * 节点指令绑定
+ */
+function bindDirective (vm, el, bindings, directive) {
+    //从节点属性中移除指令声明
+    el.removeAttribute(directive.attr.name);
+
+    /**
+     * v-text='counter'
+     * v-model='counter'
+     * data = {
+            counter: 1
+        }
+     * 这里的 counter 即指令的 key
+     */
+    var key = directive.key,
+        binding = bindings[key];
+
+    if (!binding) {
+        /**
+         * value 即 counter 对应的值
+         * directives 即 key 所绑定的相关指令
+         如：
+           bindings['counter'] = {
+                value: 1,
+                directives: [textDirective, modelDirective]
+             }
+         */
+        bindings[key] = binding = {
+            value: '',
+            directives: []
+        }
+    }
+    directive.el = el;
+    binding.directives.push(directive);
+
+    //避免重复定义
+    if (!vm.hasOwnProperty(key)) {
+        /**
+         * get/set 操作绑定
+         */
+        bindAccessors(vm, key, binding);
+    }
+}
+
+/**
+ * get/set 绑定指令更新操作
+ */
+function bindAccessors (vm, key, binding) {
+    Object.defineProperty(vm, key, {
+        get: function () {
+            return binding.value;
+        },
+        set: function (value) {
+            binding.value = value;
+            binding.directives.forEach(function (directive) {
+                directive.update(
+                    directive.el,
+                    value,
+                    directive.argument,
+                    directive,
+                    vm,
+                    key
+                )
+            })
+        }
+    })
+}
+
+function parseDirective (attr) {
+    if (attr.name.indexOf(prefix) === -1) return ;
+
+    /**
+     * 指令解析
+       v-on-click='onClick'
+       这里的指令名称为 'on', 'click'为指令的参数，onClick 为key
+     */
+
+    //移除 'v-' 前缀, 提取指令名称、指令参数
+    var directiveStr = attr.name.slice(prefix.length + 1),
+        argIndex = directiveStr.indexOf('-'),
+        directiveName = argIndex === -1
+            ? directiveStr
+            : directiveStr.slice(0, argIndex),
+        directiveDef = Directives[directiveName],
+        arg = argIndex === -1
+            ? null
+            : directiveStr.slice(argIndex + 1);
+
+    /**
+     * 指令表达式解析，即 v-text='counter' counter的解析
+     * 这里暂时只考虑包含key的情况
+     */
+    var key = attr.value;
+    return directiveDef
+        ? {
+            attr: attr,
+            key: key,
+            dirname: directiveName,
+            definition: directiveDef,
+            argument: arg,
+            /**
+             * 指令本身是一个函数的情况下，更新函数即它本身，否则调用它的update方法
+             */
+            update: typeof directiveDef === 'function'
+                ? directiveDef
+                : directiveDef.update
+        }
+        : null;
+}
+
+/**
+ * 对象合并
+ */
+function extend (child, parent) {
+    parent = parent || {};
+    child = child || {};
+
+    for(var key in parent) {
+        if (parent.hasOwnProperty(key)) {
+            child[key] = parent[key];
+        }
+    }
+
+    return child;
+}
+
+</code></pre>
+
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/2016/11/20/super-tiny-vue/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <g:plus action="share"></g:plus>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/2016/11/23/alg-ds/" data-toggle="tooltip" data-placement="top" title="数据结构与算法">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/2016/11/17/es6-top10-features/" data-toggle="tooltip" data-placement="top" title="es6 top10 features">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a>
+  </div>
+</div>
+<script src="/blog/js/script.js"></script>
+<script src="/blog/js/custom.js"></script>
+
+
+</body>
+</html>

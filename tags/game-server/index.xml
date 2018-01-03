@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Game Server on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/game-server/</link>
+    <description>Recent content in Game Server on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
+    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Tue, 10 Jan 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/game-server/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>leaf&amp;&amp;gonet2&amp;&amp;pomelo</title>
+      <link>https://yrong.github.io/blog/2017/01/10/game-server/</link>
+      <pubDate>Tue, 10 Jan 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/01/10/game-server/</guid>
+      <description>Leaf 游戏服务器框架简介 Leaf 是一个由 Go 语言（golang）编写的开发效率和执行效率并重的开源游戏服务器框架。Leaf 适用于各类游戏服务器的开发，包</description>
+    </item>
+    
+  </channel>
+</rss>

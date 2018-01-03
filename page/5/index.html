@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>yrong blog</title>
+  <meta property="og:title" content="yrong blog" />
+  <meta name="twitter:title" content="yrong blog" />
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="/blog/blog/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.32-DEV" />
+  <link href="/blog/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
+  <link href="/blog/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <section class="list home-list">
+      <article class="article">
+        <a href="/blog/2016/10/19/neo4j-replace-rdbms/" class="article-titles">
+          <h2 class="article-title">用图数据库解决关系型数据库存在的问题</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>October 19, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/neo4j/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              neo4j
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          User-Order-Product Rdbms which customers buying this product also bought that product
+Graph  (p2:Product)&lt;-[*]-(u:User) -[*]-&gt;(p1:Product) return u  Friend of friend Rdbms  Alice’s friends-of-friends
+ SELECT p1.Person AS PERSON, p2.Person AS FRIEND_OF_FRIEND FROM PersonFriend pf1 JOIN Person p1 ON pf1.PersonID = p1.ID JOIN PersonFriend pf2 ON pf2.PersonID = pf1.FriendID JOIN Person p2 ON pf2.FriendID = p2.ID WHERE p1.Person = 'Alice' AND pf2.FriendID &lt;&gt; p1.ID  queries that extend to four, five, or six degrees of friendship deteriorate significantly due to the computational and space complexity of recursivelyjoining tables
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/10/19/neo4j-replace-rdbms/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2016/10/17/machine-learning-on-spark/" class="article-titles">
+          <h2 class="article-title">Machine Learning algorithm on Spark</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>October 17, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/spark/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              spark
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          PageRank 算法 The PageRank algorithm outputs a probability distribution used to represent the likelihood that a person randomly clicking on links will arrive at any particular page. Initialize each page’s rank to 1.0. On each iteration, have page p send a contribution of rank(p)/numNeighbors(p) to its neighbors (the pages it has links to). Set each page’s rank to 0.15
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/10/17/machine-learning-on-spark/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2016/10/13/elasticsearch-query-dsl/" class="article-titles">
+          <h2 class="article-title">ElasticSearch Query DSL</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>October 13, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/elasticsearch/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              elasticsearch
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          ElasticSearch Query DSL Examples 加载ik分词插件,配置开启inline脚本 script.inline: true script.indexed: true 建索引 curl -XDELETE 'localhost:9200/text' curl -XPUT 'localhost:9200/text?pretty' mapping定义 curl -XPOST http://localhost:9200/text/mytext/_mapping -d' { &quot;mytext&quot;: { &quot;_all&quot;: { &quot;analyzer&quot;: &quot;ik_max_word&quot;, &quot;search_analyzer&quot;: &quot;ik_max_word&quot;, &quot;term_vector&quot;: &quot;no&quot;, &quot;store&quot;: &quot;false&quot; }, &quot;properties&quot;: { &quot;content&quot;: { &quot;type&quot;:
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/10/13/elasticsearch-query-dsl/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2016/10/12/d3-data-visualization/" class="article-titles">
+          <h2 class="article-title">D3.js数据可视化</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>October 12, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/d3/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              d3
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/javascript/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              javascript
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          基于 D3.js ，编写 HTML、SVG 和 CSS 就能让你的数据变得生动起来，这是一个基于数据操作 DOM 的 JavaScript 库。 每一位 Web 开发者最应该学习的三个 JavaScript 库就是 jQuery
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/10/12/d3-data-visualization/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2016/10/11/vertx-internal/" class="article-titles">
+          <h2 class="article-title">vertx源码分析</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>October 11, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/vertx/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              vertx
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          Cluster初始化 调用Vertx.clusteredVertx静态方法后，Vert.x会利用Vertx工厂方法创建Vertx实例。 @Override public void clusteredVertx(VertxOptions
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/10/11/vertx-internal/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2016/10/09/meteor-internal-reactive/" class="article-titles">
+          <h2 class="article-title">meteor的响应式数据源和响应式执行环境</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>October 9, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/meteor/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              meteor
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/javascript/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              javascript
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          如果说集合是 Meteor 的核心功能，那么响应式可以能让这个核心功能更强大。 集合从根本上改变你的应用程序的数据处理方式。从而不必手动检查数据更改（例如，
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/10/09/meteor-internal-reactive/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2016/10/03/elasticsearch-storelayer/" class="article-titles">
+          <h2 class="article-title">ElasticSearch的存储结构</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>October 3, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/elasticsearch/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              elasticsearch
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          Elasticsearch的存储结构 Node Data Simply starting Elasticsearch from a empty data directory yields the following directory tree: $ tree data data └── elasticsearch └── nodes └── 0 ├── _state │ └── global-0.st └── node.lock The node.lock file is there to ensure that
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/10/03/elasticsearch-storelayer/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2016/09/10/redis/" class="article-titles">
+          <h2 class="article-title">redis object types</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>September 10, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/redis/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              redis
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          Object Types /* Object types */ #define OBJ_STRING 0 #define OBJ_LIST 1 #define OBJ_SET 2 #define OBJ_ZSET 3 #define OBJ_HASH 4 strings&amp;Hashes&amp;Set HSET myhash field1 &ldquo;Hello&rdquo; Hash对象是用zipmap存储的，查找、删除均为O(n)，但一般来说对象的field对
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/09/10/redis/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2016/09/05/neo4j-internal/" class="article-titles">
+          <h2 class="article-title">Neo4j Internal</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>September 5, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/neo4j/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              neo4j
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          电子书 GraphDatabase 存储结构 现在让我们来看看数据在Neo4j中是如何存储的: .db是主存储文件,不同存储类型(node,relation,label,p
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/09/05/neo4j-internal/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2016/08/06/java-bytecode/" class="article-titles">
+          <h2 class="article-title">Java字节码解析</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>August 6, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/java/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              java
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          基于栈的虚拟机 JVM是一种基于栈的虚拟机，绝大部分字节码操作都涉及到操作数栈中操作数的入栈和出栈。例如，在执行求和操作时，会将两个操作数入栈
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/08/06/java-bytecode/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+    </section>
+    
+
+<ul class="pagination">
+    
+    <li>
+        <a href="/blog/" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+    </li>
+    
+    <li
+    >
+    <a href="/blog/page/4/" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+    </li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/blog/">1</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/blog/page/2/">2</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/blog/page/3/">3</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/blog/page/4/">4</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    class="active"><a href="/blog/page/5/">5</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/blog/page/6/">6</a></li>
+    
+    
+    <li
+    >
+    <a href="/blog/page/6/" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+    </li>
+    
+    <li>
+        <a href="/blog/page/6/" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    </li>
+    
+</ul>
+
+  </div>
+
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-rsslink">
+      <a href="/blog/index.xml" type="application/rss+xml" target="_blank" title="RSS">
+        <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#rss"></use></svg>
+      </a>
+    </li>
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a>
+  </div>
+</div>
+<script src="/blog/js/script.js"></script>
+<script src="/blog/js/custom.js"></script>
+
+
+</body>
+</html>

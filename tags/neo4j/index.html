@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Neo4j - yrong blog</title>
+  <meta property="og:title" content="Neo4j - yrong blog" />
+  <meta name="twitter:title" content="Neo4j - yrong blog" />
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="/blog/blog/tags/neo4j/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.32-DEV" />
+  <link href="/blog/tags/neo4j/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
+  <link href="/blog/tags/neo4j/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="breadcrumb">
+    <a href="/blog/tags/">Tags</a> / Neo4j
+  </div>
+  <div class="main" role="main">
+    <section class="list taxonomy-list">
+      <article class="article">
+        <a href="/blog/2016/11/11/neo4j-cypher/" class="article-titles">
+          <h2 class="article-title">Neo4j Cypher query</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>November 11, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/neo4j/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              neo4j
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          filter element Delete specific element from array stackoverflow
+MATCH (n) WHERE HAS(n.some_array) SET n.array = FILTER(x IN n.some_array WHERE x &lt;&gt; &quot;oranges&quot;);  split unrelated queries case
+MATCH (a {cond:'1'}), (b {cond:'x'}) CREATE a-[:rel]-&gt;b WITH 1 as dummy MATCH (a {cond:'2'}), (b {cond:'y'}) CREATE a-[:rel]-&gt;b WITH 1 as dummy MATCH (a {cond:'3'}), (b {cond:'z'}) CREATE a-[:rel]-&gt;b  aggregation  remember that anything which isn’t an aggregate function(count/collect/distinct/sum..)
+is automaticlly used as part of the grouping key which means we could include more than
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/11/11/neo4j-cypher/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2016/10/19/neo4j-replace-rdbms/" class="article-titles">
+          <h2 class="article-title">用图数据库解决关系型数据库存在的问题</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>October 19, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/neo4j/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              neo4j
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          User-Order-Product Rdbms which customers buying this product also bought that product
+Graph  (p2:Product)&lt;-[*]-(u:User) -[*]-&gt;(p1:Product) return u  Friend of friend Rdbms  Alice’s friends-of-friends
+ SELECT p1.Person AS PERSON, p2.Person AS FRIEND_OF_FRIEND FROM PersonFriend pf1 JOIN Person p1 ON pf1.PersonID = p1.ID JOIN PersonFriend pf2 ON pf2.PersonID = pf1.FriendID JOIN Person p2 ON pf2.FriendID = p2.ID WHERE p1.Person = 'Alice' AND pf2.FriendID &lt;&gt; p1.ID  queries that extend to four, five, or six degrees of friendship deteriorate significantly due to the computational and space complexity of recursivelyjoining tables
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/10/19/neo4j-replace-rdbms/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2016/09/05/neo4j-internal/" class="article-titles">
+          <h2 class="article-title">Neo4j Internal</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>September 5, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/neo4j/">
+              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              neo4j
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          电子书 GraphDatabase 存储结构 现在让我们来看看数据在Neo4j中是如何存储的: .db是主存储文件,不同存储类型(node,relation,label,p
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/09/05/neo4j-internal/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+    </section>
+    
+
+  </div>
+
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-rsslink">
+      <a href="/blog/tags/neo4j/index.xml" type="application/rss+xml" target="_blank" title="RSS">
+        <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#rss"></use></svg>
+      </a>
+    </li>
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a>
+  </div>
+</div>
+<script src="/blog/js/script.js"></script>
+<script src="/blog/js/custom.js"></script>
+
+
+</body>
+</html>

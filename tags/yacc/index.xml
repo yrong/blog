@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Yacc on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/yacc/</link>
+    <description>Recent content in Yacc on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
+    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Fri, 26 May 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/yacc/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>lex-yacc</title>
+      <link>https://yrong.github.io/blog/2017/05/26/lex-yacc/</link>
+      <pubDate>Fri, 26 May 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/05/26/lex-yacc/</guid>
+      <description>Yacc&amp;amp;Lex Lex lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码，然后</description>
+    </item>
+    
+  </channel>
+</rss>

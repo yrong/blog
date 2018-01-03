@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Spark on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/spark/</link>
+    <description>Recent content in Spark on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
+    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Mon, 17 Oct 2016 15:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/spark/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Machine Learning algorithm on Spark</title>
+      <link>https://yrong.github.io/blog/2016/10/17/machine-learning-on-spark/</link>
+      <pubDate>Mon, 17 Oct 2016 15:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/10/17/machine-learning-on-spark/</guid>
+      <description>PageRank 算法 The PageRank algorithm outputs a probability distribution used to represent the likelihood that a person randomly clicking on links will arrive at any particular page. Initialize each page’s rank to 1.0. On each iteration, have page p send a contribution of rank(p)/numNeighbors(p) to its neighbors (the pages it has links to). Set each page’s rank to 0.15</description>
+    </item>
+    
+  </channel>
+</rss>

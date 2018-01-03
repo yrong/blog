@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Git on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/git/</link>
+    <description>Recent content in Git on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
+    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Sat, 25 Feb 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/git/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>git tips</title>
+      <link>https://yrong.github.io/blog/2017/02/25/git-tips/</link>
+      <pubDate>Sat, 25 Feb 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/02/25/git-tips/</guid>
+      <description>git-tips Collection of git-tips, want to add your tips? Checkout contributing.md English | 中文 | Русский Tools: git-tip - A handy CLI to make optimum use of these tips. (Here in Docker container) P.S: All these commands are tested on git version 2.7.4 (Apple Git-66). Everyday Git in twenty commands or so Show helpful guides that come with Git Search change by content</description>
+    </item>
+    
+  </channel>
+</rss>

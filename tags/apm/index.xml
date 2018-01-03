@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Apm on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/apm/</link>
+    <description>Recent content in Apm on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
+    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Mon, 30 Jan 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/apm/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>OpenTracing use cases</title>
+      <link>https://yrong.github.io/blog/2017/01/30/opentracing/</link>
+      <pubDate>Mon, 30 Jan 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/01/30/opentracing/</guid>
+      <description>Common use cases This page aims to illustrate common use cases that developers who instrument their applications and libraries with OpenTracing API need to deal with.
+Stepping Back: Who is OpenTracing for? OpenTracing is a thin standardization layer that sits between application/library code and various systems that consume tracing and causality data. Here is a diagram:
+ +-------------+ +---------+ +----------+ +------------+ | Application | | Library | | OSS | | RPC/IPC | | Code | | Code | | Services | | Frameworks | +-------------+ +---------+ +----------+ +------------+ | | | | | | | | v v v v +-----------------------------------------------------+ | · · · · · · · · · · OpenTracing · · · · · · · · · · | +-----------------------------------------------------+ | | | | | | | | v v v v +-----------+ +-------------+ +-------------+ +-----------+ | Tracing | | Logging | | Metrics | | Tracing | | System A | | Framework B | | Framework C | | System D | +-----------+ +-------------+ +-------------+ +-----------+  Application Code: Developers writing application code can use OpenTracing to describe causality, demarcate control flow, and add fine-grained logging information along the way.</description>
+    </item>
+    
+    <item>
+      <title>分布式环境系统监控</title>
+      <link>https://yrong.github.io/blog/2017/01/05/microservice-apm/</link>
+      <pubDate>Thu, 05 Jan 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/01/05/microservice-apm/</guid>
+      <description>Dapper Zipkin zipkin为分布式链路调用监控系统，聚合各业务系统调用延迟数据，达到链路调用监控跟踪。 architecture 如图，在复杂的调用链路中假设存在一条调用链路响</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Php on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/php/</link>
+    <description>Recent content in Php on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
+    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Thu, 02 Mar 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/php/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>own cloud internal</title>
+      <link>https://yrong.github.io/blog/2017/03/02/owncloud/</link>
+      <pubDate>Thu, 02 Mar 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/03/02/owncloud/</guid>
+      <description>Classloader The classloader is provided by ownCloud and loads all your classes automatically. The only thing left to include by yourself are 3rdparty libraries. Those should be loaded in lib/AppInfo/Application.php.
+New in version 9.1.
+PSR-4 Autoloading Since ownCloud 9.1 there is a PSR-4 autoloader in place. The namespace \OCA\MyApp is mapped to /apps/myapp/lib/. Afterwards normal PSR-4 rules apply, so a folder is a namespace section in the same casing and the class name matches the file name.</description>
+    </item>
+    
+  </channel>
+</rss>

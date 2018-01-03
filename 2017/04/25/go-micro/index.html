@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>go micro code analysis - yrong blog</title>
+  <meta property="og:title" content="go micro code analysis - yrong blog" />
+  <meta name="twitter:title" content="go micro code analysis - yrong blog" />
+  <meta name="description" content="go micro code analysis
+">
+  <meta property="og:description" content="go micro code analysis
+">
+  <meta name="twitter:description" content="go micro code analysis
+">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="/blog/2017/04/25/go-micro/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.32-DEV" />
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">go micro code analysis</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>April 25, 2017</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/microservice/">
+            <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+            microservice
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/golang/">
+            <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+            golang
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#usage">Usage</a>
+<ul>
+<li><a href="#define-api-interface">Define Api Interface</a></li>
+<li><a href="#write-service">Write Service</a></li>
+<li><a href="#write-client">Write Client</a></li>
+</ul></li>
+<li><a href="#go-micro-analysis">Go Micro Analysis</a>
+<ul>
+<li><a href="#architecture">Architecture</a></li>
+<li><a href="#source-code-explaination">Source Code Explaination</a>
+<ul>
+<li><a href="#register-service-handler">register service handler</a></li>
+<li><a href="#start-service">Start Service</a></li>
+<li><a href="#client-invoke">Client Invoke</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      <p>go micro code analysis
+</p>
+
+<h1 id="overview">Overview</h1>
+
+<p>The main piece of software provided is <a href="https://github.com/micro/micro">Micro</a>, a microservice toolkit.</p>
+
+<p>The toolkit is composed of the following components:</p>
+
+<ul>
+<li><p><strong>Go Micro</strong> - A pluggable RPC framework for writing microservices in Go. It provides libraries for service discovery, client side load balancing, encoding, synchronous and asynchronous communication.</p></li>
+
+<li><p><strong>API</strong> - An API Gateway that serves HTTP and routes requests to appropriate micro services. It acts as a single entry point and can either be used as a reverse proxy or translate HTTP requests to RPC.</p></li>
+
+<li><p><strong>Sidecar</strong> - A language agnostic RPC proxy with all the features of go-micro as HTTP endpoints. While Go is a great language for building microservices, you may also want to use other languages, so the Sidecar provides a way to integrate your other apps into the Micro world.</p></li>
+
+<li><p><strong>Web</strong> - A web dashboard and reverse proxy for micro web applications. We believe that web apps should be built as microservices and therefore treated as a first class citizen in a microservice world. It behaves much the like the API reverse proxy but also includes support for web sockets.</p></li>
+
+<li><p><strong>CLI</strong> - A straight forward command line interface to interact with your micro services. It also allows you to leverage the Sidecar as a proxy where you may not want to directly connect to the service registry.</p></li>
+
+<li><p><strong>Bot</strong> - A Hubot style bot that sits inside your microservices platform and can be interacted with via Slack, HipChat, XMPP, etc. It provides the features of the CLI via messaging. Additional commands can be added to automate common ops tasks.</p></li>
+</ul>
+
+<p>Note: Go-micro is a standalone library and can be used independent of the rest of the toolkit.</p>
+
+<h1 id="usage">Usage</h1>
+
+<p>The top level <a href="https://godoc.org/github.com/micro/go-micro#Service">Service</a> interface is the main component for building a service. It wraps all the underlying packages of Go Micro into a single convenient interface.</p>
+
+<pre><code>type Service interface {
+    Init(...Option)
+    Options() Options
+    Client() client.Client
+    Server() server.Server
+    Run() error
+    String() string
+}
+</code></pre>
+
+<h2 id="define-api-interface">Define Api Interface</h2>
+
+<p>use protobuf files to define the service API interface. This is a very convenient way to strictly define the API and provide concrete types for both the server and a client.</p>
+
+<p>e.g:greeter.proto</p>
+
+<pre><code>syntax = &quot;proto3&quot;;
+
+service Greeter {
+	rpc Hello(HelloRequest) returns (HelloResponse) {}
+}
+
+message HelloRequest {
+	string name = 1;
+}
+
+message HelloResponse {
+	string greeting = 2;
+}
+</code></pre>
+
+<p>use protoc and protoc-gen-go to generate the concrete go implementation for this definition.It’s done via a protobuf plugin which requires a fork of <a href="https://github.com/golang/protobuf">golang/protobuf</a> that can be found here <a href="github.com/micro/protobuf">micro/protobuf</a></p>
+
+<pre><code>go get github.com/micro/protobuf/{proto,protoc-gen-go}
+protoc --go_out=plugins=micro:. greeter.proto
+</code></pre>
+
+<h2 id="write-service">Write Service</h2>
+
+<pre><code>package main
+
+import (
+        &quot;log&quot;
+
+        &quot;github.com/micro/go-micro&quot;
+        proto &quot;github.com/micro/examples/service/proto&quot;
+
+        &quot;golang.org/x/net/context&quot;
+)
+
+type Greeter struct{}
+
+func (g *Greeter) Hello(ctx context.Context, req *proto.HelloRequest, rsp *proto.HelloResponse) error {
+        rsp.Greeting = &quot;Hello &quot; + req.Name
+        return nil
+}
+
+func main() {
+        service := micro.NewService(
+                micro.Name(&quot;greeter&quot;),
+                micro.Version(&quot;latest&quot;),
+        )
+
+        service.Init()
+
+        proto.RegisterGreeterHandler(service.Server(), new(Greeter))
+
+        if err := service.Run(); err != nil {
+                log.Fatal(err)
+        }
+}
+</code></pre>
+
+<h2 id="write-client">Write Client</h2>
+
+<pre><code>// create the greeter client using the service name and client
+greeter := proto.NewGreeterClient(&quot;greeter&quot;, service.Client())
+
+// request the Hello method on the Greeter handler
+rsp, err := greeter.Hello(context.TODO(), &amp;proto.HelloRequest{
+	Name: &quot;John&quot;,
+})
+if err != nil {
+	fmt.Println(err)
+	return
+}
+
+fmt.Println(rsp.Greeter)
+</code></pre>
+
+<h1 id="go-micro-analysis">Go Micro Analysis</h1>
+
+<h2 id="architecture">Architecture</h2>
+
+<p>Go-micro is a standalone RPC framework for microservices. It’s at the core of the toolkit and leveraged by all the above components. Here we’ll look at each individual feature of go-micro.</p>
+
+<p><img src="https://micro.mu/docs/images/go-micro.png" alt="Go-micro" /></p>
+
+<blockquote>
+<p>Registry</p>
+</blockquote>
+
+<p>The registry provides a pluggable service discovery library to find running services. Current implementations are consul, etcd, memory and kubernetes. The interface is easily implemented if your preferences differ.</p>
+
+<blockquote>
+<p>Selector</p>
+</blockquote>
+
+<p>The selector provides a load balancing mechanism via selection. When a client makes a request to a service it will first query the registry for the service. This usually returns a list of running nodes representing the service. A selector will select one of these nodes to be used for querying. Multiple calls to the selector will allow balancing algorithms to be utilised. Current methods are round robin, random hashed and blacklist.</p>
+
+<blockquote>
+<p>Broker</p>
+</blockquote>
+
+<p>The broker is pluggable interface for pub/sub. Microservices are an event driven architecture where a publishing and subscribing to events should be a first class citizen. Current implementations include nats, rabbitmq and http (for development).</p>
+
+<blockquote>
+<p>Transport</p>
+</blockquote>
+
+<p>Transport is a pluggable interface over point to point transfer of messages. Current implementations are http, rabbitmq and nats. By providing this abstraction, transports can be swapped out seamlessly.</p>
+
+<blockquote>
+<p>Client</p>
+</blockquote>
+
+<p>The client provides a way to make RPC queries. It combines the registry, selector, broker and transport. It also provides retries, timeouts, use of context, etc.</p>
+
+<blockquote>
+<p>Server</p>
+</blockquote>
+
+<p>The server is an interface to build a running microservice. It provides a way of serving RPC requests.</p>
+
+<h2 id="source-code-explaination">Source Code Explaination</h2>
+
+<h3 id="register-service-handler">register service handler</h3>
+
+<pre><code>func (s *rpcServer) Handle(h Handler) error {
+	s.Lock()
+	defer s.Unlock()
+
+	if err := s.rpc.register(h.Handler()); err != nil {
+		return err
+	}
+
+	s.handlers[h.Name()] = h
+
+	return nil
+}
+
+func (server *server) register(rcvr interface{}) error {
+	server.mu.Lock()
+	defer server.mu.Unlock()
+	if server.serviceMap == nil {
+		server.serviceMap = make(map[string]*service)
+	}
+	s := new(service)
+	s.typ = reflect.TypeOf(rcvr)
+	s.rcvr = reflect.ValueOf(rcvr)
+	sname := reflect.Indirect(s.rcvr).Type().Name()
+	if sname == &quot;&quot; {
+		log.Fatal(&quot;rpc: no service name for type&quot;, s.typ.String())
+	}
+	if !isExported(sname) {
+		s := &quot;rpc Register: type &quot; + sname + &quot; is not exported&quot;
+		log.Print(s)
+		return errors.New(s)
+	}
+	if _, present := server.serviceMap[sname]; present {
+		return errors.New(&quot;rpc: service already defined: &quot; + sname)
+	}
+	s.name = sname
+	s.method = make(map[string]*methodType)
+
+	// Install the methods
+	for m := 0; m &lt; s.typ.NumMethod(); m++ {
+		method := s.typ.Method(m)
+		if mt := prepareMethod(method); mt != nil {
+			s.method[method.Name] = mt
+		}
+	}
+
+	if len(s.method) == 0 {
+		s := &quot;rpc Register: type &quot; + sname + &quot; has no exported methods of suitable type&quot;
+		log.Print(s)
+		return errors.New(s)
+	}
+	server.serviceMap[s.name] = s
+	return nil
+}
+</code></pre>
+
+<h3 id="start-service">Start Service</h3>
+
+<pre><code>func (s *service) Start() error {
+	for _, fn := range s.opts.BeforeStart {
+		if err := fn(); err != nil {
+			return err
+		}
+	}
+
+	if err := s.opts.Server.Start(); err != nil {
+		return err
+	}
+
+	if err := s.opts.Server.Register(); err != nil {
+		return err
+	}
+
+	for _, fn := range s.opts.AfterStart {
+		if err := fn(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+/*serving client request*/
+func (s *rpcServer) Start() error {
+	registerDebugHandler(s)
+	config := s.Options()
+
+	ts, err := config.Transport.Listen(config.Address)
+	if err != nil {
+		return err
+	}
+
+	log.Printf(&quot;Listening on %s&quot;, ts.Addr())
+	s.Lock()
+	s.opts.Address = ts.Addr()
+	s.Unlock()
+
+	go ts.Accept(s.accept)
+
+	go func() {
+		ch := &lt;-s.exit
+		ch &lt;- ts.Close()
+		config.Broker.Disconnect()
+	}()
+
+	// TODO: subscribe to cruft
+	return config.Broker.Connect()
+}
+
+/*register service to discovery system like consul*/
+func (s *rpcServer) Register() error {
+	// parse address for host, port
+	config := s.Options()
+	var advt, host string
+	var port int
+
+	// check the advertise address first
+	// if it exists then use it, otherwise
+	// use the address
+	if len(config.Advertise) &gt; 0 {
+		advt = config.Advertise
+	} else {
+		advt = config.Address
+	}
+
+	parts := strings.Split(advt, &quot;:&quot;)
+	if len(parts) &gt; 1 {
+		host = strings.Join(parts[:len(parts)-1], &quot;:&quot;)
+		port, _ = strconv.Atoi(parts[len(parts)-1])
+	} else {
+		host = parts[0]
+	}
+
+	addr, err := addr.Extract(host)
+	if err != nil {
+		return err
+	}
+
+	// register service
+	node := &amp;registry.Node{
+		Id:       config.Name + &quot;-&quot; + config.Id,
+		Address:  addr,
+		Port:     port,
+		Metadata: config.Metadata,
+	}
+
+	...
+
+	service := &amp;registry.Service{
+		Name:      config.Name,
+		Version:   config.Version,
+		Nodes:     []*registry.Node{node},
+		Endpoints: endpoints,
+	}
+
+	...
+
+	if err := config.Registry.Register(service, rOpts...); err != nil {
+		return err
+	}
+
+	...
+}
+
+/*find method name from request params*/
+func (server *server) readRequestHeader(codec serverCodec) (service *service, mtype *methodType, req *request, keepReading bool, err error) {
+	// Grab the request header.
+	req = server.getRequest()
+	err = codec.ReadRequestHeader(req, true)
+	if err != nil {
+		req = nil
+		if err == io.EOF || err == io.ErrUnexpectedEOF {
+			return
+		}
+		err = errors.New(&quot;rpc: server cannot decode request: &quot; + err.Error())
+		return
+	}
+
+	// We read the header successfully. If we see an error now,
+	// we can still recover and move on to the next request.
+	keepReading = true
+
+	serviceMethod := strings.Split(req.ServiceMethod, &quot;.&quot;)
+	if len(serviceMethod) != 2 {
+		err = errors.New(&quot;rpc: service/method request ill-formed: &quot; + req.ServiceMethod)
+		return
+	}
+	// Look up the request.
+	server.mu.Lock()
+	service = server.serviceMap[serviceMethod[0]]
+	server.mu.Unlock()
+	if service == nil {
+		err = errors.New(&quot;rpc: can't find service &quot; + req.ServiceMethod)
+		return
+	}
+	mtype = service.method[serviceMethod[1]]
+	if mtype == nil {
+		err = errors.New(&quot;rpc: can't find method &quot; + req.ServiceMethod)
+	}
+	return
+}
+
+/*reflect invoking method*/
+func (server *server) serveRequest(ctx context.Context, codec serverCodec, ct string) error {
+	sending := new(sync.Mutex)
+	service, mtype, req, argv, replyv, keepReading, err := server.readRequest(codec)
+	if err != nil {
+		if !keepReading {
+			return err
+		}
+		// send a response if we actually managed to read a header.
+		if req != nil {
+			server.sendResponse(sending, req, invalidRequest, codec, err.Error(), true)
+			server.freeRequest(req)
+		}
+		return err
+	}
+	service.call(ctx, server, sending, mtype, req, argv, replyv, codec, ct)
+	return nil
+}
+</code></pre>
+
+<h3 id="client-invoke">Client Invoke</h3>
+
+<pre><code>/*Client select node which provide service and make call*/
+func (r *rpcClient) Call(ctx context.Context, request Request, response interface{}, opts ...CallOption) error {
+	// make a copy of call opts
+	callOpts := r.opts.CallOptions
+	for _, opt := range opts {
+		opt(&amp;callOpts)
+	}
+
+	// get next nodes from the selector
+	next, err := r.opts.Selector.Select(request.Service(), callOpts.SelectOptions...)
+
+	...
+
+	// return errors.New(&quot;go.micro.client&quot;, &quot;request timeout&quot;, 408)
+	call := func(i int) error {
+		// call backoff first. Someone may want an initial start delay
+		t, err := callOpts.Backoff(ctx, request, i)
+		if err != nil {
+			return errors.InternalServerError(&quot;go.micro.client&quot;, err.Error())
+		}
+
+		// only sleep if greater than 0
+		if t.Seconds() &gt; 0 {
+			time.Sleep(t)
+		}
+
+		// select next node
+		node, err := next()
+		if err != nil &amp;&amp; err == selector.ErrNotFound {
+			return errors.NotFound(&quot;go.micro.client&quot;, err.Error())
+		} else if err != nil {
+			return errors.InternalServerError(&quot;go.micro.client&quot;, err.Error())
+		}
+
+		// set the address
+		address := node.Address
+		if node.Port &gt; 0 {
+			address = fmt.Sprintf(&quot;%s:%d&quot;, address, node.Port)
+		}
+
+		// make the call
+		err = rcall(ctx, address, request, response, callOpts)
+		r.opts.Selector.Mark(request.Service(), node, err)
+		return err
+	}
+
+	ch := make(chan error, callOpts.Retries)
+	var gerr error
+
+	for i := 0; i &lt; callOpts.Retries; i++ {
+		go func() {
+			ch &lt;- call(i)
+		}()
+
+		select {
+		case &lt;-ctx.Done():
+			return errors.New(&quot;go.micro.client&quot;, fmt.Sprintf(&quot;call timeout: %v&quot;, ctx.Err()), 408)
+		case err := &lt;-ch:
+			// if the call succeeded lets bail early
+			if err == nil {
+				return nil
+			}
+
+			retry, rerr := callOpts.Retry(ctx, request, i, err)
+			if rerr != nil {
+				return rerr
+			}
+
+			if !retry {
+				return err
+			}
+
+			gerr = err
+		}
+	}
+
+	return gerr
+}
+</code></pre>
+
+<pre><code>/*get service node from service name*/
+func (r *defaultSelector) Select(service string, opts ...SelectOption) (Next, error) {
+	sopts := SelectOptions{
+		Strategy: r.so.Strategy,
+	}
+
+	for _, opt := range opts {
+		opt(&amp;sopts)
+	}
+
+	// get the service
+	services, err := r.so.Registry.GetService(service)
+	if err != nil {
+		return nil, err
+	}
+
+	// apply the filters
+	for _, filter := range sopts.Filters {
+		services = filter(services)
+	}
+
+	// if there's nothing left, return
+	if len(services) == 0 {
+		return nil, ErrNoneAvailable
+	}
+
+	return sopts.Strategy(services), nil
+}
+</code></pre>
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/2017/04/25/go-micro/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <g:plus action="share"></g:plus>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/2017/05/01/wordpress/" data-toggle="tooltip" data-placement="top" title="wordpress code analysis">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/2017/04/20/kafka/" data-toggle="tooltip" data-placement="top" title="kafka in depth analysis">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a>
+  </div>
+</div>
+<script src="/blog/js/script.js"></script>
+<script src="/blog/js/custom.js"></script>
+
+
+</body>
+</html>

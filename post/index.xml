@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on yrong blog</title>
+    <link>https://yrong.github.io/blog/post/</link>
+    <description>Recent content in Posts on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
+    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Sat, 08 Jul 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>prometheus v2.0 storage</title>
+      <link>https://yrong.github.io/blog/2017/07/08/prometheus/</link>
+      <pubDate>Sat, 08 Jul 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/07/08/prometheus/</guid>
+      <description>&lt;p&gt;Writing a Time Series Database from Scratch
+&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>lex-yacc</title>
+      <link>https://yrong.github.io/blog/2017/05/26/lex-yacc/</link>
+      <pubDate>Fri, 26 May 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/05/26/lex-yacc/</guid>
+      <description>Yacc&amp;amp;Lex Lex lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码，然后</description>
+    </item>
+    
+    <item>
+      <title>gotour code analysis</title>
+      <link>https://yrong.github.io/blog/2017/05/16/gotour/</link>
+      <pubDate>Tue, 16 May 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/05/16/gotour/</guid>
+      <description>&lt;p&gt;GoTour as a web project to study golang
+&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>websocketd code analysis</title>
+      <link>https://yrong.github.io/blog/2017/05/12/websocketd/</link>
+      <pubDate>Fri, 12 May 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/05/12/websocketd/</guid>
+      <description>&lt;p&gt;websocketd is a small command-line tool that will wrap an existing command-line interface program, and allow it to be accessed via a WebSocket.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>cow code analysis</title>
+      <link>https://yrong.github.io/blog/2017/05/06/cow/</link>
+      <pubDate>Sat, 06 May 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/05/06/cow/</guid>
+      <description>&lt;p&gt;COW is a HTTP proxy to simplify bypassing the great firewall. It tries to automatically identify blocked websites and only use parent proxy for those sites.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>wordpress code analysis</title>
+      <link>https://yrong.github.io/blog/2017/05/01/wordpress/</link>
+      <pubDate>Mon, 01 May 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/05/01/wordpress/</guid>
+      <description>&lt;p&gt;wordpress code analysis&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>go micro code analysis</title>
+      <link>https://yrong.github.io/blog/2017/04/25/go-micro/</link>
+      <pubDate>Tue, 25 Apr 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/04/25/go-micro/</guid>
+      <description>&lt;p&gt;go micro code analysis
+&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>kafka in depth analysis</title>
+      <link>https://yrong.github.io/blog/2017/04/20/kafka/</link>
+      <pubDate>Thu, 20 Apr 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/04/20/kafka/</guid>
+      <description>Terminology Broker Kafka集群包含一个或多个服务器，这种服务器被称为broker Topic 每条发布到Kafka集群的消息都有一个类别，这个类别被称为Topic。</description>
+    </item>
+    
+    <item>
+      <title>nsq code analysis</title>
+      <link>https://yrong.github.io/blog/2017/04/16/nsq/</link>
+      <pubDate>Sun, 16 Apr 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/04/16/nsq/</guid>
+      <description>启动和退出 启动, 利用svc框架 nsq使用了svc框架来启动一个service, Run 时, 分别调用prg 实现的 Init 和 Start 方法 启动&amp;rsquo;prog</description>
+    </item>
+    
+    <item>
+      <title>bilibili crawler</title>
+      <link>https://yrong.github.io/blog/2017/04/09/bilibili-api/</link>
+      <pubDate>Sun, 09 Apr 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/04/09/bilibili-api/</guid>
+      <description>关于KEY B站的key是分成两种:app-key和secret-key．之前是开放申请的，地址:http://api.bilibili.co</description>
+    </item>
+    
+    <item>
+      <title>kafka-streams</title>
+      <link>https://yrong.github.io/blog/2017/04/02/kafka-stream/</link>
+      <pubDate>Sun, 02 Apr 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/04/02/kafka-stream/</guid>
+      <description>kafka-streams This is the repository for the examples of using Kafka streams covered in the blog posts:
+ Kafka Streams - The Processor API Kafka Streams - The KStreams API Machine Learning with Kafka Streams  Requirements to build this project  Java 8 Gradle  Requirements to run the examples  kafka version kafka_2.11-0.10.1.0 see the section marked &amp;ldquo;Running a task on a particular version of Scala&amp;rdquo; The json-data-generator from ACES,Inc  Setup Instructions Extact the kafka_2.</description>
+    </item>
+    
+    <item>
+      <title>Build a NodeJS microservice and deploy it to Docker</title>
+      <link>https://yrong.github.io/blog/2017/03/27/docker-microservice/</link>
+      <pubDate>Mon, 27 Mar 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/03/27/docker-microservice/</guid>
+      <description>Build a NodeJS microservice and deploy it to Docker Stack We’ll use a simple NodeJS service with a MongoDB for our backend.
+ NodeJS 7.5.0 MongoDB 3.4.2 Docker for Mac 1.13.0  Architecture Microservices  Movies Service example Cinema Catalog Service example Booking Service example Payment Service example Notification Service example API Gateway Service example  Api Gateway  An API Gateway is a server that is the single entry point into the system.</description>
+    </item>
+    
+    <item>
+      <title>Docker Swarm Proxy</title>
+      <link>https://yrong.github.io/blog/2017/03/22/docker-swarm/</link>
+      <pubDate>Wed, 22 Mar 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/03/22/docker-swarm/</guid>
+      <description>Integrating Proxy With Docker Swarm (Tour Around Docker 1.12 Series)  This article continues where Docker Swarm Introduction left. I will assume that you have at least a basic knowledge how Swarm in Docker v1.12+ works. If you don&amp;rsquo;t, please read the previous article first.
+ The fact that we can deploy any number of services inside a Swarm cluster does not mean that they are accessible to our users.</description>
+    </item>
+    
+    <item>
+      <title>Vertx Micro Shop</title>
+      <link>https://yrong.github.io/blog/2017/03/18/vertx-blueprint/</link>
+      <pubDate>Sat, 18 Mar 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/03/18/vertx-blueprint/</guid>
+      <description>Vert.x 蓝图 - Micro Shop 微服务应用 对应的Vert.x版本为 3.4.1 内容 利用 Vert.x 构建微服务应用 异步开发模式 函数式、响应式编程范式 事件溯源 (Event Sourcing) 通过分布式Event B</description>
+    </item>
+    
+    <item>
+      <title>path finding algorithms</title>
+      <link>https://yrong.github.io/blog/2017/03/10/pathfinding/</link>
+      <pubDate>Fri, 10 Mar 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/03/10/pathfinding/</guid>
+      <description>Traversing graphs and finding paths Let&amp;rsquo;s take a look at the diagram below:
+This is a pretty typical problem, no? We have a starting point, and ending point, and a bunch of roads we can take to get there. We can even abstract this so that the roads are &amp;ldquo;moves&amp;rdquo; (of, say, a little sliding puzzle) and the points are states of the puzzle. Our goal is to find the shortest path possible to the end node in the fewest moves — and not take a long time to find it!</description>
+    </item>
+    
+    <item>
+      <title>own cloud internal</title>
+      <link>https://yrong.github.io/blog/2017/03/02/owncloud/</link>
+      <pubDate>Thu, 02 Mar 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/03/02/owncloud/</guid>
+      <description>Classloader The classloader is provided by ownCloud and loads all your classes automatically. The only thing left to include by yourself are 3rdparty libraries. Those should be loaded in lib/AppInfo/Application.php.
+New in version 9.1.
+PSR-4 Autoloading Since ownCloud 9.1 there is a PSR-4 autoloader in place. The namespace \OCA\MyApp is mapped to /apps/myapp/lib/. Afterwards normal PSR-4 rules apply, so a folder is a namespace section in the same casing and the class name matches the file name.</description>
+    </item>
+    
+    <item>
+      <title>git tips</title>
+      <link>https://yrong.github.io/blog/2017/02/25/git-tips/</link>
+      <pubDate>Sat, 25 Feb 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/02/25/git-tips/</guid>
+      <description>git-tips Collection of git-tips, want to add your tips? Checkout contributing.md English | 中文 | Русский Tools: git-tip - A handy CLI to make optimum use of these tips. (Here in Docker container) P.S: All these commands are tested on git version 2.7.4 (Apple Git-66). Everyday Git in twenty commands or so Show helpful guides that come with Git Search change by content</description>
+    </item>
+    
+    <item>
+      <title>Serverless AWS Lambda Examples</title>
+      <link>https://yrong.github.io/blog/2017/02/10/serverless/</link>
+      <pubDate>Fri, 10 Feb 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/02/10/serverless/</guid>
+      <description>Read this on the main serverless docs site Serverless AWS Lambda Examples Have an example? Submit a PR or open an issue. ⚡️
+   Example Runtime     Aws Auth0 Api Gateway  Demonstration of protecting API gateway endpoints with auth0 nodeJS   Env Variables Encrypted In A File  Serverless example managing secrets in an encrypted file nodeJS   Serverless Node Env Variables  This example demonstrates how to use environment variables for AWS Lambdas.</description>
+    </item>
+    
+    <item>
+      <title>OpenTracing use cases</title>
+      <link>https://yrong.github.io/blog/2017/01/30/opentracing/</link>
+      <pubDate>Mon, 30 Jan 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/01/30/opentracing/</guid>
+      <description>Common use cases This page aims to illustrate common use cases that developers who instrument their applications and libraries with OpenTracing API need to deal with.
+Stepping Back: Who is OpenTracing for? OpenTracing is a thin standardization layer that sits between application/library code and various systems that consume tracing and causality data. Here is a diagram:
+ +-------------+ +---------+ +----------+ +------------+ | Application | | Library | | OSS | | RPC/IPC | | Code | | Code | | Services | | Frameworks | +-------------+ +---------+ +----------+ +------------+ | | | | | | | | v v v v +-----------------------------------------------------+ | · · · · · · · · · · OpenTracing · · · · · · · · · · | +-----------------------------------------------------+ | | | | | | | | v v v v +-----------+ +-------------+ +-------------+ +-----------+ | Tracing | | Logging | | Metrics | | Tracing | | System A | | Framework B | | Framework C | | System D | +-----------+ +-------------+ +-------------+ +-----------+  Application Code: Developers writing application code can use OpenTracing to describe causality, demarcate control flow, and add fine-grained logging information along the way.</description>
+    </item>
+    
+    <item>
+      <title>Reactive Programming with Spring Reactor</title>
+      <link>https://yrong.github.io/blog/2017/01/20/frp/</link>
+      <pubDate>Fri, 20 Jan 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/01/20/frp/</guid>
+      <description>Overview Stephane Maldini @ JOIN The new normal that is not new The Reactive Manifesto Latency &amp;amp; Blocking The Contract Reactive Types Testing &amp;amp; Debuging Other Changes RxJava Spring Framework 5 Conclusion &amp;amp; Do It Yourself Stephane Maldini @ JOIN 2016 On 5 October 2016, we had the pleasure to welcome Stephane Maldini at our JOIN event. A multi-tasker eating tech 24&amp;frasl;7, Stephane is interested in cloud computing, data science</description>
+    </item>
+    
+    <item>
+      <title>leaf&amp;&amp;gonet2&amp;&amp;pomelo</title>
+      <link>https://yrong.github.io/blog/2017/01/10/game-server/</link>
+      <pubDate>Tue, 10 Jan 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/01/10/game-server/</guid>
+      <description>Leaf 游戏服务器框架简介 Leaf 是一个由 Go 语言（golang）编写的开发效率和执行效率并重的开源游戏服务器框架。Leaf 适用于各类游戏服务器的开发，包</description>
+    </item>
+    
+    <item>
+      <title>分布式环境系统监控</title>
+      <link>https://yrong.github.io/blog/2017/01/05/microservice-apm/</link>
+      <pubDate>Thu, 05 Jan 2017 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2017/01/05/microservice-apm/</guid>
+      <description>Dapper Zipkin zipkin为分布式链路调用监控系统，聚合各业务系统调用延迟数据，达到链路调用监控跟踪。 architecture 如图，在复杂的调用链路中假设存在一条调用链路响</description>
+    </item>
+    
+    <item>
+      <title>meta program in python</title>
+      <link>https://yrong.github.io/blog/2016/12/26/meta-program/</link>
+      <pubDate>Mon, 26 Dec 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/12/26/meta-program/</guid>
+      <description>*args and **kwargs def test_var_args_call(arg1, arg2, arg3): print &amp;quot;arg1:&amp;quot;, arg1 print &amp;quot;arg2:&amp;quot;, arg2 print &amp;quot;arg3:&amp;quot;, arg3 args = (&amp;quot;two&amp;quot;, 3) test_var_args_call(1, *args) result: arg1: 1 arg2: two arg3: 3 def test_var_args_call(arg1, arg2, arg3): print &amp;quot;arg1:&amp;quot;, arg1 print &amp;quot;arg2:&amp;quot;, arg2 print &amp;quot;arg3:&amp;quot;, arg3 kwargs = {&amp;quot;arg3&amp;quot;: 3, &amp;quot;arg2&amp;quot;: &amp;quot;two&amp;quot;} test_var_args_call(1, **kwargs) result: arg1: 1 arg2: two arg3: 3 decorator #coding=utf-8 def a_decorator_passing_arbitrary_arguments(function_to_decorate): # 包装函数可以接受</description>
+    </item>
+    
+    <item>
+      <title>Codis In-depth Analysis</title>
+      <link>https://yrong.github.io/blog/2016/12/22/codis/</link>
+      <pubDate>Thu, 22 Dec 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/12/22/codis/</guid>
+      <description>Architecture Codis由以下组件组成： Codis Server：基于 redis分支开发。增加了额外的数据结构，以支持 slot 有关的操作以及数据迁移指令。具体的修改可以</description>
+    </item>
+    
+    <item>
+      <title>BoltDB In-depth Analysis</title>
+      <link>https://yrong.github.io/blog/2016/12/18/bolt/</link>
+      <pubDate>Sun, 18 Dec 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/12/18/bolt/</guid>
+      <description>BoltDB中的Bucket类似于传统关系型数据库的”表”。BoltDB通过Bucket将一个庞大的数据库划分成诸多的命名空间。用户在每个命</description>
+    </item>
+    
+    <item>
+      <title>The Raft Consensus Algorithm</title>
+      <link>https://yrong.github.io/blog/2016/12/12/raft/</link>
+      <pubDate>Mon, 12 Dec 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/12/12/raft/</guid>
+      <description>Paxos和Raft都是为了实现Consensus一致性这个目标，这个过程如同选举一样，参选者需要说服大多数选民(服务器)投票给他，一旦选定</description>
+    </item>
+    
+    <item>
+      <title>Scrapy In-depth Analysis</title>
+      <link>https://yrong.github.io/blog/2016/12/07/scrapy/</link>
+      <pubDate>Wed, 07 Dec 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/12/07/scrapy/</guid>
+      <description>spider examples and patterns import scrapy class AuthorSpider(scrapy.Spider): name = &#39;author&#39; start_urls = [&#39;http://quotes.toscrape.com/&#39;] def parse(self, response): # follow links to author pages for href in response.css(&#39;.author+a::attr(href)&#39;).extract(): yield scrapy.Request(response.urljoin(href), callback=self.parse_author) # follow pagination links next_page = response.css(&#39;li.next a::attr(href)&#39;).extract_first() if next_page is not None: next_page = response.urljoin(next_page) yield scrapy.Request(next_page, callback=self.parse) def parse_author(self, response): def extract_with_css(query): return response.css(query).extract_first().strip() yield { &#39;name&#39;: extract_with_css(&#39;h3.author-title::text&#39;), &#39;birthdate&#39;: extract_with_css(&#39;.author-born-date::text&#39;), &#39;bio&#39;: extract_with_css(&#39;.author-description::text&#39;), } For spiders, the scraping cycle</description>
+    </item>
+    
+    <item>
+      <title>webpack使用</title>
+      <link>https://yrong.github.io/blog/2016/12/02/webpack/</link>
+      <pubDate>Fri, 02 Dec 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/12/02/webpack/</guid>
+      <description>Webpack your bags 原文： Webpack your bags(by Maxime Fabre) Webpack your bags 之前你可能已经听说过这个很酷的叫webpack工具，如果你没仔细了解过这个工具，你可能会有些困惑，因为有人说他它</description>
+    </item>
+    
+    <item>
+      <title>Koa2 In-depth Analysis</title>
+      <link>https://yrong.github.io/blog/2016/11/28/koa2/</link>
+      <pubDate>Mon, 28 Nov 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/11/28/koa2/</guid>
+      <description>koa核心主要是context（上下文）和middleware（中间件）组成，v2的中间件部分可以使用ES2015-2016的语法，比如as</description>
+    </item>
+    
+    <item>
+      <title>数据结构与算法</title>
+      <link>https://yrong.github.io/blog/2016/11/23/alg-ds/</link>
+      <pubDate>Wed, 23 Nov 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/11/23/alg-ds/</guid>
+      <description>算法书 algorithm-book 算法项目 golang c++ python LeetCode leet-code</description>
+    </item>
+    
+    <item>
+      <title>super tiny vue</title>
+      <link>https://yrong.github.io/blog/2016/11/20/super-tiny-vue/</link>
+      <pubDate>Sun, 20 Nov 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/11/20/super-tiny-vue/</guid>
+      <description>简介：一个迷你vue库，虽然小但功能全面，可以作为想了解vue背后思想以及想学习vue源码而又不知如何入手的入门学习资料。代码可参考deep</description>
+    </item>
+    
+    <item>
+      <title>es6 top10 features</title>
+      <link>https://yrong.github.io/blog/2016/11/17/es6-top10-features/</link>
+      <pubDate>Thu, 17 Nov 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/11/17/es6-top10-features/</guid>
+      <description>Here’s the list of the top 10 best ES6 features for a busy software engineer (in no particular order): Default Parameters in ES6 Template Literals in ES6 Multi-line Strings in ES6 Destructuring Assignment in ES6 Enhanced Object Literals in ES6 Arrow Functions in ES6 Promises in ES6 Block-Scoped Constructs Let and Const Classes in ES6 Modules in ES6 Default Parameters in ES6 before: var link</description>
+    </item>
+    
+    <item>
+      <title>mocha异步测试源码分析</title>
+      <link>https://yrong.github.io/blog/2016/11/15/mocha-async-support/</link>
+      <pubDate>Tue, 15 Nov 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/11/15/mocha-async-support/</guid>
+      <description>使用简介 mocha是一款功能丰富的javascript单元测试框架，它既可以运行在nodejs环境中，也可以运行在浏览器环境中。 javasc</description>
+    </item>
+    
+    <item>
+      <title>Neo4j Cypher query</title>
+      <link>https://yrong.github.io/blog/2016/11/11/neo4j-cypher/</link>
+      <pubDate>Fri, 11 Nov 2016 15:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/11/11/neo4j-cypher/</guid>
+      <description>filter element Delete specific element from array stackoverflow
+MATCH (n) WHERE HAS(n.some_array) SET n.array = FILTER(x IN n.some_array WHERE x &amp;lt;&amp;gt; &amp;quot;oranges&amp;quot;);  split unrelated queries case
+MATCH (a {cond:&#39;1&#39;}), (b {cond:&#39;x&#39;}) CREATE a-[:rel]-&amp;gt;b WITH 1 as dummy MATCH (a {cond:&#39;2&#39;}), (b {cond:&#39;y&#39;}) CREATE a-[:rel]-&amp;gt;b WITH 1 as dummy MATCH (a {cond:&#39;3&#39;}), (b {cond:&#39;z&#39;}) CREATE a-[:rel]-&amp;gt;b  aggregation  remember that anything which isn’t an aggregate function(count/collect/distinct/sum..)
+is automaticlly used as part of the grouping key which means we could include more than</description>
+    </item>
+    
+    <item>
+      <title>leetcode</title>
+      <link>https://yrong.github.io/blog/2016/11/07/leetcode/</link>
+      <pubDate>Mon, 07 Nov 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/11/07/leetcode/</guid>
+      <description>LeetCode reverse a linked list # Python program to reverse a linked list # Time Complexity : O(n) # Space Complexity : O(1) # Node class class Node: # Constructor to initialize the node object def __init__(self, data): self.data = data self.next = None class LinkedList: # Function to initialize head def __init__(self): self.head = None # Function to reverse the linked list def reverse(self): prev = None current =</description>
+    </item>
+    
+    <item>
+      <title>reactjs源码分析</title>
+      <link>https://yrong.github.io/blog/2016/11/04/virtual-dom/</link>
+      <pubDate>Fri, 04 Nov 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/11/04/virtual-dom/</guid>
+      <description>reactjs的核心内容并不多，主要是下面这些: 虚拟dom对象(Virtual DOM) 虚拟dom差异化算法（diff algorithm） 单向数据流</description>
+    </item>
+    
+    <item>
+      <title>多终端管理器tmux</title>
+      <link>https://yrong.github.io/blog/2016/11/03/tmux/</link>
+      <pubDate>Thu, 03 Nov 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/11/03/tmux/</guid>
+      <description>tmux 为什么要用tmux tmux是什么？tmux是linux中一种管理窗口的程序。那么问题来了：Mac自带的Iterm2很好用啊。既支持多标签，</description>
+    </item>
+    
+    <item>
+      <title>chrome上的vim:vimium</title>
+      <link>https://yrong.github.io/blog/2016/11/02/vimium/</link>
+      <pubDate>Wed, 02 Nov 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/11/02/vimium/</guid>
+      <description>页面滚动 浏览任何一个页面时，不管你想向上滚动，向下滚动，到页面最底部……都只用按一两个键就可以搞定： j：向下滚动一点 k：向上滚动一点 d：向下</description>
+    </item>
+    
+    <item>
+      <title>XSS与CSRF两种跨站攻击</title>
+      <link>https://yrong.github.io/blog/2016/10/23/xss-csrf/</link>
+      <pubDate>Sun, 23 Oct 2016 18:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/10/23/xss-csrf/</guid>
+      <description>XSS (Cross Site Script):脚本中的不速之客 XSS 全称“跨站脚本”。当然，名字只是为了跟css做区分，是注入攻击的一种。跟SQL注入不同的是，XSS不</description>
+    </item>
+    
+    <item>
+      <title>程序员必备工具之Jupyter</title>
+      <link>https://yrong.github.io/blog/2016/10/21/jupyter/</link>
+      <pubDate>Fri, 21 Oct 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/10/21/jupyter/</guid>
+      <description>IPython 和 Jupyter IPython 是一个 Python REPl shell，环境远比 Python 自带的强大，而 Jupyter Notebook 则是一个基于 IPython REPl 的 Web 应用，运行结果可保存为后缀.ipynb，交互性强，所见即所得，</description>
+    </item>
+    
+    <item>
+      <title>用图数据库解决关系型数据库存在的问题</title>
+      <link>https://yrong.github.io/blog/2016/10/19/neo4j-replace-rdbms/</link>
+      <pubDate>Wed, 19 Oct 2016 15:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/10/19/neo4j-replace-rdbms/</guid>
+      <description>User-Order-Product Rdbms which customers buying this product also bought that product
+Graph  (p2:Product)&amp;lt;-[*]-(u:User) -[*]-&amp;gt;(p1:Product) return u  Friend of friend Rdbms  Alice’s friends-of-friends
+ SELECT p1.Person AS PERSON, p2.Person AS FRIEND_OF_FRIEND FROM PersonFriend pf1 JOIN Person p1 ON pf1.PersonID = p1.ID JOIN PersonFriend pf2 ON pf2.PersonID = pf1.FriendID JOIN Person p2 ON pf2.FriendID = p2.ID WHERE p1.Person = &#39;Alice&#39; AND pf2.FriendID &amp;lt;&amp;gt; p1.ID  queries that extend to four, five, or six degrees of friendship deteriorate significantly due to the computational and space complexity of recursivelyjoining tables</description>
+    </item>
+    
+    <item>
+      <title>Machine Learning algorithm on Spark</title>
+      <link>https://yrong.github.io/blog/2016/10/17/machine-learning-on-spark/</link>
+      <pubDate>Mon, 17 Oct 2016 15:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/10/17/machine-learning-on-spark/</guid>
+      <description>PageRank 算法 The PageRank algorithm outputs a probability distribution used to represent the likelihood that a person randomly clicking on links will arrive at any particular page. Initialize each page’s rank to 1.0. On each iteration, have page p send a contribution of rank(p)/numNeighbors(p) to its neighbors (the pages it has links to). Set each page’s rank to 0.15</description>
+    </item>
+    
+    <item>
+      <title>ElasticSearch Query DSL</title>
+      <link>https://yrong.github.io/blog/2016/10/13/elasticsearch-query-dsl/</link>
+      <pubDate>Thu, 13 Oct 2016 18:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/10/13/elasticsearch-query-dsl/</guid>
+      <description>ElasticSearch Query DSL Examples 加载ik分词插件,配置开启inline脚本 script.inline: true script.indexed: true 建索引 curl -XDELETE &#39;localhost:9200/text&#39; curl -XPUT &#39;localhost:9200/text?pretty&#39; mapping定义 curl -XPOST http://localhost:9200/text/mytext/_mapping -d&#39; { &amp;quot;mytext&amp;quot;: { &amp;quot;_all&amp;quot;: { &amp;quot;analyzer&amp;quot;: &amp;quot;ik_max_word&amp;quot;, &amp;quot;search_analyzer&amp;quot;: &amp;quot;ik_max_word&amp;quot;, &amp;quot;term_vector&amp;quot;: &amp;quot;no&amp;quot;, &amp;quot;store&amp;quot;: &amp;quot;false&amp;quot; }, &amp;quot;properties&amp;quot;: { &amp;quot;content&amp;quot;: { &amp;quot;type&amp;quot;:</description>
+    </item>
+    
+    <item>
+      <title>D3.js数据可视化</title>
+      <link>https://yrong.github.io/blog/2016/10/12/d3-data-visualization/</link>
+      <pubDate>Wed, 12 Oct 2016 18:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/10/12/d3-data-visualization/</guid>
+      <description>基于 D3.js ，编写 HTML、SVG 和 CSS 就能让你的数据变得生动起来，这是一个基于数据操作 DOM 的 JavaScript 库。 每一位 Web 开发者最应该学习的三个 JavaScript 库就是 jQuery</description>
+    </item>
+    
+    <item>
+      <title>vertx源码分析</title>
+      <link>https://yrong.github.io/blog/2016/10/11/vertx-internal/</link>
+      <pubDate>Tue, 11 Oct 2016 18:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/10/11/vertx-internal/</guid>
+      <description>Cluster初始化 调用Vertx.clusteredVertx静态方法后，Vert.x会利用Vertx工厂方法创建Vertx实例。 @Override public void clusteredVertx(VertxOptions</description>
+    </item>
+    
+    <item>
+      <title>meteor的响应式数据源和响应式执行环境</title>
+      <link>https://yrong.github.io/blog/2016/10/09/meteor-internal-reactive/</link>
+      <pubDate>Sun, 09 Oct 2016 18:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/10/09/meteor-internal-reactive/</guid>
+      <description>如果说集合是 Meteor 的核心功能，那么响应式可以能让这个核心功能更强大。 集合从根本上改变你的应用程序的数据处理方式。从而不必手动检查数据更改（例如，</description>
+    </item>
+    
+    <item>
+      <title>ElasticSearch的存储结构</title>
+      <link>https://yrong.github.io/blog/2016/10/03/elasticsearch-storelayer/</link>
+      <pubDate>Mon, 03 Oct 2016 15:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/10/03/elasticsearch-storelayer/</guid>
+      <description>Elasticsearch的存储结构 Node Data Simply starting Elasticsearch from a empty data directory yields the following directory tree: $ tree data data └── elasticsearch └── nodes └── 0 ├── _state │ └── global-0.st └── node.lock The node.lock file is there to ensure that</description>
+    </item>
+    
+    <item>
+      <title>redis object types</title>
+      <link>https://yrong.github.io/blog/2016/09/10/redis/</link>
+      <pubDate>Sat, 10 Sep 2016 00:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/09/10/redis/</guid>
+      <description>Object Types /* Object types */ #define OBJ_STRING 0 #define OBJ_LIST 1 #define OBJ_SET 2 #define OBJ_ZSET 3 #define OBJ_HASH 4 strings&amp;amp;Hashes&amp;amp;Set HSET myhash field1 &amp;ldquo;Hello&amp;rdquo; Hash对象是用zipmap存储的，查找、删除均为O(n)，但一般来说对象的field对</description>
+    </item>
+    
+    <item>
+      <title>Neo4j Internal</title>
+      <link>https://yrong.github.io/blog/2016/09/05/neo4j-internal/</link>
+      <pubDate>Mon, 05 Sep 2016 15:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/09/05/neo4j-internal/</guid>
+      <description>电子书 GraphDatabase 存储结构 现在让我们来看看数据在Neo4j中是如何存储的: .db是主存储文件,不同存储类型(node,relation,label,p</description>
+    </item>
+    
+    <item>
+      <title>Java字节码解析</title>
+      <link>https://yrong.github.io/blog/2016/08/06/java-bytecode/</link>
+      <pubDate>Sat, 06 Aug 2016 15:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/08/06/java-bytecode/</guid>
+      <description>基于栈的虚拟机 JVM是一种基于栈的虚拟机，绝大部分字节码操作都涉及到操作数栈中操作数的入栈和出栈。例如，在执行求和操作时，会将两个操作数入栈</description>
+    </item>
+    
+    <item>
+      <title>nginx模块初始化</title>
+      <link>https://yrong.github.io/blog/2016/07/21/nginx-under-the-hood/</link>
+      <pubDate>Thu, 21 Jul 2016 15:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/07/21/nginx-under-the-hood/</guid>
+      <description>主要在函数ngx_init_cycle（src/ngx_cycle.c）中完成 ... for (i = 0; cycle-&amp;gt;modules[i]; i++) { if (cycle-&amp;gt;modules[i]-&amp;gt;type != NGX_CORE_MODULE) { continue; } module = cycle-&amp;gt;modules[i]-&amp;gt;ctx; if (module-&amp;gt;create_conf) { //只有ngx_co</description>
+    </item>
+    
+    <item>
+      <title>ElasticSearch源码解析之文档索引</title>
+      <link>https://yrong.github.io/blog/2016/07/16/elasticsearch-analysis/</link>
+      <pubDate>Sat, 16 Jul 2016 18:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/07/16/elasticsearch-analysis/</guid>
+      <description>es5.0版本主要改进应该是lucene版本升级到6.0,利用插件机制把netty从core中剥离出来接入NetworkModule,代码在</description>
+    </item>
+    
+    <item>
+      <title>ACS CWMP协议基于异步开源框架vertx的实现</title>
+      <link>https://yrong.github.io/blog/2016/07/13/tinyacs/</link>
+      <pubDate>Wed, 13 Jul 2016 15:00:00 +0000</pubDate>
+      <author>yrong@ustc.edu (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/2016/07/13/tinyacs/</guid>
+      <description>ACS CWMP A blazing fast TR-069 auto configuration server (ACS) built with Vertx, Redis, and MongoDB. I&amp;rsquo;ve added the source code in github and welcome comments. Infrastructure and message flow for nbi request meteor stack send nbi request to acs nbi server by standard restful api and nbi server forward it to one cpe server by vertx eventbus api(eventbus send will choose one cpe server with round-robin algrithom) cpe server</description>
+    </item>
+    
+  </channel>
+</rss>
