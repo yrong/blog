@@ -1,0 +1,6 @@
+_site
+bak
+.DS_Store
+*.sh
+.idea
+public
