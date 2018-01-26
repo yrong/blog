@@ -9,8 +9,10 @@ title: Neo4j Internal
 url: /2016/09/05/neo4j-internal/
 ---
 
-# 电子书 #
+Neo4j中数据是如何存储的
+<!--more-->
 
+# 电子书 #
 
 [GraphDatabase](/attach/OreillyGraphDatabases.pdf)
 

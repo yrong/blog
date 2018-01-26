@@ -9,6 +9,7 @@ title: ElasticSearch源码解析之文档索引
 url: /2016/07/16/elasticsearch-analysis/
 ---
 
+
 es5.0版本主要改进应该是lucene版本升级到6.0,利用插件机制把netty从core中剥离出来接入NetworkModule,代码在Netty3Plugin.
 
 ``` java

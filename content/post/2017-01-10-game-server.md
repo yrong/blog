@@ -9,6 +9,9 @@ title: leaf&&gonet2&&pomelo
 url: /2017/01/10/game-server/
 ---
 
+game server frameworks like leaf&&gonet2&&pomelo
+<!--more-->
+
 Leaf 游戏服务器框架简介
 ==================
 

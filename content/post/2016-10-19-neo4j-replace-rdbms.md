@@ -9,6 +9,9 @@ title: 用图数据库解决关系型数据库存在的问题
 url: /2016/10/19/neo4j-replace-rdbms/
 ---
 
+用图数据库解决关系型数据库存在的问题
+<!--more-->
+
 # User-Order-Product
 
 ## Rdbms

@@ -9,6 +9,9 @@ title: meta program in python
 url: /2016/12/26/meta-program/
 ---
 
+meta program in python
+<!--more-->
+
 ## *args and **kwargs
 
 ```

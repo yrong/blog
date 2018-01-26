@@ -9,6 +9,9 @@ title: Neo4j Cypher query
 url: /2016/11/11/neo4j-cypher/
 ---
 
+Neo4j Cypher Query
+<!--more-->
+
 ### filter element
 
 #### Delete specific element from array

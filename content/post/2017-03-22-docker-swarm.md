@@ -9,6 +9,9 @@ title: Docker Swarm Proxy
 url: /2017/03/22/docker-swarm/
 ---
 
+Integrating Proxy With Docker Swarm
+<!--more-->
+
 Integrating Proxy With Docker Swarm (Tour Around Docker 1.12 Series)
 ====================================================================
 

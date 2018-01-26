@@ -10,6 +10,9 @@ title: OpenTracing use cases
 url: /2017/01/30/opentracing/
 ---
 
+openTracing use cases
+<!--more-->
+
 # Common use cases
 
 This page aims to illustrate common use cases that developers who instrument their applications and libraries with OpenTracing API need to deal with.

@@ -3,12 +3,14 @@ author: Ron
 catalog: false
 date: 2016-07-21T15:00:00Z
 header-img: img/post-bg-os-metro.jpg
-subtitle: nginx模块初始化
 tags:
 - nginx
 title: nginx模块初始化
 url: /2016/07/21/nginx-under-the-hood/
 ---
+
+nginx模块初始化
+<!--more-->
 
 主要在函数ngx_init_cycle（src/ngx_cycle.c）中完成
 

@@ -9,6 +9,9 @@ title: mocha异步测试源码分析
 url: /2016/11/15/mocha-async-support/
 ---
 
+mocha异步测试源码分析
+<!--more-->
+
 ### 使用简介
 
 mocha是一款功能丰富的javascript单元测试框架，它既可以运行在nodejs环境中，也可以运行在浏览器环境中。

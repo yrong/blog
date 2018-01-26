@@ -10,6 +10,9 @@ title: reactjs源码分析
 url: /2016/11/04/virtual-dom/
 ---
 
+reactjs virtual dom 源码分析
+<!--more-->
+
 reactjs的核心内容并不多，主要是下面这些:
 
 - 虚拟dom对象(Virtual DOM)

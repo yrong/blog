@@ -10,6 +10,9 @@ title: Serverless AWS Lambda Examples
 url: /2017/02/10/serverless/
 ---
 
+serverless aws lamba examples
+<!--more-->
+
 ### [Read this on the main serverless docs site](https://www.serverless.com/framework/docs/providers/aws/examples/)
 
 

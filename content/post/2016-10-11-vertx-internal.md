@@ -9,6 +9,9 @@ title: vertx源码分析
 url: /2016/10/11/vertx-internal/
 ---
 
+vertx源码分析
+<!--more-->
+
 ## Cluster初始化 ##
 
 调用Vertx.clusteredVertx静态方法后，Vert.x会利用Vertx工厂方法创建Vertx实例。

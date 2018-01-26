@@ -10,6 +10,9 @@ title: Vertx Micro Shop
 url: /2017/03/18/vertx-blueprint/
 ---
 
+Vert.x Micro Shop 微服务应用
+<!--more-->
+
 # Vert.x 蓝图 - Micro Shop 微服务应用
 
 对应的Vert.x版本为 **3.4.1**

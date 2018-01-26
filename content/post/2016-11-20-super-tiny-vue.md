@@ -9,6 +9,9 @@ title: super tiny vue
 url: /2016/11/20/super-tiny-vue/
 ---
 
+super tiny vue implementation
+<!--more-->
+
 简介：一个迷你vue库，虽然小但功能全面，可以作为想了解vue背后思想以及想学习vue源码而又不知如何入手的入门学习资料。代码可参考[deep-in-vue](https://github.com/yrong/deep-in-vue)
  
  特性：

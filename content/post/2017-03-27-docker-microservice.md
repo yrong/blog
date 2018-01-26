@@ -10,6 +10,9 @@ title: Build a NodeJS microservice and deploy it to Docker
 url: /2017/03/27/docker-microservice/
 ---
 
+Build a NodeJS microservice and deploy it to Docker
+<!--more-->
+
 # Build a NodeJS microservice and deploy it to Docker
 
 ### Stack

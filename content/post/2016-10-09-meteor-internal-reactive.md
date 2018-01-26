@@ -10,6 +10,9 @@ title: meteor的响应式数据源和响应式执行环境
 url: /2016/10/09/meteor-internal-reactive/
 ---
 
+meteor的响应式数据源实现原理
+<!--more-->
+
 如果说集合是 Meteor 的核心功能，那么**响应式**可以能让这个核心功能更强大。
 
 集合从根本上改变你的应用程序的数据处理方式。从而不必手动检查数据更改（例如，通过一个 AJAX 调用），再根据这些变化去修改 HTML 页面.在此之前先了解一下[mongodb oplog](https://docs.mongodb.com/manual/core/replica-set-oplog/)的概念,Meteor 基于oplog随时检测到数据的更改，并将它无缝地应用到用户界面上。让我们思考一下：在后台，当底层的数据集合被更新以后， Meteor 如何马上修改用户界面的**任何**部分。

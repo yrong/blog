@@ -9,6 +9,9 @@ title: path finding algorithms
 url: /2017/03/10/pathfinding/
 ---
 
+Path finding algorithom
+<!--more-->
+
 # Traversing graphs and finding paths
 Let's take a look at the diagram below:
 

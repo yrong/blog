@@ -9,6 +9,9 @@ title: es6 top10 features
 url: /2016/11/17/es6-top10-features/
 ---
 
+es6 top10 features
+<!--more-->
+
 Here’s the list of the top 10 best ES6 features for a busy software engineer (in no particular order):
 
 1. Default Parameters in ES6　	

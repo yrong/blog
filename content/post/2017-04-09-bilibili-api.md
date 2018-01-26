@@ -9,6 +9,9 @@ title: bilibili crawler
 url: /2017/04/09/bilibili-api/
 ---
 
+针对B站视频的爬虫实现
+<!--more-->
+
 ## 关于KEY
 B站的key是分成两种:app-key和secret-key．之前是开放申请的，地址:http://api.bilibili.com
 ，目前已经关闭．只有使用之前申请过的了，具体参考一些开源项目中的引用.

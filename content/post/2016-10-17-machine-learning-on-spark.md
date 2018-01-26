@@ -9,6 +9,9 @@ title: Machine Learning algorithm on Spark
 url: /2016/10/17/machine-learning-on-spark/
 ---
 
+page rank and decision tree on spark
+<!--more-->
+
 ## PageRank ##
 
 ### 算法 ###

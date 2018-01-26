@@ -9,6 +9,9 @@ title: ElasticSearch的存储结构
 url: /2016/10/03/elasticsearch-storelayer/
 ---
 
+ElasticSearch的存储结构
+<!--more-->
+
 # Elasticsearch的存储结构 #
 
 

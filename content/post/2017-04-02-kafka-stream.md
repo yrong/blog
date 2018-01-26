@@ -9,6 +9,9 @@ title: kafka-streams
 url: /2017/04/02/kafka-stream/
 ---
 
+kafka流的一个实例
+<!--more-->
+
 # kafka-streams
 This is the repository for the examples of using Kafka streams covered in the blog posts:
 
