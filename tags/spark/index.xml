@@ -20,7 +20,8 @@
       <pubDate>Mon, 17 Oct 2016 15:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/10/17/machine-learning-on-spark/</guid>
-      <description>PageRank 算法 The PageRank algorithm outputs a probability distribution used to represent the likelihood that a person randomly clicking on links will arrive at any particular page. Initialize each page’s rank to 1.0. On each iteration, have page p send a contribution of rank(p)/numNeighbors(p) to its neighbors (the pages it has links to). Set each page’s rank to 0.15</description>
+      <description>&lt;p&gt;page rank and decision tree on spark
+&lt;/p&gt;</description>
     </item>
     
   </channel>

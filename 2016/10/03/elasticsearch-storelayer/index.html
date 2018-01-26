@@ -6,9 +6,12 @@
   <title>ElasticSearch的存储结构 - yrong blog</title>
   <meta property="og:title" content="ElasticSearch的存储结构 - yrong blog" />
   <meta name="twitter:title" content="ElasticSearch的存储结构 - yrong blog" />
-  <meta name="description" content="Elasticsearch的存储结构 Node Data Simply starting Elasticsearch from a empty data directory yields the following directory tree: $ tree data data └── elasticsearch └── nodes └── 0 ├── _state │ └── global-0.st └── node.lock The node.lock file is there to ensure that">
-  <meta property="og:description" content="Elasticsearch的存储结构 Node Data Simply starting Elasticsearch from a empty data directory yields the following directory tree: $ tree data data └── elasticsearch └── nodes └── 0 ├── _state │ └── global-0.st └── node.lock The node.lock file is there to ensure that">
-  <meta name="twitter:description" content="Elasticsearch的存储结构 Node Data Simply starting Elasticsearch from a empty data directory yields the following directory tree: $ tree data data └── elasticsearch └── nodes └── 0 ├── _state │ └── …">
+  <meta name="description" content="ElasticSearch的存储结构
+">
+  <meta property="og:description" content="ElasticSearch的存储结构
+">
+  <meta name="twitter:description" content="ElasticSearch的存储结构
+">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="/blog/2016/10/03/elasticsearch-storelayer/" />
@@ -65,7 +68,8 @@
 </ul>
 </nav>
 </aside>
-      
+      <p>ElasticSearch的存储结构
+</p>
 
 <h1 id="elasticsearch的存储结构">Elasticsearch的存储结构</h1>
 
@@ -267,7 +271,6 @@ data/elasticsearch/nodes/0/indices/foo/0
 <blockquote>
 <p>When using the Compound File format (default in 1.4 and greater) all these files (except for the Segment info file, the Lock file, and Deleted documents file) are collapsed into a single .cfs file.</p>
 </blockquote>
-
     </article>
 
     

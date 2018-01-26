@@ -20,7 +20,8 @@
       <pubDate>Sun, 16 Apr 2017 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2017/04/16/nsq/</guid>
-      <description>启动和退出 启动, 利用svc框架 nsq使用了svc框架来启动一个service, Run 时, 分别调用prg 实现的 Init 和 Start 方法 启动&amp;rsquo;prog</description>
+      <description>&lt;p&gt;nsq code analysis
+&lt;/p&gt;</description>
     </item>
     
   </channel>

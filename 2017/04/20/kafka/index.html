@@ -6,9 +6,12 @@
   <title>kafka in depth analysis - yrong blog</title>
   <meta property="og:title" content="kafka in depth analysis - yrong blog" />
   <meta name="twitter:title" content="kafka in depth analysis - yrong blog" />
-  <meta name="description" content="Terminology Broker Kafka集群包含一个或多个服务器，这种服务器被称为broker Topic 每条发布到Kafka集群的消息都有一个类别，这个类别被称为Topic。">
-  <meta property="og:description" content="Terminology Broker Kafka集群包含一个或多个服务器，这种服务器被称为broker Topic 每条发布到Kafka集群的消息都有一个类别，这个类别被称为Topic。">
-  <meta name="twitter:description" content="Terminology Broker Kafka集群包含一个或多个服务器，这种服务器被称为broker Topic 每条发布到Kafka集群的消息都有一个类别，这个类别被称为Topic。">
+  <meta name="description" content="kafka架构分析
+">
+  <meta property="og:description" content="kafka架构分析
+">
+  <meta name="twitter:description" content="kafka架构分析
+">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="/blog/2017/04/20/kafka/" />
@@ -86,7 +89,8 @@
 </ul>
 </nav>
 </aside>
-      
+      <p>kafka架构分析
+</p>
 
 <h2 id="terminology">Terminology</h2>
 
@@ -391,7 +395,6 @@ Topics are added and modified using the topic tool:</p>
 <h3 id="replica-management">replica management</h3>
 
 <p>上面关于Replicated log选主过程的讨论是仅针对单个topic的某个partition而言的，事实上，Kafka集群管理着成百上千个这样的partitions，分布在不同的broker节点上。也就是说集群中有很多的leaders，那么优化选主过程对可用性也是非常重要的。Kafka在集群的所有broker中选择一个broker作为“controller”，由这个controller在broker级别负责检测其他broker节点的fail情况，并负责给那些failed的broker上受到影响的partitions选主。这样做的结果就是所有选主操作都由controller负责，多个partition的leadership变动通知也可以做到批量发送，选主过程变得简单快速。如果controller挂掉了，那么剩下的broker节点将进行新的controller选举（即broker层面的选主）。</p>
-
     </article>
 
     

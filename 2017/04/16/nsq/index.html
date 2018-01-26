@@ -6,9 +6,12 @@
   <title>nsq code analysis - yrong blog</title>
   <meta property="og:title" content="nsq code analysis - yrong blog" />
   <meta name="twitter:title" content="nsq code analysis - yrong blog" />
-  <meta name="description" content="启动和退出 启动, 利用svc框架 nsq使用了svc框架来启动一个service, Run 时, 分别调用prg 实现的 Init 和 Start 方法 启动&rsquo;prog">
-  <meta property="og:description" content="启动和退出 启动, 利用svc框架 nsq使用了svc框架来启动一个service, Run 时, 分别调用prg 实现的 Init 和 Start 方法 启动&rsquo;prog">
-  <meta name="twitter:description" content="启动和退出 启动, 利用svc框架 nsq使用了svc框架来启动一个service, Run 时, 分别调用prg 实现的 Init 和 Start 方法 启动&rsquo;prog">
+  <meta name="description" content="nsq code analysis
+">
+  <meta property="og:description" content="nsq code analysis
+">
+  <meta name="twitter:description" content="nsq code analysis
+">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="/blog/2017/04/16/nsq/" />
@@ -93,7 +96,8 @@
 </ul>
 </nav>
 </aside>
-      
+      <p>nsq code analysis
+</p>
 
 <h1 id="启动和退出">启动和退出</h1>
 
@@ -1329,7 +1333,6 @@ t.RUnlock()
 <p>Channel本身在投递消息给消费者时维护两个队列，一个是inFlight队列，该队列存储正在投递，但还没被标记为投递成功的消息。 另一个是deferred队列，用来存储需要被延时投递的消息。</p>
 
 <p>inFlight队列中消息可能因为投递超时而失败，deferred队列中的消息需要在到达指定时间后进行重新投递。 如果为两个队列中的每个消息都分别指定定时器，无疑是非常消耗资源的。因此nsq采用定时扫描队列的做法。 在扫描时采用多个worker分别处理。这种类似多线程的处理方式提高了处理效率。 nsq在扫描策略上使用了Redis的probabilistic expiration算法，同时动态调整worker的数量， 这些优化平衡了效率和资源占用。</p>
-
     </article>
 
     

@@ -6,16 +6,12 @@
   <title>Neo4j Cypher query - yrong blog</title>
   <meta property="og:title" content="Neo4j Cypher query - yrong blog" />
   <meta name="twitter:title" content="Neo4j Cypher query - yrong blog" />
-  <meta name="description" content="filter element Delete specific element from array stackoverflow
-MATCH (n) WHERE HAS(n.some_array) SET n.array = FILTER(x IN n.some_array WHERE x &lt;&gt; &quot;oranges&quot;);  split unrelated queries case
-MATCH (a {cond:&#39;1&#39;}), (b {cond:&#39;x&#39;}) CREATE a-[:rel]-&gt;b WITH 1 as dummy MATCH (a {cond:&#39;2&#39;}), (b {cond:&#39;y&#39;}) CREATE a-[:rel]-&gt;b WITH 1 as dummy MATCH (a {cond:&#39;3&#39;}), (b {cond:&#39;z&#39;}) CREATE a-[:rel]-&gt;b  aggregation  remember that anything which isn’t an aggregate function(count/collect/distinct/sum..)
-is automaticlly used as part of the grouping key which means we could include more than">
-  <meta property="og:description" content="filter element Delete specific element from array stackoverflow
-MATCH (n) WHERE HAS(n.some_array) SET n.array = FILTER(x IN n.some_array WHERE x &lt;&gt; &quot;oranges&quot;);  split unrelated queries case
-MATCH (a {cond:&#39;1&#39;}), (b {cond:&#39;x&#39;}) CREATE a-[:rel]-&gt;b WITH 1 as dummy MATCH (a {cond:&#39;2&#39;}), (b {cond:&#39;y&#39;}) CREATE a-[:rel]-&gt;b WITH 1 as dummy MATCH (a {cond:&#39;3&#39;}), (b {cond:&#39;z&#39;}) CREATE a-[:rel]-&gt;b  aggregation  remember that anything which isn’t an aggregate function(count/collect/distinct/sum..)
-is automaticlly used as part of the grouping key which means we could include more than">
-  <meta name="twitter:description" content="filter element Delete specific element from array stackoverflow
-MATCH (n) WHERE HAS(n.some_array) SET n.array = FILTER(x IN n.some_array WHERE x &lt;&gt; &quot;oranges&quot;);  split unrelated queries …">
+  <meta name="description" content="Neo4j Cypher Query
+">
+  <meta property="og:description" content="Neo4j Cypher Query
+">
+  <meta name="twitter:description" content="Neo4j Cypher Query
+">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="/blog/2016/11/11/neo4j-cypher/" />
@@ -84,7 +80,8 @@ MATCH (n) WHERE HAS(n.some_array) SET n.array = FILTER(x IN n.some_array WHERE x
 </ul>
 </nav>
 </aside>
-      
+      <p>Neo4j Cypher Query
+</p>
 
 <h3 id="filter-element">filter element</h3>
 
@@ -340,7 +337,6 @@ unwind nodes(s) as n
 with collect(n) as m
 return head(m)
 </code></pre>
-
     </article>
 
     

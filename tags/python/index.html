@@ -53,7 +53,8 @@
           </li>
         </ul>
         <div class="article-content">
-          *args and **kwargs def test_var_args_call(arg1, arg2, arg3): print &quot;arg1:&quot;, arg1 print &quot;arg2:&quot;, arg2 print &quot;arg3:&quot;, arg3 args = (&quot;two&quot;, 3) test_var_args_call(1, *args) result: arg1: 1 arg2: two arg3: 3 def test_var_args_call(arg1, arg2, arg3): print &quot;arg1:&quot;, arg1 print &quot;arg2:&quot;, arg2 print &quot;arg3:&quot;, arg3 kwargs = {&quot;arg3&quot;: 3, &quot;arg2&quot;: &quot;two&quot;} test_var_args_call(1, **kwargs) result: arg1: 1 arg2: two arg3: 3 decorator #coding=utf-8 def a_decorator_passing_arbitrary_arguments(function_to_decorate): # 包装函数可以接受
+          <p>meta program in python
+</p>
         </div>
         <div class="article-readmore"><a href="/blog/2016/12/26/meta-program/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -79,7 +80,8 @@
           </li>
         </ul>
         <div class="article-content">
-          spider examples and patterns import scrapy class AuthorSpider(scrapy.Spider): name = 'author' start_urls = ['http://quotes.toscrape.com/'] def parse(self, response): # follow links to author pages for href in response.css('.author+a::attr(href)').extract(): yield scrapy.Request(response.urljoin(href), callback=self.parse_author) # follow pagination links next_page = response.css('li.next a::attr(href)').extract_first() if next_page is not None: next_page = response.urljoin(next_page) yield scrapy.Request(next_page, callback=self.parse) def parse_author(self, response): def extract_with_css(query): return response.css(query).extract_first().strip() yield { 'name': extract_with_css('h3.author-title::text'), 'birthdate': extract_with_css('.author-born-date::text'), 'bio': extract_with_css('.author-description::text'), } For spiders, the scraping cycle
+          <p>Scrapy In-depth Analysis
+</p>
         </div>
         <div class="article-readmore"><a href="/blog/2016/12/07/scrapy/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -99,7 +101,8 @@
           </li>
         </ul>
         <div class="article-content">
-          IPython 和 Jupyter IPython 是一个 Python REPl shell，环境远比 Python 自带的强大，而 Jupyter Notebook 则是一个基于 IPython REPl 的 Web 应用，运行结果可保存为后缀.ipynb，交互性强，所见即所得，
+          <p>程序员必备工具之Jupyter
+</p>
         </div>
         <div class="article-readmore"><a href="/blog/2016/10/21/jupyter/">Read more...</a></div>
         <div class="article-floatclear"></div>

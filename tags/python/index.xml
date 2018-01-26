@@ -20,7 +20,8 @@
       <pubDate>Mon, 26 Dec 2016 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/12/26/meta-program/</guid>
-      <description>*args and **kwargs def test_var_args_call(arg1, arg2, arg3): print &amp;quot;arg1:&amp;quot;, arg1 print &amp;quot;arg2:&amp;quot;, arg2 print &amp;quot;arg3:&amp;quot;, arg3 args = (&amp;quot;two&amp;quot;, 3) test_var_args_call(1, *args) result: arg1: 1 arg2: two arg3: 3 def test_var_args_call(arg1, arg2, arg3): print &amp;quot;arg1:&amp;quot;, arg1 print &amp;quot;arg2:&amp;quot;, arg2 print &amp;quot;arg3:&amp;quot;, arg3 kwargs = {&amp;quot;arg3&amp;quot;: 3, &amp;quot;arg2&amp;quot;: &amp;quot;two&amp;quot;} test_var_args_call(1, **kwargs) result: arg1: 1 arg2: two arg3: 3 decorator #coding=utf-8 def a_decorator_passing_arbitrary_arguments(function_to_decorate): # 包装函数可以接受</description>
+      <description>&lt;p&gt;meta program in python
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -29,7 +30,8 @@
       <pubDate>Wed, 07 Dec 2016 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/12/07/scrapy/</guid>
-      <description>spider examples and patterns import scrapy class AuthorSpider(scrapy.Spider): name = &#39;author&#39; start_urls = [&#39;http://quotes.toscrape.com/&#39;] def parse(self, response): # follow links to author pages for href in response.css(&#39;.author+a::attr(href)&#39;).extract(): yield scrapy.Request(response.urljoin(href), callback=self.parse_author) # follow pagination links next_page = response.css(&#39;li.next a::attr(href)&#39;).extract_first() if next_page is not None: next_page = response.urljoin(next_page) yield scrapy.Request(next_page, callback=self.parse) def parse_author(self, response): def extract_with_css(query): return response.css(query).extract_first().strip() yield { &#39;name&#39;: extract_with_css(&#39;h3.author-title::text&#39;), &#39;birthdate&#39;: extract_with_css(&#39;.author-born-date::text&#39;), &#39;bio&#39;: extract_with_css(&#39;.author-description::text&#39;), } For spiders, the scraping cycle</description>
+      <description>&lt;p&gt;Scrapy In-depth Analysis
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -38,7 +40,8 @@
       <pubDate>Fri, 21 Oct 2016 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/10/21/jupyter/</guid>
-      <description>IPython 和 Jupyter IPython 是一个 Python REPl shell，环境远比 Python 自带的强大，而 Jupyter Notebook 则是一个基于 IPython REPl 的 Web 应用，运行结果可保存为后缀.ipynb，交互性强，所见即所得，</description>
+      <description>&lt;p&gt;程序员必备工具之Jupyter
+&lt;/p&gt;</description>
     </item>
     
   </channel>

@@ -6,14 +6,12 @@
   <title>用图数据库解决关系型数据库存在的问题 - yrong blog</title>
   <meta property="og:title" content="用图数据库解决关系型数据库存在的问题 - yrong blog" />
   <meta name="twitter:title" content="用图数据库解决关系型数据库存在的问题 - yrong blog" />
-  <meta name="description" content="User-Order-Product Rdbms which customers buying this product also bought that product
-Graph  (p2:Product)&lt;-[*]-(u:User) -[*]-&gt;(p1:Product) return u  Friend of friend Rdbms  Alice’s friends-of-friends
- SELECT p1.Person AS PERSON, p2.Person AS FRIEND_OF_FRIEND FROM PersonFriend pf1 JOIN Person p1 ON pf1.PersonID = p1.ID JOIN PersonFriend pf2 ON pf2.PersonID = pf1.FriendID JOIN Person p2 ON pf2.FriendID = p2.ID WHERE p1.Person = &#39;Alice&#39; AND pf2.FriendID &lt;&gt; p1.ID  queries that extend to four, five, or six degrees of friendship deteriorate significantly due to the computational and space complexity of recursivelyjoining tables">
-  <meta property="og:description" content="User-Order-Product Rdbms which customers buying this product also bought that product
-Graph  (p2:Product)&lt;-[*]-(u:User) -[*]-&gt;(p1:Product) return u  Friend of friend Rdbms  Alice’s friends-of-friends
- SELECT p1.Person AS PERSON, p2.Person AS FRIEND_OF_FRIEND FROM PersonFriend pf1 JOIN Person p1 ON pf1.PersonID = p1.ID JOIN PersonFriend pf2 ON pf2.PersonID = pf1.FriendID JOIN Person p2 ON pf2.FriendID = p2.ID WHERE p1.Person = &#39;Alice&#39; AND pf2.FriendID &lt;&gt; p1.ID  queries that extend to four, five, or six degrees of friendship deteriorate significantly due to the computational and space complexity of recursivelyjoining tables">
-  <meta name="twitter:description" content="User-Order-Product Rdbms which customers buying this product also bought that product
-Graph  (p2:Product)&lt;-[*]-(u:User) -[*]-&gt;(p1:Product) return u  Friend of friend Rdbms  Alice’s …">
+  <meta name="description" content="用图数据库解决关系型数据库存在的问题
+">
+  <meta property="og:description" content="用图数据库解决关系型数据库存在的问题
+">
+  <meta name="twitter:description" content="用图数据库解决关系型数据库存在的问题
+">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="/blog/2016/10/19/neo4j-replace-rdbms/" />
@@ -95,7 +93,8 @@ Graph  (p2:Product)&lt;-[*]-(u:User) -[*]-&gt;(p1:Product) return u  Friend of f
 </ul>
 </nav>
 </aside>
-      
+      <p>用图数据库解决关系型数据库存在的问题
+</p>
 
 <h1 id="user-order-product">User-Order-Product</h1>
 
@@ -364,7 +363,6 @@ RETURN movie
 ORDER BY commonKeywords DESC
 LIMIT 25
 </code></pre>
-
     </article>
 
     

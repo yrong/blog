@@ -41,7 +41,7 @@
       <article class="article">
         <a href="/blog/2016/07/21/nginx-under-the-hood/" class="article-titles">
           <h2 class="article-title">nginx模块初始化</h2>
-          <h3 class="article-subtitle">nginx模块初始化</h3>
+          
         </a>
         <ul class="article-meta">
           <li class="article-meta-date"><time>July 21, 2016</time></li>
@@ -53,7 +53,8 @@
           </li>
         </ul>
         <div class="article-content">
-          主要在函数ngx_init_cycle（src/ngx_cycle.c）中完成 ... for (i = 0; cycle-&gt;modules[i]; i++) { if (cycle-&gt;modules[i]-&gt;type != NGX_CORE_MODULE) { continue; } module = cycle-&gt;modules[i]-&gt;ctx; if (module-&gt;create_conf) { //只有ngx_co
+          <p>nginx模块初始化
+</p>
         </div>
         <div class="article-readmore"><a href="/blog/2016/07/21/nginx-under-the-hood/">Read more...</a></div>
         <div class="article-floatclear"></div>

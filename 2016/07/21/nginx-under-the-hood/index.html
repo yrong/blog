@@ -6,9 +6,12 @@
   <title>nginx模块初始化 - yrong blog</title>
   <meta property="og:title" content="nginx模块初始化 - yrong blog" />
   <meta name="twitter:title" content="nginx模块初始化 - yrong blog" />
-  <meta name="description" content="nginx模块初始化">
-  <meta property="og:description" content="nginx模块初始化">
-  <meta name="twitter:description" content="nginx模块初始化">
+  <meta name="description" content="nginx模块初始化
+">
+  <meta property="og:description" content="nginx模块初始化
+">
+  <meta name="twitter:description" content="nginx模块初始化
+">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="/blog/2016/07/21/nginx-under-the-hood/" />
@@ -39,7 +42,7 @@
       
       
       <h1 class="article-title">nginx模块初始化</h1>
-      <h2 class="article-subtitle">nginx模块初始化</h2>
+      
       <hr class="article-title-bottom">
       <ul class="article-meta">
         <li class="article-meta-date"><time>July 21, 2016</time></li>
@@ -54,7 +57,10 @@
 <aside class="toc">
   
 </aside>
-      <p>主要在函数ngx_init_cycle（src/ngx_cycle.c）中完成</p>
+      <p>nginx模块初始化
+</p>
+
+<p>主要在函数ngx_init_cycle（src/ngx_cycle.c）中完成</p>
 
 <pre><code class="language-c">...
 for (i = 0; cycle-&gt;modules[i]; i++) {
@@ -138,7 +144,6 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 ...
 }
 </code></pre>
-
     </article>
 
     

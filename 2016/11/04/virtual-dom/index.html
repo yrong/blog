@@ -6,9 +6,12 @@
   <title>reactjs源码分析 - yrong blog</title>
   <meta property="og:title" content="reactjs源码分析 - yrong blog" />
   <meta name="twitter:title" content="reactjs源码分析 - yrong blog" />
-  <meta name="description" content="reactjs的核心内容并不多，主要是下面这些: 虚拟dom对象(Virtual DOM) 虚拟dom差异化算法（diff algorithm） 单向数据流">
-  <meta property="og:description" content="reactjs的核心内容并不多，主要是下面这些: 虚拟dom对象(Virtual DOM) 虚拟dom差异化算法（diff algorithm） 单向数据流">
-  <meta name="twitter:description" content="reactjs的核心内容并不多，主要是下面这些: 虚拟dom对象(Virtual DOM) 虚拟dom差异化算法（diff algorithm） 单向数据流">
+  <meta name="description" content="reactjs virtual dom 源码分析
+">
+  <meta property="og:description" content="reactjs virtual dom 源码分析
+">
+  <meta name="twitter:description" content="reactjs virtual dom 源码分析
+">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="/blog/2016/11/04/virtual-dom/" />
@@ -88,7 +91,8 @@
 </ul>
 </nav>
 </aside>
-      
+      <p>reactjs virtual dom 源码分析
+</p>
 
 <p>reactjs的核心内容并不多，主要是下面这些:</p>
 
@@ -1139,7 +1143,6 @@ ReactDOMComponent.prototype._diff = function(diffQueue, nextChildrenElements){
 </ol>
 
 <p>整个reactjs的差异算法就是这个样子。最核心的两个_shouldUpdateReactComponent以及diff,patch算法。</p>
-
     </article>
 
     

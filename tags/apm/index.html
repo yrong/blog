@@ -59,9 +59,8 @@
           </li>
         </ul>
         <div class="article-content">
-          Common use cases This page aims to illustrate common use cases that developers who instrument their applications and libraries with OpenTracing API need to deal with.
-Stepping Back: Who is OpenTracing for? OpenTracing is a thin standardization layer that sits between application/library code and various systems that consume tracing and causality data. Here is a diagram:
- +-------------+ +---------+ +----------+ +------------+ | Application | | Library | | OSS | | RPC/IPC | | Code | | Code | | Services | | Frameworks | +-------------+ +---------+ +----------+ +------------+ | | | | | | | | v v v v +-----------------------------------------------------+ | · · · · · · · · · · OpenTracing · · · · · · · · · · | +-----------------------------------------------------+ | | | | | | | | v v v v +-----------+ +-------------+ +-------------+ +-----------+ | Tracing | | Logging | | Metrics | | Tracing | | System A | | Framework B | | Framework C | | System D | +-----------+ +-------------+ +-------------+ +-----------+  Application Code: Developers writing application code can use OpenTracing to describe causality, demarcate control flow, and add fine-grained logging information along the way.
+          <p>openTracing use cases
+</p>
         </div>
         <div class="article-readmore"><a href="/blog/2017/01/30/opentracing/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -87,7 +86,8 @@ Stepping Back: Who is OpenTracing for? OpenTracing is a thin standardization lay
           </li>
         </ul>
         <div class="article-content">
-          Dapper Zipkin zipkin为分布式链路调用监控系统，聚合各业务系统调用延迟数据，达到链路调用监控跟踪。 architecture 如图，在复杂的调用链路中假设存在一条调用链路响
+          <p>分布式环境系统监控Zipkin&amp;Pinpoint
+</p>
         </div>
         <div class="article-readmore"><a href="/blog/2017/01/05/microservice-apm/">Read more...</a></div>
         <div class="article-floatclear"></div>

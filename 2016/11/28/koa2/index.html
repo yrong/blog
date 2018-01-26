@@ -6,9 +6,12 @@
   <title>Koa2 In-depth Analysis - yrong blog</title>
   <meta property="og:title" content="Koa2 In-depth Analysis - yrong blog" />
   <meta name="twitter:title" content="Koa2 In-depth Analysis - yrong blog" />
-  <meta name="description" content="koa核心主要是context（上下文）和middleware（中间件）组成，v2的中间件部分可以使用ES2015-2016的语法，比如as">
-  <meta property="og:description" content="koa核心主要是context（上下文）和middleware（中间件）组成，v2的中间件部分可以使用ES2015-2016的语法，比如as">
-  <meta name="twitter:description" content="koa核心主要是context（上下文）和middleware（中间件）组成，v2的中间件部分可以使用ES2015-2016的语法，比如as">
+  <meta name="description" content="Koa2 In-depth Analysis
+">
+  <meta property="og:description" content="Koa2 In-depth Analysis
+">
+  <meta name="twitter:description" content="Koa2 In-depth Analysis
+">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="/blog/2016/11/28/koa2/" />
@@ -54,7 +57,10 @@
 <aside class="toc">
   
 </aside>
-      <p>koa核心主要是context（上下文）和middleware（中间件）组成，v2的中间件部分可以使用ES2015-2016的语法，比如async await和箭头函数，同时支持3种不同种类的中间件，普通函数，async 函数，Generator函数。先看如何使用：</p>
+      <p>Koa2 In-depth Analysis
+</p>
+
+<p>koa核心主要是context（上下文）和middleware（中间件）组成，v2的中间件部分可以使用ES2015-2016的语法，比如async await和箭头函数，同时支持3种不同种类的中间件，普通函数，async 函数，Generator函数。先看如何使用：</p>
 
 <p>普通函数的用法</p>
 
@@ -270,7 +276,6 @@ app.use(convert(function *(next) {
 </code></pre>
 
 <p>首先第一个条件「执行后返回promise」可以看到中间件是用 co.wrap 包起来的，co.wrap会返回promise，参考co的源码，第一个条件满足．再说第二个条件，「中间件内部可以监听promise并等待promise接收后执行后续代码」co 与async一样，yield后面可以跟一个promise，co会监听这个promise，什么时候这个promise执行完了。什么时候执行后续的代码，这点跟async是一模一样的，只是写法略有不同，第二个条件也满足．</p>
-
     </article>
 
     

@@ -20,7 +20,8 @@
       <pubDate>Sun, 09 Oct 2016 18:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/10/09/meteor-internal-reactive/</guid>
-      <description>如果说集合是 Meteor 的核心功能，那么响应式可以能让这个核心功能更强大。 集合从根本上改变你的应用程序的数据处理方式。从而不必手动检查数据更改（例如，</description>
+      <description>&lt;p&gt;meteor的响应式数据源实现原理
+&lt;/p&gt;</description>
     </item>
     
   </channel>

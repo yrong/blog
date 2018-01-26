@@ -6,9 +6,12 @@
   <title>ElasticSearch Query DSL - yrong blog</title>
   <meta property="og:title" content="ElasticSearch Query DSL - yrong blog" />
   <meta name="twitter:title" content="ElasticSearch Query DSL - yrong blog" />
-  <meta name="description" content="ElasticSearch Query DSL Examples 加载ik分词插件,配置开启inline脚本 script.inline: true script.indexed: true 建索引 curl -XDELETE &#39;localhost:9200/text&#39; curl -XPUT &#39;localhost:9200/text?pretty&#39; mapping定义 curl -XPOST http://localhost:9200/text/mytext/_mapping -d&#39; { &quot;mytext&quot;: { &quot;_all&quot;: { &quot;analyzer&quot;: &quot;ik_max_word&quot;, &quot;search_analyzer&quot;: &quot;ik_max_word&quot;, &quot;term_vector&quot;: &quot;no&quot;, &quot;store&quot;: &quot;false&quot; }, &quot;properties&quot;: { &quot;content&quot;: { &quot;type&quot;:">
-  <meta property="og:description" content="ElasticSearch Query DSL Examples 加载ik分词插件,配置开启inline脚本 script.inline: true script.indexed: true 建索引 curl -XDELETE &#39;localhost:9200/text&#39; curl -XPUT &#39;localhost:9200/text?pretty&#39; mapping定义 curl -XPOST http://localhost:9200/text/mytext/_mapping -d&#39; { &quot;mytext&quot;: { &quot;_all&quot;: { &quot;analyzer&quot;: &quot;ik_max_word&quot;, &quot;search_analyzer&quot;: &quot;ik_max_word&quot;, &quot;term_vector&quot;: &quot;no&quot;, &quot;store&quot;: &quot;false&quot; }, &quot;properties&quot;: { &quot;content&quot;: { &quot;type&quot;:">
-  <meta name="twitter:description" content="ElasticSearch Query DSL Examples 加载ik分词插件,配置开启inline脚本 script.inline: true script.indexed: true 建索引 curl -XDELETE &#39;localhost:9200/text&#39; curl -XPUT &#39;localhost:9200/text?pretty&#39; mapping定义 curl -XPOST …">
+  <meta name="description" content="ElasticSearch Query DSL Examples
+">
+  <meta property="og:description" content="ElasticSearch Query DSL Examples
+">
+  <meta name="twitter:description" content="ElasticSearch Query DSL Examples
+">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="/blog/2016/10/13/elasticsearch-query-dsl/" />
@@ -66,7 +69,8 @@
 </ul>
 </nav>
 </aside>
-      
+      <p>ElasticSearch Query DSL Examples
+</p>
 
 <h1 id="elasticsearch-query-dsl-examples">ElasticSearch Query DSL Examples</h1>
 
@@ -220,7 +224,6 @@ curl -XPUT 'localhost:9200/text/mytext/7?pretty' -d'
 }
 '
 </code></pre>
-
     </article>
 
     

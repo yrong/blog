@@ -20,7 +20,8 @@
       <pubDate>Thu, 20 Apr 2017 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2017/04/20/kafka/</guid>
-      <description>Terminology Broker Kafka集群包含一个或多个服务器，这种服务器被称为broker Topic 每条发布到Kafka集群的消息都有一个类别，这个类别被称为Topic。</description>
+      <description>&lt;p&gt;kafka架构分析
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -29,8 +30,8 @@
       <pubDate>Sun, 02 Apr 2017 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2017/04/02/kafka-stream/</guid>
-      <description>kafka-streams This is the repository for the examples of using Kafka streams covered in the blog posts:
- Kafka Streams - The Processor API Kafka Streams - The KStreams API Machine Learning with Kafka Streams  Requirements to build this project  Java 8 Gradle  Requirements to run the examples  kafka version kafka_2.11-0.10.1.0 see the section marked &amp;ldquo;Running a task on a particular version of Scala&amp;rdquo; The json-data-generator from ACES,Inc  Setup Instructions Extact the kafka_2.</description>
+      <description>&lt;p&gt;kafka流的一个实例
+&lt;/p&gt;</description>
     </item>
     
   </channel>

@@ -20,7 +20,8 @@
       <pubDate>Fri, 04 Nov 2016 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/11/04/virtual-dom/</guid>
-      <description>reactjs的核心内容并不多，主要是下面这些: 虚拟dom对象(Virtual DOM) 虚拟dom差异化算法（diff algorithm） 单向数据流</description>
+      <description>&lt;p&gt;reactjs virtual dom 源码分析
+&lt;/p&gt;</description>
     </item>
     
   </channel>

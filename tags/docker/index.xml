@@ -20,8 +20,8 @@
       <pubDate>Mon, 27 Mar 2017 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2017/03/27/docker-microservice/</guid>
-      <description>Build a NodeJS microservice and deploy it to Docker Stack We’ll use a simple NodeJS service with a MongoDB for our backend.
- NodeJS 7.5.0 MongoDB 3.4.2 Docker for Mac 1.13.0  Architecture Microservices  Movies Service example Cinema Catalog Service example Booking Service example Payment Service example Notification Service example API Gateway Service example  Api Gateway  An API Gateway is a server that is the single entry point into the system.</description>
+      <description>&lt;p&gt;Build a NodeJS microservice and deploy it to Docker
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -30,8 +30,8 @@
       <pubDate>Wed, 22 Mar 2017 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2017/03/22/docker-swarm/</guid>
-      <description>Integrating Proxy With Docker Swarm (Tour Around Docker 1.12 Series)  This article continues where Docker Swarm Introduction left. I will assume that you have at least a basic knowledge how Swarm in Docker v1.12+ works. If you don&amp;rsquo;t, please read the previous article first.
- The fact that we can deploy any number of services inside a Swarm cluster does not mean that they are accessible to our users.</description>
+      <description>&lt;p&gt;Integrating Proxy With Docker Swarm
+&lt;/p&gt;</description>
     </item>
     
   </channel>

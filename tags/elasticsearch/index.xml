@@ -20,7 +20,8 @@
       <pubDate>Thu, 13 Oct 2016 18:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/10/13/elasticsearch-query-dsl/</guid>
-      <description>ElasticSearch Query DSL Examples 加载ik分词插件,配置开启inline脚本 script.inline: true script.indexed: true 建索引 curl -XDELETE &#39;localhost:9200/text&#39; curl -XPUT &#39;localhost:9200/text?pretty&#39; mapping定义 curl -XPOST http://localhost:9200/text/mytext/_mapping -d&#39; { &amp;quot;mytext&amp;quot;: { &amp;quot;_all&amp;quot;: { &amp;quot;analyzer&amp;quot;: &amp;quot;ik_max_word&amp;quot;, &amp;quot;search_analyzer&amp;quot;: &amp;quot;ik_max_word&amp;quot;, &amp;quot;term_vector&amp;quot;: &amp;quot;no&amp;quot;, &amp;quot;store&amp;quot;: &amp;quot;false&amp;quot; }, &amp;quot;properties&amp;quot;: { &amp;quot;content&amp;quot;: { &amp;quot;type&amp;quot;:</description>
+      <description>&lt;p&gt;ElasticSearch Query DSL Examples
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -29,7 +30,8 @@
       <pubDate>Mon, 03 Oct 2016 15:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/10/03/elasticsearch-storelayer/</guid>
-      <description>Elasticsearch的存储结构 Node Data Simply starting Elasticsearch from a empty data directory yields the following directory tree: $ tree data data └── elasticsearch └── nodes └── 0 ├── _state │ └── global-0.st └── node.lock The node.lock file is there to ensure that</description>
+      <description>&lt;p&gt;ElasticSearch的存储结构
+&lt;/p&gt;</description>
     </item>
     
     <item>

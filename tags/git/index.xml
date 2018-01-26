@@ -20,7 +20,8 @@
       <pubDate>Sat, 25 Feb 2017 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2017/02/25/git-tips/</guid>
-      <description>git-tips Collection of git-tips, want to add your tips? Checkout contributing.md English | 中文 | Русский Tools: git-tip - A handy CLI to make optimum use of these tips. (Here in Docker container) P.S: All these commands are tested on git version 2.7.4 (Apple Git-66). Everyday Git in twenty commands or so Show helpful guides that come with Git Search change by content</description>
+      <description>&lt;p&gt;git-tips
+&lt;/p&gt;</description>
     </item>
     
   </channel>

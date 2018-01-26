@@ -6,9 +6,12 @@
   <title>The Raft Consensus Algorithm - yrong blog</title>
   <meta property="og:title" content="The Raft Consensus Algorithm - yrong blog" />
   <meta name="twitter:title" content="The Raft Consensus Algorithm - yrong blog" />
-  <meta name="description" content="Paxos和Raft都是为了实现Consensus一致性这个目标，这个过程如同选举一样，参选者需要说服大多数选民(服务器)投票给他，一旦选定">
-  <meta property="og:description" content="Paxos和Raft都是为了实现Consensus一致性这个目标，这个过程如同选举一样，参选者需要说服大多数选民(服务器)投票给他，一旦选定">
-  <meta name="twitter:description" content="Paxos和Raft都是为了实现Consensus一致性这个目标，这个过程如同选举一样，参选者需要说服大多数选民(服务器)投票给他，一旦选定">
+  <meta name="description" content="The Raft Consensus Algorithm
+">
+  <meta property="og:description" content="The Raft Consensus Algorithm
+">
+  <meta name="twitter:description" content="The Raft Consensus Algorithm
+">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="/blog/2016/12/12/raft/" />
@@ -88,7 +91,8 @@
 </ul>
 </nav>
 </aside>
-      
+      <p>The Raft Consensus Algorithm
+</p>
 
 <p>Paxos和Raft都是为了实现Consensus一致性这个目标，这个过程如同选举一样，参选者需要说服大多数选民(服务器)投票给他，一旦选定后就跟随其操作。在Raft中，任何时候一个服务器可以扮演下面角色之一：</p>
 
@@ -486,7 +490,6 @@ func (p *Peer) sendAppendEntriesRequest(req *AppendEntriesRequest) {
 	p.server.sendAsync(resp)
 }
 </code></pre>
-
     </article>
 
     

@@ -20,8 +20,8 @@
       <pubDate>Fri, 10 Mar 2017 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2017/03/10/pathfinding/</guid>
-      <description>Traversing graphs and finding paths Let&amp;rsquo;s take a look at the diagram below:
-This is a pretty typical problem, no? We have a starting point, and ending point, and a bunch of roads we can take to get there. We can even abstract this so that the roads are &amp;ldquo;moves&amp;rdquo; (of, say, a little sliding puzzle) and the points are states of the puzzle. Our goal is to find the shortest path possible to the end node in the fewest moves — and not take a long time to find it!</description>
+      <description>&lt;p&gt;Path finding algorithom
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -30,7 +30,8 @@ This is a pretty typical problem, no? We have a starting point, and ending point
       <pubDate>Mon, 12 Dec 2016 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/12/12/raft/</guid>
-      <description>Paxos和Raft都是为了实现Consensus一致性这个目标，这个过程如同选举一样，参选者需要说服大多数选民(服务器)投票给他，一旦选定</description>
+      <description>&lt;p&gt;The Raft Consensus Algorithm
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -39,7 +40,8 @@ This is a pretty typical problem, no? We have a starting point, and ending point
       <pubDate>Wed, 23 Nov 2016 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/11/23/alg-ds/</guid>
-      <description>算法书 algorithm-book 算法项目 golang c++ python LeetCode leet-code</description>
+      <description>&lt;p&gt;数据结构与算法
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -48,7 +50,8 @@ This is a pretty typical problem, no? We have a starting point, and ending point
       <pubDate>Mon, 07 Nov 2016 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/11/07/leetcode/</guid>
-      <description>LeetCode reverse a linked list # Python program to reverse a linked list # Time Complexity : O(n) # Space Complexity : O(1) # Node class class Node: # Constructor to initialize the node object def __init__(self, data): self.data = data self.next = None class LinkedList: # Function to initialize head def __init__(self): self.head = None # Function to reverse the linked list def reverse(self): prev = None current =</description>
+      <description>&lt;p&gt;leetcode部分题解
+&lt;/p&gt;</description>
     </item>
     
   </channel>

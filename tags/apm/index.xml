@@ -20,9 +20,8 @@
       <pubDate>Mon, 30 Jan 2017 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2017/01/30/opentracing/</guid>
-      <description>Common use cases This page aims to illustrate common use cases that developers who instrument their applications and libraries with OpenTracing API need to deal with.
-Stepping Back: Who is OpenTracing for? OpenTracing is a thin standardization layer that sits between application/library code and various systems that consume tracing and causality data. Here is a diagram:
- +-------------+ +---------+ +----------+ +------------+ | Application | | Library | | OSS | | RPC/IPC | | Code | | Code | | Services | | Frameworks | +-------------+ +---------+ +----------+ +------------+ | | | | | | | | v v v v +-----------------------------------------------------+ | · · · · · · · · · · OpenTracing · · · · · · · · · · | +-----------------------------------------------------+ | | | | | | | | v v v v +-----------+ +-------------+ +-------------+ +-----------+ | Tracing | | Logging | | Metrics | | Tracing | | System A | | Framework B | | Framework C | | System D | +-----------+ +-------------+ +-------------+ +-----------+  Application Code: Developers writing application code can use OpenTracing to describe causality, demarcate control flow, and add fine-grained logging information along the way.</description>
+      <description>&lt;p&gt;openTracing use cases
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -31,7 +30,8 @@ Stepping Back: Who is OpenTracing for? OpenTracing is a thin standardization lay
       <pubDate>Thu, 05 Jan 2017 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2017/01/05/microservice-apm/</guid>
-      <description>Dapper Zipkin zipkin为分布式链路调用监控系统，聚合各业务系统调用延迟数据，达到链路调用监控跟踪。 architecture 如图，在复杂的调用链路中假设存在一条调用链路响</description>
+      <description>&lt;p&gt;分布式环境系统监控Zipkin&amp;amp;Pinpoint
+&lt;/p&gt;</description>
     </item>
     
   </channel>

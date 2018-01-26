@@ -6,14 +6,12 @@
   <title>OpenTracing use cases - yrong blog</title>
   <meta property="og:title" content="OpenTracing use cases - yrong blog" />
   <meta name="twitter:title" content="OpenTracing use cases - yrong blog" />
-  <meta name="description" content="Common use cases This page aims to illustrate common use cases that developers who instrument their applications and libraries with OpenTracing API need to deal with.
-Stepping Back: Who is OpenTracing for? OpenTracing is a thin standardization layer that sits between application/library code and various systems that consume tracing and causality data. Here is a diagram:
- &#43;-------------&#43; &#43;---------&#43; &#43;----------&#43; &#43;------------&#43; | Application | | Library | | OSS | | RPC/IPC | | Code | | Code | | Services | | Frameworks | &#43;-------------&#43; &#43;---------&#43; &#43;----------&#43; &#43;------------&#43; | | | | | | | | v v v v &#43;-----------------------------------------------------&#43; | · · · · · · · · · · OpenTracing · · · · · · · · · · | &#43;-----------------------------------------------------&#43; | | | | | | | | v v v v &#43;-----------&#43; &#43;-------------&#43; &#43;-------------&#43; &#43;-----------&#43; | Tracing | | Logging | | Metrics | | Tracing | | System A | | Framework B | | Framework C | | System D | &#43;-----------&#43; &#43;-------------&#43; &#43;-------------&#43; &#43;-----------&#43;  Application Code: Developers writing application code can use OpenTracing to describe causality, demarcate control flow, and add fine-grained logging information along the way.">
-  <meta property="og:description" content="Common use cases This page aims to illustrate common use cases that developers who instrument their applications and libraries with OpenTracing API need to deal with.
-Stepping Back: Who is OpenTracing for? OpenTracing is a thin standardization layer that sits between application/library code and various systems that consume tracing and causality data. Here is a diagram:
- &#43;-------------&#43; &#43;---------&#43; &#43;----------&#43; &#43;------------&#43; | Application | | Library | | OSS | | RPC/IPC | | Code | | Code | | Services | | Frameworks | &#43;-------------&#43; &#43;---------&#43; &#43;----------&#43; &#43;------------&#43; | | | | | | | | v v v v &#43;-----------------------------------------------------&#43; | · · · · · · · · · · OpenTracing · · · · · · · · · · | &#43;-----------------------------------------------------&#43; | | | | | | | | v v v v &#43;-----------&#43; &#43;-------------&#43; &#43;-------------&#43; &#43;-----------&#43; | Tracing | | Logging | | Metrics | | Tracing | | System A | | Framework B | | Framework C | | System D | &#43;-----------&#43; &#43;-------------&#43; &#43;-------------&#43; &#43;-----------&#43;  Application Code: Developers writing application code can use OpenTracing to describe causality, demarcate control flow, and add fine-grained logging information along the way.">
-  <meta name="twitter:description" content="Common use cases This page aims to illustrate common use cases that developers who instrument their applications and libraries with OpenTracing API need to deal with.
-Stepping Back: Who is OpenTracing …">
+  <meta name="description" content="openTracing use cases
+">
+  <meta property="og:description" content="openTracing use cases
+">
+  <meta name="twitter:description" content="openTracing use cases
+">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="/blog/2017/01/30/opentracing/" />
@@ -94,7 +92,8 @@ Stepping Back: Who is OpenTracing …">
 </ul>
 </nav>
 </aside>
-      
+      <p>openTracing use cases
+</p>
 
 <h1 id="common-use-cases">Common use cases</h1>
 
@@ -342,7 +341,6 @@ explicit_span.finish(
         tags={tags.SAMPLING_PRIORITY: 1}
     )
 </code></pre>
-
     </article>
 
     

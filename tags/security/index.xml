@@ -20,7 +20,8 @@
       <pubDate>Sun, 23 Oct 2016 18:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/10/23/xss-csrf/</guid>
-      <description>XSS (Cross Site Script):脚本中的不速之客 XSS 全称“跨站脚本”。当然，名字只是为了跟css做区分，是注入攻击的一种。跟SQL注入不同的是，XSS不</description>
+      <description>&lt;p&gt;XSS与CSRF两种跨站攻击
+&lt;/p&gt;</description>
     </item>
     
   </channel>

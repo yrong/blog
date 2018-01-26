@@ -6,9 +6,12 @@
   <title>BoltDB In-depth Analysis - yrong blog</title>
   <meta property="og:title" content="BoltDB In-depth Analysis - yrong blog" />
   <meta name="twitter:title" content="BoltDB In-depth Analysis - yrong blog" />
-  <meta name="description" content="BoltDB中的Bucket类似于传统关系型数据库的”表”。BoltDB通过Bucket将一个庞大的数据库划分成诸多的命名空间。用户在每个命">
-  <meta property="og:description" content="BoltDB中的Bucket类似于传统关系型数据库的”表”。BoltDB通过Bucket将一个庞大的数据库划分成诸多的命名空间。用户在每个命">
-  <meta name="twitter:description" content="BoltDB中的Bucket类似于传统关系型数据库的”表”。BoltDB通过Bucket将一个庞大的数据库划分成诸多的命名空间。用户在每个命">
+  <meta name="description" content="boltdb in-depth analysis
+">
+  <meta property="og:description" content="boltdb in-depth analysis
+">
+  <meta name="twitter:description" content="boltdb in-depth analysis
+">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="/blog/2016/12/18/bolt/" />
@@ -81,7 +84,8 @@
 </ul>
 </nav>
 </aside>
-      
+      <p>boltdb in-depth analysis
+</p>
 
 <p>BoltDB中的Bucket类似于传统关系型数据库的”表”。BoltDB通过Bucket将一个庞大的数据库划分成诸多的命名空间。用户在每个命名空间内存储KV数据，通过此种办法可以提高数据的搜索效率。</p>
 
@@ -475,7 +479,6 @@ func (b *Bucket) Put(key []byte, value []byte) error {
 
 <p>在bucket内插入普通KV记录后，其内部存储结构如下所示：（注意：我们说的还是Inline Bucket哦）
 <img src="{{ site.baseurl }}/img/90b56d2936d395722432762efaf64863.jpg" alt="" /></p>
-
     </article>
 
     

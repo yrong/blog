@@ -30,8 +30,8 @@
       <pubDate>Mon, 27 Mar 2017 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2017/03/27/docker-microservice/</guid>
-      <description>Build a NodeJS microservice and deploy it to Docker Stack We’ll use a simple NodeJS service with a MongoDB for our backend.
- NodeJS 7.5.0 MongoDB 3.4.2 Docker for Mac 1.13.0  Architecture Microservices  Movies Service example Cinema Catalog Service example Booking Service example Payment Service example Notification Service example API Gateway Service example  Api Gateway  An API Gateway is a server that is the single entry point into the system.</description>
+      <description>&lt;p&gt;Build a NodeJS microservice and deploy it to Docker
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -40,7 +40,8 @@
       <pubDate>Sat, 18 Mar 2017 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2017/03/18/vertx-blueprint/</guid>
-      <description>Vert.x 蓝图 - Micro Shop 微服务应用 对应的Vert.x版本为 3.4.1 内容 利用 Vert.x 构建微服务应用 异步开发模式 函数式、响应式编程范式 事件溯源 (Event Sourcing) 通过分布式Event B</description>
+      <description>&lt;p&gt;Vert.x Micro Shop 微服务应用
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -49,8 +50,8 @@
       <pubDate>Fri, 10 Feb 2017 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2017/02/10/serverless/</guid>
-      <description>Read this on the main serverless docs site Serverless AWS Lambda Examples Have an example? Submit a PR or open an issue. ⚡️
-   Example Runtime     Aws Auth0 Api Gateway  Demonstration of protecting API gateway endpoints with auth0 nodeJS   Env Variables Encrypted In A File  Serverless example managing secrets in an encrypted file nodeJS   Serverless Node Env Variables  This example demonstrates how to use environment variables for AWS Lambdas.</description>
+      <description>&lt;p&gt;serverless aws lamba examples
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -59,9 +60,8 @@
       <pubDate>Mon, 30 Jan 2017 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2017/01/30/opentracing/</guid>
-      <description>Common use cases This page aims to illustrate common use cases that developers who instrument their applications and libraries with OpenTracing API need to deal with.
-Stepping Back: Who is OpenTracing for? OpenTracing is a thin standardization layer that sits between application/library code and various systems that consume tracing and causality data. Here is a diagram:
- +-------------+ +---------+ +----------+ +------------+ | Application | | Library | | OSS | | RPC/IPC | | Code | | Code | | Services | | Frameworks | +-------------+ +---------+ +----------+ +------------+ | | | | | | | | v v v v +-----------------------------------------------------+ | · · · · · · · · · · OpenTracing · · · · · · · · · · | +-----------------------------------------------------+ | | | | | | | | v v v v +-----------+ +-------------+ +-------------+ +-----------+ | Tracing | | Logging | | Metrics | | Tracing | | System A | | Framework B | | Framework C | | System D | +-----------+ +-------------+ +-------------+ +-----------+  Application Code: Developers writing application code can use OpenTracing to describe causality, demarcate control flow, and add fine-grained logging information along the way.</description>
+      <description>&lt;p&gt;openTracing use cases
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -70,7 +70,8 @@ Stepping Back: Who is OpenTracing for? OpenTracing is a thin standardization lay
       <pubDate>Thu, 05 Jan 2017 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2017/01/05/microservice-apm/</guid>
-      <description>Dapper Zipkin zipkin为分布式链路调用监控系统，聚合各业务系统调用延迟数据，达到链路调用监控跟踪。 architecture 如图，在复杂的调用链路中假设存在一条调用链路响</description>
+      <description>&lt;p&gt;分布式环境系统监控Zipkin&amp;amp;Pinpoint
+&lt;/p&gt;</description>
     </item>
     
   </channel>

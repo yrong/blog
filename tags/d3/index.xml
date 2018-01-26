@@ -20,7 +20,8 @@
       <pubDate>Wed, 12 Oct 2016 18:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/10/12/d3-data-visualization/</guid>
-      <description>基于 D3.js ，编写 HTML、SVG 和 CSS 就能让你的数据变得生动起来，这是一个基于数据操作 DOM 的 JavaScript 库。 每一位 Web 开发者最应该学习的三个 JavaScript 库就是 jQuery</description>
+      <description>&lt;p&gt;D3.js数据可视化
+&lt;/p&gt;</description>
     </item>
     
   </channel>

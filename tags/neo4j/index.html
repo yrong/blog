@@ -53,10 +53,8 @@
           </li>
         </ul>
         <div class="article-content">
-          filter element Delete specific element from array stackoverflow
-MATCH (n) WHERE HAS(n.some_array) SET n.array = FILTER(x IN n.some_array WHERE x &lt;&gt; &quot;oranges&quot;);  split unrelated queries case
-MATCH (a {cond:'1'}), (b {cond:'x'}) CREATE a-[:rel]-&gt;b WITH 1 as dummy MATCH (a {cond:'2'}), (b {cond:'y'}) CREATE a-[:rel]-&gt;b WITH 1 as dummy MATCH (a {cond:'3'}), (b {cond:'z'}) CREATE a-[:rel]-&gt;b  aggregation  remember that anything which isn’t an aggregate function(count/collect/distinct/sum..)
-is automaticlly used as part of the grouping key which means we could include more than
+          <p>Neo4j Cypher Query
+</p>
         </div>
         <div class="article-readmore"><a href="/blog/2016/11/11/neo4j-cypher/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -76,9 +74,8 @@ is automaticlly used as part of the grouping key which means we could include mo
           </li>
         </ul>
         <div class="article-content">
-          User-Order-Product Rdbms which customers buying this product also bought that product
-Graph  (p2:Product)&lt;-[*]-(u:User) -[*]-&gt;(p1:Product) return u  Friend of friend Rdbms  Alice’s friends-of-friends
- SELECT p1.Person AS PERSON, p2.Person AS FRIEND_OF_FRIEND FROM PersonFriend pf1 JOIN Person p1 ON pf1.PersonID = p1.ID JOIN PersonFriend pf2 ON pf2.PersonID = pf1.FriendID JOIN Person p2 ON pf2.FriendID = p2.ID WHERE p1.Person = 'Alice' AND pf2.FriendID &lt;&gt; p1.ID  queries that extend to four, five, or six degrees of friendship deteriorate significantly due to the computational and space complexity of recursivelyjoining tables
+          <p>用图数据库解决关系型数据库存在的问题
+</p>
         </div>
         <div class="article-readmore"><a href="/blog/2016/10/19/neo4j-replace-rdbms/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -98,7 +95,8 @@ Graph  (p2:Product)&lt;-[*]-(u:User) -[*]-&gt;(p1:Product) return u  Friend of f
           </li>
         </ul>
         <div class="article-content">
-          电子书 GraphDatabase 存储结构 现在让我们来看看数据在Neo4j中是如何存储的: .db是主存储文件,不同存储类型(node,relation,label,p
+          <p>Neo4j中数据是如何存储的
+</p>
         </div>
         <div class="article-readmore"><a href="/blog/2016/09/05/neo4j-internal/">Read more...</a></div>
         <div class="article-floatclear"></div>

@@ -20,7 +20,8 @@
       <pubDate>Thu, 21 Jul 2016 15:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/07/21/nginx-under-the-hood/</guid>
-      <description>主要在函数ngx_init_cycle（src/ngx_cycle.c）中完成 ... for (i = 0; cycle-&amp;gt;modules[i]; i++) { if (cycle-&amp;gt;modules[i]-&amp;gt;type != NGX_CORE_MODULE) { continue; } module = cycle-&amp;gt;modules[i]-&amp;gt;ctx; if (module-&amp;gt;create_conf) { //只有ngx_co</description>
+      <description>&lt;p&gt;nginx模块初始化
+&lt;/p&gt;</description>
     </item>
     
   </channel>

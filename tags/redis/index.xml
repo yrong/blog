@@ -20,7 +20,8 @@
       <pubDate>Thu, 22 Dec 2016 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/12/22/codis/</guid>
-      <description>Architecture Codis由以下组件组成： Codis Server：基于 redis分支开发。增加了额外的数据结构，以支持 slot 有关的操作以及数据迁移指令。具体的修改可以</description>
+      <description>&lt;p&gt;codis in-depth analysis
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -29,7 +30,8 @@
       <pubDate>Sat, 10 Sep 2016 00:00:00 +0000</pubDate>
       <author>yrong@ustc.edu (Ronyang)</author>
       <guid>https://yrong.github.io/blog/2016/09/10/redis/</guid>
-      <description>Object Types /* Object types */ #define OBJ_STRING 0 #define OBJ_LIST 1 #define OBJ_SET 2 #define OBJ_ZSET 3 #define OBJ_HASH 4 strings&amp;amp;Hashes&amp;amp;Set HSET myhash field1 &amp;ldquo;Hello&amp;rdquo; Hash对象是用zipmap存储的，查找、删除均为O(n)，但一般来说对象的field对</description>
+      <description>&lt;p&gt;redis数据结构类型及实现
+&lt;/p&gt;</description>
     </item>
     
   </channel>

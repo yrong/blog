@@ -6,9 +6,12 @@
   <title>Neo4j Internal - yrong blog</title>
   <meta property="og:title" content="Neo4j Internal - yrong blog" />
   <meta name="twitter:title" content="Neo4j Internal - yrong blog" />
-  <meta name="description" content="电子书 GraphDatabase 存储结构 现在让我们来看看数据在Neo4j中是如何存储的: .db是主存储文件,不同存储类型(node,relation,label,p">
-  <meta property="og:description" content="电子书 GraphDatabase 存储结构 现在让我们来看看数据在Neo4j中是如何存储的: .db是主存储文件,不同存储类型(node,relation,label,p">
-  <meta name="twitter:description" content="电子书 GraphDatabase 存储结构 现在让我们来看看数据在Neo4j中是如何存储的: .db是主存储文件,不同存储类型(node,relation,label,p">
+  <meta name="description" content="Neo4j中数据是如何存储的
+">
+  <meta property="og:description" content="Neo4j中数据是如何存储的
+">
+  <meta name="twitter:description" content="Neo4j中数据是如何存储的
+">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="/blog/2016/09/05/neo4j-internal/" />
@@ -60,7 +63,8 @@
 </ul>
 </nav>
 </aside>
-      
+      <p>Neo4j中数据是如何存储的
+</p>
 
 <h1 id="电子书">电子书</h1>
 
@@ -212,7 +216,6 @@ Finally the TraversalMatcher doesn&rsquo;t receive any rows of data, due to bein
 So you can see that the execution plan, as constructed from the Cypher query, operates bottom up. Patterns are found in the TraversalMatcher (a total of 6 rows), and then passed through the Filter, which only allows 2 through, and finally to the ColumnFilter, which only keeps the &ldquo;friends&rdquo; column specified in the RETURN clause.<br />
 For detailed query tuning options, check the <a href="http://neo4j.com/docs/developer-manual/current/cypher/#query-tuning">tuning guide</a></p>
 </blockquote>
-
     </article>
 
     
