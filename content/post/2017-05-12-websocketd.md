@@ -2,7 +2,6 @@
 author: Ron
 catalog: true
 date: 2017-05-12T00:00:00Z
-header-img: img/post-bg-2015.jpg
 tags:
 - golang
 title: websocketd code analysis

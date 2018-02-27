@@ -2,7 +2,6 @@
 author: Ron
 catalog: true
 date: 2017-07-08T00:00:00Z
-header-img: img/post-bg-os-metro.jpg
 tags:
 - golang
 - prometheus
