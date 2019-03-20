@@ -6,8 +6,6 @@
     <description>Recent content in Redis on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
     <lastBuildDate>Thu, 22 Dec 2016 00:00:00 +0000</lastBuildDate>
     
@@ -18,20 +16,18 @@
       <title>Codis In-depth Analysis</title>
       <link>https://yrong.github.io/blog/2016/12/22/codis/</link>
       <pubDate>Thu, 22 Dec 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/12/22/codis/</guid>
-      <description>&lt;p&gt;codis in-depth analysis
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;codis in-depth analysis&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>redis object types</title>
       <link>https://yrong.github.io/blog/2016/09/10/redis/</link>
       <pubDate>Sat, 10 Sep 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/09/10/redis/</guid>
-      <description>&lt;p&gt;redis数据结构类型及实现
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;redis数据结构类型及实现&lt;/p&gt;</description>
     </item>
     
   </channel>

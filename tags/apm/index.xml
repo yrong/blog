@@ -6,8 +6,6 @@
     <description>Recent content in Apm on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
     <lastBuildDate>Mon, 30 Jan 2017 00:00:00 +0000</lastBuildDate>
     
@@ -18,20 +16,18 @@
       <title>OpenTracing use cases</title>
       <link>https://yrong.github.io/blog/2017/01/30/opentracing/</link>
       <pubDate>Mon, 30 Jan 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/01/30/opentracing/</guid>
-      <description>&lt;p&gt;openTracing use cases
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;openTracing use cases&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>分布式环境系统监控</title>
       <link>https://yrong.github.io/blog/2017/01/05/microservice-apm/</link>
       <pubDate>Thu, 05 Jan 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/01/05/microservice-apm/</guid>
-      <description>&lt;p&gt;分布式环境系统监控Zipkin&amp;amp;Pinpoint
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;分布式环境系统监控Zipkin&amp;amp;Pinpoint&lt;/p&gt;</description>
     </item>
     
   </channel>

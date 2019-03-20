@@ -6,23 +6,25 @@
   <title>bilibili crawler - yrong blog</title>
   <meta property="og:title" content="bilibili crawler - yrong blog" />
   <meta name="twitter:title" content="bilibili crawler - yrong blog" />
-  <meta name="description" content="针对B站视频的爬虫实现
-">
-  <meta property="og:description" content="针对B站视频的爬虫实现
-">
-  <meta name="twitter:description" content="针对B站视频的爬虫实现
-">
+  <meta name="description" content="针对B站视频的爬虫实现">
+  <meta property="og:description" content="针对B站视频的爬虫实现">
+  <meta name="twitter:description" content="针对B站视频的爬虫实现">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
-  <meta property="og:url" content="/blog/2017/04/09/bilibili-api/" />
+  <meta property="og:url" content="https://yrong.github.io/2017/04/09/bilibili-api/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.32-DEV" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
-  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
 </head>
+
 <body>
 
 <header class="site-header">
@@ -48,7 +50,7 @@
         <li class="article-meta-date"><time>April 9, 2017</time></li>
         <li class="article-meta-tags">
           <a href="/blog/tags/crawler/">
-            <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+            <i class="fas fa-tag"></i>
             crawler
           </a>&nbsp;
         </li>
@@ -75,8 +77,7 @@
 </ul>
 </nav>
 </aside>
-      <p>针对B站视频的爬虫实现
-</p>
+      <p>针对B站视频的爬虫实现</p>
 
 <h2 id="关于key">关于KEY</h2>
 
@@ -238,10 +239,6 @@ func Md5(formal string) string {
     }(document, 'script', 'facebook-jssdk'));</script>
   </li>
   <li>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <g:plus action="share"></g:plus>
-  </li>
-  <li>
     <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
   </li>
   <li>
@@ -249,6 +246,7 @@ func Md5(formal string) string {
     <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
   </li>
 </ul>
+
 
     <ul class="pager article-pager">
       <li class="pager-newer">
@@ -267,11 +265,9 @@ func Md5(formal string) string {
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>
   <div class="powerdby">
-    Powered by <a href="https://gohugo.io/">Hugo</a>
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
   </div>
 </div>
-<script src="/blog/js/script.js"></script>
-<script src="/blog/js/custom.js"></script>
 
 
 </body>

@@ -6,23 +6,25 @@
   <title>D3.js数据可视化 - yrong blog</title>
   <meta property="og:title" content="D3.js数据可视化 - yrong blog" />
   <meta name="twitter:title" content="D3.js数据可视化 - yrong blog" />
-  <meta name="description" content="D3.js数据可视化
-">
-  <meta property="og:description" content="D3.js数据可视化
-">
-  <meta name="twitter:description" content="D3.js数据可视化
-">
+  <meta name="description" content="D3.js数据可视化">
+  <meta property="og:description" content="D3.js数据可视化">
+  <meta name="twitter:description" content="D3.js数据可视化">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
-  <meta property="og:url" content="/blog/2016/10/12/d3-data-visualization/" />
+  <meta property="og:url" content="https://yrong.github.io/2016/10/12/d3-data-visualization/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.32-DEV" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
-  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
 </head>
+
 <body>
 
 <header class="site-header">
@@ -48,13 +50,13 @@
         <li class="article-meta-date"><time>October 12, 2016</time></li>
         <li class="article-meta-tags">
           <a href="/blog/tags/d3/">
-            <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+            <i class="fas fa-tag"></i>
             d3
           </a>&nbsp;
         </li>
         <li class="article-meta-tags">
           <a href="/blog/tags/javascript/">
-            <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+            <i class="fas fa-tag"></i>
             javascript
           </a>&nbsp;
         </li>
@@ -67,31 +69,18 @@
 <ul>
 <li><a href="#柱状图">柱状图</a></li>
 <li><a href="#github-贡献表">GitHub 贡献表</a></li>
-<li><a href="#svg">SVG</a></li>
-<li><a href="#circles">Circles</a></li>
-<li><a href="#圆形">圆形</a></li>
 <li><a href="#折线图">折线图</a></li>
 <li><a href="#scales">Scales</a></li>
 <li><a href="#航线数据可视化">航线数据可视化</a></li>
 <li><a href="#渲染循环">渲染循环</a></li>
 <li><a href="#创建-更新和过期">创建、更新和过期</a></li>
 <li><a href="#过渡">过渡</a></li>
-<li><a href="#树形图">树形图</a>
-<ul>
-<li><a href="#关键代码注解">关键代码注解</a></li>
-</ul></li>
-<li><a href="#地图">地图</a>
-<ul>
-<li><a href="#关键代码注解-1">关键代码注解</a></li>
-</ul></li>
-<li><a href="#neo4j-link-graph-render">Neo4j Link Graph Render</a></li>
 <li><a href="#others">Others</a></li>
 </ul></li>
 </ul>
 </nav>
 </aside>
-      <p>D3.js数据可视化
-</p>
+      <p>D3.js数据可视化</p>
 
 <blockquote>
 <p>基于 <a href="https://d3js.org/">D3.js</a> ，编写 HTML、SVG 和 CSS 就能让你的数据变得生动起来，这是一个基于数据操作 DOM 的 JavaScript 库。</p>
@@ -118,11 +107,11 @@
   .style(&quot;height&quot;, (d)=&gt; d + &quot;px&quot;)
 </code></pre>
 
-<p><code>selectAll</code> 方法返回了一个 D3 selection。D3 selection 是一个数组，当针对一个数据点创建一个 <code>div</code> ，然后通过 <code>enter()</code> 和 <code>append()</code> 调用这个 <code>div</code> 时，selection 中的元素就会被创建出来。</p>
+<pre><code class="language-selectAll```">
+上述代码中的输入数据是一组数组：[4, 8, 15, 16, 23, 42]，对应的输出 HTML 结构是：
 
-<p>上述代码中的输入数据是一组数组：[4, 8, 15, 16, 23, 42]，对应的输出 HTML 结构是：</p>
-
-<pre><code class="language-html">&lt;div id=&quot;chart&quot;&gt;
+``` html
+&lt;div id=&quot;chart&quot;&gt;
   &lt;div style=&quot;height: 4px;&quot;&gt;&lt;/div&gt;
   &lt;div style=&quot;height: 8px;&quot;&gt;&lt;/div&gt;
   &lt;div style=&quot;height: 15px;&quot;&gt;&lt;/div&gt;
@@ -167,15 +156,15 @@ d3.select('#chart')
   })
 </code></pre>
 
-<p><code>colorMap</code> 函数接收的输入值要在0到1之间，返回的是一个颜色值，这个值是在以输入值中两两数据为颜色值之间的渐变色值。插值法是图形编程和动画的关键点。在后面我们将会看到更多这方面的例子。</p>
+<pre><code class="language-colorMap```">
+## SVG
 
-<h2 id="svg">SVG</h2>
+D3 最大的魅力大概来自于它能应用在 SVG 上，也就是说平面图形比如圆形、多边形、路径和文本，它都可以交互。
 
-<p>D3 最大的魅力大概来自于它能应用在 SVG 上，也就是说平面图形比如圆形、多边形、路径和文本，它都可以交互。</p>
+![](/images/learn-to-d3/03.png)
 
-<p><img src="/images/learn-to-d3/03.png" alt="" /></p>
-
-<pre><code class="language-html">&lt;svg width=&quot;200&quot; height=&quot;200&quot;&gt;
+```html
+&lt;svg width=&quot;200&quot; height=&quot;200&quot;&gt;
   &lt;circle fill=&quot;#3E5693&quot; cx=&quot;50&quot; cy=&quot;120&quot; r=&quot;20&quot; /&gt;
   &lt;text x=&quot;100&quot; y=&quot;100&quot;&gt;Hello SVG!&lt;/text&gt;
   &lt;path d=&quot;M100,10L150,70L50,70Z&quot; fill=&quot;#BEDBC3&quot; stroke=&quot;#539E91&quot; stroke-width=&quot;3&quot;&gt;
@@ -190,19 +179,19 @@ d3.select('#chart')
 <li>一个 3px 粗边的三角形，<code>d</code> 指的是方向，从点 (100,100) 画线到点 (150,170) 再到点 (50,70) 结束</li>
 </ul>
 
-<p><code>&lt;path&gt;</code> 可以算是 SVG 中最好用的元素了。</p>
+<pre><code class="language-&lt;path&gt;```">
+## Circles
 
-<h2 id="circles">Circles</h2>
+## 圆形
 
-<h2 id="圆形">圆形</h2>
+![](/images/learn-to-d3/04.png)
 
-<p><img src="/images/learn-to-d3/04.png" alt="" /></p>
+（[codepen 中查看代码](http://codepen.io/SitePoint/pen/jrBKMM)）
 
-<p>（<a href="http://codepen.io/SitePoint/pen/jrBKMM">codepen 中查看代码</a>）</p>
+上面的例子中给出的数据结构是很简单的一组数据，D3 的能力远不止于此，它还可以操作更复杂的数据类型。
 
-<p>上面的例子中给出的数据结构是很简单的一组数据，D3 的能力远不止于此，它还可以操作更复杂的数据类型。</p>
-
-<pre><code class="language-javascript">const data = [{
+```javascript
+const data = [{
   label: &quot;7am&quot;,
   sales: 20
 },{
@@ -540,22 +529,26 @@ d3.select('.time')
   });
 </code></pre>
 
-<p><code>t</code> 是用于变换的一个介于 0 到 1 的增长值。</p>
+<pre><code class="language-t```">
+## 树形图
 
-<h2 id="树形图">树形图</h2>
 
-<p><img src="{{ site.baseurl }}/images/learn-to-d3/tree-02.png" alt="" /></p>
 
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-  &lt;head&gt;
-    &lt;meta charset=&quot;utf-8&quot;&gt;
+![]({{ site.baseurl }}/images/learn-to-d3/tree-02.png)
 
-    &lt;title&gt;Tree Example&lt;/title&gt;
+</code></pre>
 
-    &lt;style&gt;
-  
-  .node {
+<p>&lt;!DOCTYPE html&gt;
+<html lang="en">
+  <head>
+    <meta charset="utf-8"></p>
+
+<pre><code>&lt;title&gt;Tree Example&lt;/title&gt;
+
+&lt;style&gt;
+</code></pre>
+
+<p>.node {
     cursor: pointer;
   }
   .node circle {
@@ -570,40 +563,43 @@ d3.select('.time')
     fill: none;
     stroke: #ccc;
     stroke-width: 2px;
-  }
+  }</p>
+
+<pre><code>&lt;/style&gt;
+</code></pre>
+
+<p></head></p>
+
+<p><body></p>
+
+<!-- load the d3.js library --> 
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
   
-    &lt;/style&gt;
 
-  &lt;/head&gt;
-
-  &lt;body&gt;
-
-&lt;!-- load the d3.js library --&gt; 
-&lt;script src=&quot;http://d3js.org/d3.v3.min.js&quot;&gt;&lt;/script&gt;
-  
-&lt;script&gt;
+<script>
 var treeData = [
   {
-    &quot;name&quot;: &quot;Top Level&quot;,
-    &quot;parent&quot;: &quot;null&quot;,
-    &quot;children&quot;: [
+    "name": "Top Level",
+    "parent": "null",
+    "children": [
       {
-        &quot;name&quot;: &quot;Level 2: A&quot;,
-        &quot;parent&quot;: &quot;Top Level&quot;,
-        &quot;children&quot;: [
+        "name": "Level 2: A",
+        "parent": "Top Level",
+        "children": [
           {
-            &quot;name&quot;: &quot;Son of A&quot;,
-            &quot;parent&quot;: &quot;Level 2: A&quot;
+            "name": "Son of A",
+            "parent": "Level 2: A"
           },
           {
-            &quot;name&quot;: &quot;Daughter of A&quot;,
-            &quot;parent&quot;: &quot;Level 2: A&quot;
+            "name": "Daughter of A",
+            "parent": "Level 2: A"
           }
         ]
       },
       {
-        &quot;name&quot;: &quot;Level 2: B&quot;,
-        &quot;parent&quot;: &quot;Top Level&quot;
+        "name": "Level 2: B",
+        "parent": "Top Level"
       }
     ]
   }
@@ -620,17 +616,17 @@ var tree = d3.layout.tree()
   .size([height, width]);
 var diagonal = d3.svg.diagonal()
   .projection(function(d) { return [d.y, d.x]; });
-var svg = d3.select(&quot;body&quot;).append(&quot;svg&quot;)
-  .attr(&quot;width&quot;, width + margin.right + margin.left)
-  .attr(&quot;height&quot;, height + margin.top + margin.bottom)
-  .append(&quot;g&quot;)
-  .attr(&quot;transform&quot;, &quot;translate(&quot; + margin.left + &quot;,&quot; + margin.top + &quot;)&quot;);
+var svg = d3.select("body").append("svg")
+  .attr("width", width + margin.right + margin.left)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 root = treeData[0];
 root.x0 = height / 2;
 root.y0 = 0;
   
 update(root);
-d3.select(self.frameElement).style(&quot;height&quot;, &quot;500px&quot;);
+d3.select(self.frameElement).style("height", "500px");
 function update(source) {
   // Compute the new tree layout.
   var nodes = tree.nodes(root).reverse(),
@@ -638,58 +634,58 @@ function update(source) {
   // Normalize for fixed-depth.
   nodes.forEach(function(d) { d.y = d.depth * 180; });
   // Update the nodes…
-  var node = svg.selectAll(&quot;g.node&quot;)
+  var node = svg.selectAll("g.node")
     .data(nodes, function(d) { return d.id || (d.id = ++i); });
   // Enter any new nodes at the parent's previous position.
-  var nodeEnter = node.enter().append(&quot;g&quot;)
-    .attr(&quot;class&quot;, &quot;node&quot;)
-    .attr(&quot;transform&quot;, function(d) { return &quot;translate(&quot; + source.y0 + &quot;,&quot; + source.x0 + &quot;)&quot;; })
-    .on(&quot;click&quot;, click);
-  nodeEnter.append(&quot;circle&quot;)
-    .attr(&quot;r&quot;, 1e-6)
-    .style(&quot;fill&quot;, function(d) { return d._children ? &quot;lightsteelblue&quot; : &quot;#fff&quot;; });
-  nodeEnter.append(&quot;text&quot;)
-    .attr(&quot;x&quot;, function(d) { return d.children || d._children ? -13 : 13; })
-    .attr(&quot;dy&quot;, &quot;.35em&quot;)
-    .attr(&quot;text-anchor&quot;, function(d) { return d.children || d._children ? &quot;end&quot; : &quot;start&quot;; })
+  var nodeEnter = node.enter().append("g")
+    .attr("class", "node")
+    .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+    .on("click", click);
+  nodeEnter.append("circle")
+    .attr("r", 1e-6)
+    .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+  nodeEnter.append("text")
+    .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
+    .attr("dy", ".35em")
+    .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
     .text(function(d) { return d.name; })
-    .style(&quot;fill-opacity&quot;, 1e-6);
+    .style("fill-opacity", 1e-6);
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
     .duration(duration)
-    .attr(&quot;transform&quot;, function(d) { return &quot;translate(&quot; + d.y + &quot;,&quot; + d.x + &quot;)&quot;; });
-  nodeUpdate.select(&quot;circle&quot;)
-    .attr(&quot;r&quot;, 10)
-    .style(&quot;fill&quot;, function(d) { return d._children ? &quot;lightsteelblue&quot; : &quot;#fff&quot;; });
-  nodeUpdate.select(&quot;text&quot;)
-    .style(&quot;fill-opacity&quot;, 1);
+    .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+  nodeUpdate.select("circle")
+    .attr("r", 10)
+    .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+  nodeUpdate.select("text")
+    .style("fill-opacity", 1);
   // Transition exiting nodes to the parent's new position.
   var nodeExit = node.exit().transition()
     .duration(duration)
-    .attr(&quot;transform&quot;, function(d) { return &quot;translate(&quot; + source.y + &quot;,&quot; + source.x + &quot;)&quot;; })
+    .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
     .remove();
-  nodeExit.select(&quot;circle&quot;)
-    .attr(&quot;r&quot;, 1e-6);
-  nodeExit.select(&quot;text&quot;)
-    .style(&quot;fill-opacity&quot;, 1e-6);
+  nodeExit.select("circle")
+    .attr("r", 1e-6);
+  nodeExit.select("text")
+    .style("fill-opacity", 1e-6);
   // Update the links…
-  var link = svg.selectAll(&quot;path.link&quot;)
+  var link = svg.selectAll("path.link")
     .data(links, function(d) { return d.target.id; });
   // Enter any new links at the parent's previous position.
-  link.enter().insert(&quot;path&quot;, &quot;g&quot;)
-    .attr(&quot;class&quot;, &quot;link&quot;)
-    .attr(&quot;d&quot;, function(d) {
+  link.enter().insert("path", "g")
+    .attr("class", "link")
+    .attr("d", function(d) {
     var o = {x: source.x0, y: source.y0};
     return diagonal({source: o, target: o});
     });
   // Transition links to their new position.
   link.transition()
     .duration(duration)
-    .attr(&quot;d&quot;, diagonal);
+    .attr("d", diagonal);
   // Transition exiting nodes to the parent's new position.
   link.exit().transition()
     .duration(duration)
-    .attr(&quot;d&quot;, function(d) {
+    .attr("d", function(d) {
     var o = {x: source.x, y: source.y};
     return diagonal({source: o, target: o});
     })
@@ -711,61 +707,68 @@ function click(d) {
   }
   update(d);
 }
-&lt;/script&gt;
+</script>
   
-  &lt;/body&gt;
-&lt;/html&gt;
+
+<p></body>
+</html></p>
+
+<pre><code>
+### 关键代码注解 ###
 
 </code></pre>
 
-<h3 id="关键代码注解">关键代码注解</h3>
+<p>var diagonal = d3.svg.diagonal()
+ .projection(function(d) { return [d.y, d.x]; });</p>
 
-<pre><code>var diagonal = d3.svg.diagonal()
- .projection(function(d) { return [d.y, d.x]; });
-</code></pre>
+<pre><code>声明[d3.js diagonal](https://github.com/d3/d3-3.x-api-reference/blob/master/SVG-Shapes.md)连接线发生器,注意这里x,y坐标系互换
 
-<p>声明<a href="https://github.com/d3/d3-3.x-api-reference/blob/master/SVG-Shapes.md">d3.js diagonal</a>连接线发生器,注意这里x,y坐标系互换</p>
-
-<pre><code>var nodes = tree.nodes(root),
-   links = tree.links(nodes);
 
 </code></pre>
 
-<p>treenode和links的初始化,参见<a href="https://github.com/d3/d3/wiki/%E6%A0%91%E5%B8%83%E5%B1%80">树布局</a>,每个节点中包含以下属性：</p>
+<p>var nodes = tree.nodes(root),
+   links = tree.links(nodes);</p>
 
-<ul>
-<li>parent - 父节点引用，根节点为 null;</li>
-<li>children - 所有子节点，叶子节点为 null;</li>
-<li>depth - 当前节点所处层级（也叫深度）；根节点为 0;</li>
-<li>x - 计算得到的当前节点的计 x 坐标;</li>
-<li>y - 计算得到的当前节点的计 y 坐标;</li>
-</ul>
+<pre><code>treenode和links的初始化,参见[树布局](https://github.com/d3/d3/wiki/%E6%A0%91%E5%B8%83%E5%B1%80),每个节点中包含以下属性：
 
-<pre><code>  nodes.forEach(function(d) { d.y = d.depth * 180; });
+- parent - 父节点引用，根节点为 null;
+- children - 所有子节点，叶子节点为 null;
+- depth - 当前节点所处层级（也叫深度）；根节点为 0;
+- x - 计算得到的当前节点的计 x 坐标;
+- y - 计算得到的当前节点的计 y 坐标;
+
+
 </code></pre>
 
-<p>定义节点深度(level)和水平(x,y坐标系已互换)位置的关系.</p>
+<p>nodes.forEach(function(d) { d.y = d.depth * 180; });</p>
 
-<p><img src="{{ site.baseurl }}/images/learn-to-d3/tree-05.png" alt="" /></p>
+<pre><code>
+定义节点深度(level)和水平(x,y坐标系已互换)位置的关系.
 
-<pre><code>var node = svg.selectAll(&quot;g.node&quot;)
-   .data(nodes, function(d) { return d.id || (d.id = ++i); });
+![]({{ site.baseurl }}/images/learn-to-d3/tree-05.png)
 
-var link = svg.selectAll(&quot;path.link&quot;)
+
+</code></pre>
+
+<p>var node = svg.selectAll(&ldquo;g.node&rdquo;)
+   .data(nodes, function(d) { return d.id || (d.id = ++i); });</p>
+
+<p>var link = svg.selectAll(&ldquo;path.link&rdquo;)
    .data(links, function(d) { return d.target.id; });
-   .enter().insert(&quot;path&quot;, &quot;g&quot;)
-   .attr(&quot;class&quot;, &quot;link&quot;)
-   .attr(&quot;d&quot;, diagonal);
+   .enter().insert(&ldquo;path&rdquo;, &ldquo;g&rdquo;)
+   .attr(&ldquo;class&rdquo;, &ldquo;link&rdquo;)
+   .attr(&ldquo;d&rdquo;, diagonal);</p>
+
+<pre><code>根据生成的节点id关联链路,用diagonal产生连接曲线
+
+
 </code></pre>
 
-<p>根据生成的节点id关联链路,用diagonal产生连接曲线</p>
-
-<pre><code>.node {
+<p>.node {
   cursor: pointer;
- }
+ }</p>
 
-
-function click(d) {
+<p>function click(d) {
   if (d.children) {
  d._children = d.children;
  d.children = null;
@@ -774,208 +777,218 @@ function click(d) {
  d._children = null;
   }
   update(d);
-}
+}</p>
+
+<pre><code>根据children属性添加交互式collapse效果(点击根节点隐藏子节点,再点展开)
+
+
+
+## 地图
+
+用不同颜色标注你所去过的地方
+
 </code></pre>
 
-<p>根据children属性添加交互式collapse效果(点击根节点隐藏子节点,再点展开)</p>
+<p>&lt;!DOCTYPE html&gt;
+<meta charset="utf-8">
+<style></p>
 
-<h2 id="地图">地图</h2>
+<p>/* CSS goes here. */</p>
 
-<p>用不同颜色标注你所去过的地方</p>
-
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;meta charset=&quot;utf-8&quot;&gt;
-&lt;style&gt;
-
-/* CSS goes here. */
-
-&lt;/style&gt;
-&lt;body&gt;
-&lt;div id=&quot;chart&quot; style=&quot;max-width: 47.5em; margin: 10px auto; position: relative;&quot;&gt;
-&lt;script src=&quot;//d3js.org/d3.v3.min.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;//d3js.org/topojson.v1.min.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
+<p></style>
+<body>
+<div id="chart" style="max-width: 47.5em; margin: 10px auto; position: relative;">
+<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="//d3js.org/topojson.v1.min.js"></script>
+<script>
   var width  = 700;
-  var height = 400;
+  var height = 400;</p>
 
-  var myMap = new Map();
-      myMap.set(&quot;甘肃&quot;, &quot;#F5A9A9&quot;);
-      myMap.set(&quot;青海&quot;, &quot;#F5A9A9&quot;);
-      myMap.set(&quot;广西&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;贵州&quot;, &quot;#F5A9A9&quot;);
-      myMap.set(&quot;重庆&quot;, &quot;#F5A9A9&quot;);
-      myMap.set(&quot;北京&quot;, &quot;#FA5858&quot;);
-      myMap.set(&quot;福建&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;安徽&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;广东&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;西藏&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;新疆&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;海南&quot;, &quot;#F5A9A9&quot;);
-      myMap.set(&quot;宁夏&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;陕西&quot;, &quot;#F5A9A9&quot;);
-      myMap.set(&quot;山西&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;湖北&quot;, &quot;#FA5858&quot;);
-      myMap.set(&quot;湖南&quot;, &quot;#F5A9A9&quot;);
-      myMap.set(&quot;四川&quot;, &quot;#FE2E2E&quot;);
-      myMap.set(&quot;云南&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;河北&quot;, &quot;#F5A9A9&quot;);
-      myMap.set(&quot;河南&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;辽宁&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;山东&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;天津&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;江西&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;江苏&quot;, &quot;#FA5858&quot;);
-      myMap.set(&quot;上海&quot;, &quot;#FA5858&quot;);
-      myMap.set(&quot;浙江&quot;, &quot;#F5A9A9&quot;);
-      myMap.set(&quot;吉林&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;内蒙古&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;黑龙江&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;香港&quot;, &quot;#F5A9A9&quot;);
-      myMap.set(&quot;澳门&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;台湾&quot;, &quot;#A4A4A4&quot;);
-      myMap.set(&quot;background&quot;, &quot;#2A0A0A&quot;);
-  
-  var svg = d3.select(&quot;#chart&quot;).append(&quot;svg&quot;)
-    .attr(&quot;width&quot;, '100%')
-    .attr(&quot;height&quot;, '100%')
-    .attr('viewBox','0 0 '+(Math.min(width,height))+' '+Math.min(width,height))
-    .attr('preserveAspectRatio','xMinYMin')
-      .append(&quot;g&quot;)
-      .attr(&quot;transform&quot;, &quot;translate(0,0)&quot;);
-  
-  var projection = d3.geo.mercator()
+<p>var myMap = new Map();
+      myMap.set(&ldquo;甘肃&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;青海&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;广西&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;贵州&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;重庆&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;北京&rdquo;, &ldquo;#FA5858&rdquo;);
+      myMap.set(&ldquo;福建&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;安徽&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;广东&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;西藏&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;新疆&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;海南&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;宁夏&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;陕西&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;山西&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;湖北&rdquo;, &ldquo;#FA5858&rdquo;);
+      myMap.set(&ldquo;湖南&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;四川&rdquo;, &ldquo;#FE2E2E&rdquo;);
+      myMap.set(&ldquo;云南&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;河北&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;河南&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;辽宁&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;山东&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;天津&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;江西&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;江苏&rdquo;, &ldquo;#FA5858&rdquo;);
+      myMap.set(&ldquo;上海&rdquo;, &ldquo;#FA5858&rdquo;);
+      myMap.set(&ldquo;浙江&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;吉林&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;内蒙古&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;黑龙江&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;香港&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;澳门&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;台湾&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;background&rdquo;, &ldquo;#2A0A0A&rdquo;);</p>
+
+<p>var svg = d3.select(&ldquo;#chart&rdquo;).append(&ldquo;svg&rdquo;)
+    .attr(&ldquo;width&rdquo;, &lsquo;100%&rsquo;)
+    .attr(&ldquo;height&rdquo;, &lsquo;100%&rsquo;)
+    .attr(&lsquo;viewBox&rsquo;,&lsquo;0 0 &lsquo;+(Math.min(width,height))+&rsquo; &lsquo;+Math.min(width,height))
+    .attr(&lsquo;preserveAspectRatio&rsquo;,&lsquo;xMinYMin&rsquo;)
+      .append(&ldquo;g&rdquo;)
+      .attr(&ldquo;transform&rdquo;, &ldquo;translate(0,0)&rdquo;);</p>
+
+<p>var projection = d3.geo.mercator()
             .center([107, 31])
             .scale(350)
-              .translate([width/2-130, height/2+30]);
-  
-  var path = d3.geo.path()
-          .projection(projection);
-  
-  d3.json(&quot;china_simplify.json&quot;, function(error, root) {
-    
-    if (error) 
-      return console.error(error);
-    console.log(root.features);
-    
-    svg.selectAll(&quot;path&quot;)
-      .data( root.features )
-      .enter()
-      .append(&quot;path&quot;)
-      .attr(&quot;stroke&quot;,&quot;#000&quot;)
-      .attr(&quot;stroke-width&quot;,1)
-      .attr(&quot;fill&quot;, function(d,i){
-        return myMap.get(&quot;background&quot;);
-      })
-      .attr(&quot;d&quot;, path )
-      .on(&quot;mouseover&quot;,function(d,i){
-                d3.select(this)
-                    .attr(&quot;fill&quot;,&quot;#ACB1E6&quot;);
-            })
-            .on(&quot;mouseout&quot;,function(d,i){
-                d3.select(this)
-                    .attr(&quot;fill&quot;,myMap.get(d.properties.name));
-            });
-    
-  });
+              .translate([width/2-130, height/2+30]);</p>
 
-&lt;/script&gt;
-&lt;/div&gt;
-&lt;/body&gt;
+<p>var path = d3.geo.path()
+          .projection(projection);</p>
+
+<p>d3.json(&ldquo;china_simplify.json&rdquo;, function(error, root) {</p>
+
+<pre><code>if (error) 
+  return console.error(error);
+console.log(root.features);
+
+svg.selectAll(&quot;path&quot;)
+  .data( root.features )
+  .enter()
+  .append(&quot;path&quot;)
+  .attr(&quot;stroke&quot;,&quot;#000&quot;)
+  .attr(&quot;stroke-width&quot;,1)
+  .attr(&quot;fill&quot;, function(d,i){
+    return myMap.get(&quot;background&quot;);
+  })
+  .attr(&quot;d&quot;, path )
+  .on(&quot;mouseover&quot;,function(d,i){
+            d3.select(this)
+                .attr(&quot;fill&quot;,&quot;#ACB1E6&quot;);
+        })
+        .on(&quot;mouseout&quot;,function(d,i){
+            d3.select(this)
+                .attr(&quot;fill&quot;,myMap.get(d.properties.name));
+        });
+</code></pre>
+
+<p>});</p>
+
+<p></script>
+</div>
+</body></p>
+
+<pre><code>
+### 关键代码注解 ###
+
+Define your projection
 
 </code></pre>
 
-<h3 id="关键代码注解-1">关键代码注解</h3>
-
-<p>Define your projection</p>
-
-<pre><code>    var projection = d3.geo.mercator()
-            .center([107, 31]) //(107,31) as center
-            .scale(350)
-              .translate([width/2-130, height/2+30]);// centers in SVG
+<pre><code>var projection = d3.geo.mercator()
+        .center([107, 31]) //(107,31) as center
+        .scale(350)
+          .translate([width/2-130, height/2+30]);// centers in SVG
 </code></pre>
 
-<p>When you define a projection, you tell D3 how to transform your data from spherical to Cartesian coordinates. Take a look at the projection docs to get a sense of how you can project your data with D3.</p>
+<pre><code>
+When you define a projection, you tell D3 how to transform your data from spherical to Cartesian coordinates. Take a look at the projection docs to get a sense of how you can project your data with D3.
 
-<p>Translate to screen coordinates</p>
-
-<pre><code>    var path = d3.geo.path()
-          .projection(projection);
-</code></pre>
-
-<p>When D3 renders your SVG, it has to translate geo coordinates to pixel coordinates on your screen. This functionality is called a path generator. In this block, we store our path generator in the variable path so we can access it through out our code.</p>
-
-<p>Load geo json data</p>
-
-<pre><code>d3.json(&quot;china_simplify.json&quot;, function(error, root) { // loads JSON file
-    
-    if (error) 
-      return console.error(error);
-    console.log(root.features);
-    
-    svg.selectAll(&quot;path&quot;) // selects path elements, will make them if they don't exist
-      .data( root.features ) // iterates over geo feature
-      .enter() // adds feature if it doesn't exist as an element
-      .append(&quot;path&quot;) // defines element as a path
-      .attr(&quot;stroke&quot;,&quot;#000&quot;)
-      .attr(&quot;stroke-width&quot;,1)
-      .attr(&quot;fill&quot;, function(d,i){
-        return myMap.get(&quot;background&quot;);
-      })
-      .attr(&quot;d&quot;, path )  // path generator translates geo data to SVG
-      .on(&quot;mouseover&quot;,function(d,i){
-                d3.select(this)
-                    .attr(&quot;fill&quot;,&quot;#ACB1E6&quot;);
-            })
-            .on(&quot;mouseout&quot;,function(d,i){
-                d3.select(this)
-                    .attr(&quot;fill&quot;,myMap.get(d.properties.name));
-            });
-    
-  });
+Translate to screen coordinates
 
 </code></pre>
 
-<h2 id="neo4j-link-graph-render">Neo4j Link Graph Render</h2>
-
-<p>visualization toolkits usually expect a JSON structure of node objects (their id, label(s) and properties) and a list of relationships (their properties, start- and end-node-id (or node-array-index for d3) and optionally relationship-id) like this. Here we see 3 nodes (2 people, one database) and 3 relationships in that datastructure.</p>
-
-<blockquote>
-<p>Target JSON DataStructure</p>
-</blockquote>
-
-<pre><code>{&quot;nodes&quot;:[{name:&quot;Peter&quot;,label:&quot;Person&quot;,id:1},{name:&quot;Michael&quot;,label:&quot;Person&quot;,id:2},
-          {name:&quot;Neo4j&quot;,label:&quot;Database&quot;,id:3}],
- &quot;links&quot;:[{source:0, target:1, type:&quot;KNOWS&quot;, since:2010},{source:0, target:2, type:&quot;FOUNDED&quot;},
-          {source:1, target:2, type:&quot;WORKS_ON&quot;}]}
+<pre><code>var path = d3.geo.path()
+      .projection(projection);
 </code></pre>
 
-<blockquote>
-<p>neo4j Query Result DataStructure</p>
-</blockquote>
+<pre><code>
+When D3 renders your SVG, it has to translate geo coordinates to pixel coordinates on your screen. This functionality is called a path generator. In this block, we store our path generator in the variable path so we can access it through out our code.
 
-<pre><code>{ &quot;results&quot;: [
+Load geo json data
+
+</code></pre>
+
+<p>d3.json(&ldquo;china_simplify.json&rdquo;, function(error, root) { // loads JSON file</p>
+
+<pre><code>if (error) 
+  return console.error(error);
+console.log(root.features);
+
+svg.selectAll(&quot;path&quot;) // selects path elements, will make them if they don't exist
+  .data( root.features ) // iterates over geo feature
+  .enter() // adds feature if it doesn't exist as an element
+  .append(&quot;path&quot;) // defines element as a path
+  .attr(&quot;stroke&quot;,&quot;#000&quot;)
+  .attr(&quot;stroke-width&quot;,1)
+  .attr(&quot;fill&quot;, function(d,i){
+    return myMap.get(&quot;background&quot;);
+  })
+  .attr(&quot;d&quot;, path )  // path generator translates geo data to SVG
+  .on(&quot;mouseover&quot;,function(d,i){
+            d3.select(this)
+                .attr(&quot;fill&quot;,&quot;#ACB1E6&quot;);
+        })
+        .on(&quot;mouseout&quot;,function(d,i){
+            d3.select(this)
+                .attr(&quot;fill&quot;,myMap.get(d.properties.name));
+        });
+</code></pre>
+
+<p>});</p>
+
+<pre><code>
+## Neo4j Link Graph Render ##
+
+visualization toolkits usually expect a JSON structure of node objects (their id, label(s) and properties) and a list of relationships (their properties, start- and end-node-id (or node-array-index for d3) and optionally relationship-id) like this. Here we see 3 nodes (2 people, one database) and 3 relationships in that datastructure.
+
+&gt; Target JSON DataStructure
+
+</code></pre>
+
+<p>{&ldquo;nodes&rdquo;:[{name:&ldquo;Peter&rdquo;,label:&ldquo;Person&rdquo;,id:1},{name:&ldquo;Michael&rdquo;,label:&ldquo;Person&rdquo;,id:2},
+          {name:&ldquo;Neo4j&rdquo;,label:&ldquo;Database&rdquo;,id:3}],
+ &ldquo;links&rdquo;:[{source:0, target:1, type:&ldquo;KNOWS&rdquo;, since:2010},{source:0, target:2, type:&ldquo;FOUNDED&rdquo;},
+          {source:1, target:2, type:&ldquo;WORKS_ON&rdquo;}]}</p>
+
+<pre><code>
+&gt; neo4j Query Result DataStructure
+
+</code></pre>
+
+<p>{ &ldquo;results&rdquo;: [
     {
-      &quot;columns&quot;: [&quot;path&quot;],
-      &quot;data&quot;   : [{
-          &quot;graph&quot;: {
-            &quot;nodes&quot;: [
-              {&quot;id&quot;: &quot;1&quot;, &quot;labels&quot;: [&quot;Person&quot;], &quot;properties&quot;: {&quot;name&quot;: &quot;Peter&quot;}},
-              {&quot;id&quot;: &quot;2&quot;, &quot;labels&quot;: [&quot;Person&quot;], &quot;properties&quot;: {&quot;name&quot;: &quot;Michael&quot;}}
+      &ldquo;columns&rdquo;: [&ldquo;path&rdquo;],
+      &ldquo;data&rdquo;   : [{
+          &ldquo;graph&rdquo;: {
+            &ldquo;nodes&rdquo;: [
+              {&ldquo;id&rdquo;: &ldquo;1&rdquo;, &ldquo;labels&rdquo;: [&ldquo;Person&rdquo;], &ldquo;properties&rdquo;: {&ldquo;name&rdquo;: &ldquo;Peter&rdquo;}},
+              {&ldquo;id&rdquo;: &ldquo;2&rdquo;, &ldquo;labels&rdquo;: [&ldquo;Person&rdquo;], &ldquo;properties&rdquo;: {&ldquo;name&rdquo;: &ldquo;Michael&rdquo;}}
              ],
-            &quot;relationships&quot;: [
-              {&quot;id&quot;: &quot;0&quot;, &quot;type&quot;: &quot;KNOWS&quot;, &quot;startNode&quot;: &quot;1&quot;, &quot;endNode&quot;: &quot;2&quot;, &quot;properties&quot;: {}}
+            &ldquo;relationships&rdquo;: [
+              {&ldquo;id&rdquo;: &ldquo;0&rdquo;, &ldquo;type&rdquo;: &ldquo;KNOWS&rdquo;, &ldquo;startNode&rdquo;: &ldquo;1&rdquo;, &ldquo;endNode&rdquo;: &ldquo;2&rdquo;, &ldquo;properties&rdquo;: {}}
              ]
-          } // , {&quot;graph&quot;: ...}, ...
+          } // , {&ldquo;graph&rdquo;: &hellip;}, &hellip;
       }]}
-  ], &quot;errors&quot;: []
-}
-</code></pre>
+  ], &ldquo;errors&rdquo;: []
+}</p>
 
-<blockquote>
-<p>conversion logic</p>
-</blockquote>
+<pre><code>
+&gt; conversion logic
 
-<pre><code class="language-js">function idIndex(a,id) {
+``` js
+function idIndex(a,id) {
   for (var i=0;i&lt;a.length;i++) {
     if (a[i].id == id) return i;}
   return null;
@@ -1097,10 +1110,6 @@ if (error) return;
     }(document, 'script', 'facebook-jssdk'));</script>
   </li>
   <li>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <g:plus action="share"></g:plus>
-  </li>
-  <li>
     <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
   </li>
   <li>
@@ -1108,6 +1117,7 @@ if (error) return;
     <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
   </li>
 </ul>
+
 
     <ul class="pager article-pager">
       <li class="pager-newer">
@@ -1126,11 +1136,9 @@ if (error) return;
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>
   <div class="powerdby">
-    Powered by <a href="https://gohugo.io/">Hugo</a>
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
   </div>
 </div>
-<script src="/blog/js/script.js"></script>
-<script src="/blog/js/custom.js"></script>
 
 
 </body>

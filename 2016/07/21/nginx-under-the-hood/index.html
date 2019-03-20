@@ -6,23 +6,25 @@
   <title>nginx模块初始化 - yrong blog</title>
   <meta property="og:title" content="nginx模块初始化 - yrong blog" />
   <meta name="twitter:title" content="nginx模块初始化 - yrong blog" />
-  <meta name="description" content="nginx模块初始化
-">
-  <meta property="og:description" content="nginx模块初始化
-">
-  <meta name="twitter:description" content="nginx模块初始化
-">
+  <meta name="description" content="nginx模块初始化">
+  <meta property="og:description" content="nginx模块初始化">
+  <meta name="twitter:description" content="nginx模块初始化">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
-  <meta property="og:url" content="/blog/2016/07/21/nginx-under-the-hood/" />
+  <meta property="og:url" content="https://yrong.github.io/2016/07/21/nginx-under-the-hood/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.32-DEV" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
-  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
 </head>
+
 <body>
 
 <header class="site-header">
@@ -48,7 +50,7 @@
         <li class="article-meta-date"><time>July 21, 2016</time></li>
         <li class="article-meta-tags">
           <a href="/blog/tags/nginx/">
-            <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+            <i class="fas fa-tag"></i>
             nginx
           </a>&nbsp;
         </li>
@@ -57,8 +59,7 @@
 <aside class="toc">
   
 </aside>
-      <p>nginx模块初始化
-</p>
+      <p>nginx模块初始化</p>
 
 <p>主要在函数ngx_init_cycle（src/ngx_cycle.c）中完成</p>
 
@@ -163,10 +164,6 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }(document, 'script', 'facebook-jssdk'));</script>
   </li>
   <li>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <g:plus action="share"></g:plus>
-  </li>
-  <li>
     <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
   </li>
   <li>
@@ -174,6 +171,7 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
   </li>
 </ul>
+
 
     <ul class="pager article-pager">
       <li class="pager-newer">
@@ -192,11 +190,9 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>
   <div class="powerdby">
-    Powered by <a href="https://gohugo.io/">Hugo</a>
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
   </div>
 </div>
-<script src="/blog/js/script.js"></script>
-<script src="/blog/js/custom.js"></script>
 
 
 </body>

@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://yrong.github.io/blog/2018/02/09/intro-to-go-modules/</loc>
+    <lastmod>2018-02-09T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://yrong.github.io/blog/2017/08/19/blockchain/</loc>
     <lastmod>2017-08-19T00:00:00+00:00</lastmod>
   </url>
@@ -353,7 +358,7 @@
   
   <url>
     <loc>https://yrong.github.io/blog/tags/golang/</loc>
-    <lastmod>2017-07-08T00:00:00+00:00</lastmod>
+    <lastmod>2018-02-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -413,7 +418,7 @@
   
   <url>
     <loc>https://yrong.github.io/blog/post/</loc>
-    <lastmod>2017-08-19T00:00:00+00:00</lastmod>
+    <lastmod>2018-02-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -526,7 +531,7 @@
   
   <url>
     <loc>https://yrong.github.io/blog/</loc>
-    <lastmod>2017-08-19T00:00:00+00:00</lastmod>
+    <lastmod>2018-02-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

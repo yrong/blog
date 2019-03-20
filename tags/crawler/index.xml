@@ -6,8 +6,6 @@
     <description>Recent content in Crawler on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
     <lastBuildDate>Sun, 09 Apr 2017 00:00:00 +0000</lastBuildDate>
     
@@ -18,10 +16,9 @@
       <title>bilibili crawler</title>
       <link>https://yrong.github.io/blog/2017/04/09/bilibili-api/</link>
       <pubDate>Sun, 09 Apr 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/04/09/bilibili-api/</guid>
-      <description>&lt;p&gt;针对B站视频的爬虫实现
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;针对B站视频的爬虫实现&lt;/p&gt;</description>
     </item>
     
   </channel>

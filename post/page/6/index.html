@@ -8,17 +8,22 @@
   <meta name="twitter:title" content="Posts - yrong blog" />
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
-  <meta property="og:url" content="/blog/blog/post/" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.32-DEV" />
+  <meta name="generator" content="Hugo 0.54.0" />
   <link href="/blog/post/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
   <link href="/blog/post/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
+
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
-  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
 </head>
+
 <body>
 
 <header class="site-header">
@@ -39,6 +44,26 @@
   <div class="main" role="main">
     <section class="list section-list">
       <article class="article">
+        <a href="/blog/2016/09/05/neo4j-internal/" class="article-titles">
+          <h2 class="article-title">Neo4j Internal</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>September 5, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/neo4j/">
+              <i class="fas fa-tag"></i>
+              neo4j
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>Neo4j中数据是如何存储的</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/2016/09/05/neo4j-internal/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/2016/08/06/java-bytecode/" class="article-titles">
           <h2 class="article-title">Java字节码解析</h2>
           
@@ -47,7 +72,7 @@
           <li class="article-meta-date"><time>August 6, 2016</time></li>
           <li class="article-meta-tags">
             <a href="/blog/tags/java/">
-              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              <i class="fas fa-tag"></i>
               java
             </a>&nbsp;
           </li>
@@ -67,14 +92,13 @@
           <li class="article-meta-date"><time>July 21, 2016</time></li>
           <li class="article-meta-tags">
             <a href="/blog/tags/nginx/">
-              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              <i class="fas fa-tag"></i>
               nginx
             </a>&nbsp;
           </li>
         </ul>
         <div class="article-content">
-          <p>nginx模块初始化
-</p>
+          <p>nginx模块初始化</p>
         </div>
         <div class="article-readmore"><a href="/blog/2016/07/21/nginx-under-the-hood/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -88,7 +112,7 @@
           <li class="article-meta-date"><time>July 16, 2016</time></li>
           <li class="article-meta-tags">
             <a href="/blog/tags/elasticsearch/">
-              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              <i class="fas fa-tag"></i>
               elasticsearch
             </a>&nbsp;
           </li>
@@ -108,20 +132,19 @@
           <li class="article-meta-date"><time>July 13, 2016</time></li>
           <li class="article-meta-tags">
             <a href="/blog/tags/java/">
-              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              <i class="fas fa-tag"></i>
               java
             </a>&nbsp;
           </li>
           <li class="article-meta-tags">
             <a href="/blog/tags/vertx/">
-              <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+              <i class="fas fa-tag"></i>
               vertx
             </a>&nbsp;
           </li>
         </ul>
         <div class="article-content">
-          <p>A blazing fast TR-069 auto configuration server (ACS) built with Vertx,Redis, and MongoDB
-</p>
+          <p>A blazing fast TR-069 auto configuration server (ACS) built with Vertx,Redis, and MongoDB</p>
         </div>
         <div class="article-readmore"><a href="/blog/2016/07/13/tinyacs/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -131,13 +154,12 @@
 
 <ul class="pagination">
     
-    <li>
-        <a href="/blog/post/" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+    <li class="page-item">
+        <a href="/blog/post/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
     </li>
     
-    <li
-    >
-    <a href="/blog/post/page/5/" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+    <li class="page-item">
+    <a href="/blog/post/page/5/" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
     </li>
     
     
@@ -149,8 +171,7 @@
         
     
     
-    <li
-    ><a href="/blog/post/">1</a></li>
+    <li class="page-item"><a class="page-link" href="/blog/post/">1</a></li>
     
     
     
@@ -161,8 +182,7 @@
         
     
     
-    <li
-    ><a href="/blog/post/page/2/">2</a></li>
+    <li class="page-item"><a class="page-link" href="/blog/post/page/2/">2</a></li>
     
     
     
@@ -173,8 +193,7 @@
         
     
     
-    <li
-    ><a href="/blog/post/page/3/">3</a></li>
+    <li class="page-item"><a class="page-link" href="/blog/post/page/3/">3</a></li>
     
     
     
@@ -185,7 +204,7 @@
         
     
     
-    <li class="disabled"><span aria-hidden="true">&hellip;</span></li>
+    <li class="page-item disabled"><span aria-hidden="true">&nbsp;&hellip;&nbsp;</span></li>
     
     
     
@@ -196,8 +215,7 @@
         
     
     
-    <li
-    ><a href="/blog/post/page/5/">5</a></li>
+    <li class="page-item"><a class="page-link" href="/blog/post/page/5/">5</a></li>
     
     
     
@@ -208,17 +226,15 @@
         
     
     
-    <li
-    class="active"><a href="/blog/post/page/6/">6</a></li>
+    <li class="page-item active"><a class="page-link" href="/blog/post/page/6/">6</a></li>
     
     
-    <li
-    class="disabled">
-    <a href="" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+    <li class="page-item disabled">
+    <a href="" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
     </li>
     
-    <li>
-        <a href="/blog/post/page/6/" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <li class="page-item">
+        <a href="/blog/post/page/6/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
     </li>
     
 </ul>
@@ -232,17 +248,15 @@
   <ul class="site-footer-items">
     <li class="site-footer-item-rsslink">
       <a href="/blog/post/index.xml" type="application/rss+xml" target="_blank" title="RSS">
-        <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#rss"></use></svg>
+        <i class="fas fa-rss"></i>
       </a>
     </li>
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>
   <div class="powerdby">
-    Powered by <a href="https://gohugo.io/">Hugo</a>
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
   </div>
 </div>
-<script src="/blog/js/script.js"></script>
-<script src="/blog/js/custom.js"></script>
 
 
 </body>

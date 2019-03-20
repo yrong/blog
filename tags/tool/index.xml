@@ -6,8 +6,6 @@
     <description>Recent content in Tool on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
     <lastBuildDate>Thu, 03 Nov 2016 00:00:00 +0000</lastBuildDate>
     
@@ -18,20 +16,18 @@
       <title>多终端管理器tmux</title>
       <link>https://yrong.github.io/blog/2016/11/03/tmux/</link>
       <pubDate>Thu, 03 Nov 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/11/03/tmux/</guid>
-      <description>&lt;p&gt;多终端管理器tmux
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;多终端管理器tmux&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>chrome上的vim:vimium</title>
       <link>https://yrong.github.io/blog/2016/11/02/vimium/</link>
       <pubDate>Wed, 02 Nov 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/11/02/vimium/</guid>
-      <description>&lt;p&gt;chrome上的vim:vimium
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;chrome上的vim:vimium&lt;/p&gt;</description>
     </item>
     
   </channel>

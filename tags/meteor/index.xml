@@ -6,8 +6,6 @@
     <description>Recent content in Meteor on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
     <lastBuildDate>Sun, 09 Oct 2016 18:00:00 +0000</lastBuildDate>
     
@@ -18,10 +16,9 @@
       <title>meteor的响应式数据源和响应式执行环境</title>
       <link>https://yrong.github.io/blog/2016/10/09/meteor-internal-reactive/</link>
       <pubDate>Sun, 09 Oct 2016 18:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/10/09/meteor-internal-reactive/</guid>
-      <description>&lt;p&gt;meteor的响应式数据源实现原理
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;meteor的响应式数据源实现原理&lt;/p&gt;</description>
     </item>
     
   </channel>

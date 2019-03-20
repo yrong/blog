@@ -6,8 +6,6 @@
     <description>Recent content in Tags on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
     <lastBuildDate>Fri, 10 Mar 2017 00:00:00 +0000</lastBuildDate>
     
@@ -18,7 +16,7 @@
       <title>Algorithom</title>
       <link>https://yrong.github.io/blog/tags/algorithom/</link>
       <pubDate>Fri, 10 Mar 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/algorithom/</guid>
       <description></description>
     </item>
@@ -27,7 +25,7 @@
       <title>Apm</title>
       <link>https://yrong.github.io/blog/tags/apm/</link>
       <pubDate>Mon, 30 Jan 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/apm/</guid>
       <description></description>
     </item>
@@ -36,7 +34,7 @@
       <title>Blockchain</title>
       <link>https://yrong.github.io/blog/tags/blockchain/</link>
       <pubDate>Sat, 19 Aug 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/blockchain/</guid>
       <description></description>
     </item>
@@ -45,7 +43,7 @@
       <title>Bolt</title>
       <link>https://yrong.github.io/blog/tags/bolt/</link>
       <pubDate>Sun, 18 Dec 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/bolt/</guid>
       <description></description>
     </item>
@@ -54,7 +52,7 @@
       <title>Crawler</title>
       <link>https://yrong.github.io/blog/tags/crawler/</link>
       <pubDate>Sun, 09 Apr 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/crawler/</guid>
       <description></description>
     </item>
@@ -63,7 +61,7 @@
       <title>D3</title>
       <link>https://yrong.github.io/blog/tags/d3/</link>
       <pubDate>Wed, 12 Oct 2016 18:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/d3/</guid>
       <description></description>
     </item>
@@ -72,7 +70,7 @@
       <title>Db</title>
       <link>https://yrong.github.io/blog/tags/db/</link>
       <pubDate>Thu, 22 Dec 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/db/</guid>
       <description></description>
     </item>
@@ -81,7 +79,7 @@
       <title>Docker</title>
       <link>https://yrong.github.io/blog/tags/docker/</link>
       <pubDate>Mon, 27 Mar 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/docker/</guid>
       <description></description>
     </item>
@@ -90,7 +88,7 @@
       <title>Elasticsearch</title>
       <link>https://yrong.github.io/blog/tags/elasticsearch/</link>
       <pubDate>Thu, 13 Oct 2016 18:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/elasticsearch/</guid>
       <description></description>
     </item>
@@ -99,7 +97,7 @@
       <title>Game Server</title>
       <link>https://yrong.github.io/blog/tags/game-server/</link>
       <pubDate>Tue, 10 Jan 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/game-server/</guid>
       <description></description>
     </item>
@@ -108,7 +106,7 @@
       <title>Git</title>
       <link>https://yrong.github.io/blog/tags/git/</link>
       <pubDate>Sat, 25 Feb 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/git/</guid>
       <description></description>
     </item>
@@ -116,8 +114,8 @@
     <item>
       <title>Golang</title>
       <link>https://yrong.github.io/blog/tags/golang/</link>
-      <pubDate>Sat, 08 Jul 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      <pubDate>Fri, 09 Feb 2018 00:00:00 +0000</pubDate>
+      
       <guid>https://yrong.github.io/blog/tags/golang/</guid>
       <description></description>
     </item>
@@ -126,7 +124,7 @@
       <title>Java</title>
       <link>https://yrong.github.io/blog/tags/java/</link>
       <pubDate>Fri, 20 Jan 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/java/</guid>
       <description></description>
     </item>
@@ -135,7 +133,7 @@
       <title>Javascript</title>
       <link>https://yrong.github.io/blog/tags/javascript/</link>
       <pubDate>Sat, 19 Aug 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/javascript/</guid>
       <description></description>
     </item>
@@ -144,7 +142,7 @@
       <title>Kafka</title>
       <link>https://yrong.github.io/blog/tags/kafka/</link>
       <pubDate>Thu, 20 Apr 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/kafka/</guid>
       <description></description>
     </item>
@@ -153,7 +151,7 @@
       <title>Meteor</title>
       <link>https://yrong.github.io/blog/tags/meteor/</link>
       <pubDate>Sun, 09 Oct 2016 18:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/meteor/</guid>
       <description></description>
     </item>
@@ -162,7 +160,7 @@
       <title>Microservice</title>
       <link>https://yrong.github.io/blog/tags/microservice/</link>
       <pubDate>Tue, 25 Apr 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/microservice/</guid>
       <description></description>
     </item>
@@ -171,7 +169,7 @@
       <title>Neo4j</title>
       <link>https://yrong.github.io/blog/tags/neo4j/</link>
       <pubDate>Fri, 11 Nov 2016 15:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/neo4j/</guid>
       <description></description>
     </item>
@@ -180,7 +178,7 @@
       <title>Nginx</title>
       <link>https://yrong.github.io/blog/tags/nginx/</link>
       <pubDate>Thu, 21 Jul 2016 15:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/nginx/</guid>
       <description></description>
     </item>
@@ -189,7 +187,7 @@
       <title>Nsq</title>
       <link>https://yrong.github.io/blog/tags/nsq/</link>
       <pubDate>Sun, 16 Apr 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/nsq/</guid>
       <description></description>
     </item>
@@ -198,7 +196,7 @@
       <title>Php</title>
       <link>https://yrong.github.io/blog/tags/php/</link>
       <pubDate>Thu, 02 Mar 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/php/</guid>
       <description></description>
     </item>
@@ -207,7 +205,7 @@
       <title>Prometheus</title>
       <link>https://yrong.github.io/blog/tags/prometheus/</link>
       <pubDate>Sat, 08 Jul 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/prometheus/</guid>
       <description></description>
     </item>
@@ -216,7 +214,7 @@
       <title>Python</title>
       <link>https://yrong.github.io/blog/tags/python/</link>
       <pubDate>Mon, 26 Dec 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/python/</guid>
       <description></description>
     </item>
@@ -225,7 +223,7 @@
       <title>Raft</title>
       <link>https://yrong.github.io/blog/tags/raft/</link>
       <pubDate>Mon, 12 Dec 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/raft/</guid>
       <description></description>
     </item>
@@ -234,7 +232,7 @@
       <title>React</title>
       <link>https://yrong.github.io/blog/tags/react/</link>
       <pubDate>Fri, 04 Nov 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/react/</guid>
       <description></description>
     </item>
@@ -243,7 +241,7 @@
       <title>Reactive</title>
       <link>https://yrong.github.io/blog/tags/reactive/</link>
       <pubDate>Fri, 20 Jan 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/reactive/</guid>
       <description></description>
     </item>
@@ -252,7 +250,7 @@
       <title>Reactor</title>
       <link>https://yrong.github.io/blog/tags/reactor/</link>
       <pubDate>Fri, 20 Jan 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/reactor/</guid>
       <description></description>
     </item>
@@ -261,7 +259,7 @@
       <title>Redis</title>
       <link>https://yrong.github.io/blog/tags/redis/</link>
       <pubDate>Thu, 22 Dec 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/redis/</guid>
       <description></description>
     </item>
@@ -270,7 +268,7 @@
       <title>Security</title>
       <link>https://yrong.github.io/blog/tags/security/</link>
       <pubDate>Sun, 23 Oct 2016 18:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/security/</guid>
       <description></description>
     </item>
@@ -279,7 +277,7 @@
       <title>Serverless</title>
       <link>https://yrong.github.io/blog/tags/serverless/</link>
       <pubDate>Fri, 10 Feb 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/serverless/</guid>
       <description></description>
     </item>
@@ -288,7 +286,7 @@
       <title>Spark</title>
       <link>https://yrong.github.io/blog/tags/spark/</link>
       <pubDate>Mon, 17 Oct 2016 15:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/spark/</guid>
       <description></description>
     </item>
@@ -297,7 +295,7 @@
       <title>Spider</title>
       <link>https://yrong.github.io/blog/tags/spider/</link>
       <pubDate>Wed, 07 Dec 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/spider/</guid>
       <description></description>
     </item>
@@ -306,7 +304,7 @@
       <title>Spring</title>
       <link>https://yrong.github.io/blog/tags/spring/</link>
       <pubDate>Fri, 20 Jan 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/spring/</guid>
       <description></description>
     </item>
@@ -315,7 +313,7 @@
       <title>Tool</title>
       <link>https://yrong.github.io/blog/tags/tool/</link>
       <pubDate>Thu, 03 Nov 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/tool/</guid>
       <description></description>
     </item>
@@ -324,7 +322,7 @@
       <title>Vertx</title>
       <link>https://yrong.github.io/blog/tags/vertx/</link>
       <pubDate>Sat, 18 Mar 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/vertx/</guid>
       <description></description>
     </item>
@@ -333,7 +331,7 @@
       <title>Wordpress</title>
       <link>https://yrong.github.io/blog/tags/wordpress/</link>
       <pubDate>Mon, 01 May 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/wordpress/</guid>
       <description></description>
     </item>
@@ -342,7 +340,7 @@
       <title>Yacc</title>
       <link>https://yrong.github.io/blog/tags/yacc/</link>
       <pubDate>Fri, 26 May 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/tags/yacc/</guid>
       <description></description>
     </item>

@@ -6,8 +6,6 @@
     <description>Recent content in React on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
     <lastBuildDate>Fri, 04 Nov 2016 00:00:00 +0000</lastBuildDate>
     
@@ -18,10 +16,9 @@
       <title>reactjs源码分析</title>
       <link>https://yrong.github.io/blog/2016/11/04/virtual-dom/</link>
       <pubDate>Fri, 04 Nov 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/11/04/virtual-dom/</guid>
-      <description>&lt;p&gt;reactjs virtual dom 源码分析
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;reactjs virtual dom 源码分析&lt;/p&gt;</description>
     </item>
     
   </channel>

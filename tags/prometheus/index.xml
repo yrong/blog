@@ -6,8 +6,6 @@
     <description>Recent content in Prometheus on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
     <lastBuildDate>Sat, 08 Jul 2017 00:00:00 +0000</lastBuildDate>
     
@@ -18,10 +16,9 @@
       <title>prometheus v2.0 storage</title>
       <link>https://yrong.github.io/blog/2017/07/08/prometheus/</link>
       <pubDate>Sat, 08 Jul 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/07/08/prometheus/</guid>
-      <description>&lt;p&gt;Writing a Time Series Database from Scratch
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;Writing a Time Series Database from Scratch&lt;/p&gt;</description>
     </item>
     
   </channel>

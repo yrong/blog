@@ -6,8 +6,6 @@
     <description>Recent content in Yacc on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
     <lastBuildDate>Fri, 26 May 2017 00:00:00 +0000</lastBuildDate>
     
@@ -18,10 +16,9 @@
       <title>lex-yacc</title>
       <link>https://yrong.github.io/blog/2017/05/26/lex-yacc/</link>
       <pubDate>Fri, 26 May 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/05/26/lex-yacc/</guid>
-      <description>&lt;p&gt;lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了&lt;/p&gt;</description>
     </item>
     
   </channel>

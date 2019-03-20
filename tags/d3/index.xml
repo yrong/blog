@@ -6,8 +6,6 @@
     <description>Recent content in D3 on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
     <lastBuildDate>Wed, 12 Oct 2016 18:00:00 +0000</lastBuildDate>
     
@@ -18,10 +16,9 @@
       <title>D3.js数据可视化</title>
       <link>https://yrong.github.io/blog/2016/10/12/d3-data-visualization/</link>
       <pubDate>Wed, 12 Oct 2016 18:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/10/12/d3-data-visualization/</guid>
-      <description>&lt;p&gt;D3.js数据可视化
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;D3.js数据可视化&lt;/p&gt;</description>
     </item>
     
   </channel>

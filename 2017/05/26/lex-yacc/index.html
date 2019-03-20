@@ -6,23 +6,25 @@
   <title>lex-yacc - yrong blog</title>
   <meta property="og:title" content="lex-yacc - yrong blog" />
   <meta name="twitter:title" content="lex-yacc - yrong blog" />
-  <meta name="description" content="lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了
-">
-  <meta property="og:description" content="lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了
-">
-  <meta name="twitter:description" content="lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了
-">
+  <meta name="description" content="lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了">
+  <meta property="og:description" content="lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了">
+  <meta name="twitter:description" content="lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
-  <meta property="og:url" content="/blog/2017/05/26/lex-yacc/" />
+  <meta property="og:url" content="https://yrong.github.io/2017/05/26/lex-yacc/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.32-DEV" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
-  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
 </head>
+
 <body>
 
 <header class="site-header">
@@ -48,13 +50,13 @@
         <li class="article-meta-date"><time>May 26, 2017</time></li>
         <li class="article-meta-tags">
           <a href="/blog/tags/golang/">
-            <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+            <i class="fas fa-tag"></i>
             golang
           </a>&nbsp;
         </li>
         <li class="article-meta-tags">
           <a href="/blog/tags/yacc/">
-            <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+            <i class="fas fa-tag"></i>
             yacc
           </a>&nbsp;
         </li>
@@ -78,8 +80,7 @@
 </ul>
 </nav>
 </aside>
-      <p>lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了
-</p>
+      <p>lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了</p>
 
 <h1 id="yacc-lex">Yacc&amp;Lex</h1>
 
@@ -463,10 +464,6 @@ func main(){
     }(document, 'script', 'facebook-jssdk'));</script>
   </li>
   <li>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <g:plus action="share"></g:plus>
-  </li>
-  <li>
     <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
   </li>
   <li>
@@ -474,6 +471,7 @@ func main(){
     <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
   </li>
 </ul>
+
 
     <ul class="pager article-pager">
       <li class="pager-newer">
@@ -492,11 +490,9 @@ func main(){
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>
   <div class="powerdby">
-    Powered by <a href="https://gohugo.io/">Hugo</a>
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
   </div>
 </div>
-<script src="/blog/js/script.js"></script>
-<script src="/blog/js/custom.js"></script>
 
 
 </body>

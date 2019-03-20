@@ -6,84 +6,82 @@
     <description>Recent content in Golang on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
-    <lastBuildDate>Sat, 08 Jul 2017 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 09 Feb 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://yrong.github.io/blog/tags/golang/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>Introduction to Go Modules</title>
+      <link>https://yrong.github.io/blog/2018/02/09/intro-to-go-modules/</link>
+      <pubDate>Fri, 09 Feb 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/2018/02/09/intro-to-go-modules/</guid>
+      <description>&lt;p&gt;The upcoming version 1.11 of the Go programming language will bring experimental support for modules, a new dependency management system for Go.A few days ago, I wrote a quick post about it. Since that post went live, things changed a bit and as we’re now very close to the new release, I thought it would be a good time for another post with a more hands-on approach.So here’s what we’ll do: we’ll create a new package and then we’ll make a few releases to see how that would work.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>prometheus v2.0 storage</title>
       <link>https://yrong.github.io/blog/2017/07/08/prometheus/</link>
       <pubDate>Sat, 08 Jul 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/07/08/prometheus/</guid>
-      <description>&lt;p&gt;Writing a Time Series Database from Scratch
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;Writing a Time Series Database from Scratch&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>lex-yacc</title>
       <link>https://yrong.github.io/blog/2017/05/26/lex-yacc/</link>
       <pubDate>Fri, 26 May 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/05/26/lex-yacc/</guid>
-      <description>&lt;p&gt;lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>gotour code analysis</title>
       <link>https://yrong.github.io/blog/2017/05/16/gotour/</link>
       <pubDate>Tue, 16 May 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/05/16/gotour/</guid>
-      <description>&lt;p&gt;GoTour as a web project to study golang
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;GoTour as a web project to study golang&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>websocketd code analysis</title>
       <link>https://yrong.github.io/blog/2017/05/12/websocketd/</link>
       <pubDate>Fri, 12 May 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/05/12/websocketd/</guid>
-      <description>&lt;p&gt;websocketd is a small command-line tool that will wrap an existing command-line interface program, and allow it to be accessed via a WebSocket.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;websocketd is a small command-line tool that will wrap an existing command-line interface program, and allow it to be accessed via a WebSocket.&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>cow code analysis</title>
       <link>https://yrong.github.io/blog/2017/05/06/cow/</link>
       <pubDate>Sat, 06 May 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/05/06/cow/</guid>
-      <description>&lt;p&gt;COW is a HTTP proxy to simplify bypassing the great firewall. It tries to automatically identify blocked websites and only use parent proxy for those sites.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;COW is a HTTP proxy to simplify bypassing the great firewall. It tries to automatically identify blocked websites and only use parent proxy for those sites.&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>go micro code analysis</title>
       <link>https://yrong.github.io/blog/2017/04/25/go-micro/</link>
       <pubDate>Tue, 25 Apr 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/04/25/go-micro/</guid>
-      <description>&lt;p&gt;go micro code analysis
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;go micro code analysis&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>nsq code analysis</title>
       <link>https://yrong.github.io/blog/2017/04/16/nsq/</link>
       <pubDate>Sun, 16 Apr 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/04/16/nsq/</guid>
-      <description>&lt;p&gt;nsq code analysis
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;nsq code analysis&lt;/p&gt;</description>
     </item>
     
   </channel>

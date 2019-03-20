@@ -6,23 +6,25 @@
   <title>kafka in depth analysis - yrong blog</title>
   <meta property="og:title" content="kafka in depth analysis - yrong blog" />
   <meta name="twitter:title" content="kafka in depth analysis - yrong blog" />
-  <meta name="description" content="kafka架构分析
-">
-  <meta property="og:description" content="kafka架构分析
-">
-  <meta name="twitter:description" content="kafka架构分析
-">
+  <meta name="description" content="kafka架构分析">
+  <meta property="og:description" content="kafka架构分析">
+  <meta name="twitter:description" content="kafka架构分析">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
-  <meta property="og:url" content="/blog/2017/04/20/kafka/" />
+  <meta property="og:url" content="https://yrong.github.io/2017/04/20/kafka/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.32-DEV" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
-  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
 </head>
+
 <body>
 
 <header class="site-header">
@@ -48,7 +50,7 @@
         <li class="article-meta-date"><time>April 20, 2017</time></li>
         <li class="article-meta-tags">
           <a href="/blog/tags/kafka/">
-            <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>
+            <i class="fas fa-tag"></i>
             kafka
           </a>&nbsp;
         </li>
@@ -89,8 +91,7 @@
 </ul>
 </nav>
 </aside>
-      <p>kafka架构分析
-</p>
+      <p>kafka架构分析</p>
 
 <h2 id="terminology">Terminology</h2>
 
@@ -414,10 +415,6 @@ Topics are added and modified using the topic tool:</p>
     }(document, 'script', 'facebook-jssdk'));</script>
   </li>
   <li>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <g:plus action="share"></g:plus>
-  </li>
-  <li>
     <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
   </li>
   <li>
@@ -425,6 +422,7 @@ Topics are added and modified using the topic tool:</p>
     <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
   </li>
 </ul>
+
 
     <ul class="pager article-pager">
       <li class="pager-newer">
@@ -443,11 +441,9 @@ Topics are added and modified using the topic tool:</p>
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>
   <div class="powerdby">
-    Powered by <a href="https://gohugo.io/">Hugo</a>
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
   </div>
 </div>
-<script src="/blog/js/script.js"></script>
-<script src="/blog/js/custom.js"></script>
 
 
 </body>

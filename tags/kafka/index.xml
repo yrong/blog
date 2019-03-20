@@ -6,8 +6,6 @@
     <description>Recent content in Kafka on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
     <lastBuildDate>Thu, 20 Apr 2017 00:00:00 +0000</lastBuildDate>
     
@@ -18,20 +16,18 @@
       <title>kafka in depth analysis</title>
       <link>https://yrong.github.io/blog/2017/04/20/kafka/</link>
       <pubDate>Thu, 20 Apr 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/04/20/kafka/</guid>
-      <description>&lt;p&gt;kafka架构分析
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;kafka架构分析&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>kafka-streams</title>
       <link>https://yrong.github.io/blog/2017/04/02/kafka-stream/</link>
       <pubDate>Sun, 02 Apr 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/04/02/kafka-stream/</guid>
-      <description>&lt;p&gt;kafka流的一个实例
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;kafka流的一个实例&lt;/p&gt;</description>
     </item>
     
   </channel>

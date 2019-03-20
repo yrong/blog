@@ -6,522 +6,476 @@
     <description>Recent content on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
-    <lastBuildDate>Sat, 19 Aug 2017 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 09 Feb 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://yrong.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>Introduction to Go Modules</title>
+      <link>https://yrong.github.io/blog/2018/02/09/intro-to-go-modules/</link>
+      <pubDate>Fri, 09 Feb 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/2018/02/09/intro-to-go-modules/</guid>
+      <description>&lt;p&gt;The upcoming version 1.11 of the Go programming language will bring experimental support for modules, a new dependency management system for Go.A few days ago, I wrote a quick post about it. Since that post went live, things changed a bit and as we’re now very close to the new release, I thought it would be a good time for another post with a more hands-on approach.So here’s what we’ll do: we’ll create a new package and then we’ll make a few releases to see how that would work.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>Build Your Own Blockchains in JavaScript from Zero</title>
       <link>https://yrong.github.io/blog/2017/08/19/blockchain/</link>
       <pubDate>Sat, 19 Aug 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/08/19/blockchain/</guid>
-      <description>&lt;p&gt;Build Your Own Blockchains in JavaScript from Zero (Scratch)
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;Build Your Own Blockchains in JavaScript from Zero (Scratch)&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>prometheus v2.0 storage</title>
       <link>https://yrong.github.io/blog/2017/07/08/prometheus/</link>
       <pubDate>Sat, 08 Jul 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/07/08/prometheus/</guid>
-      <description>&lt;p&gt;Writing a Time Series Database from Scratch
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;Writing a Time Series Database from Scratch&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>lex-yacc</title>
       <link>https://yrong.github.io/blog/2017/05/26/lex-yacc/</link>
       <pubDate>Fri, 26 May 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/05/26/lex-yacc/</guid>
-      <description>&lt;p&gt;lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>gotour code analysis</title>
       <link>https://yrong.github.io/blog/2017/05/16/gotour/</link>
       <pubDate>Tue, 16 May 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/05/16/gotour/</guid>
-      <description>&lt;p&gt;GoTour as a web project to study golang
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;GoTour as a web project to study golang&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>websocketd code analysis</title>
       <link>https://yrong.github.io/blog/2017/05/12/websocketd/</link>
       <pubDate>Fri, 12 May 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/05/12/websocketd/</guid>
-      <description>&lt;p&gt;websocketd is a small command-line tool that will wrap an existing command-line interface program, and allow it to be accessed via a WebSocket.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;websocketd is a small command-line tool that will wrap an existing command-line interface program, and allow it to be accessed via a WebSocket.&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>cow code analysis</title>
       <link>https://yrong.github.io/blog/2017/05/06/cow/</link>
       <pubDate>Sat, 06 May 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/05/06/cow/</guid>
-      <description>&lt;p&gt;COW is a HTTP proxy to simplify bypassing the great firewall. It tries to automatically identify blocked websites and only use parent proxy for those sites.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;COW is a HTTP proxy to simplify bypassing the great firewall. It tries to automatically identify blocked websites and only use parent proxy for those sites.&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>wordpress code analysis</title>
       <link>https://yrong.github.io/blog/2017/05/01/wordpress/</link>
       <pubDate>Mon, 01 May 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/05/01/wordpress/</guid>
-      <description>&lt;p&gt;wordpress code analysis&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;wordpress code analysis&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>go micro code analysis</title>
       <link>https://yrong.github.io/blog/2017/04/25/go-micro/</link>
       <pubDate>Tue, 25 Apr 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/04/25/go-micro/</guid>
-      <description>&lt;p&gt;go micro code analysis
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;go micro code analysis&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>kafka in depth analysis</title>
       <link>https://yrong.github.io/blog/2017/04/20/kafka/</link>
       <pubDate>Thu, 20 Apr 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/04/20/kafka/</guid>
-      <description>&lt;p&gt;kafka架构分析
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;kafka架构分析&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>nsq code analysis</title>
       <link>https://yrong.github.io/blog/2017/04/16/nsq/</link>
       <pubDate>Sun, 16 Apr 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/04/16/nsq/</guid>
-      <description>&lt;p&gt;nsq code analysis
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;nsq code analysis&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>bilibili crawler</title>
       <link>https://yrong.github.io/blog/2017/04/09/bilibili-api/</link>
       <pubDate>Sun, 09 Apr 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/04/09/bilibili-api/</guid>
-      <description>&lt;p&gt;针对B站视频的爬虫实现
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;针对B站视频的爬虫实现&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>kafka-streams</title>
       <link>https://yrong.github.io/blog/2017/04/02/kafka-stream/</link>
       <pubDate>Sun, 02 Apr 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/04/02/kafka-stream/</guid>
-      <description>&lt;p&gt;kafka流的一个实例
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;kafka流的一个实例&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Build a NodeJS microservice and deploy it to Docker</title>
       <link>https://yrong.github.io/blog/2017/03/27/docker-microservice/</link>
       <pubDate>Mon, 27 Mar 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/03/27/docker-microservice/</guid>
-      <description>&lt;p&gt;Build a NodeJS microservice and deploy it to Docker
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;Build a NodeJS microservice and deploy it to Docker&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Docker Swarm Proxy</title>
       <link>https://yrong.github.io/blog/2017/03/22/docker-swarm/</link>
       <pubDate>Wed, 22 Mar 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/03/22/docker-swarm/</guid>
-      <description>&lt;p&gt;Integrating Proxy With Docker Swarm
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;Integrating Proxy With Docker Swarm&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Vertx Micro Shop</title>
       <link>https://yrong.github.io/blog/2017/03/18/vertx-blueprint/</link>
       <pubDate>Sat, 18 Mar 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/03/18/vertx-blueprint/</guid>
-      <description>&lt;p&gt;Vert.x Micro Shop 微服务应用
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;Vert.x Micro Shop 微服务应用&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>path finding algorithms</title>
       <link>https://yrong.github.io/blog/2017/03/10/pathfinding/</link>
       <pubDate>Fri, 10 Mar 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/03/10/pathfinding/</guid>
-      <description>&lt;p&gt;Path finding algorithom
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;Path finding algorithom&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>own cloud internal</title>
       <link>https://yrong.github.io/blog/2017/03/02/owncloud/</link>
       <pubDate>Thu, 02 Mar 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/03/02/owncloud/</guid>
-      <description>&lt;p&gt;own cloud internals
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;own cloud internals&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>git tips</title>
       <link>https://yrong.github.io/blog/2017/02/25/git-tips/</link>
       <pubDate>Sat, 25 Feb 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/02/25/git-tips/</guid>
-      <description>&lt;p&gt;git-tips
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;git-tips&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Serverless AWS Lambda Examples</title>
       <link>https://yrong.github.io/blog/2017/02/10/serverless/</link>
       <pubDate>Fri, 10 Feb 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/02/10/serverless/</guid>
-      <description>&lt;p&gt;serverless aws lamba examples
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;serverless aws lamba examples&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>OpenTracing use cases</title>
       <link>https://yrong.github.io/blog/2017/01/30/opentracing/</link>
       <pubDate>Mon, 30 Jan 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/01/30/opentracing/</guid>
-      <description>&lt;p&gt;openTracing use cases
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;openTracing use cases&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Reactive Programming with Spring Reactor</title>
       <link>https://yrong.github.io/blog/2017/01/20/frp/</link>
       <pubDate>Fri, 20 Jan 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/01/20/frp/</guid>
-      <description>&lt;p&gt;reactive programming with spring reactor
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;reactive programming with spring reactor&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>leaf&amp;&amp;gonet2&amp;&amp;pomelo</title>
       <link>https://yrong.github.io/blog/2017/01/10/game-server/</link>
       <pubDate>Tue, 10 Jan 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/01/10/game-server/</guid>
-      <description>&lt;p&gt;game server frameworks like leaf&amp;amp;&amp;amp;gonet2&amp;amp;&amp;amp;pomelo
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;game server frameworks like leaf&amp;amp;&amp;amp;gonet2&amp;amp;&amp;amp;pomelo&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>分布式环境系统监控</title>
       <link>https://yrong.github.io/blog/2017/01/05/microservice-apm/</link>
       <pubDate>Thu, 05 Jan 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/01/05/microservice-apm/</guid>
-      <description>&lt;p&gt;分布式环境系统监控Zipkin&amp;amp;Pinpoint
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;分布式环境系统监控Zipkin&amp;amp;Pinpoint&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>meta program in python</title>
       <link>https://yrong.github.io/blog/2016/12/26/meta-program/</link>
       <pubDate>Mon, 26 Dec 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/12/26/meta-program/</guid>
-      <description>&lt;p&gt;meta program in python
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;meta program in python&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Codis In-depth Analysis</title>
       <link>https://yrong.github.io/blog/2016/12/22/codis/</link>
       <pubDate>Thu, 22 Dec 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/12/22/codis/</guid>
-      <description>&lt;p&gt;codis in-depth analysis
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;codis in-depth analysis&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>BoltDB In-depth Analysis</title>
       <link>https://yrong.github.io/blog/2016/12/18/bolt/</link>
       <pubDate>Sun, 18 Dec 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/12/18/bolt/</guid>
-      <description>&lt;p&gt;boltdb in-depth analysis
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;boltdb in-depth analysis&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>The Raft Consensus Algorithm</title>
       <link>https://yrong.github.io/blog/2016/12/12/raft/</link>
       <pubDate>Mon, 12 Dec 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/12/12/raft/</guid>
-      <description>&lt;p&gt;The Raft Consensus Algorithm
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;The Raft Consensus Algorithm&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Scrapy In-depth Analysis</title>
       <link>https://yrong.github.io/blog/2016/12/07/scrapy/</link>
       <pubDate>Wed, 07 Dec 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/12/07/scrapy/</guid>
-      <description>&lt;p&gt;Scrapy In-depth Analysis
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;Scrapy In-depth Analysis&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>webpack使用</title>
       <link>https://yrong.github.io/blog/2016/12/02/webpack/</link>
       <pubDate>Fri, 02 Dec 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/12/02/webpack/</guid>
-      <description>&lt;p&gt;webpack使用
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;webpack使用&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Koa2 In-depth Analysis</title>
       <link>https://yrong.github.io/blog/2016/11/28/koa2/</link>
       <pubDate>Mon, 28 Nov 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/11/28/koa2/</guid>
-      <description>&lt;p&gt;Koa2 In-depth Analysis
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;Koa2 In-depth Analysis&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>数据结构与算法</title>
       <link>https://yrong.github.io/blog/2016/11/23/alg-ds/</link>
       <pubDate>Wed, 23 Nov 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/11/23/alg-ds/</guid>
-      <description>&lt;p&gt;数据结构与算法
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;数据结构与算法&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>super tiny vue</title>
       <link>https://yrong.github.io/blog/2016/11/20/super-tiny-vue/</link>
       <pubDate>Sun, 20 Nov 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/11/20/super-tiny-vue/</guid>
-      <description>&lt;p&gt;super tiny vue implementation
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;super tiny vue implementation&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>es6 top10 features</title>
       <link>https://yrong.github.io/blog/2016/11/17/es6-top10-features/</link>
       <pubDate>Thu, 17 Nov 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/11/17/es6-top10-features/</guid>
-      <description>&lt;p&gt;es6 top10 features
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;es6 top10 features&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>mocha异步测试源码分析</title>
       <link>https://yrong.github.io/blog/2016/11/15/mocha-async-support/</link>
       <pubDate>Tue, 15 Nov 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/11/15/mocha-async-support/</guid>
-      <description>&lt;p&gt;mocha异步测试源码分析
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;mocha异步测试源码分析&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Neo4j Cypher query</title>
       <link>https://yrong.github.io/blog/2016/11/11/neo4j-cypher/</link>
       <pubDate>Fri, 11 Nov 2016 15:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/11/11/neo4j-cypher/</guid>
-      <description>&lt;p&gt;Neo4j Cypher Query
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;Neo4j Cypher Query&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>leetcode</title>
       <link>https://yrong.github.io/blog/2016/11/07/leetcode/</link>
       <pubDate>Mon, 07 Nov 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/11/07/leetcode/</guid>
-      <description>&lt;p&gt;leetcode部分题解
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;leetcode部分题解&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>reactjs源码分析</title>
       <link>https://yrong.github.io/blog/2016/11/04/virtual-dom/</link>
       <pubDate>Fri, 04 Nov 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/11/04/virtual-dom/</guid>
-      <description>&lt;p&gt;reactjs virtual dom 源码分析
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;reactjs virtual dom 源码分析&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>多终端管理器tmux</title>
       <link>https://yrong.github.io/blog/2016/11/03/tmux/</link>
       <pubDate>Thu, 03 Nov 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/11/03/tmux/</guid>
-      <description>&lt;p&gt;多终端管理器tmux
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;多终端管理器tmux&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>chrome上的vim:vimium</title>
       <link>https://yrong.github.io/blog/2016/11/02/vimium/</link>
       <pubDate>Wed, 02 Nov 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/11/02/vimium/</guid>
-      <description>&lt;p&gt;chrome上的vim:vimium
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;chrome上的vim:vimium&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>XSS与CSRF两种跨站攻击</title>
       <link>https://yrong.github.io/blog/2016/10/23/xss-csrf/</link>
       <pubDate>Sun, 23 Oct 2016 18:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/10/23/xss-csrf/</guid>
-      <description>&lt;p&gt;XSS与CSRF两种跨站攻击
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;XSS与CSRF两种跨站攻击&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>程序员必备工具之Jupyter</title>
       <link>https://yrong.github.io/blog/2016/10/21/jupyter/</link>
       <pubDate>Fri, 21 Oct 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/10/21/jupyter/</guid>
-      <description>&lt;p&gt;程序员必备工具之Jupyter
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;程序员必备工具之Jupyter&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>用图数据库解决关系型数据库存在的问题</title>
       <link>https://yrong.github.io/blog/2016/10/19/neo4j-replace-rdbms/</link>
       <pubDate>Wed, 19 Oct 2016 15:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/10/19/neo4j-replace-rdbms/</guid>
-      <description>&lt;p&gt;用图数据库解决关系型数据库存在的问题
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;用图数据库解决关系型数据库存在的问题&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Machine Learning algorithm on Spark</title>
       <link>https://yrong.github.io/blog/2016/10/17/machine-learning-on-spark/</link>
       <pubDate>Mon, 17 Oct 2016 15:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/10/17/machine-learning-on-spark/</guid>
-      <description>&lt;p&gt;page rank and decision tree on spark
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;page rank and decision tree on spark&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>ElasticSearch Query DSL</title>
       <link>https://yrong.github.io/blog/2016/10/13/elasticsearch-query-dsl/</link>
       <pubDate>Thu, 13 Oct 2016 18:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/10/13/elasticsearch-query-dsl/</guid>
-      <description>&lt;p&gt;ElasticSearch Query DSL Examples
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;ElasticSearch Query DSL Examples&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>D3.js数据可视化</title>
       <link>https://yrong.github.io/blog/2016/10/12/d3-data-visualization/</link>
       <pubDate>Wed, 12 Oct 2016 18:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/10/12/d3-data-visualization/</guid>
-      <description>&lt;p&gt;D3.js数据可视化
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;D3.js数据可视化&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>vertx源码分析</title>
       <link>https://yrong.github.io/blog/2016/10/11/vertx-internal/</link>
       <pubDate>Tue, 11 Oct 2016 18:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/10/11/vertx-internal/</guid>
-      <description>&lt;p&gt;vertx源码分析
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;vertx源码分析&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>meteor的响应式数据源和响应式执行环境</title>
       <link>https://yrong.github.io/blog/2016/10/09/meteor-internal-reactive/</link>
       <pubDate>Sun, 09 Oct 2016 18:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/10/09/meteor-internal-reactive/</guid>
-      <description>&lt;p&gt;meteor的响应式数据源实现原理
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;meteor的响应式数据源实现原理&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>ElasticSearch的存储结构</title>
       <link>https://yrong.github.io/blog/2016/10/03/elasticsearch-storelayer/</link>
       <pubDate>Mon, 03 Oct 2016 15:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/10/03/elasticsearch-storelayer/</guid>
-      <description>&lt;p&gt;ElasticSearch的存储结构
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;ElasticSearch的存储结构&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>redis object types</title>
       <link>https://yrong.github.io/blog/2016/09/10/redis/</link>
       <pubDate>Sat, 10 Sep 2016 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/09/10/redis/</guid>
-      <description>&lt;p&gt;redis数据结构类型及实现
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;redis数据结构类型及实现&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Neo4j Internal</title>
       <link>https://yrong.github.io/blog/2016/09/05/neo4j-internal/</link>
       <pubDate>Mon, 05 Sep 2016 15:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/09/05/neo4j-internal/</guid>
-      <description>&lt;p&gt;Neo4j中数据是如何存储的
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;Neo4j中数据是如何存储的&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Java字节码解析</title>
       <link>https://yrong.github.io/blog/2016/08/06/java-bytecode/</link>
       <pubDate>Sat, 06 Aug 2016 15:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/08/06/java-bytecode/</guid>
       <description>基于栈的虚拟机 JVM是一种基于栈的虚拟机，绝大部分字节码操作都涉及到操作数栈中操作数的入栈和出栈。例如，在执行求和操作时，会将两个操作数入栈</description>
     </item>
@@ -530,17 +484,16 @@
       <title>nginx模块初始化</title>
       <link>https://yrong.github.io/blog/2016/07/21/nginx-under-the-hood/</link>
       <pubDate>Thu, 21 Jul 2016 15:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/07/21/nginx-under-the-hood/</guid>
-      <description>&lt;p&gt;nginx模块初始化
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;nginx模块初始化&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>ElasticSearch源码解析之文档索引</title>
       <link>https://yrong.github.io/blog/2016/07/16/elasticsearch-analysis/</link>
       <pubDate>Sat, 16 Jul 2016 18:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/07/16/elasticsearch-analysis/</guid>
       <description>es5.0版本主要改进应该是lucene版本升级到6.0,利用插件机制把netty从core中剥离出来接入NetworkModule,代码在</description>
     </item>
@@ -549,10 +502,9 @@
       <title>ACS CWMP协议基于异步开源框架vertx的实现</title>
       <link>https://yrong.github.io/blog/2016/07/13/tinyacs/</link>
       <pubDate>Wed, 13 Jul 2016 15:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/07/13/tinyacs/</guid>
-      <description>&lt;p&gt;A blazing fast TR-069 auto configuration server (ACS) built with Vertx,Redis, and MongoDB
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;A blazing fast TR-069 auto configuration server (ACS) built with Vertx,Redis, and MongoDB&lt;/p&gt;</description>
     </item>
     
   </channel>

@@ -8,17 +8,22 @@
   <meta name="twitter:title" content=" - yrong blog" />
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
-  <meta property="og:url" content="/blog/blog/archives/" />
+  <meta property="og:url" content="https://yrong.github.io/blog/archives/" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.32-DEV" />
+  <meta name="generator" content="Hugo 0.54.0" />
   <link href="/blog/archives/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
   <link href="/blog/archives/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
+
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
-  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
 </head>
+
 <body>
 
 <header class="site-header">
@@ -43,9 +48,18 @@
         <li class="archives-monthly-container">
           <ul>
             <li class="archives-item">
+              <a href="/blog/2016/10/23/xss-csrf/">XSS与CSRF两种跨站攻击</a>
+              <ul class="taxonomies">
+                <li class="taxonomies-item"><a href="/blog/tags/security/"><i class="fas fa-tag"></i>security</a></li>
+              </ul>
+              <time>October 23, 2016</time>
+            </li>
+          </ul>
+          <ul>
+            <li class="archives-item">
               <a href="/blog/2016/10/21/jupyter/">程序员必备工具之Jupyter</a>
               <ul class="taxonomies">
-                <li class="taxonomies-item"><a href="/blog/tags/python/"><svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>python</a></li>
+                <li class="taxonomies-item"><a href="/blog/tags/python/"><i class="fas fa-tag"></i>python</a></li>
               </ul>
               <time>October 21, 2016</time>
             </li>
@@ -54,7 +68,7 @@
             <li class="archives-item">
               <a href="/blog/2016/10/19/neo4j-replace-rdbms/">用图数据库解决关系型数据库存在的问题</a>
               <ul class="taxonomies">
-                <li class="taxonomies-item"><a href="/blog/tags/neo4j/"><svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>neo4j</a></li>
+                <li class="taxonomies-item"><a href="/blog/tags/neo4j/"><i class="fas fa-tag"></i>neo4j</a></li>
               </ul>
               <time>October 19, 2016</time>
             </li>
@@ -63,7 +77,7 @@
             <li class="archives-item">
               <a href="/blog/2016/10/17/machine-learning-on-spark/">Machine Learning algorithm on Spark</a>
               <ul class="taxonomies">
-                <li class="taxonomies-item"><a href="/blog/tags/spark/"><svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>spark</a></li>
+                <li class="taxonomies-item"><a href="/blog/tags/spark/"><i class="fas fa-tag"></i>spark</a></li>
               </ul>
               <time>October 17, 2016</time>
             </li>
@@ -72,7 +86,7 @@
             <li class="archives-item">
               <a href="/blog/2016/10/13/elasticsearch-query-dsl/">ElasticSearch Query DSL</a>
               <ul class="taxonomies">
-                <li class="taxonomies-item"><a href="/blog/tags/elasticsearch/"><svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>elasticsearch</a></li>
+                <li class="taxonomies-item"><a href="/blog/tags/elasticsearch/"><i class="fas fa-tag"></i>elasticsearch</a></li>
               </ul>
               <time>October 13, 2016</time>
             </li>
@@ -81,8 +95,8 @@
             <li class="archives-item">
               <a href="/blog/2016/10/12/d3-data-visualization/">D3.js数据可视化</a>
               <ul class="taxonomies">
-                <li class="taxonomies-item"><a href="/blog/tags/d3/"><svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>d3</a></li>
-                <li class="taxonomies-item"><a href="/blog/tags/javascript/"><svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>javascript</a></li>
+                <li class="taxonomies-item"><a href="/blog/tags/d3/"><i class="fas fa-tag"></i>d3</a></li>
+                <li class="taxonomies-item"><a href="/blog/tags/javascript/"><i class="fas fa-tag"></i>javascript</a></li>
               </ul>
               <time>October 12, 2016</time>
             </li>
@@ -91,7 +105,7 @@
             <li class="archives-item">
               <a href="/blog/2016/10/11/vertx-internal/">vertx源码分析</a>
               <ul class="taxonomies">
-                <li class="taxonomies-item"><a href="/blog/tags/vertx/"><svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>vertx</a></li>
+                <li class="taxonomies-item"><a href="/blog/tags/vertx/"><i class="fas fa-tag"></i>vertx</a></li>
               </ul>
               <time>October 11, 2016</time>
             </li>
@@ -100,8 +114,8 @@
             <li class="archives-item">
               <a href="/blog/2016/10/09/meteor-internal-reactive/">meteor的响应式数据源和响应式执行环境</a>
               <ul class="taxonomies">
-                <li class="taxonomies-item"><a href="/blog/tags/meteor/"><svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>meteor</a></li>
-                <li class="taxonomies-item"><a href="/blog/tags/javascript/"><svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>javascript</a></li>
+                <li class="taxonomies-item"><a href="/blog/tags/meteor/"><i class="fas fa-tag"></i>meteor</a></li>
+                <li class="taxonomies-item"><a href="/blog/tags/javascript/"><i class="fas fa-tag"></i>javascript</a></li>
               </ul>
               <time>October 9, 2016</time>
             </li>
@@ -110,7 +124,7 @@
             <li class="archives-item">
               <a href="/blog/2016/10/03/elasticsearch-storelayer/">ElasticSearch的存储结构</a>
               <ul class="taxonomies">
-                <li class="taxonomies-item"><a href="/blog/tags/elasticsearch/"><svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>elasticsearch</a></li>
+                <li class="taxonomies-item"><a href="/blog/tags/elasticsearch/"><i class="fas fa-tag"></i>elasticsearch</a></li>
               </ul>
               <time>October 3, 2016</time>
             </li>
@@ -122,18 +136,9 @@
             <li class="archives-item">
               <a href="/blog/2016/09/10/redis/">redis object types</a>
               <ul class="taxonomies">
-                <li class="taxonomies-item"><a href="/blog/tags/redis/"><svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>redis</a></li>
+                <li class="taxonomies-item"><a href="/blog/tags/redis/"><i class="fas fa-tag"></i>redis</a></li>
               </ul>
               <time>September 10, 2016</time>
-            </li>
-          </ul>
-          <ul>
-            <li class="archives-item">
-              <a href="/blog/2016/09/05/neo4j-internal/">Neo4j Internal</a>
-              <ul class="taxonomies">
-                <li class="taxonomies-item"><a href="/blog/tags/neo4j/"><svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#tag"></use></svg>neo4j</a></li>
-              </ul>
-              <time>September 5, 2016</time>
             </li>
           </ul>
         </li>
@@ -143,13 +148,12 @@
 
 <ul class="pagination">
     
-    <li>
-        <a href="/blog/archives/" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+    <li class="page-item">
+        <a href="/blog/archives/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
     </li>
     
-    <li
-    >
-    <a href="/blog/archives/page/4/" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+    <li class="page-item">
+    <a href="/blog/archives/page/4/" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
     </li>
     
     
@@ -161,8 +165,7 @@
         
     
     
-    <li
-    ><a href="/blog/archives/">1</a></li>
+    <li class="page-item"><a class="page-link" href="/blog/archives/">1</a></li>
     
     
     
@@ -173,8 +176,7 @@
         
     
     
-    <li
-    ><a href="/blog/archives/page/2/">2</a></li>
+    <li class="page-item"><a class="page-link" href="/blog/archives/page/2/">2</a></li>
     
     
     
@@ -185,8 +187,7 @@
         
     
     
-    <li
-    ><a href="/blog/archives/page/3/">3</a></li>
+    <li class="page-item"><a class="page-link" href="/blog/archives/page/3/">3</a></li>
     
     
     
@@ -197,8 +198,7 @@
         
     
     
-    <li
-    ><a href="/blog/archives/page/4/">4</a></li>
+    <li class="page-item"><a class="page-link" href="/blog/archives/page/4/">4</a></li>
     
     
     
@@ -209,8 +209,7 @@
         
     
     
-    <li
-    class="active"><a href="/blog/archives/page/5/">5</a></li>
+    <li class="page-item active"><a class="page-link" href="/blog/archives/page/5/">5</a></li>
     
     
     
@@ -221,17 +220,15 @@
         
     
     
-    <li
-    ><a href="/blog/archives/page/6/">6</a></li>
+    <li class="page-item"><a class="page-link" href="/blog/archives/page/6/">6</a></li>
     
     
-    <li
-    >
-    <a href="/blog/archives/page/6/" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+    <li class="page-item">
+    <a href="/blog/archives/page/6/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
     </li>
     
-    <li>
-        <a href="/blog/archives/page/6/" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    <li class="page-item">
+        <a href="/blog/archives/page/6/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
     </li>
     
 </ul>
@@ -244,17 +241,15 @@
   <ul class="site-footer-items">
     <li class="site-footer-item-rsslink">
       <a href="/blog/archives/index.xml" type="application/rss+xml" target="_blank" title="RSS">
-        <svg class="icon"><use xlink:href="/blog/images/fa-solid.svg#rss"></use></svg>
+        <i class="fas fa-rss"></i>
       </a>
     </li>
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>
   <div class="powerdby">
-    Powered by <a href="https://gohugo.io/">Hugo</a>
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
   </div>
 </div>
-<script src="/blog/js/script.js"></script>
-<script src="/blog/js/custom.js"></script>
 
 
 </body>

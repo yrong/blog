@@ -6,8 +6,6 @@
     <description>Recent content in Elasticsearch on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
     <lastBuildDate>Thu, 13 Oct 2016 18:00:00 +0000</lastBuildDate>
     
@@ -18,27 +16,25 @@
       <title>ElasticSearch Query DSL</title>
       <link>https://yrong.github.io/blog/2016/10/13/elasticsearch-query-dsl/</link>
       <pubDate>Thu, 13 Oct 2016 18:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/10/13/elasticsearch-query-dsl/</guid>
-      <description>&lt;p&gt;ElasticSearch Query DSL Examples
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;ElasticSearch Query DSL Examples&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>ElasticSearch的存储结构</title>
       <link>https://yrong.github.io/blog/2016/10/03/elasticsearch-storelayer/</link>
       <pubDate>Mon, 03 Oct 2016 15:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/10/03/elasticsearch-storelayer/</guid>
-      <description>&lt;p&gt;ElasticSearch的存储结构
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;ElasticSearch的存储结构&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>ElasticSearch源码解析之文档索引</title>
       <link>https://yrong.github.io/blog/2016/07/16/elasticsearch-analysis/</link>
       <pubDate>Sat, 16 Jul 2016 18:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2016/07/16/elasticsearch-analysis/</guid>
       <description>es5.0版本主要改进应该是lucene版本升级到6.0,利用插件机制把netty从core中剥离出来接入NetworkModule,代码在</description>
     </item>

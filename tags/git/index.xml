@@ -6,8 +6,6 @@
     <description>Recent content in Git on yrong blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <managingEditor>yrong@ustc.edu (Ronyang)</managingEditor>
-    <webMaster>yrong@ustc.edu (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
     <lastBuildDate>Sat, 25 Feb 2017 00:00:00 +0000</lastBuildDate>
     
@@ -18,10 +16,9 @@
       <title>git tips</title>
       <link>https://yrong.github.io/blog/2017/02/25/git-tips/</link>
       <pubDate>Sat, 25 Feb 2017 00:00:00 +0000</pubDate>
-      <author>yrong@ustc.edu (Ronyang)</author>
+      
       <guid>https://yrong.github.io/blog/2017/02/25/git-tips/</guid>
-      <description>&lt;p&gt;git-tips
-&lt;/p&gt;</description>
+      <description>&lt;p&gt;git-tips&lt;/p&gt;</description>
     </item>
     
   </channel>
