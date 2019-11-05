@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>D3.js数据可视化 - yrong blog</title>
+  <meta property="og:title" content="D3.js数据可视化 - yrong blog" />
+  <meta name="twitter:title" content="D3.js数据可视化 - yrong blog" />
+  <meta name="description" content="D3.js数据可视化">
+  <meta property="og:description" content="D3.js数据可视化">
+  <meta name="twitter:description" content="D3.js数据可视化">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/2016/10/12/d3-data-visualization/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">D3.js数据可视化</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>October 12, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/d3/">
+            <i class="fas fa-tag"></i>
+            d3
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/javascript/">
+            <i class="fas fa-tag"></i>
+            javascript
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#柱状图">柱状图</a></li>
+<li><a href="#github-贡献表">GitHub 贡献表</a></li>
+<li><a href="#折线图">折线图</a></li>
+<li><a href="#scales">Scales</a></li>
+<li><a href="#航线数据可视化">航线数据可视化</a></li>
+<li><a href="#渲染循环">渲染循环</a></li>
+<li><a href="#创建-更新和过期">创建、更新和过期</a></li>
+<li><a href="#过渡">过渡</a></li>
+<li><a href="#others">Others</a></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      <p>D3.js数据可视化</p>
+
+<blockquote>
+<p>基于 <a href="https://d3js.org/">D3.js</a> ，编写 HTML、SVG 和 CSS 就能让你的数据变得生动起来，这是一个基于数据操作 DOM 的 JavaScript 库。</p>
+</blockquote>
+
+<p>每一位 Web 开发者最应该学习的三个 JavaScript 库就是 jQuery、Underscore 和 D3。在学习它们的过程中，你将会从新的角度去思考如何写代码：jQuery 让你知道如何用尽量少的代码，尽可能多地操作 DOM；Underscore （或者称之为 lodash）用函数式的工具改变你写程序的方式；而 D3 给了你大量的操作数据的工具，以及图形化编程的思想。如果你还不了解 D3，请花一些时间看看<a href="https://github.com/mbostock/d3/wiki/Gallery">它的例子</a>，体会一下 D3 能做到什么。</p>
+
+<p>D3 有极高的灵活性，它是一个比较基础的可视化 js 库，api 和 jQuery 很像，可以把数据和 HTML 结构或者 SVG 文档对应起来。D3 有丰富的数学函数来处理数据转换和物理计算，它擅长于操作 SVG 中的路径 (path) 和几何图形 (circle, ellipse, rect&hellip;)。</p>
+
+<p>在接下来的例子里，你会看到输入的数据、数据变换和最后的输出文档。我将不会解释逐个函数做了什么，我会把代码展示给你看，希望从中你能知道大致这些代码是怎么工作的。只有在 <a href="https://github.com/d3/d3-3.x-api-reference/blob/master/Scales.md">Scales</a> 和 <a href="https://github.com/d3/d3-3.x-api-reference/blob/master/Selections.md">Selections</a> 的部分我才会重点解释。</p>
+
+<h2 id="柱状图">柱状图</h2>
+
+<p><img src="/images/learn-to-d3/01.png" alt="" />
+（<a href="http://codepen.io/SitePoint/pen/wWJXWa">codepen 中查看代码</a>）</p>
+
+<p>我说过在 D3 中，你能使用到的图表远比 Playfair 先生发明过的要多，但是学跑前先走好路，我们从最简单的柱状图开始，了解一下 D3 是怎么将数据和文档流结合在一起的：</p>
+
+<pre><code class="language-javascript">d3.select('#chart')
+  .selectAll(&quot;div&quot;)
+  .data([4, 8, 15, 16, 23, 42])
+  .enter()
+  .append(&quot;div&quot;)
+  .style(&quot;height&quot;, (d)=&gt; d + &quot;px&quot;)
+</code></pre>
+
+<pre><code class="language-selectAll```">
+上述代码中的输入数据是一组数组：[4, 8, 15, 16, 23, 42]，对应的输出 HTML 结构是：
+
+``` html
+&lt;div id=&quot;chart&quot;&gt;
+  &lt;div style=&quot;height: 4px;&quot;&gt;&lt;/div&gt;
+  &lt;div style=&quot;height: 8px;&quot;&gt;&lt;/div&gt;
+  &lt;div style=&quot;height: 15px;&quot;&gt;&lt;/div&gt;
+  &lt;div style=&quot;height: 16px;&quot;&gt;&lt;/div&gt;
+  &lt;div style=&quot;height: 23px;&quot;&gt;&lt;/div&gt;
+  &lt;div style=&quot;height: 42px;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p>所有不需要通过 JS 控制的视觉层内容都写到 CSS 中：</p>
+
+<pre><code class="language-css">#chart div {
+  display: inline-block;
+  background: #4285F4;
+  width: 20px;
+  margin-right: 3px;
+}
+</code></pre>
+
+<h2 id="github-贡献表">GitHub 贡献表</h2>
+
+<p>只需要更改柱状图代码中的几行，我们就能得到一个 GitHub 贡献表。</p>
+
+<p><img src="/images/learn-to-d3/02.png" alt="" /></p>
+
+<p>（<a href="http://codepen.io/SitePoint/pen/rLyKLG">codepen 中查看代码</a>）</p>
+
+<p>和柱状图不同地方在于，图表中根据数据变化的不再是元素的高度，而是元素的 <code>background-color</code> （背景色）。</p>
+
+<pre><code class="language-javascript">const colorMap = d3.interpolateRgb(
+  d3.rgb('#d6e685'),
+  d3.rgb('#1e6823')
+)
+
+d3.select('#chart')
+  .selectAll(&quot;div&quot;)
+  .data([.2, .4, 0, 0, .13, .92])
+  .enter()
+  .append(&quot;div&quot;)
+  .style(&quot;background-color&quot;, (d)=&gt; {
+    return d == 0 ? '#eee' : colorMap(d)
+  })
+</code></pre>
+
+<pre><code class="language-colorMap```">
+## SVG
+
+D3 最大的魅力大概来自于它能应用在 SVG 上，也就是说平面图形比如圆形、多边形、路径和文本，它都可以交互。
+
+![](/images/learn-to-d3/03.png)
+
+```html
+&lt;svg width=&quot;200&quot; height=&quot;200&quot;&gt;
+  &lt;circle fill=&quot;#3E5693&quot; cx=&quot;50&quot; cy=&quot;120&quot; r=&quot;20&quot; /&gt;
+  &lt;text x=&quot;100&quot; y=&quot;100&quot;&gt;Hello SVG!&lt;/text&gt;
+  &lt;path d=&quot;M100,10L150,70L50,70Z&quot; fill=&quot;#BEDBC3&quot; stroke=&quot;#539E91&quot; stroke-width=&quot;3&quot;&gt;
+&lt;/svg&gt;
+</code></pre>
+
+<p>上述代码实现的是：</p>
+
+<ul>
+<li>一个圆心在 (50,120)，半径是 20 的圆形</li>
+<li>一段位于 (100,100) 的文本</li>
+<li>一个 3px 粗边的三角形，<code>d</code> 指的是方向，从点 (100,100) 画线到点 (150,170) 再到点 (50,70) 结束</li>
+</ul>
+
+<pre><code class="language-&lt;path&gt;```">
+## Circles
+
+## 圆形
+
+![](/images/learn-to-d3/04.png)
+
+（[codepen 中查看代码](http://codepen.io/SitePoint/pen/jrBKMM)）
+
+上面的例子中给出的数据结构是很简单的一组数据，D3 的能力远不止于此，它还可以操作更复杂的数据类型。
+
+```javascript
+const data = [{
+  label: &quot;7am&quot;,
+  sales: 20
+},{
+  label: &quot;8am&quot;,
+  sales: 12
+}, {
+  label: &quot;9am&quot;,
+  sales: 8
+}, {
+  label: &quot;10am&quot;,
+  sales: 27
+}]
+</code></pre>
+
+<p>对每一个数据点，我们都将有一个 <code>g</code> （组）元素在 <code>#chart</code> 中，根据对象的属性，每个组里会有一个 <code>&lt;circle&gt;</code> 元素和一个 <code>&lt;text&gt;</code> 元素。</p>
+
+<p>下面的代码将输入数据和 SVG 文档一一对应起来，你能看出它的原理吗？</p>
+
+<pre><code class="language-html">&lt;svg height=&quot;100&quot; width=&quot;250&quot; id=&quot;chart&quot;&gt;
+  &lt;g&gt;
+    &lt;circle cy=&quot;40&quot; cx=&quot;50&quot; r=&quot;20&quot;/&gt;
+    &lt;text y=&quot;90&quot; x=&quot;50&quot;&gt;7am&lt;/text&gt;
+  &lt;/g&gt;
+  &lt;g&gt;
+    &lt;circle cy=&quot;40&quot; cx=&quot;100&quot; r=&quot;12&quot;/&gt;
+    &lt;text y=&quot;90&quot; x=&quot;100&quot;&gt;8am&lt;/text&gt;
+  &lt;/g&gt;
+  &lt;g&gt;
+    &lt;circle cy=&quot;40&quot; cx=&quot;150&quot; r=&quot;8&quot;/&gt;
+    &lt;text y=&quot;90&quot; x=&quot;150&quot;&gt;9am&lt;/text&gt;
+  &lt;/g&gt;
+  &lt;g&gt;
+    &lt;circle cy=&quot;40&quot; cx=&quot;200&quot; r=&quot;27&quot;/&gt;
+    &lt;text y=&quot;90&quot; x=&quot;200&quot;&gt;10am&lt;/text&gt;
+  &lt;/g&gt;
+&lt;/svg&gt;
+</code></pre>
+
+<h2 id="折线图">折线图</h2>
+
+<p><img src="/images/learn-to-d3/05.png" alt="" /></p>
+
+<p>（<a href="http://codepen.io/SitePoint/pen/pbeKER">codepen 中查看代码</a>）</p>
+
+<p>用 SVG 实现折线图再简单不过，我们将下面这些数据：</p>
+
+<pre><code class="language-javascript">const data = [
+  { x: 0, y: 30 },
+  { x: 50, y: 20 },
+  { x: 100, y: 40 },
+  { x: 150, y: 80 },
+  { x: 200, y: 95 }
+]
+</code></pre>
+
+<p>转换成以下的 SVG 文档：</p>
+
+<pre><code class="language-html">&lt;svg id=&quot;chart&quot; height=&quot;100&quot; width=&quot;200&quot;&gt;
+  &lt;path stroke-width=&quot;2&quot; d=&quot;M0,70L50,80L100,60L150,20L200,5&quot;&gt;
+&lt;/svg&gt;
+</code></pre>
+
+<p><strong>注意：</strong> SVG 代码中的  <code>y</code> 值和输入值的 <code>y</code> 值不同，是用 100 减去给定的 <code>y</code> 值，因为在 SVG 中屏幕的左上角是 (0,0)，所以在纵坐标最大值是 100 的坐标系中，需要这么处理。</p>
+
+<p>可以这么实现只由一条 <code>path</code> 构成的图形：</p>
+
+<pre><code class="language-javascript">const path = &quot;M&quot; + data.map((d)=&gt; {
+  return d.x + ',' + (100 - d.y);
+}).join('L');
+const line = `&lt;path stroke-width=&quot;2&quot; d=&quot;${ path }&quot;/&gt;`;
+document.querySelector('#chart').innerHTML = line;
+</code></pre>
+
+<p>上面的代码看着可麻烦了，D3 其实提供了路径生成函数来简化这个步骤：</p>
+
+<pre><code class="language-javascript">const line = d3.svg.line()
+  .x((d)=&gt; d.x)
+  .y((d)=&gt; 100 - d.y)
+  .interpolate(&quot;linear&quot;)
+
+d3.select('#chart')
+  .append(&quot;path&quot;)
+  .attr('stroke-width', 2)
+  .attr('d', line(data))
+</code></pre>
+
+<p>清爽多了！<code>interpolate</code> 函数可接受不同的参数，画出不一样的图形，除了 &lsquo;linear&rsquo;，还可以试试看 &lsquo;basis&rsquo;、&rsquo;cardinal&rsquo;&hellip;</p>
+
+<p><img src="/images/learn-to-d3/06.png" alt="" /></p>
+
+<h2 id="scales">Scales</h2>
+
+<blockquote>
+<p>Scales 函数可以将一个输入集映射到一个输出集中。</p>
+</blockquote>
+
+<p><a href="http://codepen.io/SitePoint/pen/aZJKmG">codepen 中查看代码</a></p>
+
+<p>上述例子所用的数据都是假数据，不会超过坐标轴所设定的范围。当数据是动态变化的时候，事情可就没有这么简单了，你需要将输入映射到固定范围的输出中，也就是我们的坐标轴。</p>
+
+<p>假设我们有一个 500px X 200px 大小的折线图区域，输入数据是：</p>
+
+<pre><code class="language-javascript">const data = [
+  { x: 0, y: 30 },
+  { x: 25, y: 15 },
+  { x: 50, y: 20 }
+]
+</code></pre>
+
+<p>如果 y 轴的范围在 [0,30]，x 轴的范围在 [0,50]，那数据就能被漂亮地呈现在屏幕上。不过现实是，y 轴范围在0到200，x 轴范围在0到500间。</p>
+
+<p>我们可以用 <code>d3.max</code> 获取到输入数据中的最大的 x 值和 y 值，然后创建出对应的 scales。</p>
+
+<p>scale 和上面用到的颜色差值函数类似，都是将输入值对应到固定的输出范围中。</p>
+
+<pre><code class="language-javascript">xScale(0) -&gt; 0
+xScale(10) -&gt; 100
+xScale(50) -&gt; 500
+</code></pre>
+
+<p>对于超出输出值范围的输入值，同样适用：</p>
+
+<pre><code class="language-javascript">xScale(-10) -&gt; -100
+xScale(60) -&gt; 600
+</code></pre>
+
+<p>在生成折线图的代码中 scale 可以这么使用：</p>
+
+<pre><code class="language-javascript">const line = d3.svg.line()
+  .x((d)=&gt; xScale(d.x))
+  .y((d)=&gt; yScale(d.y))
+  .interpolate(&quot;linear&quot;)
+</code></pre>
+
+<p>scales 还能让图形更优雅地显示出来，比如加上一点间距：</p>
+
+<pre><code class="language-javascript">const padding = 20;
+const xScale = d3.scale.linear()
+  .domain([0, xMax])
+  .range([padding, width - padding])
+
+const yScale = d3.scale.linear()
+  .domain([0, yMax])
+  .range([height - padding, padding])
+</code></pre>
+
+<p>现在可以在有动态数据集的前提下生成该集的折线图，这条折线图保证会在 500px X 200px 的范围内，并且距离该区域的四边都有 20px 的间距。</p>
+
+<p>线性的 scale 最常见，不过还有处理指数的 pow、处理非数值数据（比如分类、命名等）的 ordinal scales，除此之外还有 <a href="https://github.com/mbostock/d3/wiki/Quantitative-Scales">quantitative scales</a>、<a href="https://github.com/mbostock/d3/wiki/Ordinal-Scales">ordinal scales</a> 和 <a href="https://github.com/mbostock/d3/wiki/Time-Scales">time scales</a>。</p>
+
+<p>比如把我的寿命当做输入值，映射到 [0,500] 的区域内：</p>
+
+<pre><code class="language-javascript">const life = d3.time.scale()
+  .domain([new Date(1986, 1, 18), new Date()])
+  .range([0, 500])
+
+// 0 到 500 之间的哪个点才是我的 18 岁生日呢？
+life(new Date(2004, 1, 18))
+</code></pre>
+
+<h2 id="航线数据可视化">航线数据可视化</h2>
+
+<p>到目前为止，我们看到的都是静止的图像。接下来，以墨尔本到悉尼的航线为例，试试动态图像吧。</p>
+
+<p><a href="http://codepen.io/SitePoint/pen/wWJXoK">codepen 中查看效果</a></p>
+
+<p>上面的效果是基于 SVG 的文本 (text)、线条 (line) 和圆形 (circle)。</p>
+
+<pre><code class="language-html">&lt;svg id=&quot;chart&quot; width=&quot;600&quot; height=&quot;500&quot;&gt;
+  &lt;text class=&quot;time&quot; x=&quot;300&quot; y=&quot;50&quot; text-anchor=&quot;middle&quot;&gt;6:00&lt;/text&gt;
+  &lt;text class=&quot;origin-text&quot; x=&quot;90&quot; y=&quot;75&quot; text-anchor=&quot;end&quot;&gt;MEL&lt;/text&gt;
+  &lt;text class=&quot;dest-text&quot; x=&quot;510&quot; y=&quot;75&quot; text-anchor=&quot;start&quot;&gt;SYD&lt;/text&gt;
+  &lt;circle class=&quot;origin-dot&quot; r=&quot;5&quot; cx=&quot;100&quot; cy=&quot;75&quot; /&gt;
+  &lt;circle class=&quot;dest-dot&quot; r=&quot;5&quot; cx=&quot;500&quot; cy=&quot;75&quot; /&gt;
+  &lt;line class=&quot;origin-dest-line&quot; x1=&quot;110&quot; y1=&quot;75&quot; x2=&quot;490&quot; y2=&quot;75&quot; /&gt;
+
+  &lt;!-- for each flight in the current time --&gt;
+  &lt;g class=&quot;flight&quot;&gt;
+    &lt;text class=&quot;flight-id&quot; x=&quot;160&quot; y=&quot;100&quot;&gt;JQ 500&lt;/text&gt;
+    &lt;line class=&quot;flight-line&quot; x1=&quot;100&quot; y1=&quot;100&quot; x2=&quot;150&quot; y2=&quot;100&quot; /&gt;
+    &lt;circle class=&quot;flight-dot&quot; cx=&quot;150&quot; cy=&quot;100&quot; r=&quot;5&quot; /&gt;
+  &lt;/g&gt;
+&lt;/svg&gt;
+</code></pre>
+
+<p>动态变化的部分是时间和不同的航班，数据源大概长这样：</p>
+
+<pre><code class="language-javascript">let data = [
+  { departs: '06:00 am', arrives: '07:25 am', id: 'Jetstar 500' },
+  { departs: '06:00 am', arrives: '07:25 am', id: 'Qantas 400' },
+  { departs: '06:00 am', arrives: '07:25 am', id: 'Virgin 803' }
+]
+</code></pre>
+
+<p>我们需要将每条航线的出发和到达时间用 scale 映射到 x 轴上，这些数据将会动态地变化。在代码开始的位置，就将这些数据依次设定为 <code>Date</code> 对象，并 scale 它们，后面方便使用。对日期的处理我用的是 Moment.js。</p>
+
+<pre><code class="language-javascript">data.forEach((d)=&gt; {
+  d.departureDate = moment(d.departs, &quot;hh-mm a&quot;).toDate();
+  d.arrivalDate = moment(d.arrives, &quot;hh-mm a&quot;).toDate();
+  d.xScale = d3.time.scale()
+    .domain([departureDate, arrivalDate])
+    .range([100, 500])
+});
+</code></pre>
+
+<p>现在可以把数据传入 <code>xScale()</code> 获取到每条航线的 x 坐标。</p>
+
+<h2 id="渲染循环">渲染循环</h2>
+
+<p>出发和到达时间都四舍五入到 5 分钟，所以在第一个航班起飞时间和最后一个航班到达时间之间以 5分钟为单位递增。</p>
+
+<pre><code class="language-javascript">let now = moment(data[0].departs, &quot;hh:mm a&quot;);
+const end = moment(data[data.length - 1].arrives, &quot;hh:mm a&quot;);
+
+const loop = function() {
+  const time = now.toDate();
+
+  // 选出当前的航班
+  const currentData = data.filter((d)=&gt; {
+    return d.departureDate &lt;= time &amp;&amp; time &lt;= d.arrivalDate
+  });
+
+  render(currentData, time);
+
+  if (now &lt;= end) {
+    // Increment 5m and call loop again in 500ms
+    // 5分钟为增量，500ms 轮询依次
+    now = now.add(5, 'minutes');
+    setTimeout(loop, 500);
+  }
+}
+</code></pre>
+
+<h2 id="创建-更新和过期">创建、更新和过期</h2>
+
+<p>在以下场景下，开发者可以指定要使用的数据变换和元素过渡方式：</p>
+
+<ul>
+<li>新数据点出现的时候（创建时）</li>
+<li>现有的数据发生变化（更新时）</li>
+<li>数据不再使用时（过期时）</li>
+</ul>
+
+<pre><code class="language-javascript">const render = function(data, time) {
+  // 渲染 'time'
+  d3.select('.time')
+    .text(moment(time).format(&quot;hh:mm a&quot;))
+
+  // 创建 selection，传入数据集
+  const flight = d3.select('#chart')
+    .selectAll('g.flight')
+    .data(data, (d)=&gt; d.id)
+
+  // 为新的数据创建节点
+  const newFlight = flight.enter()
+    .append(&quot;g&quot;)
+    .attr('class', 'flight')
+
+  const xPoint = (d)=&gt; d.xScale(time);
+  const yPoint = (d, i)=&gt; 100 + i * 25;
+
+  newFlight.append(&quot;circle&quot;)
+    .attr('class',&quot;flight-dot&quot;)
+    .attr('cx', xPoint)
+    .attr('cy', yPoint)
+    .attr('r', &quot;5&quot;)
+
+  // 通过 select 更新现有的数据
+  flight.select('.flight-dot')
+    .attr('cx', xPoint)
+    .attr('cy', yPoint)
+
+  // 移除不需要的数据
+  const oldFlight = flight.exit()
+    .remove()
+}
+</code></pre>
+
+<h2 id="过渡">过渡</h2>
+
+<p>上述的代码实现了每 500ms 以 5 分钟为增量渲染画面：</p>
+
+<ul>
+<li>更新了时间</li>
+<li>每当有新的航班图时，以圆为标识创建</li>
+<li>更新当前航班的 x/y 坐标轴</li>
+<li>当飞机到达目的地时，移除数据</li>
+</ul>
+
+<p>可以说已经实现了我们开始时的目标，但是每次新数据的出现和旧数据的销毁都太粗暴。通过在 D3 selection 上添加过渡，就能把这个过程变得平滑。</p>
+
+<p>比如，为新数据添加到 DOM 结构中，通过改变透明度 (opacity)，加一个渐现动画：</p>
+
+<pre><code class="language-javascript">const newFlight = flight.enter()
+  .append(&quot;g&quot;)
+  .attr('class', 'flight')
+  .attr('opacity', 0)
+
+newFlight.transition()
+  .duration(500)
+  .attr('opacity', 1)
+</code></pre>
+
+<p>数据移除可以加上渐隐动画：</p>
+
+<pre><code class="language-javascript">flight.exit()
+  .transition()
+  .duration(500)
+  .attr('opacity', 0)
+  .remove()
+</code></pre>
+
+<p>在横纵坐标点上也可以加上：</p>
+
+<pre><code class="language-javascript">flight.select('.flight-dot')
+  .transition()
+  .duration(500)
+  .ease('linear')
+  .attr('cx', xPoint)
+  .attr('cy', yPoint)
+</code></pre>
+
+<p>我们也能对这 5 分钟的增量做过渡，用 <code>tween</code> 函数实现每分钟时间都将出现，而不是每 5 分钟才会出现。</p>
+
+<pre><code class="language-javascript">const inFiveMinutes = moment(time).add(5, 'minutes').toDate();
+const i = d3.interpolate(time, inFiveMinutes);
+d3.select('.time')
+  .transition()
+  .duration(500)
+  .ease('linear')
+  .tween(&quot;text&quot;, ()=&gt; {
+    return function(t) {
+      this.textContent = moment(i(t)).format(&quot;hh:mm a&quot;);
+    };
+  });
+</code></pre>
+
+<pre><code class="language-t```">
+## 树形图
+
+
+
+![]({{ site.baseurl }}/images/learn-to-d3/tree-02.png)
+
+</code></pre>
+
+<p>&lt;!DOCTYPE html&gt;
+<html lang="en">
+  <head>
+    <meta charset="utf-8"></p>
+
+<pre><code>&lt;title&gt;Tree Example&lt;/title&gt;
+
+&lt;style&gt;
+</code></pre>
+
+<p>.node {
+    cursor: pointer;
+  }
+  .node circle {
+    fill: #fff;
+    stroke: steelblue;
+    stroke-width: 3px;
+  }
+  .node text {
+    font: 12px sans-serif;
+  }
+  .link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 2px;
+  }</p>
+
+<pre><code>&lt;/style&gt;
+</code></pre>
+
+<p></head></p>
+
+<p><body></p>
+
+<!-- load the d3.js library --> 
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+  
+
+<script>
+var treeData = [
+  {
+    "name": "Top Level",
+    "parent": "null",
+    "children": [
+      {
+        "name": "Level 2: A",
+        "parent": "Top Level",
+        "children": [
+          {
+            "name": "Son of A",
+            "parent": "Level 2: A"
+          },
+          {
+            "name": "Daughter of A",
+            "parent": "Level 2: A"
+          }
+        ]
+      },
+      {
+        "name": "Level 2: B",
+        "parent": "Top Level"
+      }
+    ]
+  }
+];
+// ************** Generate the tree diagram  *****************
+var margin = {top: 20, right: 120, bottom: 20, left: 120},
+  width = 960 - margin.right - margin.left,
+  height = 500 - margin.top - margin.bottom;
+  
+var i = 0,
+  duration = 750,
+  root;
+var tree = d3.layout.tree()
+  .size([height, width]);
+var diagonal = d3.svg.diagonal()
+  .projection(function(d) { return [d.y, d.x]; });
+var svg = d3.select("body").append("svg")
+  .attr("width", width + margin.right + margin.left)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+root = treeData[0];
+root.x0 = height / 2;
+root.y0 = 0;
+  
+update(root);
+d3.select(self.frameElement).style("height", "500px");
+function update(source) {
+  // Compute the new tree layout.
+  var nodes = tree.nodes(root).reverse(),
+    links = tree.links(nodes);
+  // Normalize for fixed-depth.
+  nodes.forEach(function(d) { d.y = d.depth * 180; });
+  // Update the nodes…
+  var node = svg.selectAll("g.node")
+    .data(nodes, function(d) { return d.id || (d.id = ++i); });
+  // Enter any new nodes at the parent's previous position.
+  var nodeEnter = node.enter().append("g")
+    .attr("class", "node")
+    .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+    .on("click", click);
+  nodeEnter.append("circle")
+    .attr("r", 1e-6)
+    .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+  nodeEnter.append("text")
+    .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
+    .attr("dy", ".35em")
+    .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+    .text(function(d) { return d.name; })
+    .style("fill-opacity", 1e-6);
+  // Transition nodes to their new position.
+  var nodeUpdate = node.transition()
+    .duration(duration)
+    .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+  nodeUpdate.select("circle")
+    .attr("r", 10)
+    .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+  nodeUpdate.select("text")
+    .style("fill-opacity", 1);
+  // Transition exiting nodes to the parent's new position.
+  var nodeExit = node.exit().transition()
+    .duration(duration)
+    .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+    .remove();
+  nodeExit.select("circle")
+    .attr("r", 1e-6);
+  nodeExit.select("text")
+    .style("fill-opacity", 1e-6);
+  // Update the links…
+  var link = svg.selectAll("path.link")
+    .data(links, function(d) { return d.target.id; });
+  // Enter any new links at the parent's previous position.
+  link.enter().insert("path", "g")
+    .attr("class", "link")
+    .attr("d", function(d) {
+    var o = {x: source.x0, y: source.y0};
+    return diagonal({source: o, target: o});
+    });
+  // Transition links to their new position.
+  link.transition()
+    .duration(duration)
+    .attr("d", diagonal);
+  // Transition exiting nodes to the parent's new position.
+  link.exit().transition()
+    .duration(duration)
+    .attr("d", function(d) {
+    var o = {x: source.x, y: source.y};
+    return diagonal({source: o, target: o});
+    })
+    .remove();
+  // Stash the old positions for transition.
+  nodes.forEach(function(d) {
+  d.x0 = d.x;
+  d.y0 = d.y;
+  });
+}
+// Toggle children on click.
+function click(d) {
+  if (d.children) {
+  d._children = d.children;
+  d.children = null;
+  } else {
+  d.children = d._children;
+  d._children = null;
+  }
+  update(d);
+}
+</script>
+  
+
+<p></body>
+</html></p>
+
+<pre><code>
+### 关键代码注解 ###
+
+</code></pre>
+
+<p>var diagonal = d3.svg.diagonal()
+ .projection(function(d) { return [d.y, d.x]; });</p>
+
+<pre><code>声明[d3.js diagonal](https://github.com/d3/d3-3.x-api-reference/blob/master/SVG-Shapes.md)连接线发生器,注意这里x,y坐标系互换
+
+
+</code></pre>
+
+<p>var nodes = tree.nodes(root),
+   links = tree.links(nodes);</p>
+
+<pre><code>treenode和links的初始化,参见[树布局](https://github.com/d3/d3/wiki/%E6%A0%91%E5%B8%83%E5%B1%80),每个节点中包含以下属性：
+
+- parent - 父节点引用，根节点为 null;
+- children - 所有子节点，叶子节点为 null;
+- depth - 当前节点所处层级（也叫深度）；根节点为 0;
+- x - 计算得到的当前节点的计 x 坐标;
+- y - 计算得到的当前节点的计 y 坐标;
+
+
+</code></pre>
+
+<p>nodes.forEach(function(d) { d.y = d.depth * 180; });</p>
+
+<pre><code>
+定义节点深度(level)和水平(x,y坐标系已互换)位置的关系.
+
+![]({{ site.baseurl }}/images/learn-to-d3/tree-05.png)
+
+
+</code></pre>
+
+<p>var node = svg.selectAll(&ldquo;g.node&rdquo;)
+   .data(nodes, function(d) { return d.id || (d.id = ++i); });</p>
+
+<p>var link = svg.selectAll(&ldquo;path.link&rdquo;)
+   .data(links, function(d) { return d.target.id; });
+   .enter().insert(&ldquo;path&rdquo;, &ldquo;g&rdquo;)
+   .attr(&ldquo;class&rdquo;, &ldquo;link&rdquo;)
+   .attr(&ldquo;d&rdquo;, diagonal);</p>
+
+<pre><code>根据生成的节点id关联链路,用diagonal产生连接曲线
+
+
+</code></pre>
+
+<p>.node {
+  cursor: pointer;
+ }</p>
+
+<p>function click(d) {
+  if (d.children) {
+ d._children = d.children;
+ d.children = null;
+  } else {
+ d.children = d._children;
+ d._children = null;
+  }
+  update(d);
+}</p>
+
+<pre><code>根据children属性添加交互式collapse效果(点击根节点隐藏子节点,再点展开)
+
+
+
+## 地图
+
+用不同颜色标注你所去过的地方
+
+</code></pre>
+
+<p>&lt;!DOCTYPE html&gt;
+<meta charset="utf-8">
+<style></p>
+
+<p>/* CSS goes here. */</p>
+
+<p></style>
+<body>
+<div id="chart" style="max-width: 47.5em; margin: 10px auto; position: relative;">
+<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="//d3js.org/topojson.v1.min.js"></script>
+<script>
+  var width  = 700;
+  var height = 400;</p>
+
+<p>var myMap = new Map();
+      myMap.set(&ldquo;甘肃&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;青海&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;广西&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;贵州&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;重庆&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;北京&rdquo;, &ldquo;#FA5858&rdquo;);
+      myMap.set(&ldquo;福建&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;安徽&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;广东&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;西藏&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;新疆&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;海南&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;宁夏&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;陕西&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;山西&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;湖北&rdquo;, &ldquo;#FA5858&rdquo;);
+      myMap.set(&ldquo;湖南&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;四川&rdquo;, &ldquo;#FE2E2E&rdquo;);
+      myMap.set(&ldquo;云南&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;河北&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;河南&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;辽宁&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;山东&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;天津&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;江西&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;江苏&rdquo;, &ldquo;#FA5858&rdquo;);
+      myMap.set(&ldquo;上海&rdquo;, &ldquo;#FA5858&rdquo;);
+      myMap.set(&ldquo;浙江&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;吉林&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;内蒙古&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;黑龙江&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;香港&rdquo;, &ldquo;#F5A9A9&rdquo;);
+      myMap.set(&ldquo;澳门&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;台湾&rdquo;, &ldquo;#A4A4A4&rdquo;);
+      myMap.set(&ldquo;background&rdquo;, &ldquo;#2A0A0A&rdquo;);</p>
+
+<p>var svg = d3.select(&ldquo;#chart&rdquo;).append(&ldquo;svg&rdquo;)
+    .attr(&ldquo;width&rdquo;, &lsquo;100%&rsquo;)
+    .attr(&ldquo;height&rdquo;, &lsquo;100%&rsquo;)
+    .attr(&lsquo;viewBox&rsquo;,&lsquo;0 0 &lsquo;+(Math.min(width,height))+&rsquo; &lsquo;+Math.min(width,height))
+    .attr(&lsquo;preserveAspectRatio&rsquo;,&lsquo;xMinYMin&rsquo;)
+      .append(&ldquo;g&rdquo;)
+      .attr(&ldquo;transform&rdquo;, &ldquo;translate(0,0)&rdquo;);</p>
+
+<p>var projection = d3.geo.mercator()
+            .center([107, 31])
+            .scale(350)
+              .translate([width/2-130, height/2+30]);</p>
+
+<p>var path = d3.geo.path()
+          .projection(projection);</p>
+
+<p>d3.json(&ldquo;china_simplify.json&rdquo;, function(error, root) {</p>
+
+<pre><code>if (error) 
+  return console.error(error);
+console.log(root.features);
+
+svg.selectAll(&quot;path&quot;)
+  .data( root.features )
+  .enter()
+  .append(&quot;path&quot;)
+  .attr(&quot;stroke&quot;,&quot;#000&quot;)
+  .attr(&quot;stroke-width&quot;,1)
+  .attr(&quot;fill&quot;, function(d,i){
+    return myMap.get(&quot;background&quot;);
+  })
+  .attr(&quot;d&quot;, path )
+  .on(&quot;mouseover&quot;,function(d,i){
+            d3.select(this)
+                .attr(&quot;fill&quot;,&quot;#ACB1E6&quot;);
+        })
+        .on(&quot;mouseout&quot;,function(d,i){
+            d3.select(this)
+                .attr(&quot;fill&quot;,myMap.get(d.properties.name));
+        });
+</code></pre>
+
+<p>});</p>
+
+<p></script>
+</div>
+</body></p>
+
+<pre><code>
+### 关键代码注解 ###
+
+Define your projection
+
+</code></pre>
+
+<pre><code>var projection = d3.geo.mercator()
+        .center([107, 31]) //(107,31) as center
+        .scale(350)
+          .translate([width/2-130, height/2+30]);// centers in SVG
+</code></pre>
+
+<pre><code>
+When you define a projection, you tell D3 how to transform your data from spherical to Cartesian coordinates. Take a look at the projection docs to get a sense of how you can project your data with D3.
+
+Translate to screen coordinates
+
+</code></pre>
+
+<pre><code>var path = d3.geo.path()
+      .projection(projection);
+</code></pre>
+
+<pre><code>
+When D3 renders your SVG, it has to translate geo coordinates to pixel coordinates on your screen. This functionality is called a path generator. In this block, we store our path generator in the variable path so we can access it through out our code.
+
+Load geo json data
+
+</code></pre>
+
+<p>d3.json(&ldquo;china_simplify.json&rdquo;, function(error, root) { // loads JSON file</p>
+
+<pre><code>if (error) 
+  return console.error(error);
+console.log(root.features);
+
+svg.selectAll(&quot;path&quot;) // selects path elements, will make them if they don't exist
+  .data( root.features ) // iterates over geo feature
+  .enter() // adds feature if it doesn't exist as an element
+  .append(&quot;path&quot;) // defines element as a path
+  .attr(&quot;stroke&quot;,&quot;#000&quot;)
+  .attr(&quot;stroke-width&quot;,1)
+  .attr(&quot;fill&quot;, function(d,i){
+    return myMap.get(&quot;background&quot;);
+  })
+  .attr(&quot;d&quot;, path )  // path generator translates geo data to SVG
+  .on(&quot;mouseover&quot;,function(d,i){
+            d3.select(this)
+                .attr(&quot;fill&quot;,&quot;#ACB1E6&quot;);
+        })
+        .on(&quot;mouseout&quot;,function(d,i){
+            d3.select(this)
+                .attr(&quot;fill&quot;,myMap.get(d.properties.name));
+        });
+</code></pre>
+
+<p>});</p>
+
+<pre><code>
+## Neo4j Link Graph Render ##
+
+visualization toolkits usually expect a JSON structure of node objects (their id, label(s) and properties) and a list of relationships (their properties, start- and end-node-id (or node-array-index for d3) and optionally relationship-id) like this. Here we see 3 nodes (2 people, one database) and 3 relationships in that datastructure.
+
+&gt; Target JSON DataStructure
+
+</code></pre>
+
+<p>{&ldquo;nodes&rdquo;:[{name:&ldquo;Peter&rdquo;,label:&ldquo;Person&rdquo;,id:1},{name:&ldquo;Michael&rdquo;,label:&ldquo;Person&rdquo;,id:2},
+          {name:&ldquo;Neo4j&rdquo;,label:&ldquo;Database&rdquo;,id:3}],
+ &ldquo;links&rdquo;:[{source:0, target:1, type:&ldquo;KNOWS&rdquo;, since:2010},{source:0, target:2, type:&ldquo;FOUNDED&rdquo;},
+          {source:1, target:2, type:&ldquo;WORKS_ON&rdquo;}]}</p>
+
+<pre><code>
+&gt; neo4j Query Result DataStructure
+
+</code></pre>
+
+<p>{ &ldquo;results&rdquo;: [
+    {
+      &ldquo;columns&rdquo;: [&ldquo;path&rdquo;],
+      &ldquo;data&rdquo;   : [{
+          &ldquo;graph&rdquo;: {
+            &ldquo;nodes&rdquo;: [
+              {&ldquo;id&rdquo;: &ldquo;1&rdquo;, &ldquo;labels&rdquo;: [&ldquo;Person&rdquo;], &ldquo;properties&rdquo;: {&ldquo;name&rdquo;: &ldquo;Peter&rdquo;}},
+              {&ldquo;id&rdquo;: &ldquo;2&rdquo;, &ldquo;labels&rdquo;: [&ldquo;Person&rdquo;], &ldquo;properties&rdquo;: {&ldquo;name&rdquo;: &ldquo;Michael&rdquo;}}
+             ],
+            &ldquo;relationships&rdquo;: [
+              {&ldquo;id&rdquo;: &ldquo;0&rdquo;, &ldquo;type&rdquo;: &ldquo;KNOWS&rdquo;, &ldquo;startNode&rdquo;: &ldquo;1&rdquo;, &ldquo;endNode&rdquo;: &ldquo;2&rdquo;, &ldquo;properties&rdquo;: {}}
+             ]
+          } // , {&ldquo;graph&rdquo;: &hellip;}, &hellip;
+      }]}
+  ], &ldquo;errors&rdquo;: []
+}</p>
+
+<pre><code>
+&gt; conversion logic
+
+``` js
+function idIndex(a,id) {
+  for (var i=0;i&lt;a.length;i++) {
+    if (a[i].id == id) return i;}
+  return null;
+}
+var nodes=[], links=[];
+res.results[0].data.forEach(function (row) {
+   row.graph.nodes.forEach(function (n) {
+     if (idIndex(nodes,n.id) == null)
+       nodes.push({id:n.id,label:n.labels[0],title:n.properties.name});
+   });
+   links = links.concat( row.graph.relationships.map(function(r) {
+     return {source:idIndex(nodes,r.startNode),target:idIndex(nodes,r.endNode),type:r.type};
+   }));
+});
+viz = {nodes:nodes, links:links};
+</code></pre>
+
+<pre><code class="language-python">results = db.run(&quot;MATCH (m:Movie)&lt;-[:ACTED_IN]-(a:Person) &quot;
+         &quot;RETURN m.title as movie, collect(a.name) as cast &quot;
+         &quot;LIMIT {limit}&quot;, {&quot;limit&quot;: request.args.get(&quot;limit&quot;, 100)})
+nodes = []
+rels = []
+i = 0
+for record in results:
+    nodes.append({&quot;title&quot;: record[&quot;movie&quot;], &quot;label&quot;: &quot;movie&quot;})
+    target = i
+    i += 1
+    for name in record['cast']:
+        actor = {&quot;title&quot;: name, &quot;label&quot;: &quot;actor&quot;}
+        try:
+            source = nodes.index(actor)
+        except ValueError:
+            nodes.append(actor)
+            source = i
+            i += 1
+        rels.append({&quot;source&quot;: source, &quot;target&quot;: target})
+</code></pre>
+
+<p>To render this list with D3, you just need the d3.js library dependency and a few lines of javascript.</p>
+
+<pre><code>var width = 800, height = 800;
+  // force layout setup
+  var force = d3.layout.force()
+          .charge(-200).linkDistance(30).size([width, height]);
+
+  // setup svg div
+  var svg = d3.select(&quot;#graph&quot;).append(&quot;svg&quot;)
+          .attr(&quot;width&quot;, &quot;100%&quot;).attr(&quot;height&quot;, &quot;100%&quot;)
+          .attr(&quot;pointer-events&quot;, &quot;all&quot;);
+
+  // load graph (nodes,links) json from /graph endpoint
+  d3.json(&quot;/graph&quot;, function(error, graph) {
+if (error) return;
+
+      force.nodes(graph.nodes).links(graph.links).start();
+
+      // render relationships as lines
+      var link = svg.selectAll(&quot;.link&quot;)
+              .data(graph.links).enter()
+              .append(&quot;line&quot;).attr(&quot;class&quot;, &quot;link&quot;);
+
+      // render nodes as circles, css-class from label
+      var node = svg.selectAll(&quot;.node&quot;)
+              .data(graph.nodes).enter()
+              .append(&quot;circle&quot;)
+              .attr(&quot;class&quot;, function (d) { return &quot;node &quot;+d.label })
+              .attr(&quot;r&quot;, 10)
+              .call(force.drag);
+
+      // html title attribute for title node-attribute
+      node.append(&quot;title&quot;)
+              .text(function (d) { return d.title; })
+
+      // force feed algo ticks for coordinate computation
+      force.on(&quot;tick&quot;, function() {
+          link.attr(&quot;x1&quot;, function(d) { return d.source.x; })
+                  .attr(&quot;y1&quot;, function(d) { return d.source.y; })
+                  .attr(&quot;x2&quot;, function(d) { return d.target.x; })
+                  .attr(&quot;y2&quot;, function(d) { return d.target.y; });
+
+          node.attr(&quot;cx&quot;, function(d) { return d.x; })
+                  .attr(&quot;cy&quot;, function(d) { return d.y; });
+      });
+  });
+</code></pre>
+
+<p><a href="https://github.com/yrong/movies-python-bolt">my example project</a></p>
+
+<h2 id="others">Others</h2>
+
+<p>D3 能做的事太多，不一一讲解了。</p>
+
+<ul>
+<li><a href="http://bl.ocks.org/mbostock/1096355">极地时钟</a></li>
+<li><a href="http://bl.ocks.org/mbostock/4062045">Force Layouts</a></li>
+<li><a href="http://bl.ocks.org/mbostock/4060606">世界地图</a> &amp; <a href="http://bl.ocks.org/mbostock/3757125">3D 地球</a></li>
+<li><a href="http://bl.ocks.org/mbostock/4060366">Voronoi Tessellation</a></li>
+<li><a href="http://bl.ocks.org/mbostock/aa7edeac67253ea5de7f">Prim’s Algorithm V</a></li>
+<li><a href="http://bl.ocks.org/mbostock/9539958">OMG Particles II</a></li>
+</ul>
+
+<p>在 <a href="https://github.com/d3/d3/wiki/Gallery">D3 Gallery</a> 中能找到更多例子。推荐 <a href="http://alignedleft.com/tutorials/d3/">Scott Murray 的 D3 教程</a>和 <a href="https://github.com/d3/d3-3.x-api-reference/blob/master/API-Reference.md">D3 的官方文档</a>。</p>
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/2016/10/12/d3-data-visualization/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/2016/10/13/elasticsearch-query-dsl/" data-toggle="tooltip" data-placement="top" title="ElasticSearch Query DSL">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/2016/10/11/vertx-internal/" data-toggle="tooltip" data-placement="top" title="vertx源码分析">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

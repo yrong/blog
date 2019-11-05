@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Python on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/python/</link>
+    <description>Recent content in Python on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Mon, 26 Dec 2016 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/python/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>meta program in python</title>
+      <link>https://yrong.github.io/blog/2016/12/26/meta-program/</link>
+      <pubDate>Mon, 26 Dec 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/2016/12/26/meta-program/</guid>
+      <description>&lt;p&gt;meta program in python&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Scrapy In-depth Analysis</title>
+      <link>https://yrong.github.io/blog/2016/12/07/scrapy/</link>
+      <pubDate>Wed, 07 Dec 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/2016/12/07/scrapy/</guid>
+      <description>&lt;p&gt;Scrapy In-depth Analysis&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>程序员必备工具之Jupyter</title>
+      <link>https://yrong.github.io/blog/2016/10/21/jupyter/</link>
+      <pubDate>Fri, 21 Oct 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/2016/10/21/jupyter/</guid>
+      <description>&lt;p&gt;程序员必备工具之Jupyter&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>分布式环境系统监控 - yrong blog</title>
+  <meta property="og:title" content="分布式环境系统监控 - yrong blog" />
+  <meta name="twitter:title" content="分布式环境系统监控 - yrong blog" />
+  <meta name="description" content="分布式环境系统监控Zipkin&amp;Pinpoint">
+  <meta property="og:description" content="分布式环境系统监控Zipkin&amp;Pinpoint">
+  <meta name="twitter:description" content="分布式环境系统监控Zipkin&amp;Pinpoint">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/2017/01/05/microservice-apm/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">分布式环境系统监控</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>January 5, 2017</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/apm/">
+            <i class="fas fa-tag"></i>
+            apm
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/microservice/">
+            <i class="fas fa-tag"></i>
+            microservice
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li><a href="#dapper-http-bigbully-github-io-dapper-translation"><a href="http://bigbully.github.io/Dapper-translation/">Dapper</a></a></li>
+<li><a href="#zipkin">Zipkin</a>
+<ul>
+<li><a href="#architecture">architecture</a></li>
+<li><a href="#install">install</a></li>
+<li><a href="#terminology">terminology</a></li>
+<li><a href="#brave-usage">brave Usage</a></li>
+<li><a href="#brave-in-depth">brave In depth</a></li>
+</ul></li>
+<li><a href="#pinpoint">Pinpoint</a>
+<ul>
+<li><a href="#介绍">介绍</a></li>
+<li><a href="#概述">概述</a></li>
+<li><a href="#架构">架构</a></li>
+<li><a href="#支持模块">支持模块</a></li>
+</ul></li>
+<li><a href="#spring-cloud-sleuth-springhttp-ryanjbaxter-com-cloud-spring-20cloud-spring-2016-07-07-spring-cloud-sleuth-html"><a href="springhttp://ryanjbaxter.com/cloud/spring%20cloud/spring/2016/07/07/spring-cloud-sleuth.html">spring-cloud-sleuth</a></a></li>
+</ul>
+</nav>
+</aside>
+      <p>分布式环境系统监控Zipkin&amp;Pinpoint</p>
+
+<h1 id="dapper-http-bigbully-github-io-dapper-translation"><a href="http://bigbully.github.io/Dapper-translation/">Dapper</a></h1>
+
+<h1 id="zipkin">Zipkin</h1>
+
+<p><img src="http://zipkin.io/public/img/zipkin-logo-200x119.jpg" alt="zipkin" /></p>
+
+<p><code>zipkin</code>为分布式链路调用监控系统，聚合各业务系统调用延迟数据，达到链路调用监控跟踪。</p>
+
+<h2 id="architecture">architecture</h2>
+
+<p><img src="https://raw.githubusercontent.com/liaokailin/pic-repo/master/slow-service.png" alt="slow service" />
+如图，在复杂的调用链路中假设存在一条调用链路响应缓慢，如何定位其中延迟高的服务呢？</p>
+
+<ul>
+<li>日志： 通过分析调用链路上的每个服务日志得到结果</li>
+<li>zipkin：使用<code>zipkin</code>的<code>web UI</code>可以一眼看出延迟高的服务</li>
+</ul>
+
+<p><img src="http://zipkin.io/public/img/architecture-1.png" alt="zipkin" /></p>
+
+<p>如图所示，各业务系统在彼此调用时，将特定的跟踪消息传递至<code>zipkin</code>,zipkin在收集到跟踪信息后将其聚合处理、存储、展示等，用户可通过<code>web UI</code>方便
+获得网络延迟、调用链路、系统依赖等等。</p>
+
+<p><img src="http://zipkin.io/public/img/architecture-0.png" alt="zipkin" /></p>
+
+<p><code>zipkin</code>主要涉及四个组件 <code>collector</code> <code>storage</code> <code>search</code> <code>web UI</code></p>
+
+<ul>
+<li><code>Collector</code>接收各service传输的数据</li>
+<li><code>Cassandra</code>作为<code>Storage</code>的一种，也可以是mysql等，默认存储在内存中，配置<code>cassandra</code>可以参考<a href="https://github.com/openzipkin/zipkin-dependencies">这里</a></li>
+<li><code>Query</code>负责查询<code>Storage</code>中存储的数据,提供简单的<code>JSON API</code>获取数据，主要提供给<code>web UI</code>使用</li>
+<li><code>Web</code> 提供简单的web界面</li>
+</ul>
+
+<h2 id="install">install</h2>
+
+<p>执行如下命令下载jar包</p>
+
+<pre><code class="language-shell">wget -O zipkin.jar 'https://search.maven.org/remote_content?g=io.zipkin.java&amp;a=zipkin-server&amp;v=LATEST&amp;c=exec'
+</code></pre>
+
+<p>其为一个<code>spring boot</code>功能，直接运行jar</p>
+
+<pre><code class="language-shell">nohup java -jar zipkin.jar &amp; 
+</code></pre>
+
+<p>访问 <a href="http://ip:9411">http://ip:9411</a>
+<img src="https://raw.githubusercontent.com/liaokailin/pic-repo/master/zipkin-web-ui.png" alt="web-ui" /></p>
+
+<h2 id="terminology">terminology</h2>
+
+<p>使用<code>zipkin</code>涉及几个概念</p>
+
+<ul>
+<li><p><code>Span</code>:基本工作单元，一次链路调用(可以是RPC，DB等没有特定的限制)创建一个<code>span</code>，通过一个64位ID标识它，
+     <code>span</code>通过还有其他的数据，例如描述信息，时间戳，key-value对的(Annotation)tag信息，<code>parent-id</code>等,其中<code>parent-id</code>
+  可以表示<code>span</code>调用链路来源，通俗的理解<code>span</code>就是一次请求信息</p></li>
+
+<li><p><code>Trace</code>:类似于树结构的<code>Span</code>集合，表示一条调用链路，存在唯一标识</p></li>
+
+<li><p><code>Annotation</code>: 注解,用来记录请求特定事件相关信息(例如时间)，通常包含四个注解信息</p>
+
+<blockquote>
+<blockquote>
+<p>cs - Client Start,表示客户端发起请求</p>
+
+<p>sr - Server Receive,表示服务端收到请求</p>
+
+<p>ss - Server Send,表示服务端完成处理，并将结果发送给客户端</p>
+
+<p>cr - Client Received,表示客户端获取到服务端返回信息</p>
+</blockquote>
+</blockquote></li>
+
+<li><p><code>BinaryAnnotation</code>:提供一些额外信息，一般已key-value对出现</p></li>
+</ul>
+
+<p>概念说完，来看下完整的调用链路
+<img src="https://raw.githubusercontent.com/spring-cloud/spring-cloud-sleuth/master/docs/src/main/asciidoc/images/trace-id.png" alt="request chain" /></p>
+
+<p>上图表示一请求链路，一条链路通过<code>Trace Id</code>唯一标识，<code>Span</code>标识发起的请求信息，各<code>span</code>通过<code>parent id</code> 关联起来，如图
+<img src="https://raw.githubusercontent.com/spring-cloud/spring-cloud-sleuth/master/docs/src/main/asciidoc/images/parents.png" alt="tree-like" /></p>
+
+<p>整个链路的依赖关系如下:
+<img src="https://raw.githubusercontent.com/spring-cloud/spring-cloud-sleuth/master/docs/src/main/asciidoc/images/dependencies.png" alt="dependency" /></p>
+
+<p>完成链路调用的记录后，如何来计算调用的延迟呢，这就需要利用<code>Annotation</code>信息</p>
+
+<p><img src="https://raw.githubusercontent.com/liaokailin/pic-repo/master/zipkin-annotation.png" alt="annotation" /></p>
+
+<blockquote>
+<blockquote>
+<p>sr-cs 得到请求发出延迟</p>
+
+<p>ss-sr 得到服务端处理延迟</p>
+
+<p>cr-cs 得到真个链路完成延迟</p>
+</blockquote>
+</blockquote>
+
+<h2 id="brave-usage">brave Usage</h2>
+
+<p>作为各调用链路，只需要负责将指定格式的数据发送给<code>zipkin</code>即可，利用<a href="https://github.com/openzipkin/brave">brave</a>可快捷完成操作。</p>
+
+<p>首先导入jar包<code>pom.xml</code></p>
+
+<pre><code class="language-java">&lt;parent&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+        &lt;version&gt;1.3.6.RELEASE&lt;/version&gt;
+    &lt;/parent&gt;
+
+
+
+    &lt;!-- https://mvnrepository.com/artifact/io.zipkin.brave/brave-core --&gt;
+    &lt;dependencies&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-aop&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;io.zipkin.brave&lt;/groupId&gt;
+            &lt;artifactId&gt;brave-core&lt;/artifactId&gt;
+            &lt;version&gt;3.9.0&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;!-- https://mvnrepository.com/artifact/io.zipkin.brave/brave-http --&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;io.zipkin.brave&lt;/groupId&gt;
+            &lt;artifactId&gt;brave-http&lt;/artifactId&gt;
+            &lt;version&gt;3.9.0&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;io.zipkin.brave&lt;/groupId&gt;
+            &lt;artifactId&gt;brave-spancollector-http&lt;/artifactId&gt;
+            &lt;version&gt;3.9.0&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;io.zipkin.brave&lt;/groupId&gt;
+            &lt;artifactId&gt;brave-web-servlet-filter&lt;/artifactId&gt;
+            &lt;version&gt;3.9.0&lt;/version&gt;
+        &lt;/dependency&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;io.zipkin.brave&lt;/groupId&gt;
+            &lt;artifactId&gt;brave-okhttp&lt;/artifactId&gt;
+            &lt;version&gt;3.9.0&lt;/version&gt;
+        &lt;/dependency&gt;
+
+        &lt;!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api --&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+            &lt;artifactId&gt;slf4j-api&lt;/artifactId&gt;
+            &lt;version&gt;1.7.13&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.apache.httpcomponents&lt;/groupId&gt;
+            &lt;artifactId&gt;httpclient&lt;/artifactId&gt;
+            &lt;version&gt;4.5.1&lt;/version&gt;
+        &lt;/dependency&gt;
+
+    &lt;/dependencies&gt;
+
+</code></pre>
+
+<p>利用<code>spring boot</code>创建工程</p>
+
+<p><code>Application.java</code></p>
+
+<pre><code class="language-java">package com.lkl.zipkin;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+/**
+ *
+ * Created by liaokailin on 16/7/27.
+ */
+@SpringBootApplication
+public class Application {
+
+
+    public static void main(String[] args) {
+        SpringApplication app = new SpringApplication(Application.class);
+        app.run(args);
+
+
+    }
+}
+
+</code></pre>
+
+<p>建立<code>controller</code>对外提供服务</p>
+
+<p><code>HomeController.java</code></p>
+
+<pre><code>RestController
+@RequestMapping(&quot;/&quot;)
+public class HomeController {
+
+    @Autowired
+    private OkHttpClient client;
+
+    private  Random random = new Random();
+
+    @RequestMapping(&quot;start&quot;)
+    public String start() throws InterruptedException, IOException {
+        int sleep= random.nextInt(100);
+        TimeUnit.MILLISECONDS.sleep(sleep);
+        Request request = new Request.Builder().url(&quot;http://localhost:9090/foo&quot;).get().build();
+        Response response = client.newCall(request).execute();
+        return &quot; [service1 sleep &quot; + sleep+&quot; ms]&quot; + response.body().toString();
+    }
+
+</code></pre>
+
+<p><code>HomeController</code>中利用<code>OkHttpClient</code>调用发起http请求。在每次发起请求时则需要通过<code>brave</code>记录<code>Span</code>信息，并异步传递给<code>zipkin</code>
+作为被调用方(服务端)也同样需要完成以上操作.</p>
+
+<p><code>ZipkinConfig.java</code></p>
+
+<pre><code class="language-java">
+package com.lkl.zipkin.config;
+
+import com.github.kristofa.brave.Brave;
+import com.github.kristofa.brave.EmptySpanCollectorMetricsHandler;
+import com.github.kristofa.brave.SpanCollector;
+import com.github.kristofa.brave.http.DefaultSpanNameProvider;
+import com.github.kristofa.brave.http.HttpSpanCollector;
+import com.github.kristofa.brave.okhttp.BraveOkHttpRequestResponseInterceptor;
+import com.github.kristofa.brave.servlet.BraveServletFilter;
+import okhttp3.OkHttpClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Created by liaokailin on 16/7/27.
+ */
+@Configuration
+public class ZipkinConfig {
+
+    @Autowired
+    private ZipkinProperties properties;
+
+
+    @Bean
+    public SpanCollector spanCollector() {
+        HttpSpanCollector.Config config = HttpSpanCollector.Config.builder().connectTimeout(properties.getConnectTimeout()).readTimeout(properties.getReadTimeout())
+                .compressionEnabled(properties.isCompressionEnabled()).flushInterval(properties.getFlushInterval()).build();
+        return HttpSpanCollector.create(properties.getUrl(), config, new EmptySpanCollectorMetricsHandler());
+    }
+
+
+    @Bean
+    public Brave brave(SpanCollector spanCollector){
+        Brave.Builder builder = new Brave.Builder(properties.getServiceName());  //指定state
+        builder.spanCollector(spanCollector);
+        builder.traceSampler(Sampler.ALWAYS_SAMPLE);
+        Brave brave = builder.build();
+        return brave;
+    }
+
+    @Bean
+    public BraveServletFilter braveServletFilter(Brave brave){
+        BraveServletFilter filter = new BraveServletFilter(brave.serverRequestInterceptor(),brave.serverResponseInterceptor(),new DefaultSpanNameProvider());
+        return filter;
+    }
+
+    @Bean
+    public OkHttpClient okHttpClient(Brave brave){
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new BraveOkHttpRequestResponseInterceptor(brave.clientRequestInterceptor(), brave.clientResponseInterceptor(), new DefaultSpanNameProvider()))
+                .build();
+        return client;
+    }
+}
+
+</code></pre>
+
+<ul>
+<li><p><code>SpanCollector</code> 配置收集器</p></li>
+
+<li><p><code>Brave</code> 各工具类的封装,其中<code>builder.traceSampler(Sampler.ALWAYS_SAMPLE)</code>设置采样比率，0-1之间的百分比</p></li>
+
+<li><p><code>BraveServletFilter</code> 作为拦截器，需要<code>serverRequestInterceptor</code>,<code>serverResponseInterceptor</code> 分别完成<code>sr</code>和<code>ss</code>操作</p></li>
+
+<li><p><code>OkHttpClient</code> 添加拦截器，需要<code>clientRequestInterceptor</code>,<code>clientResponseInterceptor</code> 分别完成<code>cs</code>和<code>cr</code>操作,该功能由
+brave中的<code>brave-okhttp</code>模块提供，同样的道理如果需要记录数据库的延迟只要在数据库操作前后完成<code>cs</code>和<code>cr</code>即可，当然brave提供其封装。</p></li>
+</ul>
+
+<p>以上还缺少一个配置信息<code>ZipkinProperties.java</code></p>
+
+<pre><code>package com.lkl.zipkin.config;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Created by liaokailin on 16/7/28.
+ */
+@Configuration
+@ConfigurationProperties(prefix = &quot;com.zipkin&quot;)
+public class ZipkinProperties {
+
+    private String serviceName;
+
+    private String url;
+
+    private int connectTimeout;
+
+    private int readTimeout;
+
+    private int flushInterval;
+
+    private boolean compressionEnabled;
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public int getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    public void setConnectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout;
+    }
+
+    public int getReadTimeout() {
+        return readTimeout;
+    }
+
+    public void setReadTimeout(int readTimeout) {
+        this.readTimeout = readTimeout;
+    }
+
+    public int getFlushInterval() {
+        return flushInterval;
+    }
+
+    public void setFlushInterval(int flushInterval) {
+        this.flushInterval = flushInterval;
+    }
+
+    public boolean isCompressionEnabled() {
+        return compressionEnabled;
+    }
+
+    public void setCompressionEnabled(boolean compressionEnabled) {
+        this.compressionEnabled = compressionEnabled;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+}
+
+
+</code></pre>
+
+<p>则可以在配置文件<code>application.properties</code>中配置相关信息</p>
+
+<pre><code>com.zipkin.serviceName=service1
+com.zipkin.url=http://110.173.14.57:9411
+com.zipkin.connectTimeout=6000
+com.zipkin.readTimeout=6000
+com.zipkin.flushInterval=1
+com.zipkin.compressionEnabled=true
+server.port=8080
+</code></pre>
+
+<p>那么其中的<code>service1</code>即完成，同样的道理，修改配置文件(调整<code>com.zipkin.serviceName</code>,以及<code>server.port</code>)以及<code>controller</code>对应的方法构造若干服务</p>
+
+<p><code>service1</code> 中访问<code>http://localhost:8080/start</code>需要访问<code>http://localhost:9090/foo</code>,则构造<code>server2</code>提供该方法</p>
+
+<p><code>server2</code>配置</p>
+
+<pre><code>com.zipkin.serviceName=service2
+com.zipkin.url=http://110.173.14.57:9411
+com.zipkin.connectTimeout=6000
+com.zipkin.readTimeout=6000
+com.zipkin.flushInterval=1
+com.zipkin.compressionEnabled=true
+
+
+server.port=9090
+</code></pre>
+
+<p><code>controller</code>方法</p>
+
+<pre><code class="language-java">    @RequestMapping(&quot;foo&quot;)
+    public String foo() throws InterruptedException, IOException {
+        Random random = new Random();
+        int sleep= random.nextInt(100);
+        TimeUnit.MILLISECONDS.sleep(sleep);
+        Request request = new Request.Builder().url(&quot;http://localhost:9091/bar&quot;).get().build();  //service3
+        Response response = client.newCall(request).execute();
+        String result = response.body().string();
+        request = new Request.Builder().url(&quot;http://localhost:9092/tar&quot;).get().build();  //service4
+        response = client.newCall(request).execute();
+       result += response.body().string();
+        return &quot; [service2 sleep &quot; + sleep+&quot; ms]&quot; + result;
+    }
+</code></pre>
+
+<p>在<code>server2</code>中调用<code>server3</code>和<code>server4</code>中的方法</p>
+
+<p>方法分别为</p>
+
+<pre><code class="language-java"> @RequestMapping(&quot;bar&quot;)
+    public String bar() throws InterruptedException, IOException {  //service3 method
+        Random random = new Random();
+        int sleep= random.nextInt(100);
+        TimeUnit.MILLISECONDS.sleep(sleep);
+        return &quot; [service3 sleep &quot; + sleep+&quot; ms]&quot;;
+    }
+
+    @RequestMapping(&quot;tar&quot;)
+    public String tar() throws InterruptedException, IOException { //service4 method
+        Random random = new Random();
+        int sleep= random.nextInt(1000);
+        TimeUnit.MILLISECONDS.sleep(sleep);
+        return &quot; [service4 sleep &quot; + sleep+&quot; ms]&quot;;
+    }
+</code></pre>
+
+<p>将工程修改后编译成<code>jar</code>形式</p>
+
+<p>执行</p>
+
+<pre><code class="language-shell">
+nohup java -jar server4.jar &amp;
+nohup java -jar server3.jar &amp;
+nohup java -jar server2.jar &amp;
+nohup java -jar server1.jar &amp;
+
+</code></pre>
+
+<p>访问<code>http://localhost:8080/start</code>后查看<code>zipkin</code>的<code>web UI</code></p>
+
+<p><img src="https://raw.githubusercontent.com/liaokailin/pic-repo/master/zipkin-service-chain.png" alt="chain" /></p>
+
+<p>点击条目可以查看具体的延迟信息</p>
+
+<p><img src="https://raw.githubusercontent.com/liaokailin/pic-repo/master/zipkin-service3.png" alt="times" /></p>
+
+<p>服务之间的依赖为
+<img src="https://raw.githubusercontent.com/liaokailin/pic-repo/master/zipkin-service-dependency.png" alt="dependency" /></p>
+
+<h2 id="brave-in-depth">brave In depth</h2>
+
+<p>以上完成了基本的操作，下面将从源码角度来看下<code>brave</code>的实现</p>
+
+<p>brave如何装配应用，首先从<code>SpanCollector</code>来入手</p>
+
+<pre><code class="language-java">
+ @Bean
+    public SpanCollector spanCollector() {
+        HttpSpanCollector.Config config = HttpSpanCollector.Config.builder().connectTimeout(properties.getConnectTimeout()).readTimeout(properties.getReadTimeout())
+                .compressionEnabled(properties.isCompressionEnabled()).flushInterval(properties.getFlushInterval()).build();
+        return HttpSpanCollector.create(properties.getUrl(), config, new EmptySpanCollectorMetricsHandler());
+    }
+
+</code></pre>
+
+<p>从名称上看<code>HttpSpanCollector</code>是基于http的span收集器,因此超时配置是必须的，默认给出的超时时间较长，<code>flushInterval</code>表示span的传递
+间隔，实际为定时任务执行的间隔时间.</p>
+
+<ul>
+<li>Brave Initialization</li>
+</ul>
+
+<pre><code class="language-java"> @Bean
+    public Brave brave(SpanCollector spanCollector){
+        Brave.Builder builder = new Brave.Builder(properties.getServiceName());  //指定state
+        builder.spanCollector(spanCollector);
+        builder.traceSampler(Sampler.ALWAYS_SAMPLE);
+        Brave brave = builder.build();
+        return brave;
+    }
+
+</code></pre>
+
+<p>包装了各种工具类</p>
+
+<pre><code class="language-java">public Brave build() {
+            return new Brave(this);
+        }
+</code></pre>
+
+<p>创建一个Brave</p>
+
+<pre><code class="language-java">
+private Brave(Builder builder) {
+        serverTracer = ServerTracer.builder()
+                .randomGenerator(builder.random)
+                .spanCollector(builder.spanCollector)
+                .state(builder.state)
+                .traceSampler(builder.sampler).build();
+
+        clientTracer = ClientTracer.builder()
+                .randomGenerator(builder.random)
+                .spanCollector(builder.spanCollector)
+                .state(builder.state)
+                .traceSampler(builder.sampler).build();
+
+        localTracer = LocalTracer.builder()
+                .randomGenerator(builder.random)
+                .spanCollector(builder.spanCollector)
+                .spanAndEndpoint(SpanAndEndpoint.LocalSpanAndEndpoint.create(builder.state))
+                .traceSampler(builder.sampler).build();
+        
+        serverRequestInterceptor = new ServerRequestInterceptor(serverTracer);
+        serverResponseInterceptor = new ServerResponseInterceptor(serverTracer);
+        clientRequestInterceptor = new ClientRequestInterceptor(clientTracer);
+        clientResponseInterceptor = new ClientResponseInterceptor(clientTracer);
+        serverSpanAnnotationSubmitter = AnnotationSubmitter.create(SpanAndEndpoint.ServerSpanAndEndpoint.create(builder.state));
+        serverSpanThreadBinder = new ServerSpanThreadBinder(builder.state);
+        clientSpanThreadBinder = new ClientSpanThreadBinder(builder.state);
+    }
+
+</code></pre>
+
+<p>封装了<code>*Tracer</code>,<code>*Interceptor</code>,<code>*Binder</code>等</p>
+
+<p>其中 <code>serverTracer</code>当服务作为服务端时处理span信息，<code>clientTracer</code>当服务作为客户端时处理span信息</p>
+
+<ul>
+<li>Servlet Filter</li>
+</ul>
+
+<p><code>BraveServletFilter</code>是http模块提供的拦截器功能，传递<code>serverRequestInterceptor</code>,<code>serverResponseInterceptor</code>,<code>spanNameProvider</code>等参数
+其中<code>spanNameProvider</code>表示如何处理span的名称，默认使用method名称,spring boot中申明的<code>filter bean</code>默认拦截所有请求</p>
+
+<pre><code class="language-java">@Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+
+        String alreadyFilteredAttributeName = getAlreadyFilteredAttributeName();
+        boolean hasAlreadyFilteredAttribute = request.getAttribute(alreadyFilteredAttributeName) != null;
+
+        if (hasAlreadyFilteredAttribute) {
+            // Proceed without invoking this filter...
+            filterChain.doFilter(request, response);
+        } else {
+
+            final StatusExposingServletResponse statusExposingServletResponse = new StatusExposingServletResponse((HttpServletResponse) response);
+            requestInterceptor.handle(new HttpServerRequestAdapter(new ServletHttpServerRequest((HttpServletRequest) request), spanNameProvider));
+
+            try {
+                filterChain.doFilter(request, statusExposingServletResponse);
+            } finally {
+                responseInterceptor.handle(new HttpServerResponseAdapter(new HttpResponse() {
+                    @Override
+                    public int getHttpStatusCode() {
+                        return statusExposingServletResponse.getStatus();
+                    }
+                }));
+            }
+        }
+    }
+
+</code></pre>
+
+<p>首先来看<code>requestInterceptor.handle</code>方法，</p>
+
+<pre><code class="language-java">
+ public void handle(ServerRequestAdapter adapter) {
+        serverTracer.clearCurrentSpan();
+        final TraceData traceData = adapter.getTraceData();
+
+        Boolean sample = traceData.getSample();
+        if (sample != null &amp;&amp; Boolean.FALSE.equals(sample)) {
+            serverTracer.setStateNoTracing();
+            LOGGER.fine(&quot;Received indication that we should NOT trace.&quot;);
+        } else {
+            if (traceData.getSpanId() != null) {
+                LOGGER.fine(&quot;Received span information as part of request.&quot;);
+                SpanId spanId = traceData.getSpanId();
+                serverTracer.setStateCurrentTrace(spanId.traceId, spanId.spanId,
+                        spanId.nullableParentId(), adapter.getSpanName());
+            } else {
+                LOGGER.fine(&quot;Received no span state.&quot;);
+                serverTracer.setStateUnknown(adapter.getSpanName());
+            }
+            serverTracer.setServerReceived();
+            for(KeyValueAnnotation annotation : adapter.requestAnnotations())
+            {
+                serverTracer.submitBinaryAnnotation(annotation.getKey(), annotation.getValue());
+            }
+        }
+    }
+
+</code></pre>
+
+<p>其中<code>serverTracer.clearCurrentSpan()</code>清除当前线程上的<code>span</code>信息，调用<code>ThreadLocalServerClientAndLocalSpanState</code>中的</p>
+
+<pre><code class="language-java">
+  @Override
+    public void setCurrentServerSpan(final ServerSpan span) {
+        if (span == null) {
+            currentServerSpan.remove();
+        } else {
+            currentServerSpan.set(span);
+        }
+    }
+</code></pre>
+
+<p><code>currentServerSpan</code>为ThreadLocal对象</p>
+
+<pre><code class="language-java">private final static ThreadLocal&lt;ServerSpan&gt; currentServerSpan = new ThreadLocal&lt;ServerSpan&gt;() {
+</code></pre>
+
+<p>回到<code>ServerRequestInterceptor#handle()</code>方法中<code>final TraceData traceData = adapter.getTraceData()</code></p>
+
+<pre><code class="language-java"> @Override
+    public TraceData getTraceData() {
+        final String sampled = serverRequest.getHttpHeaderValue(BraveHttpHeaders.Sampled.getName());
+        if (sampled != null) {
+            if (sampled.equals(&quot;0&quot;) || sampled.toLowerCase().equals(&quot;false&quot;)) {
+                return TraceData.builder().sample(false).build();
+            } else {
+                final String parentSpanId = serverRequest.getHttpHeaderValue(BraveHttpHeaders.ParentSpanId.getName());
+                final String traceId = serverRequest.getHttpHeaderValue(BraveHttpHeaders.TraceId.getName());
+                final String spanId = serverRequest.getHttpHeaderValue(BraveHttpHeaders.SpanId.getName());
+
+                if (traceId != null &amp;&amp; spanId != null) {
+                    SpanId span = getSpanId(traceId, spanId, parentSpanId);
+                    return TraceData.builder().sample(true).spanId(span).build();
+                }
+            }
+        }
+        return TraceData.builder().build();
+    }
+</code></pre>
+
+<p>其中<code>SpanId span = getSpanId(traceId, spanId, parentSpanId)</code> 将构造一个SpanId对象</p>
+
+<pre><code class="language-java"> private SpanId getSpanId(String traceId, String spanId, String parentSpanId) {
+        return SpanId.builder()
+            .traceId(convertToLong(traceId))
+            .spanId(convertToLong(spanId))
+            .parentId(parentSpanId == null ? null : convertToLong(parentSpanId)).build();
+   }
+
+</code></pre>
+
+<p>将<code>traceId</code>,<code>spanId</code>,<code>parentId</code>关联起来，其中设置<code>parentId</code>方法为</p>
+
+<pre><code class="language-java">
+public Builder parentId(@Nullable Long parentId) {
+      if (parentId == null) {
+        this.flags |= FLAG_IS_ROOT;
+      } else {
+        this.flags &amp;= ~FLAG_IS_ROOT;
+      }
+      this.parentId = parentId;
+      return this;
+    }
+</code></pre>
+
+<p>如果parentId为空为根节点，则执行<code>this.flags |= FLAG_IS_ROOT</code> ,因此后续在判断节点是否为根节点时，只需要执行<code>(flags &amp; FLAG_IS_ROOT) == FLAG_IS_ROOT</code>即可.</p>
+
+<p>构造完SpanId后看</p>
+
+<pre><code class="language-java">    serverTracer.setStateCurrentTrace(spanId.traceId, spanId.spanId,
+                        spanId.nullableParentId(), adapter.getSpanName());
+</code></pre>
+
+<p>设置当前Span</p>
+
+<pre><code class="language-java"> public void setStateCurrentTrace(long traceId, long spanId, @Nullable Long parentSpanId, @Nullable String name) {
+        checkNotBlank(name, &quot;Null or blank span name&quot;);
+        spanAndEndpoint().state().setCurrentServerSpan(
+            ServerSpan.create(traceId, spanId, parentSpanId, name));
+    }
+
+</code></pre>
+
+<p><code>ServerSpan.create</code>创建Span信息</p>
+
+<pre><code class="language-java">
+ static ServerSpan create(long traceId, long spanId, @Nullable Long parentSpanId, String name) {
+        Span span = new Span();
+        span.setTrace_id(traceId);
+        span.setId(spanId);
+        if (parentSpanId != null) {
+            span.setParent_id(parentSpanId);
+        }
+        span.setName(name);
+        return create(span, true);
+    }
+</code></pre>
+
+<p>构造了一个包含Span信息的<code>AutoValue_ServerSpan</code>对象</p>
+
+<p>通过<code>setCurrentServerSpan</code>设置到当前线程上</p>
+
+<p>继续看<code>serverTracer.setServerReceived()</code>方法</p>
+
+<pre><code class="language-java">public void setServerReceived() {
+        submitStartAnnotation(zipkinCoreConstants.SERVER_RECV);
+    }
+</code></pre>
+
+<p>为当前请求设置了<code>server received event</code>(sr)</p>
+
+<pre><code class="language-java">
+void submitStartAnnotation(String annotationName) {
+        Span span = spanAndEndpoint().span();
+        if (span != null) {
+            Annotation annotation = Annotation.create(
+                currentTimeMicroseconds(),
+                annotationName,
+                spanAndEndpoint().endpoint()
+            );
+            synchronized (span) {
+                span.setTimestamp(annotation.timestamp);
+                span.addToAnnotations(annotation);
+            }
+        }
+    }
+</code></pre>
+
+<p>在这里为Span信息设置了<code>Annotation</code>信息,后续的</p>
+
+<pre><code class="language-java"> for(KeyValueAnnotation annotation : adapter.requestAnnotations())
+            {
+                serverTracer.submitBinaryAnnotation(annotation.getKey(), annotation.getValue());
+            }
+
+</code></pre>
+
+<p>设置了<code>BinaryAnnotation</code>信息，<code>adapter.requestAnnotations()</code>在构造<code>HttpServerRequestAdapter</code>时已完成</p>
+
+<pre><code class="language-java"> @Override
+    public Collection&lt;KeyValueAnnotation&gt; requestAnnotations() {
+        KeyValueAnnotation uriAnnotation = KeyValueAnnotation.create(
+                TraceKeys.HTTP_URL, serverRequest.getUri().toString());
+        return Collections.singleton(uriAnnotation);
+    }
+</code></pre>
+
+<p>以上将Span信息(包括sr)存储在当前线程中，处理完请求后接下来继续看<code>BraveServletFilter#doFilter</code>方法的finally部分，如何对响应处理</p>
+
+<pre><code class="language-java">
+ responseInterceptor.handle(new HttpServerResponseAdapter(new HttpResponse() {
+                    @Override  //获取http状态码
+                    public int getHttpStatusCode() {
+                        return statusExposingServletResponse.getStatus();
+                    }
+                }));
+</code></pre>
+
+<p><code>responseInterceptor.handle</code>方法</p>
+
+<pre><code class="language-java"> public void handle(ServerResponseAdapter adapter) {
+        // We can submit this in any case. When server state is not set or
+        // we should not trace this request nothing will happen.
+        LOGGER.fine(&quot;Sending server send.&quot;);
+        try {
+            for(KeyValueAnnotation annotation : adapter.responseAnnotations())
+            {
+                serverTracer.submitBinaryAnnotation(annotation.getKey(), annotation.getValue());
+            }
+            serverTracer.setServerSend();
+        } finally {
+            serverTracer.clearCurrentSpan();
+        }
+    }
+
+</code></pre>
+
+<p>首先配置<code>BinaryAnnotation</code>信息，然后执行<code>serverTracer.setServerSend</code>,在finally中清除当前线程中的Span信息(不管前面是否清楚成功,最终都将执行该不走)，<code>ThreadLocal</code>中的数据要做到有始有终</p>
+
+<p>看<code>serverTracer.setServerSend()</code></p>
+
+<pre><code class="language-java">public void setServerSend() {
+        if (submitEndAnnotation(zipkinCoreConstants.SERVER_SEND, spanCollector())) {
+            spanAndEndpoint().state().setCurrentServerSpan(null);
+        }
+    }
+
+</code></pre>
+
+<p>终于看到<code>spanCollector</code>收集器了，说明下面将看是收集Span信息,这里为<code>ss</code>注解</p>
+
+<pre><code class="language-java">
+boolean submitEndAnnotation(String annotationName, SpanCollector spanCollector) {
+        Span span = spanAndEndpoint().span();
+        if (span == null) {
+          return false;
+        }
+        Annotation annotation = Annotation.create(
+            currentTimeMicroseconds(),
+            annotationName,
+            spanAndEndpoint().endpoint()
+        );
+        span.addToAnnotations(annotation);
+        if (span.getTimestamp() != null) {
+            span.setDuration(annotation.timestamp - span.getTimestamp());
+        }
+        spanCollector.collect(span);
+        return true;
+    }
+</code></pre>
+
+<p>首先获取当前线程中的<code>Span</code>信息，然后处理注解信息，通过<code>annotation.timestamp - span.getTimestamp()</code>计算延迟,
+调用<code>spanCollector.collect(span)</code>进行收集<code>Span</code>信息，那么<code>Span</code>信息是同步收集的吗？肯定不是的，接着看</p>
+
+<p><img src="https://raw.githubusercontent.com/liaokailin/pic-repo/master/zipkin-span-collect-inherit.png" alt="zipkin-span-collect-inherit" /></p>
+
+<p>调用<code>spanCollector.collect(span)</code>则执行<code>FlushingSpanCollector</code>中的<code>collect</code>方法</p>
+
+<pre><code class="language-java">
+@Override
+  public void collect(Span span) {
+    metrics.incrementAcceptedSpans(1);
+    if (!pending.offer(span)) {
+      metrics.incrementDroppedSpans(1);
+    }
+  }
+</code></pre>
+
+<p>首先进行的是<code>metrics</code>统计信息，可以自定义该<code>SpanCollectorMetricsHandler</code>信息收集各指标信息,利用如<code>grafana</code>等展示信息</p>
+
+<p><code>pending.offer(span)</code>将<code>span</code>信息存储在<code>BlockingQueue</code>中，然后通过定时任务去取出阻塞队列中的值，偷偷摸摸的上传<code>span</code>信息</p>
+
+<p>定时任务利用了<code>Flusher</code>类来执行，在构造<code>FlushingSpanCollector</code>时构造了<code>Flusher</code>类</p>
+
+<pre><code class="language-java">
+ static final class Flusher implements Runnable {
+    final Flushable flushable;
+    final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    Flusher(Flushable flushable, int flushInterval) {
+      this.flushable = flushable;
+      this.scheduler.scheduleWithFixedDelay(this, 0, flushInterval, SECONDS);
+    }
+
+    @Override
+    public void run() {
+      try {
+        flushable.flush();
+      } catch (IOException ignored) {
+      }
+    }
+  }
+</code></pre>
+
+<p>创建了一个核心线程数为1的线程池，每间隔<code>flushInterval</code>秒执行一次Span信息上传，执行<code>flush</code>方法</p>
+
+<pre><code class="language-java">@Override
+  public void flush() {
+    if (pending.isEmpty()) return;
+    List&lt;Span&gt; drained = new ArrayList&lt;Span&gt;(pending.size());
+    pending.drainTo(drained);
+    if (drained.isEmpty()) return;
+    int spanCount = drained.size();
+    try {
+      reportSpans(drained);
+    } catch (IOException e) {
+      metrics.incrementDroppedSpans(spanCount);
+    } catch (RuntimeException e) {
+      metrics.incrementDroppedSpans(spanCount);
+    }
+  }
+
+</code></pre>
+
+<p>首先将阻塞队列中的值全部取出存如集合中，最后调用<code>reportSpans(List&lt;Span&gt; drained)</code>抽象方法，该方法在<code>AbstractSpanCollector</code>得到覆写</p>
+
+<pre><code class="language-java">@Override
+  protected void reportSpans(List&lt;Span&gt; drained) throws IOException {
+    byte[] encoded = codec.writeSpans(drained);
+    sendSpans(encoded);
+  }
+
+</code></pre>
+
+<p>转换成字节流后调用<code>sendSpans</code>抽象方法发送Span信息.</p>
+
+<h1 id="pinpoint">Pinpoint</h1>
+
+<blockquote>
+<p>翻译自 Pinpoint 的 <a href="https://github.com/naver/pinpoint">github 首页内容</a></p>
+</blockquote>
+
+<h2 id="介绍">介绍</h2>
+
+<p>Pinpoint是一个开源的 APM (Application Performance Management/应用性能管理)工具，用于基于java的大规模分布式系统。</p>
+
+<p>仿照 <a href="http://research.google.com/pubs/pub36356.html">Google Dapper</a> , Pinpoint 通过跟踪分布式应用之间的调用来提供解决方案，以帮助分析系统的总体结构和内部模块之间如何相互联系.</p>
+
+<blockquote>
+<p>注：对于各个模块之间的通讯英文原文中用的是transaction一词，但是我觉得如果翻译为&rdquo;事务&rdquo;容易引起误解，所以替换为&rdquo;交互&rdquo;或者&rdquo;调用&rdquo;这种比较直白的字眼。</p>
+</blockquote>
+
+<p>在使用上力图简单高效：</p>
+
+<ul>
+<li>安装agent，不需要修改哪怕一行代码</li>
+<li>最小化性能损失</li>
+</ul>
+
+<h2 id="概述">概述</h2>
+
+<p>如今的服务通常由很多不同模块组成，他们之间相互调用并通过API调用外部服务。每个交互是如何被执行的通常是一个黑盒。Pinpoint跟踪这些模块之间的调用流并提供清晰的视图来定位问题区域和潜在瓶颈。</p>
+
+<ul>
+<li><p>服务器地图(ServerMap)</p>
+
+<p>通过可视化分布式系统的模块和他们之间的相互联系来理解系统拓扑。点击某个节点会展示这个模块的详情，比如它当前的状态和请求数量。</p></li>
+
+<li><p>实时活动线程图表(Realtime Active Thread Chart)</p>
+
+<p>实时监控应用内部的活动线程。</p></li>
+
+<li><p>请求/应答分布图表(Request/Response Scatter Chart)</p>
+
+<p>长期可视化请求数量和应答模式来定位潜在问题。通过在图表上拉拽可以选择请求查看更多的详细信息。</p>
+
+<p><img src="https://github.com/naver/pinpoint/raw/master/doc/img/ss_server-map.png" alt="" /></p></li>
+
+<li><p>调用栈(CallStack)</p>
+
+<p>在分布式环境中为每个调用生成代码级别的可视图，在单个视图中定位瓶颈和失败点。</p>
+
+<p><img src="https://github.com/naver/pinpoint/raw/master/doc/img/ss_call-stack.png" alt="" /></p></li>
+
+<li><p>巡查(Inspector)</p>
+
+<p>查看应用上的其他详细信息，比如CPU使用率，内存/垃圾回收，TPS，和JVM参数。</p>
+
+<p><img src="https://github.com/naver/pinpoint/raw/master/doc/img/ss_inspector.png" alt="" /></p></li>
+</ul>
+
+<h2 id="架构">架构</h2>
+
+<p><img src="https://github.com/naver/pinpoint/raw/master/doc/img/pinpoint-architecture.png" alt="" /></p>
+
+<h2 id="支持模块">支持模块</h2>
+
+<ul>
+<li>JDK 6+</li>
+<li>Tomcat 6/7/8, Jetty <sup>8</sup>&frasl;<sub>9</sub></li>
+<li>Spring, Spring Boot</li>
+<li>Apache HTTP Client 3.x/4.x, JDK HttpConnector, GoogleHttpClient, OkHttpClient, NingAsyncHttpClient</li>
+<li>Thrift Client, Thrift Service</li>
+<li>MySQL, Oracle, MSSQL, CUBRID, DBCP, POSTGRESQL</li>
+<li>Arcus, Memcached, Redis</li>
+<li>iBATIS, MyBatis</li>
+<li>gson, Jackson, Json Lib</li>
+<li>log4j, Logback</li>
+</ul>
+
+<h1 id="spring-cloud-sleuth-springhttp-ryanjbaxter-com-cloud-spring-20cloud-spring-2016-07-07-spring-cloud-sleuth-html"><a href="springhttp://ryanjbaxter.com/cloud/spring%20cloud/spring/2016/07/07/spring-cloud-sleuth.html">spring-cloud-sleuth</a></h1>
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/2017/01/05/microservice-apm/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/2017/01/10/game-server/" data-toggle="tooltip" data-placement="top" title="leaf&amp;&amp;gonet2&amp;&amp;pomelo">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/2016/12/26/meta-program/" data-toggle="tooltip" data-placement="top" title="meta program in python">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>yrong blog</title>
+  <meta property="og:title" content="yrong blog" />
+  <meta name="twitter:title" content="yrong blog" />
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+  <link href="/blog/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
+  <link href="/blog/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <section class="list home-list">
+      <article class="article">
+        <a href="/blog/2018/04/09/intro-to-skynet/" class="article-titles">
+          <h2 class="article-title">Introduction to Skynet</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 9, 2018</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/lua/">
+              <i class="fas fa-tag"></i>
+              lua
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          代码结构 首先要关注一下config.path文件。 skynet/example/config.path root = &quot;./&quot; luaservice = root..&quot;service/?.lua;&quot;..root..&quot;test/?.lua;&quot;..root..&quot;examples/?.lua;&quot;..root..&quot;test/?/init.lua&quot; lualoader = root .. &quot;lualib/loader.lua&quot; lua_path = root..&quot;lualib/?.lua;&quot;..root..&quot;lualib/?/init.lua&quot; lua_cpath = root .. &quot;luaclib/?.so&quot; snax = root..&quot;examples/?.lua;&quot;..root..&quot;test/?.lua&quot; root代表的是skynet所在的目录。 lu
+        </div>
+        <div class="article-readmore"><a href="/blog/2018/04/09/intro-to-skynet/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2018/02/09/intro-to-go-modules/" class="article-titles">
+          <h2 class="article-title">Introduction to Go Modules</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>February 9, 2018</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/golang/">
+              <i class="fas fa-tag"></i>
+              golang
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>The upcoming version 1.11 of the Go programming language will bring experimental support for modules, a new dependency management system for Go.A few days ago, I wrote a quick post about it. Since that post went live, things changed a bit and as we’re now very close to the new release, I thought it would be a good time for another post with a more hands-on approach.So here’s what we’ll do: we’ll create a new package and then we’ll make a few releases to see how that would work.</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/2018/02/09/intro-to-go-modules/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2017/08/19/blockchain/" class="article-titles">
+          <h2 class="article-title">Build Your Own Blockchains in JavaScript from Zero</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>August 19, 2017</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/blockchain/">
+              <i class="fas fa-tag"></i>
+              blockchain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/javascript/">
+              <i class="fas fa-tag"></i>
+              javascript
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>Build Your Own Blockchains in JavaScript from Zero (Scratch)</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/2017/08/19/blockchain/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2017/07/08/prometheus/" class="article-titles">
+          <h2 class="article-title">prometheus v2.0 storage</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>July 8, 2017</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/golang/">
+              <i class="fas fa-tag"></i>
+              golang
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/prometheus/">
+              <i class="fas fa-tag"></i>
+              prometheus
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>Writing a Time Series Database from Scratch</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/2017/07/08/prometheus/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2017/05/26/lex-yacc/" class="article-titles">
+          <h2 class="article-title">lex-yacc</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>May 26, 2017</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/golang/">
+              <i class="fas fa-tag"></i>
+              golang
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/yacc/">
+              <i class="fas fa-tag"></i>
+              yacc
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>lex是一种词法分析器，可以识别文本中的词汇模式，模式可以用正则表达式表示。通过lex编译l文件(词法文件)就可以生产对应的c代码.lex可以参数一系列标记，如果我们想当某个标记序列出现时执行某一动作，该怎么实现呢？Yacc该出场了。通过yacc编译y文件(语法文件)就可以产生对应的c程序了</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/2017/05/26/lex-yacc/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2017/05/16/gotour/" class="article-titles">
+          <h2 class="article-title">gotour code analysis</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>May 16, 2017</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/golang/">
+              <i class="fas fa-tag"></i>
+              golang
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>GoTour as a web project to study golang</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/2017/05/16/gotour/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2017/05/12/websocketd/" class="article-titles">
+          <h2 class="article-title">websocketd code analysis</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>May 12, 2017</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/golang/">
+              <i class="fas fa-tag"></i>
+              golang
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>websocketd is a small command-line tool that will wrap an existing command-line interface program, and allow it to be accessed via a WebSocket.</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/2017/05/12/websocketd/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2017/05/06/cow/" class="article-titles">
+          <h2 class="article-title">cow code analysis</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>May 6, 2017</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/golang/">
+              <i class="fas fa-tag"></i>
+              golang
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>COW is a HTTP proxy to simplify bypassing the great firewall. It tries to automatically identify blocked websites and only use parent proxy for those sites.</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/2017/05/06/cow/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2017/05/01/wordpress/" class="article-titles">
+          <h2 class="article-title">wordpress code analysis</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>May 1, 2017</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/wordpress/">
+              <i class="fas fa-tag"></i>
+              wordpress
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>wordpress code analysis</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/2017/05/01/wordpress/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/2017/04/25/go-micro/" class="article-titles">
+          <h2 class="article-title">go micro code analysis</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 25, 2017</time></li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/microservice/">
+              <i class="fas fa-tag"></i>
+              microservice
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/blog/tags/golang/">
+              <i class="fas fa-tag"></i>
+              golang
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>go micro code analysis</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/2017/04/25/go-micro/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+    </section>
+    
+
+<ul class="pagination">
+    
+    <li class="page-item">
+        <a href="/blog/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+    </li>
+    
+    <li class="page-item disabled">
+    <a href="" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+    </li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item active"><a class="page-link" href="/blog/">1</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/blog/page/2/">2</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/blog/page/3/">3</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item disabled"><span aria-hidden="true">&nbsp;&hellip;&nbsp;</span></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="page-item"><a class="page-link" href="/blog/page/6/">6</a></li>
+    
+    
+    <li class="page-item">
+    <a href="/blog/page/2/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+    </li>
+    
+    <li class="page-item">
+        <a href="/blog/page/6/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    </li>
+    
+</ul>
+
+  </div>
+
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-rsslink">
+      <a href="/blog/index.xml" type="application/rss+xml" target="_blank" title="RSS">
+        <i class="fas fa-rss"></i>
+      </a>
+    </li>
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

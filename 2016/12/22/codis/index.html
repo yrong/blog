@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Codis In-depth Analysis - yrong blog</title>
+  <meta property="og:title" content="Codis In-depth Analysis - yrong blog" />
+  <meta name="twitter:title" content="Codis In-depth Analysis - yrong blog" />
+  <meta name="description" content="codis in-depth analysis">
+  <meta property="og:description" content="codis in-depth analysis">
+  <meta name="twitter:description" content="codis in-depth analysis">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/2016/12/22/codis/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Codis In-depth Analysis</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>December 22, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/redis/">
+            <i class="fas fa-tag"></i>
+            redis
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/db/">
+            <i class="fas fa-tag"></i>
+            db
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li><a href="#architecture">Architecture</a>
+<ul>
+<li><a href="#codis-server">Codis-Server</a></li>
+<li><a href="#codis-dashboard">Codis-Dashboard</a></li>
+</ul></li>
+<li><a href="#basic-usage">Basic Usage</a></li>
+</ul>
+</nav>
+</aside>
+      <p>codis in-depth analysis</p>
+
+<h1 id="architecture">Architecture</h1>
+
+<p>Codis由以下组件组成：</p>
+
+<ul>
+<li><p>Codis Server：基于 redis分支开发。增加了额外的数据结构，以支持 slot 有关的操作以及数据迁移指令。具体的修改可以参考文档 redis 的修改。</p></li>
+
+<li><p>Codis Proxy：客户端连接的 Redis 代理服务, 实现了 Redis 协议。 除部分命令不支持以外(不支持的命令列表)，表现的和原生的 Redis 没有区别（就像 Twemproxy）。</p>
+
+<ul>
+<li>对于同一个业务集群而言，可以同时部署多个 codis-proxy 实例</li>
+<li>不同 codis-proxy 之间由 codis-dashboard 保证状态同步</li>
+</ul></li>
+
+<li><p>Codis Dashboard：集群管理工具，支持 codis-proxy、codis-server 的添加、删除，以及据迁移等操作。在集群状态发生改变时，codis-dashboard 维护集群下所有 codis-proxy 的状态的一致性。</p>
+
+<ul>
+<li>对于同一个业务集群而言，同一个时刻 codis-dashboard 只能有 0个或者1个；</li>
+<li>所有对集群的修改都必须通过 codis-dashboard 完成。</li>
+</ul></li>
+
+<li><p>Codis Admin：集群管理的命令行工具。</p>
+
+<ul>
+<li>可用于控制 codis-proxy、codis-dashboard 状态以及访问外部存储。</li>
+</ul></li>
+
+<li><p>Codis FE：集群管理界面。</p>
+
+<ul>
+<li>多个集群实例共享可以共享同一个前端展示页面；</li>
+<li>通过配置文件管理后端 codis-dashboard 列表，配置文件可自动更新。</li>
+</ul></li>
+
+<li><p>Codis HA：为集群提供高可用。</p>
+
+<ul>
+<li>依赖 codis-dashboard 实例，自动抓取集群各个组件的状态；</li>
+<li>会根据当前集群状态自动生成主从切换策略，并在需要时通过 codis-dashboard 完成主从切换。</li>
+</ul></li>
+
+<li><p>Storage：为集群状态提供外部存储。</p>
+
+<ul>
+<li>提供 Namespace 概念，不同集群的会按照不同 product name 进行组织；</li>
+<li>目前仅提供了 Zookeeper 和 Etcd 两种实现，但是提供了抽象的 interface 可自行扩展</li>
+</ul></li>
+</ul>
+
+<p><img src="{{ site.baseurl }}/img/codis-architecture.png" alt="" /></p>
+
+<h2 id="codis-server">Codis-Server</h2>
+
+<p>Codis采用预先分片（Pre-Sharding）机制，事先规定好了，分成1024个slots，这些路由信息保存在ZooKeeper/Etcd中,同时维护Codis Server Group信息，并提供分布式锁等服务．
+redis源码server.c部分修改主要是针对Slot的<a href="https://github.com/CodisLabs/codis/blob/release3.1/doc/redis_change_zh.md">维护命令</a>，参见slot.c</p>
+
+<pre><code>{&quot;slotsinfo&quot;,slotsinfoCommand,-1,&quot;rF&quot;,0,NULL,0,0,0,0,0},
+{&quot;slotsscan&quot;,slotsscanCommand,-3,&quot;rR&quot;,0,NULL,0,0,0,0,0},
+{&quot;slotsdel&quot;,slotsdelCommand,-2,&quot;w&quot;,0,NULL,1,-1,1,0,0},
+{&quot;slotsmgrtslot&quot;,slotsmgrtslotCommand,5,&quot;aw&quot;,0,NULL,0,0,0,0,0},
+{&quot;slotsmgrtone&quot;,slotsmgrtoneCommand,5,&quot;aw&quot;,0,NULL,0,0,0,0,0},
+{&quot;slotsmgrttagslot&quot;,slotsmgrttagslotCommand,5,&quot;aw&quot;,0,NULL,0,0,0,0,0},
+{&quot;slotsmgrttagone&quot;,slotsmgrttagoneCommand,5,&quot;aw&quot;,0,NULL,0,0,0,0,0},
+{&quot;slotshashkey&quot;,slotshashkeyCommand,-1,&quot;rF&quot;,0,NULL,0,0,0,0,0},
+{&quot;slotscheck&quot;,slotscheckCommand,0,&quot;r&quot;,0,NULL,0,0,0,0,0},
+{&quot;slotsrestore&quot;,slotsrestoreCommand,-4,&quot;awm&quot;,0,NULL,1,1,1,0,0},
+</code></pre>
+
+<h2 id="codis-dashboard">Codis-Dashboard</h2>
+
+<p>pkg/topom/topom_api.go统一提供基于proxy,group,slots,sentinels的api维护接口</p>
+
+<pre><code>r.Group(&quot;/api/topom&quot;, func(r martini.Router) {
+		r.Get(&quot;/model&quot;, api.Model)
+		r.Get(&quot;/xping/:xauth&quot;, api.XPing)
+		r.Get(&quot;/stats/:xauth&quot;, api.Stats)
+		r.Get(&quot;/slots/:xauth&quot;, api.Slots)
+		r.Put(&quot;/reload/:xauth&quot;, api.Reload)
+		r.Put(&quot;/shutdown/:xauth&quot;, api.Shutdown)
+		r.Put(&quot;/loglevel/:xauth/:value&quot;, api.LogLevel)
+		r.Group(&quot;/proxy&quot;, func(r martini.Router) {
+			r.Put(&quot;/create/:xauth/:addr&quot;, api.CreateProxy)
+			r.Put(&quot;/online/:xauth/:addr&quot;, api.OnlineProxy)
+			r.Put(&quot;/reinit/:xauth/:token&quot;, api.ReinitProxy)
+			r.Put(&quot;/remove/:xauth/:token/:force&quot;, api.RemoveProxy)
+		})
+		r.Group(&quot;/group&quot;, func(r martini.Router) {
+			r.Put(&quot;/create/:xauth/:gid&quot;, api.CreateGroup)
+			r.Put(&quot;/remove/:xauth/:gid&quot;, api.RemoveGroup)
+			r.Put(&quot;/resync/:xauth/:gid&quot;, api.ResyncGroup)
+			r.Put(&quot;/resync-all/:xauth&quot;, api.ResyncGroupAll)
+			r.Put(&quot;/add/:xauth/:gid/:addr&quot;, api.GroupAddServer)
+			r.Put(&quot;/add/:xauth/:gid/:addr/:datacenter&quot;, api.GroupAddServer)
+			r.Put(&quot;/del/:xauth/:gid/:addr&quot;, api.GroupDelServer)
+			r.Put(&quot;/promote/:xauth/:gid/:addr&quot;, api.GroupPromoteServer)
+			r.Put(&quot;/replica-groups/:xauth/:gid/:addr/:value&quot;, api.EnableReplicaGroups)
+			r.Put(&quot;/replica-groups-all/:xauth/:value&quot;, api.EnableReplicaGroupsAll)
+			r.Group(&quot;/action&quot;, func(r martini.Router) {
+				r.Put(&quot;/create/:xauth/:addr&quot;, api.SyncCreateAction)
+				r.Put(&quot;/remove/:xauth/:addr&quot;, api.SyncRemoveAction)
+			})
+			r.Get(&quot;/info/:addr&quot;, api.InfoServer)
+		})
+		r.Group(&quot;/slots&quot;, func(r martini.Router) {
+			r.Group(&quot;/action&quot;, func(r martini.Router) {
+				r.Put(&quot;/create/:xauth/:sid/:gid&quot;, api.SlotCreateAction)
+				r.Put(&quot;/create-range/:xauth/:beg/:end/:gid&quot;, api.SlotCreateActionRange)
+				r.Put(&quot;/remove/:xauth/:sid&quot;, api.SlotRemoveAction)
+				r.Put(&quot;/interval/:xauth/:value&quot;, api.SetSlotActionInterval)
+				r.Put(&quot;/disabled/:xauth/:value&quot;, api.SetSlotActionDisabled)
+			})
+			r.Put(&quot;/assign/:xauth&quot;, binding.Json([]*models.SlotMapping{}), api.SlotsAssignGroup)
+			r.Put(&quot;/assign/:xauth/offline&quot;, binding.Json([]*models.SlotMapping{}), api.SlotsAssignOffline)
+			r.Put(&quot;/rebalance/:xauth/:confirm&quot;, api.SlotsRebalance)
+		})
+		r.Group(&quot;/sentinels&quot;, func(r martini.Router) {
+			r.Put(&quot;/add/:xauth/:addr&quot;, api.AddSentinel)
+			r.Put(&quot;/del/:xauth/:addr/:force&quot;, api.DelSentinel)
+			r.Put(&quot;/resync-all/:xauth&quot;, api.ResyncSentinels)
+			r.Get(&quot;/info/:addr&quot;, api.InfoSentinel)
+			r.Get(&quot;/info/:addr/monitored&quot;, api.InfoSentinelMonitored)
+		})
+	})
+</code></pre>
+
+<p>再通过资源具体实现完成操作pkg/topom/topom_proxy.go</p>
+
+<pre><code>func (s *Topom) CreateProxy(addr string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	ctx, err := s.newContext()
+	if err != nil {
+		return err
+	}
+
+	p, err := proxy.NewApiClient(addr).Model()
+	if err != nil {
+		return errors.Errorf(&quot;proxy@%s fetch model failed&quot;, addr)
+	}
+	c := s.newProxyClient(p)
+
+	if err := c.XPing(); err != nil {
+		return errors.Errorf(&quot;proxy@%s check xauth failed&quot;, addr)
+	}
+	if ctx.proxy[p.Token] != nil {
+		return errors.Errorf(&quot;proxy-[%s] already exists&quot;, p.Token)
+	} else {
+		p.Id = ctx.maxProxyId() + 1
+	}
+	defer s.dirtyProxyCache(p.Token)
+
+	if err := s.storeCreateProxy(p); err != nil {
+		return err
+	} else {
+		return s.reinitProxy(ctx, p, c)
+	}
+}
+
+func (s *Topom) OnlineProxy(addr string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	ctx, err := s.newContext()
+	if err != nil {
+		return err
+	}
+
+	p, err := proxy.NewApiClient(addr).Model()
+	if err != nil {
+		return errors.Errorf(&quot;proxy@%s fetch model failed&quot;, addr)
+	}
+	c := s.newProxyClient(p)
+
+	if err := c.XPing(); err != nil {
+		return errors.Errorf(&quot;proxy@%s check xauth failed&quot;, addr)
+	}
+	defer s.dirtyProxyCache(p.Token)
+
+	if d := ctx.proxy[p.Token]; d != nil {
+		p.Id = d.Id
+		if err := s.storeUpdateProxy(p); err != nil {
+			return err
+		}
+	} else {
+		p.Id = ctx.maxProxyId() + 1
+		if err := s.storeCreateProxy(p); err != nil {
+			return err
+		}
+	}
+	return s.reinitProxy(ctx, p, c)
+}
+
+func (s *Topom) RemoveProxy(token string, force bool) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	ctx, err := s.newContext()
+	if err != nil {
+		return err
+	}
+
+	p, err := ctx.getProxy(token)
+	if err != nil {
+		return err
+	}
+	c := s.newProxyClient(p)
+
+	if err := c.Shutdown(); err != nil {
+		log.WarnErrorf(err, &quot;proxy-[%s] shutdown failed, force remove = %t&quot;, token, force)
+		if !force {
+			return errors.Errorf(&quot;proxy-[%s] shutdown failed&quot;, p.Token)
+		}
+	}
+	defer s.dirtyProxyCache(p.Token)
+
+	return s.storeRemoveProxy(p)
+}
+
+func (s *Topom) ReinitProxy(token string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	ctx, err := s.newContext()
+	if err != nil {
+		return err
+	}
+
+	p, err := ctx.getProxy(token)
+	if err != nil {
+		return err
+	}
+	c := s.newProxyClient(p)
+
+	return s.reinitProxy(ctx, p, c)
+}
+
+func (s *Topom) newProxyClient(p *models.Proxy) *proxy.ApiClient {
+	c := proxy.NewApiClient(p.AdminAddr)
+	c.SetXAuth(s.config.ProductName, s.config.ProductAuth, p.Token)
+	return c
+}
+
+func (s *Topom) reinitProxy(ctx *context, p *models.Proxy, c *proxy.ApiClient) error {
+	log.Warnf(&quot;proxy-[%s] reinit:\n%s&quot;, p.Token, p.Encode())
+	if err := c.FillSlots(ctx.toSlotSlice(ctx.slots, p)...); err != nil {
+		log.ErrorErrorf(err, &quot;proxy-[%s] fillslots failed&quot;, p.Token)
+		return errors.Errorf(&quot;proxy-[%s] fillslots failed&quot;, p.Token)
+	}
+	if err := c.Start(); err != nil {
+		log.ErrorErrorf(err, &quot;proxy-[%s] start failed&quot;, p.Token)
+		return errors.Errorf(&quot;proxy-[%s] start failed&quot;, p.Token)
+	}
+	if err := c.SetSentinels(ctx.sentinel); err != nil {
+		log.ErrorErrorf(err, &quot;proxy-[%s] set sentinels failed&quot;, p.Token)
+		return errors.Errorf(&quot;proxy-[%s] set sentinels failed&quot;, p.Token)
+	}
+	return nil
+}
+
+func (s *Topom) resyncSlotMappingsByGroupId(ctx *context, gid int) error {
+	return s.resyncSlotMappings(ctx, ctx.getSlotMappingsByGroupId(gid)...)
+}
+
+func (s *Topom) resyncSlotMappings(ctx *context, slots ...*models.SlotMapping) error {
+	if len(slots) == 0 {
+		return nil
+	}
+	var fut sync2.Future
+	for _, p := range ctx.proxy {
+		fut.Add()
+		go func(p *models.Proxy) {
+			err := s.newProxyClient(p).FillSlots(ctx.toSlotSlice(slots, p)...)
+			if err != nil {
+				log.ErrorErrorf(err, &quot;proxy-[%s] resync slots failed&quot;, p.Token)
+			}
+			fut.Done(p.Token, err)
+		}(p)
+	}
+	for t, v := range fut.Wait() {
+		switch err := v.(type) {
+		case error:
+			if err != nil {
+				return errors.Errorf(&quot;proxy-[%s] resync slots failed&quot;, t)
+			}
+		}
+	}
+	return nil
+}
+</code></pre>
+
+<p>存储层接口/pkg/models/client.go</p>
+
+<pre><code>type Client interface {
+	Create(path string, data []byte) error
+	Update(path string, data []byte) error
+	Delete(path string) error
+
+	Read(path string, must bool) ([]byte, error)
+	List(path string, must bool) ([]string, error)
+
+	Close() error
+
+	WatchInOrder(path string) (&lt;-chan struct{}, []string, error)
+
+	CreateEphemeral(path string, data []byte) (&lt;-chan struct{}, error)
+	CreateEphemeralInOrder(path string, data []byte) (&lt;-chan struct{}, string, error)
+}
+
+func NewClient(coordinator string, addrlist string, timeout time.Duration) (Client, error) {
+	switch coordinator {
+	case &quot;zk&quot;, &quot;zookeeper&quot;:
+		return zkclient.New(addrlist, timeout)
+	case &quot;etcd&quot;:
+		return etcdclient.New(addrlist, timeout)
+	case &quot;fs&quot;, &quot;filesystem&quot;:
+		return fsclient.New(addrlist)
+	}
+	return nil, errors.Errorf(&quot;invalid coordinator name = %s&quot;, coordinator)
+}
+</code></pre>
+
+<h1 id="basic-usage">Basic Usage</h1>
+
+<p>参考/example/setup.py搭建本地redis-cluster的若干步骤</p>
+
+<pre><code>...
+if __name__ == &quot;__main__&quot;:
+    children = []
+    atexit.register(kill_all, children)
+
+    product_name = &quot;demo-test&quot;
+    product_auth = None
+
+    # step 1. codis-server &amp; codis-sentinel
+
+    # codis-server [master 16380+i &lt;== following == 17380+i slave]
+    for port in range(16380, 16384):
+        children.append(CodisServer(port, requirepass=product_auth))
+        children.append(CodisServer(port + 1000, port, requirepass=product_auth))
+
+    for port in range(26380, 26385):
+        children.append(CodisSentinel(port))
+
+    check_alive(children, 1)
+    print(&quot;[OK] setup codis-server &amp; codis-sentinel&quot;)
+
+    # step 2. setup codis-fe &amp; codis-dashboard &amp; codis-proxy
+
+    children.append(CodisFE(8080, &quot;../cmd/fe/assets&quot;))
+    children.append(CodisDashboard(18080, product_name, product_auth))
+
+    for i in range(0, 4):
+        children.append(CodisProxy(11080 + i, 19000 + i, product_name, product_auth))
+
+    check_alive(children, 3)
+    print(&quot;[OK] setup codis-fe &amp; codis-dashboard &amp; codis-proxy&quot;)
+
+    # step3: init slot-mappings
+
+    for i in range(0, 4):
+        gid = i + 1
+        codis_admin_dashboard(18080, &quot;--create-group --gid={}&quot;.format(gid))
+        codis_admin_dashboard(18080, &quot;--group-add --gid={} --addr=127.0.0.1:{} --datacenter=localhost&quot;.format(gid, 16380+i))
+        codis_admin_dashboard(18080, &quot;--group-add --gid={} --addr=127.0.0.1:{} --datacenter=localhost&quot;.format(gid, 17380+i))
+        beg, end = i * 256, (i + 1) * 256 - 1
+        codis_admin_dashboard(18080, &quot;--slots-assign --beg={} --end={} --gid={} --confirm&quot;.format(beg, end, gid))
+        codis_admin_dashboard(18080, &quot;--resync-group --gid={}&quot;.format(gid))
+
+    for i in range(0, 5):
+        codis_admin_dashboard(18080, &quot;--sentinel-add --addr=127.0.0.1:{}&quot;.format(26380+i))
+
+    codis_admin_dashboard(18080, &quot;--slot-action --interval=100&quot;)
+    codis_admin_dashboard(18080, &quot;--sentinel-resync&quot;)
+
+    check_alive(children, 3)
+    print(&quot;[OK] done &amp; have fun!!!&quot;)
+
+    while True:
+        print(datetime.datetime.now())
+        time.sleep(5)
+</code></pre>
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/2016/12/22/codis/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/2016/12/26/meta-program/" data-toggle="tooltip" data-placement="top" title="meta program in python">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/2016/12/18/bolt/" data-toggle="tooltip" data-placement="top" title="BoltDB In-depth Analysis">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

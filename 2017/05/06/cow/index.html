@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>cow code analysis - yrong blog</title>
+  <meta property="og:title" content="cow code analysis - yrong blog" />
+  <meta name="twitter:title" content="cow code analysis - yrong blog" />
+  <meta name="description" content="COW is a HTTP proxy to simplify bypassing the great firewall. It tries to automatically identify blocked websites and only use parent proxy for those sites.">
+  <meta property="og:description" content="COW is a HTTP proxy to simplify bypassing the great firewall. It tries to automatically identify blocked websites and only use parent proxy for those sites.">
+  <meta name="twitter:description" content="COW is a HTTP proxy to simplify bypassing the great firewall. It tries to automatically identify blocked websites and only use parent proxy for those sites.">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/2017/05/06/cow/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">cow code analysis</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>May 6, 2017</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/golang/">
+            <i class="fas fa-tag"></i>
+            golang
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#features">Features</a></li>
+<li><a href="#visited-site-recording">Visited site recording</a></li>
+<li><a href="#how-does-cow-detect-blocked-sites">How does COW detect blocked sites</a></li>
+<li><a href="#example-configuration">Example Configuration</a></li>
+<li><a href="#implementation-design">Implementation Design</a></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      <p>COW is a HTTP proxy to simplify bypassing the great firewall. It tries to automatically identify blocked websites and only use parent proxy for those sites.</p>
+
+<h2 id="features">Features</h2>
+
+<ul>
+<li>As a HTTP proxy, can be used by mobile devices</li>
+<li>Supports HTTP, SOCKS5, <a href="https://github.com/clowwindy/shadowsocks/wiki/Shadowsocks-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E">shadowsocks</a> and COW itself as parent proxy
+
+<ul>
+<li>Supports simple load balancing between multiple parent proxies</li>
+</ul></li>
+<li>Automatically identify blocked websites, only use parent proxy for those sites</li>
+<li>Generate and serve PAC file for browser to bypass COW for best performance
+
+<ul>
+<li>Contain domains that can be directly accessed (recorded accoring to your visit history)</li>
+</ul></li>
+</ul>
+
+<h2 id="visited-site-recording">Visited site recording</h2>
+
+<p>COW records all visited hosts and visit count in <code>stat</code> (which is a json file) under the same directory with config file.</p>
+
+<ul>
+<li><strong>For unknown site, first try direct access, use parent proxy upon failure. After 2 minutes, try direct access again</strong>
+
+<ul>
+<li>Builtin <a href="site_blocked.go">common blocked site</a> in order to reduce time to discover blockage and the use parent proxy</li>
+</ul></li>
+<li>Hosts will be put into PAC after a few times of successful direct visit</li>
+<li>Hosts will use parent proxy if direct access failed for a few times
+
+<ul>
+<li>To avoid mistakes, will try direct access with some probability</li>
+</ul></li>
+<li>Host will be deleted if not visited for a few days</li>
+<li>Hosts under builtin/manually specified blocked and direct domains will not appear in <code>stat</code></li>
+</ul>
+
+<h2 id="how-does-cow-detect-blocked-sites">How does COW detect blocked sites</h2>
+
+<p>Upon the following error, one domain is considered to be blocked</p>
+
+<ul>
+<li>Server connection reset</li>
+<li>Connection to server timeout</li>
+<li>Read from server timeout</li>
+</ul>
+
+<p>COW will retry HTTP request upon these errors, But if there&rsquo;s some data sent back to the client, connection with the client will be dropped to signal error..</p>
+
+<p>Server connection reset is usually reliable in detecting blocked sites. But timeout is not. COW tries to estimate timeout value every 30 seconds, in order to avoid considering normal sites as blocked when network condition is bad. Revert to direct access after two minutes upon first blockage is also to avoid mistakes.</p>
+
+<p>If automatica timeout retry causes problem for you, try to change <code>readTimeout</code> and <code>dialTimeout</code> in configuration.</p>
+
+<h2 id="example-configuration">Example Configuration</h2>
+
+<pre><code># Line starting with # is comment and will be ignored
+# Local proxy listen address
+listen = http://127.0.0.1:7777
+
+# SOCKS5 parent proxy
+proxy = socks5://127.0.0.1:1080
+# HTTP parent proxy
+proxy = http://127.0.0.1:8080
+proxy = http://user:password@127.0.0.1:8080
+# shadowsocks parent proxy
+proxy = ss://aes-128-cfb:password@1.2.3.4:8388
+# cow parent proxy
+proxy = cow://aes-128-cfb:password@1.2.3.4:8388
+</code></pre>
+
+<h2 id="implementation-design">Implementation Design</h2>
+
+<p>COW uses separate goroutines to read client requests and server responses.</p>
+
+<ul>
+<li>For each client, COW will create one <em>goroutine</em> to
+
+<ul>
+<li>accept client request (read from client connection)</li>
+<li>create connection if not exist</li>
+<li>send request to the server (write to server connection)</li>
+<li>reading response from the web server (read from server connection)</li>
+<li>send response back to the client (write to client connection)</li>
+</ul></li>
+</ul>
+
+<pre><code>/*entrance*/
+func main() {
+	quit = make(chan struct{})
+	// Parse flags after load config to allow override options in config
+	cmdLineConfig := parseCmdLineConfig()
+	if cmdLineConfig.PrintVer {
+		printVersion()
+		os.Exit(0)
+	}
+    //initialize listenProxy and backupParentPool
+	parseConfig(cmdLineConfig.RcFile, cmdLineConfig)
+	initSelfListenAddr()
+	initParentPool()
+
+	if config.Core &gt; 0 {
+		runtime.GOMAXPROCS(config.Core)
+	}
+    // handle signals for gracefully termination
+	go sigHandler()
+	var wg sync.WaitGroup
+	wg.Add(len(listenProxy))
+	for _, proxy := range listenProxy {
+		go proxy.Serve(&amp;wg, quit)
+	}
+	wg.Wait()
+	if relaunch {
+		info.Println(&quot;Relunching cow...&quot;)
+		// Need to fork me.
+		argv0, err := lookPath()
+		if nil != err {
+			errl.Println(err)
+			return
+		}
+
+		err = syscall.Exec(argv0, os.Args, os.Environ())
+		if err != nil {
+			errl.Println(err)
+		}
+	}
+	debug.Println(&quot;the main process is , exiting...&quot;)
+
+}
+</code></pre>
+
+<pre><code>//listen and serve proxy request from all clients
+func (hp *httpProxy) Serve(wg *sync.WaitGroup, quit &lt;-chan struct{}) {
+    	defer func() {
+    		wg.Done()
+    	}()
+    	ln, err := net.Listen(&quot;tcp&quot;, hp.addr)
+    	if err != nil {
+    		fmt.Println(&quot;listen http failed:&quot;, err)
+    		return
+    	}
+    	var exit bool
+    	go func() {
+    		&lt;-quit
+    		exit = true
+    		ln.Close()
+    	}()
+    	host, _, _ := net.SplitHostPort(hp.addr)
+    	var pacURL string
+    	if host == &quot;&quot; || host == &quot;0.0.0.0&quot; {
+    		pacURL = fmt.Sprintf(&quot;http://&lt;hostip&gt;:%s/pac&quot;, hp.port)
+    	} else if hp.addrInPAC == &quot;&quot; {
+    		pacURL = fmt.Sprintf(&quot;http://%s/pac&quot;, hp.addr)
+    	} else {
+    		pacURL = fmt.Sprintf(&quot;http://%s/pac&quot;, hp.addrInPAC)
+    	}
+    	info.Printf(&quot;COW %s listen http %s, PAC url %s\n&quot;, version, hp.addr, pacURL)
+
+    	for {
+    		conn, err := ln.Accept()
+    		if err != nil &amp;&amp; !exit {
+    			errl.Printf(&quot;http proxy(%s) accept %v\n&quot;, ln.Addr(), err)
+    			if isErrTooManyOpenFd(err) {
+    				connPool.CloseAll()
+    			}
+    			time.Sleep(time.Millisecond)
+    			continue
+    		}
+    		if exit {
+    			debug.Println(&quot;exiting the http listner&quot;)
+    			break
+    		}
+    		c := newClientConn(conn, hp)
+    		//for each connection from client,start goroutine
+    		go c.serve()
+    	}
+    }
+</code></pre>
+
+<pre><code>/*gorouting to serve request from one client*/
+func (c *clientConn) serve() {
+	var r Request
+	var rp Response
+	var sv *serverConn
+	var err error
+
+	var authed bool
+	// For cow proxy server, authentication is done by matching password.
+	if _, ok := c.proxy.(*cowProxy); ok {
+		authed = true
+	}
+
+	defer func() {
+		r.releaseBuf()
+		c.Close()
+	}()
+
+	// Refer to implementation.md for the design choices on parsing the request
+	// and response.
+	for {
+
+		if err = parseRequest(c, &amp;r); err != nil {//parse request from client
+			debug.Printf(&quot;cli(%s) parse request %v\n&quot;, c.RemoteAddr(), err)
+			if err == io.EOF || isErrConnReset(err) {
+				return
+			}
+			if err != errClientTimeout {
+				sendErrorPage(c, &quot;404 Bad request&quot;, &quot;Bad request&quot;, err.Error())
+				return
+			}
+			sendErrorPage(c, statusRequestTimeout, statusRequestTimeout,
+				&quot;Your browser didn't send a complete request in time.&quot;)
+			return
+		}
+
+	retry:
+	    //build server connection based on the parsed request
+		if sv, err = c.getServerConn(&amp;r); err != nil {
+			if debug {
+				debug.Printf(&quot;cli(%s) failed to get server conn %v\n&quot;, c.RemoteAddr(), &amp;r)
+			}
+			// Failed connection will send error page back to the client.
+			// For CONNECT, the client read buffer is released in copyClient2Server,
+			// so can't go back to getRequest.
+			if err == errPageSent &amp;&amp; !r.isConnect {
+				if r.hasBody() {
+					// skip request body
+					debug.Printf(&quot;cli(%s) skip request body %v\n&quot;, c.RemoteAddr(), &amp;r)
+					sendBody(SinkWriter{}, c.bufRd, int(r.ContLen), r.Chunking)
+				}
+				continue
+			}
+			return
+		}
+		//forward request from client to server and response from server to client
+		if err = sv.doRequest(c, &amp;r, &amp;rp); err != nil {
+			sv.Close()
+			if c.shouldRetry(&amp;r, sv, err) {
+				goto retry
+			} else if err == errPageSent &amp;&amp; (!r.hasBody() || r.hasSent()) {
+				// Can only continue if request has no body, or request body
+				// has been read.
+				continue
+			}
+			return
+		}
+		// Put server connection to pool, so other clients can use it.
+		_, isCowConn := sv.Conn.(cowConn)
+		if rp.ConnectionKeepAlive || isCowConn {
+			if debug {
+				debug.Printf(&quot;cli(%s) connPool put %s&quot;, c.RemoteAddr(), sv.hostPort)
+			}
+			// If the server connection is not going to be used soon,
+			// release buffer before putting back to pool can save memory.
+			sv.releaseBuf()
+			connPool.Put(sv)
+		} else {
+			if debug {
+				debug.Printf(&quot;cli(%s) server %s close conn\n&quot;, c.RemoteAddr(), sv.hostPort)
+			}
+			sv.Close()
+		}
+		if !r.ConnectionKeepAlive {
+			if debug {
+				debug.Printf(&quot;cli(%s) close connection\n&quot;, c.RemoteAddr())
+			}
+			return
+		}
+	}
+}
+</code></pre>
+
+<pre><code>// Connect to requested server according to whether it's marked as blocked.
+// If direct connection fails, try parent proxies.
+func (c *clientConn) connect(r *Request, siteInfo *VisitCnt) (srvconn net.Conn, err error) {
+	var errMsg string
+	if config.AlwaysProxy {
+		if srvconn, err = parentProxy.connect(r.URL); err == nil {
+			return
+		}
+		errMsg = genErrMsg(r, nil, &quot;Parent proxy connection failed, always use parent proxy.&quot;)
+		goto fail
+	}
+	if siteInfo.AsBlocked() &amp;&amp; !parentProxy.empty() {
+		// In case of connection error to socks server, fallback to direct connection
+		if srvconn, err = parentProxy.connect(r.URL); err == nil {
+			return
+		}
+		if srvconn, err = connectDirect(r.URL, siteInfo); err == nil {
+			return
+		}
+		errMsg = genErrMsg(r, nil, &quot;Parent proxy and direct connection failed, maybe blocked site.&quot;)
+	} else {
+		// In case of error on direction connection, try parent server
+		if srvconn, err = connectDirect(r.URL, siteInfo); err == nil {
+			return
+		}
+		// net.Dial does two things: DNS lookup and TCP connection.
+		// GFW may cause failure here: make it time out or reset connection.
+		// debug.Printf(&quot;type of err %T %v\n&quot;, err, err)
+
+		// RST during TCP handshake is valid and would return as connection
+		// refused error. My observation is that GFW does not use RST to stop
+		// TCP handshake.
+		// To simplify things and avoid error in my observation, always try
+		// parent proxy in case of Dial error.
+		var socksErr error
+		if srvconn, socksErr = parentProxy.connect(r.URL); socksErr == nil {
+			c.handleBlockedRequest(r, err)//flag as blocked
+			if debug {
+				debug.Printf(&quot;cli(%s) direct connection failed, use parent proxy for %v\n&quot;,
+					c.RemoteAddr(), r)
+			}
+			return srvconn, nil
+		}
+		errMsg = genErrMsg(r, nil,
+			&quot;Direct and parent proxy connection failed, maybe blocked site.&quot;)
+	}
+
+fail:
+	sendErrorPage(c, &quot;504 Connection failed&quot;, err.Error(), errMsg)
+	return nil, errPageSent
+}
+</code></pre>
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/2017/05/06/cow/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/2017/05/12/websocketd/" data-toggle="tooltip" data-placement="top" title="websocketd code analysis">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/2017/05/01/wordpress/" data-toggle="tooltip" data-placement="top" title="wordpress code analysis">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

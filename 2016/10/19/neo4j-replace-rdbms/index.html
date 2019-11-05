@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>用图数据库解决关系型数据库存在的问题 - yrong blog</title>
+  <meta property="og:title" content="用图数据库解决关系型数据库存在的问题 - yrong blog" />
+  <meta name="twitter:title" content="用图数据库解决关系型数据库存在的问题 - yrong blog" />
+  <meta name="description" content="用图数据库解决关系型数据库存在的问题">
+  <meta property="og:description" content="用图数据库解决关系型数据库存在的问题">
+  <meta name="twitter:description" content="用图数据库解决关系型数据库存在的问题">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/2016/10/19/neo4j-replace-rdbms/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">用图数据库解决关系型数据库存在的问题</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>October 19, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/neo4j/">
+            <i class="fas fa-tag"></i>
+            neo4j
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li><a href="#user-order-product">User-Order-Product</a>
+<ul>
+<li><a href="#rdbms">Rdbms</a></li>
+<li><a href="#graph">Graph</a></li>
+</ul></li>
+<li><a href="#friend-of-friend">Friend of friend</a>
+<ul>
+<li><a href="#rdbms-1">Rdbms</a></li>
+<li><a href="#graph-1">Graph</a></li>
+</ul></li>
+<li><a href="#acl">ACL</a>
+<ul>
+<li><a href="#rdbms-2">Rdbms</a></li>
+<li><a href="#graph-2">Graph</a>
+<ul>
+<li><a href="#migrating-data-to-neo4j">Migrating data to Neo4j</a></li>
+<li><a href="#running-cypher">Running Cypher</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#recommendation">Recommendation</a>
+<ul>
+<li><a href="#the-model">The Model</a>
+<ul>
+<li><a href="#nodes">Nodes</a></li>
+<li><a href="#relationships">Relationships</a></li>
+</ul></li>
+<li><a href="#recommendation-cypher">Recommendation Cypher</a>
+<ul>
+<li><a href="#user-centric-user-based-recommendations">User-Centric, User-Based Recommendations</a></li>
+<li><a href="#movie-centric-keyword-based-recommendations">Movie-Centric, Keyword-Based Recommendations</a></li>
+<li><a href="#user-centric-keyword-based-recommendations">User-Centric, Keyword-Based Recommendations</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      <p>用图数据库解决关系型数据库存在的问题</p>
+
+<h1 id="user-order-product">User-Order-Product</h1>
+
+<h2 id="rdbms">Rdbms</h2>
+
+<p><img src="{{ site.baseurl }}/img/rdbms-er-order.png" alt="" /></p>
+
+<p><code>which customers buying this product also bought that product</code></p>
+
+<h2 id="graph">Graph</h2>
+
+<pre><code>  (p2:Product)&lt;-[*]-(u:User) -[*]-&gt;(p1:Product)
+  return u
+</code></pre>
+
+<h1 id="friend-of-friend">Friend of friend</h1>
+
+<h2 id="rdbms-1">Rdbms</h2>
+
+<p><img src="{{ site.baseurl }}/img/rdbms-er-friend.png" alt="" /></p>
+
+<blockquote>
+<p>Alice’s friends-of-friends</p>
+</blockquote>
+
+<pre><code>SELECT p1.Person AS PERSON, p2.Person AS FRIEND_OF_FRIEND FROM PersonFriend pf1 
+JOIN Person p1 ON pf1.PersonID = p1.ID JOIN PersonFriend pf2 ON pf2.PersonID = pf1.FriendID 
+JOIN Person p2 ON pf2.FriendID = p2.ID 
+WHERE p1.Person = 'Alice' AND pf2.FriendID &lt;&gt; p1.ID
+</code></pre>
+
+<p>queries  that  extend  to  four,  five,  or  six  degrees  of  friendship deteriorate significantly due to the computational and space complexity of recursivelyjoining tables</p>
+
+<h2 id="graph-1">Graph</h2>
+
+<pre><code>   (alice:Person)-[:Friend*2]-&gt;(p:Person)
+   return p
+</code></pre>
+
+<h1 id="acl">ACL</h1>
+
+<h2 id="rdbms-2">Rdbms</h2>
+
+<p><img src="{{ site.baseurl }}/img/id4AloN.png" alt="" /></p>
+
+<p>quick script to init schema and load data</p>
+
+<pre><code>CREATE TABLE USERS (id SERIAL, name varchar(50));
+CREATE TABLE GROUPS (id SERIAL, name varchar(50));
+CREATE TABLE USER_GROUPS (user_id integer, group_id integer);
+CREATE TABLE GROUP_GROUPS (parent_group_id integer, group_id integer);
+CREATE TABLE USER_ASSET_ACCESS(user_id integer, asset_id integer);
+CREATE TABLE GROUP_ASSET_ACCESS(group_id integer, asset_id integer);
+CREATE TABLE ASSETS (id SERIAL, uri varchar(1000));
+
+INSERT INTO USERS (name) values('neo');
+INSERT INTO USERS (name) values('morpheus');
+INSERT INTO USERS (name) values('trinity');
+INSERT INTO USERS (name) values('cypher');
+INSERT INTO USERS (name) values('smith');
+
+INSERT INTO GROUPS (name) values('agents');
+INSERT INTO GROUPS (name) values('matrix');
+INSERT INTO GROUPS (name) values('crew');
+INSERT INTO GROUPS (name) values('the_one');
+
+INSERT INTO USER_GROUPS values(1, 3);
+INSERT INTO USER_GROUPS values(1, 4);
+INSERT INTO USER_GROUPS values(2, 3);
+INSERT INTO USER_GROUPS values(3, 3);
+INSERT INTO USER_GROUPS values(4, 3);
+INSERT INTO USER_GROUPS values(5, 1);
+
+INSERT INTO GROUP_GROUPS values(2, 1);
+
+INSERT INTO ASSETS (uri) values('/there/is/no/spoon');
+INSERT INTO ASSETS (uri) values('/the/red/pill');
+INSERT INTO ASSETS (uri) values('/mainframe');
+INSERT INTO ASSETS (uri) values('/deja/vu');
+
+INSERT INTO USER_ASSET_ACCESS values(1, 1);
+
+INSERT INTO GROUP_ASSET_ACCESS values(2, 3);
+INSERT INTO GROUP_ASSET_ACCESS values(3, 2);
+INSERT INTO GROUP_ASSET_ACCESS values(4, 2); to create the schema in postgres, to follow along:
+</code></pre>
+
+<p>consider the queries we&rsquo;ll need to run in order to decide whether a particular user has access to a particular asset. They might be directly connected via user_asset_access, or they might be in a group that has access via group_asset_access. Or they may even be in a group that&rsquo;s part of a larger group that has access via group_asset_access, and so on&hellip;</p>
+
+<p>So you end up writing <a href="http://sqlfiddle.com/#!15/032bf/10">long queries</a> in order to determine <em><strong>whether someone has access to a particular asset</strong></em>. Here, if any counts returned are &gt;0, they have access:</p>
+
+<pre><code>SELECT count(1)
+FROM users u, user_asset_access uaa, assets a
+WHERE u.id = uaa.user_id 
+  AND uaa.asset_id = a.id
+  AND a.uri = '/mainframe'
+  AND u.name = 'smith'
+UNION ALL
+SELECT count(1)
+FROM users u, user_groups ug, groups g, group_asset_access gaa, assets a
+WHERE u.id = ug.user_id
+  AND g.id = ug.group_id
+  AND gaa.asset_id = a.id
+  AND gaa.group_id = g.id
+  AND a.uri = '/mainframe'
+  AND u.name = 'smith'
+UNION ALL
+SELECT count(1)
+FROM users u, user_groups ug, groups g, groups pg, group_groups gg, group_asset_access gaa, assets a
+WHERE u.id = ug.user_id
+  AND g.id = ug.group_id
+  AND gg.parent_group_id = pg.id
+  AND gg.group_id = g.id
+  AND gaa.asset_id = a.id
+  AND gaa.group_id = pg.id
+  AND a.uri = '/mainframe'
+  AND u.name = 'smith'
+</code></pre>
+
+<h2 id="graph-2">Graph</h2>
+
+<h3 id="migrating-data-to-neo4j">Migrating data to Neo4j</h3>
+
+<p>let&rsquo;s construct our export and import queries to load our data from a SQL database to Neo4j. In postgres, there is a convenient CSV export function called COPY</p>
+
+<pre><code>wfreeman=# COPY users TO '/tmp/users.csv' WITH CSV;
+COPY 5
+wfreeman=# COPY assets TO '/tmp/assets.csv' WITH CSV;
+COPY 4
+wfreeman=# COPY groups TO '/tmp/groups.csv' WITH CSV;
+COPY 4
+wfreeman=# COPY user_groups TO '/tmp/user_groups.csv' WITH CSV;
+COPY 6
+wfreeman=# COPY group_groups TO '/tmp/group_groups.csv' WITH CSV;
+COPY 1
+wfreeman=# COPY group_asset_access TO '/tmp/group_asset_access.csv' WITH CSV;
+COPY 3
+wfreeman=# COPY user_asset_access TO '/tmp/user_asset_access.csv' WITH CSV;
+COPY 1
+</code></pre>
+
+<p>First we&rsquo;ll make some unique constraints (which come with indexes), as well as some indexes for our non-unique data:</p>
+
+<pre><code>CREATE CONSTRAINT ON (u:User) ASSERT u.id IS UNIQUE;
+CREATE CONSTRAINT ON (g:Group) ASSERT g.id IS UNIQUE;
+CREATE CONSTRAINT ON (a:Asset) ASSERT a.id IS UNIQUE;
+
+CREATE INDEX ON :User(name);
+CREATE INDEX ON :Group(name);
+CREATE INDEX ON :Asset(uri);
+</code></pre>
+
+<p>We&rsquo;ll need to use LOAD CSV along with the MERGE clause to bring the data in.</p>
+
+<pre><code>LOAD CSV FROM 'file:///tmp/users.csv' as line
+MERGE (:User {id:toInt(line[0]), name:line[1]});
+
+LOAD CSV FROM 'file:///tmp/groups.csv' as line
+MERGE (:Group {id:toInt(line[0]), name:line[1]});
+
+LOAD CSV FROM 'file:///tmp/assets.csv' as line
+MERGE (:Asset {id:toInt(line[0]), uri:line[1]});
+
+LOAD CSV FROM 'file:///tmp/user_asset_access.csv' as line
+MATCH (u:User {id:toInt(line[0])}), (a:Asset {id:toInt(line[1])})
+MERGE (u)-[:HAS_ACCESS]-&gt;(a);
+
+LOAD CSV FROM 'file:///tmp/group_asset_access.csv' as line
+MATCH (g:Group {id:toInt(line[0])}), (a:Asset {id:toInt(line[1])})
+MERGE (g)-[:HAS_ACCESS]-&gt;(a);
+
+LOAD CSV FROM 'file:///tmp/user_groups.csv' as line
+MATCH (u:User {id:toInt(line[0])}), (g:Group {id:toInt(line[1])})
+MERGE (u)-[:IS_MEMBER]-&gt;(g);
+
+LOAD CSV FROM 'file:///tmp/group_groups.csv' as line
+MATCH (p:Group {id:toInt(line[0])}), (g:Group {id:toInt(line[1])})
+MERGE (g)-[:IS_MEMBER]-&gt;(p);
+</code></pre>
+
+<h3 id="running-cypher">Running Cypher</h3>
+
+<p>Once all of the data is imported, we can run some queries in the browser.Let&rsquo;s see <em><strong>whether Neo has access to /the/red/pill</strong></em>, using the shortestPath function to optimize the search (note the difference in complexity between this query and the SQL that accomplished a similar result):</p>
+
+<pre><code>MATCH shortestPath((neo:User {name:'neo'})-[:HAS_ACCESS|IS_MEMBER*]-&gt;(a:Asset {uri:'/the/red/pill'}))
+RETURN count(*) &gt; 0 as hasAccess
+</code></pre>
+
+<p>We have :User(name) and :Asset(uri) indexes, so Cypher can look those up quickly via their respective indexes.
+Once it has those starting points, it will use the shortestPath() matcher to find a single path that matches, following relationships of either:HAS_ACCESS or :IS_MEMBER (which is enough to determine whether Neo has access to /the/red/pill).</p>
+
+<p><em><strong>Who has access to /the/red/pill?</strong></em></p>
+
+<pre><code>MATCH shortestPath((u:User)-[:HAS_ACCESS|IS_MEMBER*]-&gt;(a:Asset {uri:'/the/red/pill'}))
+RETURN u.name
+</code></pre>
+
+<h1 id="recommendation">Recommendation</h1>
+
+<h2 id="the-model">The Model</h2>
+
+<p><img src="{{ site.baseurl }}/img/model.png" alt="image of movie model" /></p>
+
+<h3 id="nodes">Nodes</h3>
+
+<ul>
+<li><code>Movie</code></li>
+<li><code>Person</code></li>
+<li><code>Genre</code></li>
+<li><code>Keyword</code></li>
+</ul>
+
+<h3 id="relationships">Relationships</h3>
+
+<ul>
+<li><code>(:Person)-[:ACTED_IN {role:&quot;some role&quot;}]-&gt;(:Movie)</code></li>
+<li><code>(:Person)-[:DIRECTED]-&gt;(:Movie)</code></li>
+<li><code>(:Person)-[:WRITER_OF]-&gt;(:Movie)</code></li>
+<li><code>(:Person)-[:PRODUCED]-&gt;(:Movie)</code></li>
+<li><code>(:MOVIE)-[:HAS_GENRE]-&gt;(:Genre)</code></li>
+</ul>
+
+<h2 id="recommendation-cypher">Recommendation Cypher</h2>
+
+<h3 id="user-centric-user-based-recommendations">User-Centric, User-Based Recommendations</h3>
+
+<p>Based on my similarity to other users, user <code>Sherman</code> might be interested in movies rated highly by users with similar ratings as himself.</p>
+
+<pre><code>MATCH (me:User {username:'Sherman'})-[my:RATED]-&gt;(m:Movie)
+MATCH (other:User)-[their:RATED]-&gt;(m)
+WHERE me &lt;&gt; other
+AND abs(my.rating - their.rating) &lt; 2
+WITH other,m
+MATCH (other)-[otherRating:RATED]-&gt;(movie:Movie)
+WHERE movie &lt;&gt; m
+WITH avg(otherRating.rating) AS avgRating, movie
+RETURN movie
+ORDER BY avgRating desc
+LIMIT 25
+</code></pre>
+
+<h3 id="movie-centric-keyword-based-recommendations">Movie-Centric, Keyword-Based Recommendations</h3>
+
+<p>Site visitors interested in movies like <code>Elysium</code> will likely be interested in movies with similar keywords.</p>
+
+<pre><code>MATCH (m:Movie {title:'Elysium'})
+MATCH (m)-[:HAS_KEYWORD]-&gt;(k:Keyword)
+MATCH (movie:Movie)-[r:HAS_KEYWORD]-&gt;(k)
+WHERE m &lt;&gt; movie
+WITH movie, count(DISTINCT r) AS commonKeywords
+RETURN movie
+ORDER BY commonKeywords DESC
+LIMIT 25
+</code></pre>
+
+<h3 id="user-centric-keyword-based-recommendations">User-Centric, Keyword-Based Recommendations</h3>
+
+<p><code>Sherman</code> has seen many movies, and is looking for movies similar to the ones he has already watched.</p>
+
+<pre><code>MATCH (u:User {username:'Sherman'})-[:RATED]-&gt;(m:Movie)
+MATCH (m)-[:HAS_KEYWORD]-&gt;(k:Keyword)
+MATCH (movie:Movie)-[r:HAS_KEYWORD]-&gt;(k)
+WHERE m &lt;&gt; movie
+WITH movie, count(DISTINCT r) AS commonKeywords
+RETURN movie
+ORDER BY commonKeywords DESC
+LIMIT 25
+</code></pre>
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/2016/10/19/neo4j-replace-rdbms/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/2016/10/21/jupyter/" data-toggle="tooltip" data-placement="top" title="程序员必备工具之Jupyter">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/2016/10/17/machine-learning-on-spark/" data-toggle="tooltip" data-placement="top" title="Machine Learning algorithm on Spark">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

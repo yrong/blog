@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Redis on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/redis/</link>
+    <description>Recent content in Redis on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Thu, 22 Dec 2016 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/redis/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Codis In-depth Analysis</title>
+      <link>https://yrong.github.io/blog/2016/12/22/codis/</link>
+      <pubDate>Thu, 22 Dec 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/2016/12/22/codis/</guid>
+      <description>&lt;p&gt;codis in-depth analysis&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>redis object types</title>
+      <link>https://yrong.github.io/blog/2016/09/10/redis/</link>
+      <pubDate>Sat, 10 Sep 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/2016/09/10/redis/</guid>
+      <description>&lt;p&gt;redis数据结构类型及实现&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

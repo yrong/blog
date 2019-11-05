@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Machine Learning algorithm on Spark - yrong blog</title>
+  <meta property="og:title" content="Machine Learning algorithm on Spark - yrong blog" />
+  <meta name="twitter:title" content="Machine Learning algorithm on Spark - yrong blog" />
+  <meta name="description" content="page rank and decision tree on spark">
+  <meta property="og:description" content="page rank and decision tree on spark">
+  <meta name="twitter:description" content="page rank and decision tree on spark">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/2016/10/17/machine-learning-on-spark/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Machine Learning algorithm on Spark</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>October 17, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/spark/">
+            <i class="fas fa-tag"></i>
+            spark
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#pagerank">PageRank</a>
+<ul>
+<li><a href="#算法">算法</a></li>
+<li><a href="#实例">实例</a></li>
+</ul></li>
+<li><a href="#decision-tree">Decision Tree</a>
+<ul>
+<li><a href="#概率统计理论">概率统计理论</a></li>
+<li><a href="#id3">ID3</a></li>
+<li><a href="#spark实例">Spark实例 ###</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      <p>page rank and decision tree on spark</p>
+
+<h2 id="pagerank">PageRank</h2>
+
+<h3 id="算法">算法</h3>
+
+<p>The PageRank algorithm outputs a probability distribution used to represent the likelihood that a person randomly clicking on links will arrive at any particular page.</p>
+
+<ol>
+<li>Initialize each page’s rank to 1.0.</li>
+<li>On each iteration, have page p send a contribution of rank(p)/numNeighbors(p) to its neighbors (the pages it has links to).</li>
+<li>Set each page’s rank to 0.15 + 0.85 * contributionsReceived.</li>
+</ol>
+
+<p>The last two steps repeat for several iterations, during which the algorithm will con‐ verge to the correct PageRank value for each page. In practice, it’s typical to run about 10 iterations.</p>
+
+<h3 id="实例">实例</h3>
+
+<p><img src="{{ site.baseurl }}/img/Screen-Shot-1.png" alt="" /></p>
+
+<p>Above diagram shows there are 4 web pages with theirs outboundlinks.</p>
+
+<pre><code>(&quot;MapR&quot;,List(&quot;Baidu&quot;,&quot;Blogger&quot;)),
+(&quot;Baidu&quot;, List(&quot;MapR&quot;)),
+(&quot;Blogger&quot;,List(&quot;Google&quot;,&quot;Baidu&quot;)),
+(&quot;Google&quot;, List(&quot;MapR&quot;))
+</code></pre>
+
+<p>Solution:</p>
+
+<blockquote>
+<p>Initialize each page’s rank to 1.0.</p>
+</blockquote>
+
+<pre><code>val links = sc.parallelize(List((&quot;MapR&quot;,List(&quot;Baidu&quot;,&quot;Blogger&quot;)),(&quot;Baidu&quot;, List(&quot;MapR&quot;)),(&quot;Blogger&quot;,List(&quot;Google&quot;,&quot;Baidu&quot;)),(&quot;Google&quot;, List(&quot;MapR&quot;)))).partitionBy(new HashPartitioner(4)).persist()
+var ranks = links.mapValues(v =&gt; 1.0)
+</code></pre>
+
+<p><img src="{{ site.baseurl }}/img/Screen Shot 2016-03-02 at 1.28.40 PM.png" alt="" /></p>
+
+<blockquote>
+<p>On each iteration, have page p send a contribution of rank(p)/numNeighbors(p) to its neighbors (the pages it has links to).</p>
+</blockquote>
+
+<pre><code>val contributions = links.join(ranks).flatMap { case (url, (links, rank)) =&gt; links.map(dest =&gt; (dest, rank / links.size)) }
+</code></pre>
+
+<p><img src="{{ site.baseurl }}/img/Screen Shot 2016-03-02 at 1.33.56 PM.png" alt="" /></p>
+
+<p>See above contributions in red, and it matches the calculations using scala:</p>
+
+<pre><code>scala&gt; contributions.collect
+res26: Array[(String, Double)] = Array((MapR,1.0), (Baidu,0.5), (Blogger,0.5), (Google,0.5), (Baidu,0.5), (MapR,1.0))
+</code></pre>
+
+<blockquote>
+<p>Set each page’s rank to 0.15 + 0.85 * contributionsReceived.</p>
+</blockquote>
+
+<pre><code>val ranks = contributions.reduceByKey((x, y) =&gt; x + y).mapValues(v =&gt; 0.15 + 0.85*v)
+</code></pre>
+
+<p><img src="{{ site.baseurl }}/img/Screen Shot 2016-03-02 at 1.41.26 PM.png" alt="" /></p>
+
+<p>After 1st iteration, current pagerank value for each page is:</p>
+
+<pre><code>scala&gt; ranks.collect
+res27: Array[(String, Double)] = Array((Google,0.575), (MapR,1.8499999999999999), (Blogger,0.575), (Baidu,1.0))
+</code></pre>
+
+<p>Then the last two steps repeat for several iterations.</p>
+
+<h2 id="decision-tree">Decision Tree</h2>
+
+<h3 id="概率统计理论">概率统计理论</h3>
+
+<p>信息量的数学定义为：
+$$ I(u_i)=-log_2P(u_i) $$
+其中 $$P(u_i)$$ 为信息 $$ui$$ 发生的概率。信息熵是信息量的数学期望，是信源发出信息前的平均不确定性，也成为先验熵，信息熵的数学定义为：</p>
+
+<p>$$Ent(U)=-\sum_iP(u_i)log_2P(u_i)$$</p>
+
+<p>当已知信号U的概率分布P(U)且收到信号$$V=v_i$$后，发出信号的概率分布变为\(P(U|v_j)\),于是信源的平均不确定性变为（也称为条件熵）：</p>
+
+<p>$$Ent(U|v_i)=-\sum_iP(u_i|v_i)log_2P(u_i|v_i)$$</p>
+
+<p>信息增益为：</p>
+
+<p>$$Gains(U,V)=Ent(U)-Ent(U|V)$$</p>
+
+<h3 id="id3">ID3</h3>
+
+<p>ID3算法的主要思想就是每次计算出各个属性的信息增益，选择最大者为分裂属性。下面举例说明，为简单起见，随机杜撰了10条数据，分为2个维度：</p>
+
+<p>性别(T1)  |1  |0  |1  |0  |1  |0  |1  |0  |1  |1
+套餐类别(T2)    |A  |B  |A  |A  |C  |C  |B  |A  |A  |C
+是否购买    |true   |false  |true   |false  |true   |true   |false  |true   |true   |true</p>
+
+<p>信息熵：
+$$ Ent(U)=-\sum_iP(u_i)log_2P(u_i)=-{7\over 10}log_2({7\over 10})-{3\over 10}log_2({3\over 10})=0.881 $$</p>
+
+<p>条件熵
+$$ Ent(U|T_1)={6\over 10}(-{5\over 6}log_2({5\over 6})-{1\over 6}log_2({1\over 6}))+{4\over 10}(-{2\over 4}log_2({2\over 4})-{2\over 4}log_2({2\over 4}))=0.790 $$</p>
+
+<p>$$ Ent(U|T_2)={5\over 10}(-{4\over 5}log_2({4\over 5})-{1\over 5}log_2({1\over 5}))+{2\over 10}(-{2\over 2}log_2({2\over 2})-{0\over 2}log_2({0\over 2}))+{3\over 10}(-{3\over 3}log_2({3\over 3})-{0\over 3}log_2({0\over 3}))=0.361 $$</p>
+
+<p>信息增益
+$$ Gains(U,T_1)=Ent(U)-Ent(U|T_1)=0.091 $$</p>
+
+<p>$$ Gains(U,T_2)=Ent(U)-Ent(U|T_2)=0.520 $$</p>
+
+<p>根据ID3的算法，目前来说这种情况下将会选择T2作为最佳分组变量，因为它消除信宿对信源的平均不确定性的能力最强，由此得到T2-&gt;T1的树结构</p>
+
+<h3 id="spark实例">Spark实例 ###</h3>
+
+<p><a href="{{ site.baseurl }}/data/rita2014jan.csv">测试数据</a></p>
+
+<ul>
+<li><p><code>categoricalFeaturesInfo</code> specifies which features are categorical and how many categorical values each of those features can take. This is given as a map from feature index to the number of categories for that feature. Any features not in this map are treated as continuous.</p>
+
+<ul>
+<li>e.g:For the test data,the first categorical feature, categoricalFeaturesInfo = (0 -&gt; 31) specifies that feature index 0 (which represents the day of the month) has 31 categories (values {0, &hellip;, 31}). The second , categoricalFeaturesInfo = (1 -&gt; 7), represents days of the week, and specifies that feature index 1 has 7 categories. The carrier categorial feature is index 4 and the value can go from 0 to the number of distinct carriers , and so on.</li>
+</ul></li>
+
+<li><p><code>maxDepth</code> Maximum depth of a tree.</p></li>
+
+<li><p><code>maxBins</code> Number of bins used when discretizing continuous features.</p>
+
+<ul>
+<li>Note that the maxBins parameter must be at least the maximum number of categories MM for any categorical feature</li>
+</ul></li>
+
+<li><p><code>numClasses</code> Number of classes (for Classification only).</p></li>
+
+<li><p><code>impurity</code> Impurity measure of the homogeneity of the labels at the node</p></li>
+</ul>
+
+<pre><code>import org.apache.spark._
+
+import org.apache.spark.rdd.RDD
+import org.apache.spark.util.IntParam
+
+// Import classes for MLLib regression labeledpoint, vectors, decisiontree, decisiontree model, MLUtils
+import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.mllib.tree.DecisionTree
+import org.apache.spark.mllib.tree.model.DecisionTreeModel
+import org.apache.spark.mllib.util.MLUtils
+
+
+case class Flight(dofM: String, dofW: String, carrier: String, tailnum: String, flnum: Int, org_id: String, origin: String, dest_id: String, dest: String, crsdeptime: Double, deptime: Double, depdelaymins: Double, crsarrtime: Double, arrtime: Double, arrdelay: Double, crselapsedtime: Double, dist: Int)
+
+// function to parse input into Movie class  
+def parseFlight(str: String): Flight = {
+  val line = str.split(&quot;,&quot;)
+  Flight(line(0), line(1), line(2), line(3), line(4).toInt, line(5), line(6), line(7), line(8), line(9).toDouble, line(10).toDouble, line(11).toDouble, line(12).toDouble, line(13).toDouble, line(14).toDouble, line(15).toDouble, line(16).toInt)
+}
+
+
+//Creating and RDD with the January 2014 data to be used for training the model
+val textRDD = sc.textFile(&quot;/user/user01/data/rita2014jan.csv&quot;)
+
+val flightsRDD = textRDD.map(parseFlight).cache()
+flightsRDD.take(2)
+
+//Array(Flight(1,3,AA,N338AA,1,12478,JFK,12892,LAX,900.0,914.0,14.0,1225.0,1238.0,13.0,385.0,2475), 
+// Flight(2,4,AA,N338AA,1,12478,JFK,12892,LAX,900.0,857.0,0.0,1225.0,1226.0,1.0,385.0,2475))
+
+ 
+var carrierMap: Map[String, Int] = Map()
+var index: Int = 0
+flightsRDD.map(flight =&gt; flight.carrier).distinct.collect.foreach(x =&gt; { carrierMap += (x -&gt; index); index += 1 })
+carrierMap.toString
+//res2: String = Map(DL -&gt; 5, F9 -&gt; 10, US -&gt; 9, OO -&gt; 2, B6 -&gt; 0, AA -&gt; 6, EV -&gt; 12, FL -&gt; 1, UA -&gt; 4, MQ -&gt; 8, WN -&gt; 13, AS -&gt; 3, VX -&gt; 7, HA -&gt; 11)
+
+var originMap: Map[String, Int] = Map()
+var index1: Int = 0
+flightsRDD.map(flight =&gt; flight.origin).distinct.collect.foreach(x =&gt; { originMap += (x -&gt; index1); index1 += 1 })
+originMap.toString
+//res4: String = Map(JFK -&gt; 214,  LAX -&gt; 294,  ATL -&gt; 273,MIA -&gt; 175 ...
+
+var destMap: Map[String, Int] = Map()
+var index2: Int = 0
+flightsRDD.map(flight =&gt; flight.dest).distinct.collect.foreach(x =&gt; { destMap += (x -&gt; index2); index2 += 1 })
+
+//- Defining the features array
+val mlprep = flightsRDD.map(flight =&gt; {
+  val monthday = flight.dofM.toInt - 1 // category
+  val weekday = flight.dofW.toInt - 1 // category
+  val crsdeptime1 = flight.crsdeptime.toInt
+  val crsarrtime1 = flight.crsarrtime.toInt
+  val carrier1 = carrierMap(flight.carrier) // category
+  val crselapsedtime1 = flight.crselapsedtime.toDouble
+  val origin1 = originMap(flight.origin) // category
+  val dest1 = destMap(flight.dest) // category
+  val delayed = if (flight.depdelaymins.toDouble &gt; 40) 1.0 else 0.0
+  Array(delayed.toDouble, monthday.toDouble, weekday.toDouble, crsdeptime1.toDouble, crsarrtime1.toDouble, carrier1.toDouble, crselapsedtime1.toDouble, origin1.toDouble, dest1.toDouble)
+})
+mlprep.take(1)
+//res6: Array[Array[Double]] = Array(Array(0.0, 0.0, 2.0, 900.0, 1225.0, 6.0, 385.0, 214.0, 294.0))
+
+//Making LabeledPoint of features - this is the training data for the model
+val mldata = mlprep.map(x =&gt; LabeledPoint(x(0), Vectors.dense(x(1), x(2), x(3), x(4), x(5), x(6), x(7), x(8))))
+mldata.take(1)
+//res7: Array[org.apache.spark.mllib.regression.LabeledPoint] = Array((0.0,[0.0,2.0,900.0,1225.0,6.0,385.0,214.0,294.0]))
+// mldata0 is %85 not delayed flights
+val mldata0 = mldata.filter(x =&gt; x.label == 0).randomSplit(Array(0.85, 0.15))(1)
+// mldata1 is %100 delayed flights
+val mldata1 = mldata.filter(x =&gt; x.label != 0)
+// mldata2 is delayed and not delayed
+val mldata2 = mldata0 ++ mldata1
+mldata2.count
+res27: Long = 116692
+//  split mldata2 into training and test data
+val splits = mldata2.randomSplit(Array(0.7, 0.3))
+val (trainingData, testData) = (splits(0), splits(1))
+trainingData.count
+res26: Long = 81727  
+
+// set ranges for 0=dofM 1=dofW 4=carrier 6=origin 7=dest
+var categoricalFeaturesInfo = Map[Int, Int]()
+categoricalFeaturesInfo += (0 -&gt; 31)
+categoricalFeaturesInfo += (1 -&gt; 7)
+categoricalFeaturesInfo += (4 -&gt; carrierMap.size)
+categoricalFeaturesInfo += (6 -&gt; originMap.size)
+categoricalFeaturesInfo += (7 -&gt; destMap.size)
+
+val numClasses = 2
+// Defning values for the other parameters
+val impurity = &quot;gini&quot;
+val maxDepth = 9
+val maxBins = 7000
+
+val model = DecisionTree.trainClassifier(trainingData, numClasses, categoricalFeaturesInfo,
+impurity, maxDepth, maxBins)
+
+model.toDebugString
+// 0=dofM 4=carrier 3=crsarrtime1  6=origin  
+res20: String = 
+DecisionTreeModel classifier of depth 9 with 919 nodes
+  If (feature 0 in {11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,30.0})
+   If (feature 4 in {0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,13.0})
+    If (feature 3 &lt;= 1603.0)
+     If (feature 0 in {11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0})
+      If (feature 6 in {0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,10.0,11.0,12.0,13.0...
+
+
+testData.take(1)
+//res21: Array[org.apache.spark.mllib.regression.LabeledPoint] = Array((0.0,[18.0,6.0,900.0,1225.0,6.0,385.0,214.0,294.0]))
+
+val labelAndPreds = testData.map { point =&gt;
+  val prediction = model.predict(point.features)
+  (point.label, prediction)
+}
+labelAndPreds.take(3)
+
+res33: Array[(Double, Double)] = Array((0.0,0.0), (0.0,0.0), (0.0,0.0))
+
+
+val wrongPrediction =(labelAndPreds.filter{
+  case (label, prediction) =&gt; ( label !=prediction) 
+  })
+
+wrongPrediction.count()
+res35: Long = 11040 
+
+val ratioWrong=wrongPrediction.count().toDouble/testData.count()
+ratioWrong: Double = 0.3157443157443157   
+
+testData.count
+//res28: Long = 34965 
+
+// find delay predicted when there was no delay
+val falsePositives =(labelAndPreds.filter{
+  case (label, prediction) =&gt; ( label==0 &amp;&amp; prediction == 1) 
+  })
+falsePositives.count
+//res24: Long = 5489 
+val falseNegatives =(labelAndPreds.filter(r =&gt; ( r._2==0 &amp;&amp; r._1== 1) ))
+falseNegatives.count
+//res34: Long = 5551  
+val fpRatio=falsePositives.count.toDouble/ testData.count()
+fpRatio: Double = 0.156985556985557  
+val fnRatio=falseNegatives.count.toDouble/ testData.count()
+fnRatio: Double = 0.15875875875875875 
+
+</code></pre>
+
+<p>Model.toDebugString prints out the decision tree, which asks the following questions to determine if the flight was delayed or not:</p>
+
+<p><img src="{{ site.baseurl }}/img/spark-machine-tutorial-blog-img13.png" alt="" /></p>
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/2016/10/17/machine-learning-on-spark/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/2016/10/19/neo4j-replace-rdbms/" data-toggle="tooltip" data-placement="top" title="用图数据库解决关系型数据库存在的问题">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/2016/10/13/elasticsearch-query-dsl/" data-toggle="tooltip" data-placement="top" title="ElasticSearch Query DSL">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

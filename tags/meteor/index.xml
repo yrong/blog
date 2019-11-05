@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Meteor on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/meteor/</link>
+    <description>Recent content in Meteor on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Sun, 09 Oct 2016 18:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/meteor/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>meteor的响应式数据源和响应式执行环境</title>
+      <link>https://yrong.github.io/blog/2016/10/09/meteor-internal-reactive/</link>
+      <pubDate>Sun, 09 Oct 2016 18:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/2016/10/09/meteor-internal-reactive/</guid>
+      <description>&lt;p&gt;meteor的响应式数据源实现原理&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

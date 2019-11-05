@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Java字节码解析 - yrong blog</title>
+  <meta property="og:title" content="Java字节码解析 - yrong blog" />
+  <meta name="twitter:title" content="Java字节码解析 - yrong blog" />
+  <meta name="description" content="基于栈的虚拟机 JVM是一种基于栈的虚拟机，绝大部分字节码操作都涉及到操作数栈中操作数的入栈和出栈。例如，在执行求和操作时，会将两个操作数入栈">
+  <meta property="og:description" content="基于栈的虚拟机 JVM是一种基于栈的虚拟机，绝大部分字节码操作都涉及到操作数栈中操作数的入栈和出栈。例如，在执行求和操作时，会将两个操作数入栈">
+  <meta name="twitter:description" content="基于栈的虚拟机 JVM是一种基于栈的虚拟机，绝大部分字节码操作都涉及到操作数栈中操作数的入栈和出栈。例如，在执行求和操作时，会将两个操作数入栈">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/2016/08/06/java-bytecode/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Java字节码解析</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>August 6, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/java/">
+            <i class="fas fa-tag"></i>
+            java
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#基于栈的虚拟机">基于栈的虚拟机</a></li>
+<li><a href="#字节码格式概览">字节码格式概览</a></li>
+<li><a href="#字节码结构详解">字节码结构详解</a>
+<ul>
+<li><a href="#threads">Threads</a>
+<ul>
+<li><a href="#stack">Stack</a></li>
+<li><a href="#frame">Frame</a>
+<ul>
+<li><a href="#operand-stack">Operand Stack</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#shared-between-threads">Shared Between Threads</a>
+<ul>
+<li><a href="#non-heap-memory">Non-Heap Memory</a>
+<ul>
+<li><a href="#method-area">Method Area</a></li>
+</ul></li>
+<li><a href="#class-file-structure">Class File Structure</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      
+
+<h2 id="基于栈的虚拟机">基于栈的虚拟机</h2>
+
+<p>JVM是一种基于栈的虚拟机，绝大部分字节码操作都涉及到操作数栈中操作数的入栈和出栈。例如，在执行求和操作时，会将两个操作数入栈，将两个数做加法后再将结果入栈，使用结果的时候再将操作结果出栈。除了栈之外，字节码的格式还规定了有多达65536个寄存器可以使用，也称之为 <strong>局部变量</strong>。</p>
+
+<p>在字节码格式中，操作指令都被编码在一个字节中，也就是说，JVM最多支持256种 <strong>操作码（opcode）</strong>,每种操作都有唯一值和类似于汇编指令的 <a href="https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-6.html#jvms-6.5">助记符</a></p>
+
+<h2 id="字节码格式概览">字节码格式概览</h2>
+
+<p>下面的代码是一个执行加法的函数及其编译后的字节码格式：</p>
+
+<pre><code>public int add(int a, int b) {
+    return a + b;
+}
+
+public int add(int, int);
+  Code:
+    0: iload_1    // stack: a
+    1: iload_2    // stack: a, b
+    2: iadd       // stack: (a+b)
+    3: ireturn    // stack:
+}
+</code></pre>
+
+<p>函数<code>add</code>有两个输入参数<code>a</code>和<code>b</code>，分别被放入局部变量1和局部变量2中（根据JVM规范，实例方法局部变量0中存放是<code>this</code>）。前两个操作，即<code>iload_1</code>和<code>iload_2</code>，用于将局部变量1和局部变量2中的值放入到操作数栈中。第三个操作<code>iadd</code>从操作数栈中弹出两个数，对其求和，并将结果入栈。第四个操作<code>ireturn</code>弹出之前计算出的和，以该值作为返回值，方法结束。上面例子中的每一步字节码操作旁边都有关于操作数栈操作的注释，读者可自行揣摩。</p>
+
+<h2 id="字节码结构详解">字节码结构详解</h2>
+
+<p>key internal components of a typical JVM that conforms to <a href="https://docs.oracle.com/javase/specs/jvms/se7/html/">The Java Virtual Machine Specification Java SE 7 Edition</a>.
+<img src="/img/JVM_Internal_Architecture.png" alt="" /></p>
+
+<p>The components shown on this diagram are each explained below in two sections. First section covers the components that are created for each thread and the second section covers the components that are created independently of threads.</p>
+
+<ul>
+<li>Threads
+
+<ul>
+<li>JVM System Threads</li>
+<li>Per Thread</li>
+<li>program Counter (PC)</li>
+<li>Stack</li>
+<li>Native Stack</li>
+<li>Stack Restrictions</li>
+<li>Frame</li>
+<li>Local Variables Array</li>
+<li>Operand Stack</li>
+<li>Dynamic Linking</li>
+</ul></li>
+<li>Shared Between Threads
+
+<ul>
+<li>Heap</li>
+<li>Memory Management</li>
+<li>Non-Heap Memory</li>
+<li>Just In Time (JIT) Compilation</li>
+<li>Method Area</li>
+<li>Class File Structure</li>
+<li>Classloader</li>
+<li>Faster Class Loading</li>
+<li>Where Is The Method Area</li>
+<li>Classloader Reference</li>
+<li>Run Time Constant Pool</li>
+<li>Exception Table</li>
+<li>Symbol Table</li>
+<li>Interned Strings (String Table)</li>
+</ul></li>
+</ul>
+
+<h3 id="threads">Threads</h3>
+
+<h4 id="stack">Stack</h4>
+
+<p>Each thread has its own stack that holds a frame for each method executing on that thread. The stack is a Last In First Out (LIFO) data structure, so the currently executing method is at the top of the stack. A new frame is created and added (pushed) to the top of stack for every method invocation. The frame is removed (popped) when the method returns normally or if an uncaught exception is thrown during the method invocation. The stack is not directly manipulated, except to push and pop frame objects, and therefore the frame objects may be allocated in the Heap and the memory does not need to be contiguous.</p>
+
+<h4 id="frame">Frame</h4>
+
+<p>A new frame is created and added (pushed) to the top of stack for every method invocation. The frame is removed (popped) when the method returns normally or if an uncaught exception is thrown during the method invocation. For more detail on exception handling see the section on Exception Tables below.Each frame contains:</p>
+
+<ul>
+<li>Local variable array</li>
+<li>Return value</li>
+<li>Operand stack</li>
+<li>Reference to runtime constant pool for class of the current method</li>
+</ul>
+
+<h5 id="operand-stack">Operand Stack</h5>
+
+<p>The operand stack is used during the execution of byte code instructions in a similar way that general-purpose registers are used in a native CPU. Most JVM byte code spends its time manipulating the operand stack by pushing, popping, duplicating, swapping, or executing operations that produce or consume values. Therefore, instructions that move values between the array of local variables and the operand stack are very frequent in byte code. For example, a simple variable initialization results in two byte codes that interact with the operand stack.</p>
+
+<pre><code>int i;
+</code></pre>
+
+<p>Gets compiled to the following byte code:</p>
+
+<pre><code>0: iconst_0    // Push 0 to top of the operand stack
+1: istore_1    // Pop value from top of operand stack and store as local variable 1
+</code></pre>
+
+<p>下面的代码是判断一个数是否是偶数的函数，及其编译为字节码后的样子：</p>
+
+<pre><code>public boolean even(int number) {
+    return (number &amp; 1) == 0;
+}
+
+public boolean even(int);
+  Code:
+    0: iload_1      // 0x1b number
+    1: iconst_1     // 0x04 number, 1
+    2: iand         // 0x7e (number &amp; 1)
+    3: ifne 10      // 0x9a 0x00 0x07
+    6: iconst_1     // 0x03 1
+    7: goto 11      // 0xa7 0x00 0x04
+    10: iconst_0    // 0x03 0
+    11: ireturn     // 0xac
+}
+</code></pre>
+
+<p>在上面的代码中，首先将传入的参数<code>number</code>和常数1压入到操作数栈中，然后将它们都弹出求和，即执行<code>iand</code>指令，并将结果压入操作数栈。指令<code>ifne</code>进行条件判断，从操作数栈中弹出一个操作数做比较判断，如果不是0的话，就跳转到其他分支运行。指令<code>iconst_0</code>将常数0压入到操作数栈中，其操作码为<code>0x03</code>，其后无操作数。类似的，指令<code>iconst_1</code>会将常量1压入操作数栈中。返回值为布尔类型时是使用常量整数来表示的。</p>
+
+<p>比较和跳转指令，例如<code>ifne</code>（如果不相等则跳转，字节码是<code>0x9a</code>），通常需要使用两个字节的操作数（以满足16位跳转偏移的要求）。举个例子，如果有一个操作是经过条件跳转判断后需要将指令指针向前移动10000个字节的话，那么这个操作的编码应该是<code>0x9a 0x27 0x10</code>（注意，0x2710是10000的16禁止表示，字节码中数字的存储是大端序的）。</p>
+
+<p>字节码中还包含其他一些复杂结构，例如分支跳转，是通过在<code>tableswitch</code>指令后附加包含了所有跳转偏移的分支跳转表实现的。</p>
+
+<h3 id="shared-between-threads">Shared Between Threads</h3>
+
+<h4 id="non-heap-memory">Non-Heap Memory</h4>
+
+<p>Objects that are logically considered as part of the JVM mechanics are not created on the Heap.The non-heap memory includes:</p>
+
+<ul>
+<li>Permanent Generation that contains</li>
+<li>the method area</li>
+<li>interned strings</li>
+<li>Code Cache used for compilation and storage of methods that have been compiled to native code by the JIT compiler</li>
+<li>Just In Time (JIT) Compilation</li>
+</ul>
+
+<p>Java byte code is interpreted however this is not as fast as directly executing native code on the JVM’s host CPU. To improve performance the Oracle Hotspot VM looks for “hot” areas of byte code that are executed regularly and compiles these to native code. The native code is then stored in the code cache in non-heap memory. In this way the Hotspot VM tries to choose the most appropriate way to trade-off the extra time it takes to compile code verses the extra time it take to execute interpreted code.</p>
+
+<p>程序，包含数据和代码量部分，而数据则作为操作数使用。对于字节码程序来说，如果操作数非常小而又很常用，则这些操作数是直接内嵌在字节码指令中的，（例如<code>iconst_0</code>）。</p>
+
+<p>较大块的数据，例如常量字符串或比较大的数字，是存储在class文件开始部分的常量池中的。要使用数据作为操作数时，使用的是常量池中数据的索引位置，而不是实际数据本身。如果在编译方法时每次都要重新编码字符串的话，那字节码就谈不上压缩存储了。</p>
+
+<p>此外，Java程序中，方法、域和类的元数据也是class文件的组成部分，存储在常量池中。</p>
+
+<h5 id="method-area">Method Area</h5>
+
+<p>The method area stores per-class information such as:</p>
+
+<ul>
+<li><p>Classloader Reference</p></li>
+
+<li><p>Run Time Constant Pool</p>
+
+<ul>
+<li>Numeric constants</li>
+<li>Field references</li>
+<li>Method References</li>
+<li>Attributes</li>
+</ul></li>
+
+<li><p>Field data</p>
+
+<ul>
+<li>Per field
+
+<ul>
+<li>Name</li>
+<li>Type</li>
+<li>Modifiers</li>
+<li>Attributes</li>
+</ul></li>
+</ul></li>
+
+<li><p>Method data</p>
+
+<ul>
+<li>Per method
+
+<ul>
+<li>Name</li>
+<li>Return Type</li>
+<li>Parameter Types (in order)</li>
+<li>Modifiers</li>
+<li>Attributes</li>
+</ul></li>
+</ul></li>
+
+<li><p>Method code</p>
+
+<ul>
+<li>Per method
+
+<ul>
+<li>Bytecodes</li>
+<li>Operand stack size</li>
+<li>Local variable size</li>
+<li>Local variable table</li>
+<li>Exception table
+
+<ul>
+<li>Per exception handler
+
+<ul>
+<li>Start point</li>
+<li>End point</li>
+<li>PC offset for handler code</li>
+<li>Constant pool index for exception class being caught</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+
+<p>All threads share the same method area, so access to the method area data and the process of dynamic linking must be thread safe. If two threads attempt to access a field or method on a class that has not yet been loaded it must only be loaded once and both threads must not continue execution until it has been loaded.</p>
+
+<h4 id="class-file-structure">Class File Structure</h4>
+
+<blockquote>
+<p>可以使用JDK附带的命令行工具javap对字节码进行反汇编</p>
+</blockquote>
+
+<p>A compiled class file consists of the following structure:</p>
+
+<pre><code>ClassFile {
+    u4          magic;
+    u2          minor_version;
+    u2          major_version;
+    u2          constant_pool_count;
+    cp_info     contant_pool[constant_pool_count – 1];
+    u2          access_flags;
+    u2          this_class;
+    u2          super_class;
+    u2          interfaces_count;
+    u2          interfaces[interfaces_count];
+    u2          fields_count;
+    field_info      fields[fields_count];
+    u2          methods_count;
+    method_info     methods[methods_count];
+    u2          attributes_count;
+    attribute_info  attributes[attributes_count];
+}
+</code></pre>
+
+<p>If you compile the following simple class:</p>
+
+<pre><code>package org.jvminternals;
+
+public class SimpleClass {
+
+    public void sayHello() {
+        System.out.println(&quot;Hello&quot;);
+    }
+
+}
+</code></pre>
+
+<p>Then you get the following output if you run:</p>
+
+<pre><code>javap -v -p -s -sysinfo -constants classes/org/jvminternals/SimpleClass.class
+</code></pre>
+
+<pre><code>public class org.jvminternals.SimpleClass
+      SourceFile: &quot;SimpleClass.java&quot;
+      minor version: 0
+      major version: 51
+      flags: ACC_PUBLIC, ACC_SUPER
+    Constant pool:
+       #1 = Methodref          #6.#17         //  java/lang/Object.&quot;&lt;init&gt;&quot;:()V
+       #2 = Fieldref           #18.#19        //  java/lang/System.out:Ljava/io/PrintStream;
+       #3 = String             #20            //  &quot;Hello&quot;
+       #4 = Methodref          #21.#22        //  java/io/PrintStream.println:(Ljava/lang/String;)V
+       #5 = Class              #23            //  org/jvminternals/SimpleClass
+       #6 = Class              #24            //  java/lang/Object
+       #7 = Utf8               &lt;init&gt;
+       #8 = Utf8               ()V
+       #9 = Utf8               Code
+      #10 = Utf8               LineNumberTable
+      #11 = Utf8               LocalVariableTable
+      #12 = Utf8               this
+      #13 = Utf8               Lorg/jvminternals/SimpleClass;
+      #14 = Utf8               sayHello
+      #15 = Utf8               SourceFile
+      #16 = Utf8               SimpleClass.java
+      #17 = NameAndType        #7:#8          //  &quot;&lt;init&gt;&quot;:()V
+      #18 = Class              #25            //  java/lang/System
+      #19 = NameAndType        #26:#27        //  out:Ljava/io/PrintStream;
+      #20 = Utf8               Hello
+      #21 = Class              #28            //  java/io/PrintStream
+      #22 = NameAndType        #29:#30        //  println:(Ljava/lang/String;)V
+      #23 = Utf8               org/jvminternals/SimpleClass
+      #24 = Utf8               java/lang/Object
+      #25 = Utf8               java/lang/System
+      #26 = Utf8               out
+      #27 = Utf8               Ljava/io/PrintStream;
+      #28 = Utf8               java/io/PrintStream
+      #29 = Utf8               println
+      #30 = Utf8               (Ljava/lang/String;)V
+    {
+      public org.jvminternals.SimpleClass();
+        Signature: ()V
+        flags: ACC_PUBLIC
+        Code:
+          stack=1, locals=1, args_size=1
+            0: aload_0
+            1: invokespecial #1    // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V
+            4: return
+          LineNumberTable:
+            line 3: 0
+          LocalVariableTable:
+            Start  Length  Slot  Name   Signature
+              0      5      0    this   Lorg/jvminternals/SimpleClass;
+
+      public void sayHello();
+        Signature: ()V
+        flags: ACC_PUBLIC
+        Code:
+          stack=2, locals=1, args_size=1
+            0: getstatic      #2    // Field java/lang/System.out:Ljava/io/PrintStream;
+            3: ldc            #3    // String &quot;Hello&quot;
+            5: invokevirtual  #4    // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+            8: return
+          LineNumberTable:
+            line 6: 0
+            line 7: 8
+          LocalVariableTable:
+            Start  Length  Slot  Name   Signature
+              0      9      0    this   Lorg/jvminternals/SimpleClass;
+    }
+</code></pre>
+
+<p>This class file shows three main sections the constant pool, the constructor and the sayHello method.</p>
+
+<ul>
+<li><p>Constant Pool – this provides the same information that a symbol table typically provides and is described in more detail below.</p></li>
+
+<li><p>Methods – each containing four areas:</p>
+
+<ul>
+<li>signature and access flags</li>
+<li>byte code</li>
+<li>LineNumberTable – provides information to a debugger to indicate which line corresponds to which byte code instruction, for example line 6 in Java code corresponds to byte code 0 in the sayHello method and line 7 corresponds to byte code 8</li>
+<li>LocalVariableTable – this lists all local variables provided in the frame, in both examples the only local variable is this.</li>
+</ul></li>
+</ul>
+
+<p><img src="/img/bytecode_explanation_SimpleClass.png" alt="" /></p>
+
+<p><img src="/img/bytecode_explanation_sayHello.png" alt="" /></p>
+
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/2016/08/06/java-bytecode/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/2016/09/05/neo4j-internal/" data-toggle="tooltip" data-placement="top" title="Neo4j Internal">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/2016/07/21/nginx-under-the-hood/" data-toggle="tooltip" data-placement="top" title="nginx模块初始化">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

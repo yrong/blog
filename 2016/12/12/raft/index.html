@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>The Raft Consensus Algorithm - yrong blog</title>
+  <meta property="og:title" content="The Raft Consensus Algorithm - yrong blog" />
+  <meta name="twitter:title" content="The Raft Consensus Algorithm - yrong blog" />
+  <meta name="description" content="The Raft Consensus Algorithm">
+  <meta property="og:description" content="The Raft Consensus Algorithm">
+  <meta name="twitter:description" content="The Raft Consensus Algorithm">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/2016/12/12/raft/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">The Raft Consensus Algorithm</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>December 12, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/raft/">
+            <i class="fas fa-tag"></i>
+            raft
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/algorithom/">
+            <i class="fas fa-tag"></i>
+            algorithom
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#选举过程">选举过程</a>
+<ul>
+<li><a href="#选举说明">选举说明</a></li>
+<li><a href="#细节补充">细节补充</a></li>
+</ul></li>
+<li><a href="#日志复制">日志复制</a>
+<ul>
+<li><a href="#日志复制说明">日志复制说明</a></li>
+<li><a href="#网络分区异常">网络分区异常</a></li>
+<li><a href="#细节补充-1">细节补充</a></li>
+</ul></li>
+<li><a href="#animated-show-http-thesecretlivesofdata-com-raft"><a href="http://thesecretlivesofdata.com/raft/">animated show</a></a></li>
+<li><a href="#source-code-analysis">Source code analysis</a>
+<ul>
+<li><a href="#state-machine-in-event-loop">State Machine in Event Loop</a></li>
+<li><a href="#log-replication">Log Replication</a></li>
+<li><a href="#append-entries-processing-in-event-loop">append entries processing in event loop</a></li>
+<li><a href="#append-entries-processing-in-heatbeat">append entries processing in heatbeat</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      <p>The Raft Consensus Algorithm</p>
+
+<p>Paxos和Raft都是为了实现Consensus一致性这个目标，这个过程如同选举一样，参选者需要说服大多数选民(服务器)投票给他，一旦选定后就跟随其操作。在Raft中，任何时候一个服务器可以扮演下面角色之一：</p>
+
+<ul>
+<li>Leader: 处理所有客户端交互，日志复制等，一般一次只有一个Leader.</li>
+<li>Follower: 类似选民，完全被动</li>
+<li>Candidate候选人: 类似Proposer律师，可以被选为一个新的领导人。</li>
+</ul>
+
+<h3 id="选举过程">选举过程</h3>
+
+<p>Raft阶段分为两个，首先是选举过程，然后在选举出来的领导人带领进行正常操作，比如日志复制等。下面用图示展示这个过程：</p>
+
+<ol>
+<li><p>任何一个服务器都可以成为一个候选者Candidate，它向其他服务器Follower发出要求选举自己的请求：
+<img src="{{ site.baseurl }}/img/raft/raft1.png" alt="" /></p></li>
+
+<li><p>其他服务器同意了，发出OK。<br />
+<img src="{{ site.baseurl }}/img/raft/raft2.png" alt="" />
+如果在这个过程中，有一个Follower当机，没有收到请求选举的要求，因此候选者可以自己选自己，只要达到N/2 + 1 的大多数票，候选人还是可以成为Leader的。</p></li>
+
+<li><p>这样这个候选者就成为了Leader领导人，它可以向选民也就是Follower们发出指令，比如进行日志复制。
+<img src="{{ site.baseurl }}/img/raft/raft3.png" alt="" /></p></li>
+
+<li><p>以后通过心跳进行日志复制的通知
+<img src="{{ site.baseurl }}/img/raft/raft4.png" alt="" /></p></li>
+
+<li><p>如果一旦这个Leader当机崩溃了，那么Follower中有一个成为候选者，发出邀票选举。
+<img src="{{ site.baseurl }}/img/raft/raft5.png" alt="" /></p></li>
+
+<li><p>Follower同意后，其成为Leader，继续承担日志复制等指导工作：
+<img src="{{ site.baseurl }}/img/raft/raft6.png" alt="" /></p></li>
+</ol>
+
+<h4 id="选举说明">选举说明</h4>
+
+<p>自增currentTerm，由Follower转换为Candidate，设置votedFor为自身，并行发起RequestVote RPC，不断重试，直至满足以下任一条件：</p>
+
+<ol>
+<li>获得超过半数Server的投票，转换为Leader，广播Heartbeat</li>
+<li>接收到合法Leader的AppendEntries RPC，转换为Follower</li>
+<li>选举超时，没有Server选举成功，自增currentTerm，重新选举</li>
+</ol>
+
+<h4 id="细节补充">细节补充</h4>
+
+<ol>
+<li>Candidate在等待投票结果的过程中，可能会接收到来自其它Leader的AppendEntries RPC。如果该Leader的Term不小于本地的currentTerm，则认可该Leader身份的合法性，主动降级为Follower；反之，则维持Candidate身份，继续等待投票结果</li>
+<li>Candidate既没有选举成功，也没有收到其它Leader的RPC，这种情况一般出现在多个节点同时发起选举（如图Split Vote），最终每个Candidate都将超时。为了减少冲突，这里采取“随机退让”策略，每个Candidate重启选举定时器（随机值），大大降低了冲突概率</li>
+</ol>
+
+<h3 id="日志复制">日志复制</h3>
+
+<p>以日志复制为例子说明Raft算法:</p>
+
+<ol>
+<li><p>假设Leader领导人已经选出，这时客户端发出增加一个日志的要求，比如日志是&rdquo;sally&rdquo;：
+<img src="{{ site.baseurl }}/img/raft/raft8.png" alt="" /></p></li>
+
+<li><p>Leader要求Followe遵从他的指令，都将这个新的日志内容追加到他们各自日志中：
+<img src="{{ site.baseurl }}/img/raft/raft9.png" alt="" /></p></li>
+
+<li><p>大多数follower服务器将日志写入磁盘文件后，确认追加成功，发出Commited Ok:
+<img src="{{ site.baseurl }}/img/raft/raft10.png" alt="" /></p></li>
+
+<li><p>在下一个心跳heartbeat中，Leader会通知所有Follwer更新commited 项目。</p></li>
+</ol>
+
+<p>对于每个新的日志记录，重复上述过程。</p>
+
+<h4 id="日志复制说明">日志复制说明</h4>
+
+<p><img src="{{ site.baseurl }}/img/raft/raft-replicated-log.png" alt="" /></p>
+
+<p>正常操作流程：</p>
+
+<ol>
+<li>Client发送command给Leader</li>
+<li>Leader追加command至本地log</li>
+<li>Leader广播AppendEntriesRPC至Follower</li>
+
+<li><p>一旦日志项committed成功：</p>
+
+<p>4.1 Leader应用对应的command至本地StateMachine，并返回结果至Client</p>
+
+<p>4.2 Leader通过后续AppendEntriesRPC将committed日志项通知到Follower</p>
+
+<p>4.3 Follower收到committed日志项后，将其应用至本地StateMachine</p></li>
+</ol>
+
+<h4 id="网络分区异常">网络分区异常</h4>
+
+<ul>
+<li>如果在这一过程中，发生了网络分区或者网络通信故障，使得Leader不能访问大多数Follwers了，那么Leader只能正常更新它能访问的那些Follower服务器．</li>
+<li>而大多数的服务器Follower因为没有了Leader，他们重新选举一个候选者作为Leader，然后这个Leader作为代表于外界打交道，如果外界要求其添加新的日志，这个新的Leader就按上述步骤通知大多数Followers</li>
+<li>如果这时网络故障修复了，那么原先的Leader就变成Follower，在失联阶段这个老Leader的任何更新都不能算commit，都回滚，接受新的Leader的新的更新。</li>
+</ul>
+
+<h4 id="细节补充-1">细节补充</h4>
+
+<p>当一个新的leader选出来的时候，它的日志和其它的follower的日志可能不一样，这个时候，就需要一个机制来保证日志是一致的。如下图所示，一个新leader产生时，集群状态可能如下：</p>
+
+<p><img src="{{ site.baseurl }}/img/raft/11204152-4fb97264f2d346fea21b1d70df78e7ff.png" alt="" /></p>
+
+<p>最上面这个是新leader，a~f是follower，每个格子代表一条log entry，格子内的数字代表这个log entry是在哪个term上产生的。</p>
+
+<p>新leader产生后，log就以leader上的log为准。其它的follower要么少了数据比如b，要么多了数据，比如d，要么既少了又多了数据，比如f。</p>
+
+<p>需要有一种机制来让leader和follower对log达成一致:</p>
+
+<ul>
+<li>leader会为每个follower维护一个nextIndex，表示leader给各个follower发送的下一条log entry在log中的index，初始化为leader的最后一条log entry的下一个位置。</li>
+<li>leader给follower发送AppendEntriesRPC消息，带着(term_id, (nextIndex-1))， term_id即(nextIndex-1)这个槽位的log entry的term_id</li>
+<li>follower接收到AppendEntriesRPC后，会从自己的log中找是不是存在这样的log entry，如果不存在，就给leader回复拒绝消息，然后leader则将nextIndex减1</li>
+<li>再重复，直到AppendEntriesRPC消息被接收。</li>
+</ul>
+
+<p>以leader和b为例：</p>
+
+<ul>
+<li>初始化，nextIndex为11</li>
+<li>leader给b发送AppendEntriesRPC(6,10)</li>
+<li>b在自己log的10号槽位中没有找到term_id为6的log entry。则给leader回应一个拒绝消息。</li>
+<li>接着，leader将nextIndex减一，变成10，然后给b发送AppendEntriesRPC(6, 9)，b在自己log的9号槽位中同样没有找到term_id为6的log entry。循环下去，直到leader发送了AppendEntriesRPC(4,4)，b在自己log的槽位4中找到了term_id为4的log entry。接收了消息。</li>
+<li>随后，leader就可以从槽位5开始给b推送日志了。</li>
+</ul>
+
+<h3 id="animated-show-http-thesecretlivesofdata-com-raft"><a href="http://thesecretlivesofdata.com/raft/">animated show</a></h3>
+
+<iframe height="600" src="http://thesecretlivesofdata.com/raft/" width="900"></iframe>
+
+<h3 id="source-code-analysis">Source code analysis</h3>
+
+<p><a href="https://github.com/yrong/raft-1">referenced impl</a></p>
+
+<p><a href="https://github.com/yrong/raftd">usage</a></p>
+
+<h4 id="state-machine-in-event-loop">State Machine in Event Loop</h4>
+
+<pre><code>//               ________
+//            --|Snapshot|                 timeout
+//            |  --------                  ______
+// recover    |       ^                   |      |
+// snapshot / |       |snapshot           |      |
+// higher     |       |                   v      |     recv majority votes
+// term       |    --------    timeout    -----------                        -----------
+//            |-&gt; |Follower| ----------&gt; | Candidate |--------------------&gt; |  Leader   |
+//                 --------               -----------                        -----------
+//                    ^          higher term/ |                         higher term |
+//                    |            new leader |                                     |
+//                    |_______________________|____________________________________ |
+
+
+func (s *server) loop() {
+	defer s.debugln(&quot;server.loop.end&quot;)
+
+	state := s.State()
+
+	for state != Stopped {
+		s.debugln(&quot;server.loop.run &quot;, state)
+		switch state {
+		case Follower:
+			s.followerLoop()
+		case Candidate:
+			s.candidateLoop()
+		case Leader:
+			s.leaderLoop()
+		case Snapshotting:
+			s.snapshotLoop()
+		}
+		state = s.State()
+	}
+}
+</code></pre>
+
+<h4 id="log-replication">Log Replication</h4>
+
+<h4 id="append-entries-processing-in-event-loop">append entries processing in event loop</h4>
+
+<pre><code>// Processes the &quot;append entries&quot; request.
+func (s *server) processAppendEntriesRequest(req *AppendEntriesRequest) (*AppendEntriesResponse, bool) {
+	s.traceln(&quot;server.ae.process&quot;)
+
+	if req.Term &lt; s.currentTerm {
+		s.debugln(&quot;server.ae.error: stale term&quot;)
+		return newAppendEntriesResponse(s.currentTerm, false, s.log.currentIndex(), s.log.CommitIndex()), false
+	}
+
+	if req.Term == s.currentTerm {
+		_assert(s.State() != Leader, &quot;leader.elected.at.same.term.%d\n&quot;, s.currentTerm)
+
+		// step-down to follower when it is a candidate
+		if s.state == Candidate {
+			// change state to follower
+			s.setState(Follower)
+		}
+
+		// discover new leader when candidate
+		// save leader name when follower
+		s.leader = req.LeaderName
+	} else {
+		// Update term and leader.
+		s.updateCurrentTerm(req.Term, req.LeaderName)
+	}
+
+	// Reject if log doesn't contain a matching previous entry.
+	if err := s.log.truncate(req.PrevLogIndex, req.PrevLogTerm); err != nil {
+		s.debugln(&quot;server.ae.truncate.error: &quot;, err)
+		return newAppendEntriesResponse(s.currentTerm, false, s.log.currentIndex(), s.log.CommitIndex()), true
+	}
+
+	// Append entries to the log.
+	if err := s.log.appendEntries(req.Entries); err != nil {
+		s.debugln(&quot;server.ae.append.error: &quot;, err)
+		return newAppendEntriesResponse(s.currentTerm, false, s.log.currentIndex(), s.log.CommitIndex()), true
+	}
+
+	// Commit up to the commit index.
+	if err := s.log.setCommitIndex(req.CommitIndex); err != nil {
+		s.debugln(&quot;server.ae.commit.error: &quot;, err)
+		return newAppendEntriesResponse(s.currentTerm, false, s.log.currentIndex(), s.log.CommitIndex()), true
+	}
+
+	// once the server appended and committed all the log entries from the leader
+
+	return newAppendEntriesResponse(s.currentTerm, true, s.log.currentIndex(), s.log.CommitIndex()), true
+}
+
+// Processes the &quot;append entries&quot; response from the peer. This is only
+// processed when the server is a leader. Responses received during other
+// states are dropped.
+func (s *server) processAppendEntriesResponse(resp *AppendEntriesResponse) {
+	// If we find a higher term then change to a follower and exit.
+	if resp.Term() &gt; s.Term() {
+		s.updateCurrentTerm(resp.Term(), &quot;&quot;)
+		return
+	}
+
+	// panic response if it's not successful.
+	if !resp.Success() {
+		return
+	}
+
+	// if one peer successfully append a log from the leader term,
+	// we add it to the synced list
+	if resp.append == true {
+		s.syncedPeer[resp.peer] = true
+	}
+
+	// Increment the commit count to make sure we have a quorum before committing.
+	if len(s.syncedPeer) &lt; s.QuorumSize() {
+		return
+	}
+
+	// Determine the committed index that a majority has.
+	var indices []uint64
+	indices = append(indices, s.log.currentIndex())
+	for _, peer := range s.peers {
+		indices = append(indices, peer.getPrevLogIndex())
+	}
+	sort.Sort(sort.Reverse(uint64Slice(indices)))
+
+	// We can commit up to the index which the majority of the members have appended.
+	commitIndex := indices[s.QuorumSize()-1]
+	committedIndex := s.log.commitIndex
+
+	if commitIndex &gt; committedIndex {
+		// leader needs to do a fsync before committing log entries
+		s.log.sync()
+		s.log.setCommitIndex(commitIndex)
+		s.debugln(&quot;commit index &quot;, commitIndex)
+	}
+}
+</code></pre>
+
+<h4 id="append-entries-processing-in-heatbeat">append entries processing in heatbeat</h4>
+
+<pre><code>//--------------------------------------
+// Heartbeat
+//--------------------------------------
+// The event loop that is run when the server is in a Leader state.
+func (s *server) leaderLoop() {
+...
+    // Update the peers prevLogIndex to leader's lastLogIndex and start heartbeat.
+    for _, peer := range s.peers {
+        peer.setPrevLogIndex(logIndex)
+        peer.startHeartbeat()
+    }
+...
+}
+
+
+
+// Listens to the heartbeat timeout and flushes an AppendEntries RPC.
+func (p *Peer) heartbeat(c chan bool) {
+    ...
+
+	ticker := time.Tick(p.heartbeatInterval)
+
+	debugln(&quot;peer.heartbeat: &quot;, p.Name, p.heartbeatInterval)
+
+	for {
+		select {
+		...
+		case &lt;-ticker:
+			start := time.Now()
+			p.flush()
+			duration := time.Now().Sub(start)
+			p.server.DispatchEvent(newEvent(HeartbeatEventType, duration, nil))
+		}
+	}
+}
+
+func (p *Peer) flush() {
+	debugln(&quot;peer.heartbeat.flush: &quot;, p.Name)
+	prevLogIndex := p.getPrevLogIndex()
+	log.Print(&quot;heartbeat flush,prev log index is:&quot;,prevLogIndex)
+	term := p.server.currentTerm
+    // Retrieves a list of entries after a given index as well as the term of the
+    // index provided. A nil list of entries is returned if the index no longer
+    // exists because a snapshot was made.
+	entries, prevLogTerm := p.server.log.getEntriesAfter(prevLogIndex, p.server.maxLogEntriesPerRequest)
+
+	if entries != nil {
+		p.sendAppendEntriesRequest(newAppendEntriesRequest(term, prevLogIndex, prevLogTerm, p.server.log.CommitIndex(), p.server.name, entries))
+	} else {
+		p.sendSnapshotRequest(newSnapshotRequest(p.server.name, p.server.snapshot))
+	}
+}
+
+//--------------------------------------
+// Append Entries
+//--------------------------------------
+
+// Sends an AppendEntries request to the peer through the transport.
+func (p *Peer) sendAppendEntriesRequest(req *AppendEntriesRequest) {
+	tracef(&quot;peer.append.send: %s-&gt;%s [prevLog:%v length: %v]\n&quot;,
+		p.server.Name(), p.Name, req.PrevLogIndex, len(req.Entries))
+
+	resp := p.server.Transporter().SendAppendEntriesRequest(p.server, p, req)
+	if resp == nil {
+		p.server.DispatchEvent(newEvent(HeartbeatIntervalEventType, p, nil))
+		debugln(&quot;peer.append.timeout: &quot;, p.server.Name(), &quot;-&gt;&quot;, p.Name)
+		return
+	}
+	traceln(&quot;peer.append.resp: &quot;, p.server.Name(), &quot;&lt;-&quot;, p.Name)
+
+	p.setLastActivity(time.Now())
+	// If successful then update the previous log index.
+	p.Lock()
+	if resp.Success() {
+		if len(req.Entries) &gt; 0 {
+			p.prevLogIndex = req.Entries[len(req.Entries)-1].GetIndex()
+		}
+		traceln(&quot;peer.append.resp.success: &quot;, p.Name, &quot;; idx =&quot;, p.prevLogIndex)
+	} else {
+		if resp.Term() &gt; p.server.Term() {
+			// this happens when there is a new leader comes up that this *leader* has not
+			// known yet.
+			// this server can know until the new leader send a ae with higher term
+			// or this server finish processing this response.
+			debugln(&quot;peer.append.resp.not.update: new.leader.found&quot;)
+		} else if resp.Term() == req.Term &amp;&amp; resp.CommitIndex() &gt;= p.prevLogIndex {
+			// we may miss a response from peer
+			// so maybe the peer has committed the logs we just sent
+			// but we did not receive the successful reply and did not increase
+			// the prevLogIndex
+
+			// peer failed to truncate the log and sent a fail reply at this time
+			// we just need to update peer's prevLog index to commitIndex
+
+			p.prevLogIndex = resp.CommitIndex()
+			debugln(&quot;peer.append.resp.update: &quot;, p.Name, &quot;; idx =&quot;, p.prevLogIndex)
+
+		} else if p.prevLogIndex &gt; 0 {
+            // If it was unsuccessful then decrement the previous log index and
+            // we'll try again next time.
+			// Decrement the previous log index down until we find a match. Don't
+			// let it go below where the peer's commit index is though. That's a
+			// problem.
+			p.prevLogIndex--
+			// if it is not enough, we directly decrease to the index of the peer log
+			if p.prevLogIndex &gt; resp.Index() {
+				p.prevLogIndex = resp.Index()
+			}
+
+			debugln(&quot;peer.append.resp.decrement: &quot;, p.Name, &quot;; idx =&quot;, p.prevLogIndex)
+		}
+	}
+	p.Unlock()
+
+	// Attach the peer to resp, thus server can know where it comes from
+	resp.peer = p.Name
+	// Send response to server for processing.
+	p.server.sendAsync(resp)
+}
+</code></pre>
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/2016/12/12/raft/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/2016/12/18/bolt/" data-toggle="tooltip" data-placement="top" title="BoltDB In-depth Analysis">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/2016/12/07/scrapy/" data-toggle="tooltip" data-placement="top" title="Scrapy In-depth Analysis">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

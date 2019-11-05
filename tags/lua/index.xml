@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Lua on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/lua/</link>
+    <description>Recent content in Lua on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Mon, 09 Apr 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/lua/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Introduction to Skynet</title>
+      <link>https://yrong.github.io/blog/2018/04/09/intro-to-skynet/</link>
+      <pubDate>Mon, 09 Apr 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/2018/04/09/intro-to-skynet/</guid>
+      <description>代码结构 首先要关注一下config.path文件。 skynet/example/config.path root = &amp;quot;./&amp;quot; luaservice = root..&amp;quot;service/?.lua;&amp;quot;..root..&amp;quot;test/?.lua;&amp;quot;..root..&amp;quot;examples/?.lua;&amp;quot;..root..&amp;quot;test/?/init.lua&amp;quot; lualoader = root .. &amp;quot;lualib/loader.lua&amp;quot; lua_path = root..&amp;quot;lualib/?.lua;&amp;quot;..root..&amp;quot;lualib/?/init.lua&amp;quot; lua_cpath = root .. &amp;quot;luaclib/?.so&amp;quot; snax = root..&amp;quot;examples/?.lua;&amp;quot;..root..&amp;quot;test/?.lua&amp;quot; root代表的是skynet所在的目录。 lu</description>
+    </item>
+    
+  </channel>
+</rss>
