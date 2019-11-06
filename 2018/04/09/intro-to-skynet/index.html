@@ -64,6 +64,7 @@
 <li><a href="#代码结构">代码结构</a></li>
 <li><a href="#例子分析">例子分析</a></li>
 <li><a href="#模块加载">模块加载</a></li>
+<li><a href="#调试">调试</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -584,6 +585,84 @@ skynet_module_init(const char *path) {
 
     M = m;
 }
+</code></pre>
+
+<h2 id="调试">调试</h2>
+
+<p>接下来，你可以使用 nc 127.0.0.1 8000 接入调试控制台。正确接入的话，会看到</p>
+
+<p>Welcome to skynet console</p>
+
+<p>这行字。</p>
+
+<p>如果你 list 的话，可以看到所有服务：</p>
+
+<pre><code>:01000004       snlua cmaster
+:01000005       snlua cslave
+:01000007       snlua datacenterd
+:01000008       snlua service_mgr
+:0100000a       snlua console
+:0100000b       snlua debug_console 8000
+:0100000c       snlua simpledb
+:0100000d       snlua watchdog
+:0100000e       snlua gate
+</code></pre>
+
+<p>我们可以用 simpledb 这个服务做实验。注意：目前仅限于调试同一进程内的服务。（这个限制是因为实现者特别懒）</p>
+
+<p>输入 debug c 或 debug :0100000c 可以 attach 进 simpledb ，然后你会看到 :0100000c&gt; 这样的提示符。</p>
+
+<p>你可以输入 &hellip; 来检查当前消息是什么。通常你会看到这样的信息（表示当前是一个 timeout 消息）。因为这个时候 simpledb 在不停的调用 timer 保持和你的交互。</p>
+
+<pre><code>1       userdata: (nil) 0       226     0
+</code></pre>
+
+<p>当然，你也可以运行你想运行的任何 lua 代码。</p>
+
+<p>调试器在这里只提供了一个叫 watch 的函数，让我们下一个条件断点，并跟踪运行它。</p>
+
+<pre><code>:0100000c&gt;watch(&quot;lua&quot;, function(_,_,cmd) return cmd==&quot;get&quot; end)
+</code></pre>
+
+<p>这时，启动一下测试客户端，并输入 get hello 。</p>
+
+<pre><code>./3rd/lua/lua examples/client.lua
+</code></pre>
+
+<p>我们会看到，在输入 get hello 后，调试控制台的提示符会变成 ./examples/simpledb.lua(18) 表示停在了 simpledb.lua 的 18 行。接下来可以用 &hellip; 检查这个函数的参数。用 n 继续一行行运行，直到消息处理完毕。</p>
+
+<pre><code>:0100000c&gt;./examples/simpledb.lua(18)&gt;...
+get hello
+./examples/simpledb.lua(18)&gt;n
+./examples/simpledb.lua(19)&gt;n
+./examples/simpledb.lua(23)&gt;n
+:0100000c&gt;
+</code></pre>
+
+<p>如果用 s 的话还会跟踪进入子函数内部。为了方便调试，调试器不会进入定义在 skynet.lua 的函数里（通常你不需要关心 skynet 本身的实现）。</p>
+
+<p>另外，调试器还提供了一个叫 _CO 的变量，保存在正在调试的协程对象。如果你想使用 debug api ，这个变量可能有用。例如，可以用 debug.traceback(_CO) 查看调用栈：</p>
+
+<pre><code>:0100000c&gt;watch &quot;lua&quot;
+</code></pre>
+
+<pre><code>:0100000c&gt;./examples/simpledb.lua(18)&gt;_CO
+thread: 0x7fe7f9811dc8
+./examples/simpledb.lua(18)&gt;debug.traceback(_CO)
+stack traceback:
+        ./examples/simpledb.lua:18: in upvalue 'dispatch'
+        ./lualib/skynet/remotedebug.lua:150: in upvalue 'f'
+        ./lualib/skynet.lua:111: in function &lt;./lualib/skynet.lua:105&gt;
+./examples/simpledb.lua(18)&gt;s
+./examples/simpledb.lua(19)&gt;s
+./examples/simpledb.lua(10)&gt;s
+./examples/simpledb.lua(11)&gt;debug.traceback(_CO)
+stack traceback:
+        ./examples/simpledb.lua:11: in local 'f'
+        ./examples/simpledb.lua:20: in upvalue 'dispatch'
+        ./lualib/skynet/remotedebug.lua:150: in upvalue 'f'
+        ./lualib/skynet.lua:111: in function &lt;./lualib/skynet.lua:105&gt;
+./examples/simpledb.lua(11)&gt;c
 </code></pre>
 
     </article>
