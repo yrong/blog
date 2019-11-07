@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Introduction to nestjs - yrong blog</title>
+  <meta property="og:title" content="Introduction to nestjs - yrong blog" />
+  <meta name="twitter:title" content="Introduction to nestjs - yrong blog" />
+  <meta name="description" content="代码分析 入口main.ts import { NestFactory } from &#39;@nestjs/core&#39;; import { ApplicationModule } from &#39;./app.module&#39;; async function bootstrap() { const app = await NestFactory.create(ApplicationModule); await app.listen(3000); } bootstrap(); NestFactory构造 public async create( module: any, serverOrOptions?: any, options?: NestApplicationOptions, ): Promise&lt; INestApplication &amp; (INestExpressApplication | INestFastifyApplication) &gt; { const">
+  <meta property="og:description" content="代码分析 入口main.ts import { NestFactory } from &#39;@nestjs/core&#39;; import { ApplicationModule } from &#39;./app.module&#39;; async function bootstrap() { const app = await NestFactory.create(ApplicationModule); await app.listen(3000); } bootstrap(); NestFactory构造 public async create( module: any, serverOrOptions?: any, options?: NestApplicationOptions, ): Promise&lt; INestApplication &amp; (INestExpressApplication | INestFastifyApplication) &gt; { const">
+  <meta name="twitter:description" content="代码分析 入口main.ts import { NestFactory } from &#39;@nestjs/core&#39;; import { ApplicationModule } from &#39;./app.module&#39;; async function bootstrap() { const app = await NestFactory.create(ApplicationModule); await …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/2018/06/09/intro-to-netjs/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Introduction to nestjs</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>June 9, 2018</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/typescript/">
+            <i class="fas fa-tag"></i>
+            typescript
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#代码分析">代码分析</a></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      
+
+<h2 id="代码分析">代码分析</h2>
+
+<p>入口main.ts</p>
+
+<pre><code>import { NestFactory } from '@nestjs/core';
+import { ApplicationModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(ApplicationModule);
+  await app.listen(3000);
+}
+bootstrap();
+</code></pre>
+
+<p>NestFactory构造</p>
+
+<pre><code>public async create(
+    module: any,
+    serverOrOptions?: any,
+    options?: NestApplicationOptions,
+  ): Promise&lt;
+    INestApplication &amp; (INestExpressApplication | INestFastifyApplication)
+  &gt; {
+    const isHttpServer = serverOrOptions &amp;&amp; serverOrOptions.patch;
+    // tslint:disable-next-line:prefer-const
+    let [httpServer, appOptions] = isHttpServer
+      ? [serverOrOptions, options]
+      : [ExpressFactory.create()/* 默认使用Express*/, serverOrOptions];
+
+    const applicationConfig = new ApplicationConfig();
+    const container = new NestContainer(applicationConfig);//生成容器container;传入了配置对象
+    httpServer = this.applyExpressAdapter(httpServer);//初始化http服务
+
+    this.applyLogger(appOptions);//日志输出对象
+    await this.initialize(module, container, applicationConfig, httpServer);
+    return this.createNestInstance&lt;NestApplication&gt;(
+      new NestApplication(container, httpServer, applicationConfig, appOptions),
+    );
+  }
+</code></pre>
+
+<ul>
+<li>第一个参数是使用是传入的类似angularmodule的对象</li>
+<li>第二个参数可以是设置参数，也可以是类似express的MVC，如官网提到的fastify，覆盖默认使用的express</li>
+<li>第三个参数就是设置参数</li>
+</ul>
+
+<p>初始化模块</p>
+
+<pre><code>private async initialize(
+    module,
+    container: NestContainer,
+    config = new ApplicationConfig(),
+    httpServer: HttpServer = null,
+  ) {
+    //生成实例加载器和依赖扫描器
+    const instanceLoader = new InstanceLoader(container);
+    const dependenciesScanner = new DependenciesScanner(
+      container,
+      new MetadataScanner(),
+      config,
+    );
+    container.setApplicationRef(httpServer);
+    try {
+      this.logger.log(messages.APPLICATION_START);
+      await ExceptionsZone.asyncRun(async () =&gt; {
+        await dependenciesScanner.scan(module);
+        await instanceLoader.createInstancesOfDependencies();
+        dependenciesScanner.applyApplicationProviders();
+      });
+    } catch (e) {
+      process.abort();
+    }
+  }
+</code></pre>
+
+<p>扫描当前文件的依赖</p>
+
+<pre><code>public async scan(module: Type&lt;any&gt;) {
+    await this.scanForModules(module);
+    await this.scanModulesForDependencies();
+    this.container.bindGlobalScope();
+  }
+</code></pre>
+
+<p>scanForModules扫描及保存模块（包括imports进来的模块）</p>
+
+<pre><code>public async scanForModules(
+    module: Type&lt;any&gt; | DynamicModule,
+    scope: Type&lt;any&gt;[] = [],
+  ) {
+    await this.insertModule(module, scope);
+
+    const modules = this.reflectMetadata(module, metadata.MODULES);
+    for (const innerModule of modules) {
+      await this.scanForModules(innerModule, [].concat(scope, module));
+    }
+  }
+</code></pre>
+
+<p>容器对象的insertModule</p>
+
+<pre><code>
+public async insertModule(
+    metatype: Type&lt;any&gt; | DynamicModule | Promise&lt;DynamicModule&gt;,
+    scope: Type&lt;any&gt;[],
+  ): Promise&lt;Module&gt; {
+    if (!metatype) {
+      throw new InvalidModuleException(scope);
+    }
+    //模块编译器先编译模块
+    const { type, dynamicMetadata, token } = await this.moduleCompiler.compile(
+      metatype,
+      scope,
+    );
+    //根据token判断是否已保存。没有保存则创建一个Module实例。
+    if (this.modules.has(token)) {
+      return;
+    }
+    //Module对象能保存组件、注入的服务、路由、导出的对象及相关模块。创建时先保存核心的注入（模块的实例，模块的配置、映射器、MVC对象、外部的上下文生成器、该模块的的所有模块）
+    const module = new Module(type, scope, this);
+    this.modules.set(token, module);
+    //动态模块保存在dynamicModulesMetadata对象中，然后对动态模块里的模块（modules\imports）都执行下addModule方法，共用一个作用域数组
+    this.addDynamicMetadata(token, dynamicMetadata, [].concat(scope, type));
+    //全局模块则添加到globalModules的Set对象中
+    this.isGlobalModule(type) &amp;&amp; this.addGlobalModule(module);
+
+    return module;
+  }
+</code></pre>
+
+<p>扫描模块里的依赖项，作依赖注入的准备工作，其实就是处理Module的配置项await this.scanModulesForDependencies();</p>
+
+<pre><code>async scanModulesForDependencies() {
+        const modules = this.container.getModules();
+        for (const [token, { metatype }] of modules) {
+            await this.reflectImports(metatype, token, metatype.name);
+            this.reflectProviders(metatype, token);
+            this.reflectControllers(metatype, token);
+            this.reflectExports(metatype, token);
+        }
+        this.calculateModulesDistance(modules);
+    }
+</code></pre>
+
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/2018/06/09/intro-to-netjs/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer pager-noitem">&lt; Newer</li>
+      <li class="pager-older">
+        <a href="/blog/2018/04/09/intro-to-skynet/" data-toggle="tooltip" data-placement="top" title="Introduction to Skynet">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>
