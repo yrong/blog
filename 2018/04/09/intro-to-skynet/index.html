@@ -64,6 +64,12 @@
 <li><a href="#代码结构">代码结构</a></li>
 <li><a href="#例子分析">例子分析</a></li>
 <li><a href="#模块加载">模块加载</a></li>
+<li><a href="#服务启动">服务启动</a>
+<ul>
+<li><a href="#c部分">C部分</a></li>
+<li><a href="#回到lua">回到lua</a></li>
+<li><a href="#最初的最初">最初的最初</a></li>
+</ul></li>
 <li><a href="#调试">调试</a></li>
 </ul></li>
 </ul>
@@ -586,6 +592,218 @@ skynet_module_init(const char *path) {
     M = m;
 }
 </code></pre>
+
+<h2 id="服务启动">服务启动</h2>
+
+<p>先看一个skynet_sample中启动agent服务的例子：</p>
+
+<pre><code>local function new_agent()
+    return skynet.newservice &quot;agent&quot;
+end
+</code></pre>
+
+<p>skynet.newservice的实现也很简单：</p>
+
+<pre><code class="language-skynet.lua">function skynet.newservice(name, ...)
+    return skynet.call(&quot;.launcher&quot;, &quot;lua&quot; , &quot;LAUNCH&quot;, &quot;snlua&quot;, name, ...)
+end
+</code></pre>
+
+<p>这里，.launcher是一个服务的名字，后面都是通过skynet.call传给.launcher的参数。</p>
+
+<p>先来看看这个.launcher是什么</p>
+
+<pre><code class="language-bootstrap.lua">local launcher = assert(skynet.launch(&quot;snlua&quot;,&quot;launcher&quot;))
+skynet.name(&quot;.launcher&quot;, launcher)
+</code></pre>
+
+<p>通过wiki我们知道，bootstrap.lua是skynet服务的启动入口，在这里，调用了skynet.launch，启动了一个launcher服务，并将其命名为.launcher。
+skynet.launch的实现如下：</p>
+
+<pre><code class="language-manager.lua">local c = require &quot;skynet.core&quot;
+function skynet.launch(...)
+    local addr = c.command(&quot;LAUNCH&quot;, table.concat({...},&quot; &quot;))
+    if addr then
+        return tonumber(&quot;0x&quot; .. string.sub(addr , 2))
+    end
+end
+</code></pre>
+
+<p>这里的skynet.core是一个C语言模块，至此，我们将进入C语言实现部分，调用skynet.core.command(“LAUNCH”, “snlua launcher”)</p>
+
+<h3 id="c部分">C部分</h3>
+
+<p>skynet.core其实是在lua_skynet.c中定义的，其command对应于lcommand函数。 这时的参数其实都压进了lua_State中。</p>
+
+<pre><code class="language-lua-skynet.c">static int
+lcommand(lua_State *L) {
+    struct skynet_context * context = lua_touserdata(L, lua_upvalueindex(1));
+    const char * cmd = luaL_checkstring(L,1);
+    const char * result;
+    const char * parm = NULL;
+    if (lua_gettop(L) == 2) {
+        parm = luaL_checkstring(L,2);
+    }
+
+    result = skynet_command(context, cmd, parm);
+    if (result) {
+        lua_pushstring(L, result);
+        return 1;
+    }
+    return 0;
+}
+</code></pre>
+
+<p>在lcommand中，cmd应该是LAUNCH,parm应该是 snlua launcher。context暂时按下不表，来看看skynet_command的实现。</p>
+
+<pre><code class="language-skynet_server.c">static struct command_func cmd_funcs[] = {
+    { &quot;TIMEOUT&quot;, cmd_timeout },
+    ...
+    { &quot;LAUNCH&quot;, cmd_launch },
+    ...
+    { NULL, NULL },
+};
+
+const char * 
+skynet_command(struct skynet_context * context, const char * cmd , const char * param) {
+    struct command_func * method = &amp;cmd_funcs[0];
+    while(method-&gt;name) {
+        if (strcmp(cmd, method-&gt;name) == 0) {
+            return method-&gt;func(context, param);
+        }
+        ++method;
+    }
+
+    return NULL;
+}
+</code></pre>
+
+<p>所以，这里会转发到cmd_launch函数。</p>
+
+<pre><code class="language-skynet_server.c">static const char *
+cmd_launch(struct skynet_context * context, const char * param) {
+    size_t sz = strlen(param);
+    char tmp[sz+1];
+    strcpy(tmp,param);
+    char * args = tmp;
+    char * mod = strsep(&amp;args, &quot; \t\r\n&quot;);
+    args = strsep(&amp;args, &quot;\r\n&quot;);
+    struct skynet_context * inst = skynet_context_new(mod,args);
+    if (inst == NULL) {
+        return NULL;
+    } else {
+        id_to_hex(context-&gt;result, inst-&gt;handle);
+        return context-&gt;result;
+    }
+}
+</code></pre>
+
+<p>在cmd_launch中，mod是snlua，args是“snlua launcher”，会根据这两个参数，重新构造一个skynet_context出来。</p>
+
+<p>skynet_context_new的函数体比较长，其中重要的步骤包括：</p>
+
+<ul>
+<li>根据参数实例化一个模块（这里是snlua)</li>
+<li>创建此服务的消息队列</li>
+<li>根据参数，初始化前面创建的模块（snlua)</li>
+</ul>
+
+<p>在第1步中，加载模块（snlua)并调用了模块的create函数。</p>
+
+<pre><code class="language-service_snlua.c">struct snlua *
+snlua_create(void) {
+    struct snlua * l = skynet_malloc(sizeof(*l));
+    memset(l,0,sizeof(*l));
+    l-&gt;mem_report = MEMORY_WARNING_REPORT;
+    l-&gt;mem_limit = 0;
+    l-&gt;L = lua_newstate(lalloc, l);
+    return l;
+}
+</code></pre>
+
+<p>这里，新创建了一个lua_State。因此，正如wiki中所说，snlua是lua的一个沙盒服务，保证了各个lua服务之间是隔离的。</p>
+
+<p>而第3步，其实是调用了snlua模块的init函数。</p>
+
+<pre><code class="language-service_snlua.c">int
+snlua_init(struct snlua *l, struct skynet_context *ctx, const char * args) {
+    int sz = strlen(args);
+    char * tmp = skynet_malloc(sz);
+    memcpy(tmp, args, sz);
+    skynet_callback(ctx, l , launch_cb);
+    const char * self = skynet_command(ctx, &quot;REG&quot;, NULL);
+    uint32_t handle_id = strtoul(self+1, NULL, 16);
+    // it must be first message
+    skynet_send(ctx, 0, handle_id, PTYPE_TAG_DONTCOPY,0, tmp, sz);
+    return 0;
+}
+</code></pre>
+
+<p>这里，设置了当前模块的callback为launch_cb，因此之后skynet_send消息，将由launch_cb处理。</p>
+
+<pre><code class="language-service_snlua.c">static int
+launch_cb(struct skynet_context * context, void *ud, int type, int session, uint32_t source , const void * msg, size_t sz) {
+    assert(type == 0 &amp;&amp; session == 0);
+    struct snlua *l = ud;
+    skynet_callback(context, NULL, NULL);
+    int err = init_cb(l, context, msg, sz);
+    if (err) {
+        skynet_command(context, &quot;EXIT&quot;, NULL);
+    }
+
+    return 0;
+}
+</code></pre>
+
+<p>这里，launch_cb重置了服务的callback（因为snlua只用负责在沙盒中启动lua服务，其他消息应由lua程序处理），之后，调用了init_cb。</p>
+
+<p>init_cb中除了设置各种路径、栈数据之外，和我们关心的lua程序有关的，是这样的一行：</p>
+
+<pre><code class="language-service_snlua.c">const char * loader = optstring(ctx, &quot;lualoader&quot;, &quot;./lualib/loader.lua&quot;);
+
+int r = luaL_loadfile(L,loader);
+if (r != LUA_OK) {
+    skynet_error(ctx, &quot;Can't load %s : %s&quot;, loader, lua_tostring(L, -1));
+    report_launcher_error(ctx);
+    return 1;
+}
+lua_pushlstring(L, args, sz);
+r = lua_pcall(L,1,0,1);
+</code></pre>
+
+<p>这里，就又通过C语言的lua接口，调用回了lua层面。</p>
+
+<p>总结一下，C语言层面的处理流程是这样的：</p>
+
+<p>skynet.core.command–&gt;lcommand–&gt;skynet_command–&gt;cmd_launch–&gt;skynet_context_new–&gt;snlua_create–&gt;snlua_init–&gt;loader.lua</p>
+
+<h3 id="回到lua">回到lua</h3>
+
+<p>loader.lua的功能也很简单，就是在沙盒snlua中，加载并执行lua程序，这里也就是launcher.lua。</p>
+
+<p>在launcher.lua中，通过skynet.register_protocol和skynet.dispatch，设置了launcher服务对各种消息的处理函数。而在skynet.start的调用中：</p>
+
+<pre><code class="language-skynet.lua">function skynet.start(start_func)
+    c.callback(skynet.dispatch_message)
+    skynet.timeout(0, function()
+        skynet.init_service(start_func)
+    end)
+end
+</code></pre>
+
+<p>这里又重新设置了服务的callback。所以，所谓启动一个服务，其实就是将用lua编写的若干回调函数，挂载到对消息队列的处理中去。具体到这里的launcher服务，其实就是在lua层面，将command.LAUNCH等lua函数，挂接到消息队列中的LAUNCH等消息的回调函数。</p>
+
+<h3 id="最初的最初">最初的最初</h3>
+
+<p>作为创建服务的服务.launcher，它自己又是被谁创建的呢？前面我们看到，它是在bootstrap.lua中创建出来的。那么bootstrap.lua又是什么时候启动的呢？</p>
+
+<p>这里，我们需要看一下skynet启动时的第一个函数入口，main函数。</p>
+
+<p>main函数隐藏在skynet_main.c中，当其解析完传入的config文件之后，就转到了skynet_start。</p>
+
+<p>在skynet_start函数中，调用了bootstrap(ctx, config-&gt;bootstrap),其中，就像前面讲到的流程一样，直接走到了skynet_context_new这一步。</p>
+
+<p>一般默认，config-&gt;bootstrap项就是snlua bootstrap。那这里其实就是启动调用bootstrap.lua，，其中会启动launcher服务。有了launcher服务，之后的服务启动，就都可以交由launcher服务来进行了。</p>
 
 <h2 id="调试">调试</h2>
 
