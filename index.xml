@@ -13,6 +13,15 @@
     
     
     <item>
+      <title>Introduction to mxgraph</title>
+      <link>https://yrong.github.io/blog/2018/07/08/mxgraph/</link>
+      <pubDate>Sat, 09 Jun 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/2018/07/08/mxgraph/</guid>
+      <description>业务背景 业务流程图在线绘制需求在业务场景中广泛存在，常用业务需求如下： 流程图框架需求列表 需求名称 优先级 批量圈选(图形&amp;amp;连线圈选) P0 拉</description>
+    </item>
+    
+    <item>
       <title>Introduction to nestjs</title>
       <link>https://yrong.github.io/blog/2018/06/09/intro-to-netjs/</link>
       <pubDate>Sat, 09 Jun 2018 00:00:00 +0000</pubDate>
