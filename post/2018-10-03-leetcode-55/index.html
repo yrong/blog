@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>55-JumpGame - yrong blog</title>
+  <meta property="og:title" content="55-JumpGame - yrong blog" />
+  <meta name="twitter:title" content="55-JumpGame - yrong blog" />
+  <meta name="description" content="题目地址 https://leetcode.com/problems/jump-game/description/ 题目描述 Given an array of non-negative integers, you are initially positioned at the first index of the array. Each element in the array represents your maximum jump length at that position. Determine if you are able to reach the last index. Example 1: Input: [2,3,1,1,4] Output: true Explanation: Jump 1 step from index 0 to 1, then 3 steps to the last">
+  <meta property="og:description" content="题目地址 https://leetcode.com/problems/jump-game/description/ 题目描述 Given an array of non-negative integers, you are initially positioned at the first index of the array. Each element in the array represents your maximum jump length at that position. Determine if you are able to reach the last index. Example 1: Input: [2,3,1,1,4] Output: true Explanation: Jump 1 step from index 0 to 1, then 3 steps to the last">
+  <meta name="twitter:description" content="题目地址 https://leetcode.com/problems/jump-game/description/ 题目描述 Given an array of non-negative integers, you are initially positioned at the first index of the array. Each element in the array …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2018-10-03-leetcode-55/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">55-JumpGame</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>October 3, 2018</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/leetcode/">
+            <i class="fas fa-tag"></i>
+            leetcode
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#题目地址">题目地址</a></li>
+<li><a href="#题目描述">题目描述</a></li>
+<li><a href="#思路">思路</a></li>
+<li><a href="#关键点解析">关键点解析</a></li>
+<li><a href="#代码">代码</a></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      
+
+<h2 id="题目地址">题目地址</h2>
+
+<p><a href="https://leetcode.com/problems/jump-game/description/">https://leetcode.com/problems/jump-game/description/</a></p>
+
+<h2 id="题目描述">题目描述</h2>
+
+<pre><code>Given an array of non-negative integers, you are initially positioned at the first index of the array.
+
+Each element in the array represents your maximum jump length at that position.
+
+Determine if you are able to reach the last index.
+
+Example 1:
+
+Input: [2,3,1,1,4]
+Output: true
+Explanation: Jump 1 step from index 0 to 1, then 3 steps to the last index.
+Example 2:
+
+Input: [3,2,1,0,4]
+Output: false
+Explanation: You will always arrive at index 3 no matter what. Its maximum
+             jump length is 0, which makes it impossible to reach the last index.
+
+</code></pre>
+
+<h2 id="思路">思路</h2>
+
+<p>这道题目是一道典型的<code>回溯</code>类型题目。
+思路就是用一个变量记录当前能够到达的最大的索引，我们逐个遍历数组中的元素去更新这个索引。
+变量完成判断这个索引是否大于数组下表即可。</p>
+
+<h2 id="关键点解析">关键点解析</h2>
+
+<ul>
+<li>建模 (记录和更新当前位置能够到达的最大的索引即可)</li>
+</ul>
+
+<h2 id="代码">代码</h2>
+
+<ul>
+<li>语言支持: Javascript，Python3</li>
+</ul>
+
+<pre><code class="language-js">
+/*
+ * @lc app=leetcode id=55 lang=javascript
+ *
+ * [55] Jump Game
+ *
+ * https://leetcode.com/problems/jump-game/description/
+ *
+ * algorithms
+ * Medium (31.38%)
+ * Total Accepted:    252.4K
+ * Total Submissions: 797.2K
+ * Testcase Example:  '[2,3,1,1,4]'
+ *
+ * Given an array of non-negative integers, you are initially positioned at the
+ * first index of the array.
+ *
+ * Each element in the array represents your maximum jump length at that
+ * position.
+ *
+ * Determine if you are able to reach the last index.
+ *
+ * Example 1:
+ *
+ *
+ * Input: [2,3,1,1,4]
+ * Output: true
+ * Explanation: Jump 1 step from index 0 to 1, then 3 steps to the last
+ * index.
+ *
+ *
+ * Example 2:
+ *
+ *
+ * Input: [3,2,1,0,4]
+ * Output: false
+ * Explanation: You will always arrive at index 3 no matter what. Its
+ * maximum
+ * jump length is 0, which makes it impossible to reach the last index.
+ *
+ *
+ */
+/**
+ * @param {number[]} nums
+ * @return {boolean}
+ */
+var canJump = function(nums) {
+  let max = 0; // 能够走到的数组下标
+
+  for(let i = 0; i &lt; nums.length; i++) {
+      if (max &lt; i) return false; // 当前这一步都走不到，后面更走不到了
+      max = Math.max(nums[i] + i, max);
+  }
+
+  return max &gt;= nums.length - 1
+};
+
+</code></pre>
+
+<p>Python3 Code:</p>
+
+<pre><code class="language-Python">class Solution:
+    def canJump(self, nums: List[int]) -&gt; bool:
+        &quot;&quot;&quot;思路同上&quot;&quot;&quot;
+        _max = 0
+        _len = len(nums)
+        for i in range(_len-1):
+            if _max &lt; i:
+                return False
+            _max = max(_max, nums[i] + i)
+            # 下面这个判断可有可无，但提交的时候数据会好看点
+            if _max &gt;= _len - 1:
+                return True
+        return _max &gt;= _len - 1
+</code></pre>
+
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/post/2018-10-03-leetcode-55/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer pager-noitem">&lt; Newer</li>
+      <li class="pager-older">
+        <a href="/blog/post/2018-09-10-leetcode-560/" data-toggle="tooltip" data-placement="top" title="560-subarray-sum-equals-k">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>
