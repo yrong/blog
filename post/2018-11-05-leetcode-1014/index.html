@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>1014-best-sightseeing-pair - yrong blog</title>
+  <meta property="og:title" content="1014-best-sightseeing-pair - yrong blog" />
+  <meta name="twitter:title" content="1014-best-sightseeing-pair - yrong blog" />
+  <meta name="description" content="题目地址(1014. 最佳观光组合) https://leetcode-cn.com/problems/best-sightseeing-pair/description/ 题目描述 给定正整数数组 A，A[i] 表示第 i 个观光景点的评分，并且两个景点 i 和 j 之间的距离为 j - i。 一对景">
+  <meta property="og:description" content="题目地址(1014. 最佳观光组合) https://leetcode-cn.com/problems/best-sightseeing-pair/description/ 题目描述 给定正整数数组 A，A[i] 表示第 i 个观光景点的评分，并且两个景点 i 和 j 之间的距离为 j - i。 一对景">
+  <meta name="twitter:description" content="题目地址(1014. 最佳观光组合) https://leetcode-cn.com/problems/best-sightseeing-pair/description/ 题目描述 给定正整数数组 A，A[i] 表示第 i 个观光景点的评分，并且两个景点 i 和 j 之间的距离为 j - i。 一对景">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2018-11-05-leetcode-1014/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">1014-best-sightseeing-pair</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>November 5, 2018</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/leetcode/">
+            <i class="fas fa-tag"></i>
+            leetcode
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#题目地址-1014-最佳观光组合">题目地址(1014. 最佳观光组合)</a></li>
+<li><a href="#题目描述">题目描述</a></li>
+<li><a href="#思路">思路</a></li>
+<li><a href="#关键点解析">关键点解析</a></li>
+<li><a href="#代码">代码</a></li>
+<li><a href="#小技巧">小技巧</a></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      
+
+<h2 id="题目地址-1014-最佳观光组合">题目地址(1014. 最佳观光组合)</h2>
+
+<p><a href="https://leetcode-cn.com/problems/best-sightseeing-pair/description/">https://leetcode-cn.com/problems/best-sightseeing-pair/description/</a></p>
+
+<h2 id="题目描述">题目描述</h2>
+
+<p>给定正整数数组  A，A[i]  表示第 i 个观光景点的评分，并且两个景点  i 和  j  之间的距离为  j - i。</p>
+
+<p>一对景点（i &lt; j）组成的观光组合的得分为（A[i] + A[j] + i - j）：景点的评分之和减去它们两者之间的距离。</p>
+
+<p>返回一对观光景点能取得的最高分。</p>
+
+<p>示例：</p>
+
+<p>输入：[8,1,5,2,6]
+输出：11
+解释：i = 0, j = 2, A[i] + A[j] + i - j = 8 + 5 + 0 - 2 = 11</p>
+
+<p>提示：</p>
+
+<p>2 &lt;= A.length &lt;= 50000
+1 &lt;= A[i] &lt;= 1000</p>
+
+<h2 id="思路">思路</h2>
+
+<p>最简单的思路就是两两组合，找出最大的，妥妥超时，我们来看下代码：</p>
+
+<pre><code class="language-python">class Solution:
+    def maxScoreSightseeingPair(self, A: List[int]) -&gt; int:
+        n = len(A)
+        res = 0
+        for i in range(n - 1):
+            for j in range(i + 1, n):
+                res = max(res, A[i] + A[j] + i - j)
+        return res
+</code></pre>
+
+<p>我们思考如何优化。 其实我们可以遍历一遍数组，对于数组的每一项<code>A[j] - j</code> 我们都去前面找<code>最大</code>的 A[i] + i （这样才能保证结果最大）。</p>
+
+<p>我们考虑使用动态规划来解决, 我们使用 dp[i] 来表示 数组 A 前 i 项的<code>A[i] + i</code>的最大值。</p>
+
+<pre><code class="language-python">class Solution:
+    def maxScoreSightseeingPair(self, A: List[int]) -&gt; int:
+        n = len(A)
+        dp = [float('-inf')] * (n + 1)
+        res = 0
+        for i in range(n):
+            dp[i + 1] = max(dp[i], A[i] + i)
+            res = max(res, dp[i] + A[i] - i)
+        return res
+</code></pre>
+
+<p>如上其实我们发现，dp[i + 1] 只和 dp[i] 有关，这是一个空间优化的信号。我们其实可以使用一个变量来记录，而不必要使用一个数组，代码见下方。</p>
+
+<h2 id="关键点解析">关键点解析</h2>
+
+<ul>
+<li>空间换时间</li>
+<li>dp 空间优化</li>
+</ul>
+
+<h2 id="代码">代码</h2>
+
+<pre><code class="language-python">class Solution:
+    def maxScoreSightseeingPair(self, A: List[int]) -&gt; int:
+        n = len(A)
+        pre = A[0] + 0
+        res = 0
+        for i in range(1, n):
+            res = max(res, pre + A[i] - i)
+            pre = max(pre, A[i] + i)
+        return res
+</code></pre>
+
+<h2 id="小技巧">小技巧</h2>
+
+<p>Python 的代码如果不使用 max，而是使用 if else 效率目测会更高，大家可以试一下。</p>
+
+<pre><code class="language-python">class Solution:
+    def maxScoreSightseeingPair(self, A: List[int]) -&gt; int:
+        n = len(A)
+        pre = A[0] + 0
+        res = 0
+        for i in range(1, n):
+            # res = max(res, pre + A[i] - i)
+            # pre = max(pre, A[i] + i)
+            res = res if res &gt; pre + A[i] - i else pre + A[i] - i
+            pre = pre if pre &gt; A[i] + i else A[i] + i
+        return res
+</code></pre>
+
+    </article>
+
+    
+<ul class="article-share">
+  <li>
+    <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </li>
+  <li>
+    <div class="fb-share-button" data-href="https://yrong.github.io/blog/post/2018-11-05-leetcode-1014/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.10";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+  </li>
+  <li>
+    <a href="http://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="basic-label-counter" data-hatena-bookmark-lang="en" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </li>
+  <li>
+    <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+    <script>!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+  </li>
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer pager-noitem">&lt; Newer</li>
+      <li class="pager-older">
+        <a href="/blog/post/2018-10-03-leetcode-55/" data-toggle="tooltip" data-placement="top" title="55-JumpGame">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>
