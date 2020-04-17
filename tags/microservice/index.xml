@@ -14,55 +14,55 @@
     
     <item>
       <title>go micro code analysis</title>
-      <link>https://yrong.github.io/blog/2017/04/25/go-micro/</link>
+      <link>https://yrong.github.io/blog/post/2017-04-25-go-micro/</link>
       <pubDate>Tue, 25 Apr 2017 00:00:00 +0000</pubDate>
       
-      <guid>https://yrong.github.io/blog/2017/04/25/go-micro/</guid>
+      <guid>https://yrong.github.io/blog/post/2017-04-25-go-micro/</guid>
       <description>&lt;p&gt;go micro code analysis&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Build a NodeJS microservice and deploy it to Docker</title>
-      <link>https://yrong.github.io/blog/2017/03/27/docker-microservice/</link>
+      <link>https://yrong.github.io/blog/post/2017-03-27-docker-microservice/</link>
       <pubDate>Mon, 27 Mar 2017 00:00:00 +0000</pubDate>
       
-      <guid>https://yrong.github.io/blog/2017/03/27/docker-microservice/</guid>
+      <guid>https://yrong.github.io/blog/post/2017-03-27-docker-microservice/</guid>
       <description>&lt;p&gt;Build a NodeJS microservice and deploy it to Docker&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Vertx Micro Shop</title>
-      <link>https://yrong.github.io/blog/2017/03/18/vertx-blueprint/</link>
+      <link>https://yrong.github.io/blog/post/2017-03-18-vertx-blueprint/</link>
       <pubDate>Sat, 18 Mar 2017 00:00:00 +0000</pubDate>
       
-      <guid>https://yrong.github.io/blog/2017/03/18/vertx-blueprint/</guid>
+      <guid>https://yrong.github.io/blog/post/2017-03-18-vertx-blueprint/</guid>
       <description>&lt;p&gt;Vert.x Micro Shop 微服务应用&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Serverless AWS Lambda Examples</title>
-      <link>https://yrong.github.io/blog/2017/02/10/serverless/</link>
+      <link>https://yrong.github.io/blog/post/2017-02-10-serverless/</link>
       <pubDate>Fri, 10 Feb 2017 00:00:00 +0000</pubDate>
       
-      <guid>https://yrong.github.io/blog/2017/02/10/serverless/</guid>
+      <guid>https://yrong.github.io/blog/post/2017-02-10-serverless/</guid>
       <description>&lt;p&gt;serverless aws lamba examples&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>OpenTracing use cases</title>
-      <link>https://yrong.github.io/blog/2017/01/30/opentracing/</link>
+      <link>https://yrong.github.io/blog/post/2017-01-30-opentracing/</link>
       <pubDate>Mon, 30 Jan 2017 00:00:00 +0000</pubDate>
       
-      <guid>https://yrong.github.io/blog/2017/01/30/opentracing/</guid>
+      <guid>https://yrong.github.io/blog/post/2017-01-30-opentracing/</guid>
       <description>&lt;p&gt;openTracing use cases&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>分布式环境系统监控</title>
-      <link>https://yrong.github.io/blog/2017/01/05/microservice-apm/</link>
+      <link>https://yrong.github.io/blog/post/2017-01-05-microservice-apm/</link>
       <pubDate>Thu, 05 Jan 2017 00:00:00 +0000</pubDate>
       
-      <guid>https://yrong.github.io/blog/2017/01/05/microservice-apm/</guid>
+      <guid>https://yrong.github.io/blog/post/2017-01-05-microservice-apm/</guid>
       <description>&lt;p&gt;分布式环境系统监控Zipkin&amp;amp;Pinpoint&lt;/p&gt;</description>
     </item>
     

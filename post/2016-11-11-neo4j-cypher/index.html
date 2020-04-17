@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Neo4j Cypher query - yrong blog</title>
+  <meta property="og:title" content="Neo4j Cypher query - yrong blog" />
+  <meta name="twitter:title" content="Neo4j Cypher query - yrong blog" />
+  <meta name="description" content="Neo4j Cypher Query">
+  <meta property="og:description" content="Neo4j Cypher Query">
+  <meta name="twitter:description" content="Neo4j Cypher Query">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2016-11-11-neo4j-cypher/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Neo4j Cypher query</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>November 11, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/neo4j/">
+            <i class="fas fa-tag"></i>
+            neo4j
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#filter-element">filter element</a>
+<ul>
+<li><a href="#delete-specific-element-from-array">Delete specific element from array</a></li>
+<li><a href="#split-unrelated-queries">split unrelated queries</a></li>
+</ul></li>
+<li><a href="#aggregation">aggregation</a></li>
+<li><a href="#collecting-elments">collecting elments</a></li>
+<li><a href="#null-handling">null handling</a>
+<ul>
+<li><a href="#case-null-check">case&amp;&amp;null check</a></li>
+<li><a href="#foreach-check">foreach check</a></li>
+</ul></li>
+<li><a href="#complex-json-structure-handling">complex json structure handling</a></li>
+<li><a href="#unwind-vs-foreach">unwind vs foreach</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      <p>Neo4j Cypher Query</p>
+
+<h3 id="filter-element">filter element</h3>
+
+<h4 id="delete-specific-element-from-array">Delete specific element from array</h4>
+
+<p><a href="http://stackoverflow.com/questions/31953794/delete-specific-element-from-array">stackoverflow</a></p>
+
+<pre><code>MATCH (n)
+WHERE HAS(n.some_array)
+SET n.array = FILTER(x IN n.some_array WHERE x &lt;&gt; &quot;oranges&quot;);
+</code></pre>
+
+<h4 id="split-unrelated-queries">split unrelated queries</h4>
+
+<p><a href="http://stackoverflow.com/questions/21778435/multiple-unrelated-queries-in-neo4j-cypher#comment54304565_21810903">case</a></p>
+
+<pre><code>MATCH (a {cond:'1'}), (b {cond:'x'}) CREATE a-[:rel]-&gt;b
+WITH 1 as dummy
+MATCH (a {cond:'2'}), (b {cond:'y'}) CREATE a-[:rel]-&gt;b
+WITH 1 as dummy
+MATCH (a {cond:'3'}), (b {cond:'z'}) CREATE a-[:rel]-&gt;b
+</code></pre>
+
+<h3 id="aggregation">aggregation</h3>
+
+<blockquote>
+<p>remember that anything which isn’t an aggregate function(count/collect/distinct/sum..)<br />
+    is automaticlly used as part of the grouping key which means we could include more than<br />
+    one field in our grouping key.</p>
+</blockquote>
+
+<p><a href="http://neo4j.com/docs/developer-manual/current/cypher/clauses/aggregation/">neo4j</a></p>
+
+<pre>
+MATCH (n { name: 'A' })-[r]->()
+RETURN <b>type(r)</b>, count(*)//group key as type(r)
+</pre>
+
+<p><a href="http://www.markhneedham.com/blog/2013/02/17/neo4jcypher-sql-style-group-by-functionality/">markhneedham</a></p>
+
+<pre>
+START player = node:players('name:*')
+MATCH player-[:sent_off_in]-game-[:in_month]-month
+RETURN COUNT(player.name) AS numberOfReds, <b>month.name</b>//group key as month.name
+ORDER BY numberOfReds DESC
+
+START player = node:players('name:*')
+MATCH player-[:sent_off_in]-game-[:in_month]-month, 
+      game-[:in_match]-stats-[:stats]-player, 
+      stats-[:played_for]-team
+RETURN <b>month.name, team.name</b>, COUNT(player.name) AS numberOfReds//group key as month.name and team.name
+ORDER BY numberOfReds DESC
+</pre>
+
+<p><a href="http://stackoverflow.com/questions/27536615/how-to-group-and-count-relationships-in-cypher-neo4j">stackoverflow</a></p>
+
+<pre>
+MATCH (u:User {name: 'my user'})
+RETURN <b>u</b>, size((u)-[:POSTED]>())//count posts group by user
+</pre>
+
+<p><a href="http://stackoverflow.com/questions/13731911/how-to-use-sql-like-group-by-in-cypher-query-language-in-neo4j">stackoverflow</a></p>
+
+<pre>
+start n=node:node_auto_index(name='comp')
+match n<-[:Members_In]-x
+with  <b>n.name as companyName</b>, collect(x) as employees//group by company name
+return length(filter(x in employees : x.Sex='Male')) as NumOfMale,
+length(filter(x in employees : x.Sex='Female')) as NumOfFemale,
+length(employees) as Total
+</pre>
+
+<h3 id="collecting-elments">collecting elments</h3>
+
+<p><a href="http://gist.neo4j.org/?4c4ed4fef33bcf5c4b35">Neo4j Gist</a></p>
+
+<pre><code>MATCH 
+    (brand:Brand)-[:CREATED_A]-&gt;(campaign:Campaign)&lt;--&gt;(node)
+WITH 
+    brand, 
+    { 
+        campaign : campaign, 
+        nodes : COLLECT(node)
+    } AS campaigns
+WITH 
+    { 
+        brand : brand, 
+        campaigns : COLLECT(campaigns)
+    } AS brands
+RETURN brands
+</code></pre>
+
+<pre><code>match (n:Label)
+//group by n.prop implicitly
+with n.prop as prop, collect(n) as nodelist, count(*) as count
+where count &gt; 1
+return prop, nodelist, count;
+</code></pre>
+
+<p><a href="http://www.markhneedham.com/blog/2014/09/26/neo4j-collecting-multiple-values-too-many-parameters-for-function-collect/">markhneedham</a></p>
+
+<pre><code>MATCH (p:Person)-[:EVENT]-&gt;(e)
+RETURN p, COLLECT({eventName: e.name, eventTimestamp: e.timestamp});
+</code></pre>
+
+<p><a href="http://stackoverflow.com/questions/30266193/neo4j-cypher-how-to-count-multiple-property-values-with-cypher-efficiently-and">stackoverflow</a></p>
+
+<pre><code>match (c:Company {id: 'MY.co'})&lt;-[:type_of]-(s:Set)&lt;-[:job_for]-(j:Job) 
+with s, j.Status as Status,count(*) as StatusCount
+return s.Description, collect({Status:Status,StatusCount:StatusCount]);
+</code></pre>
+
+<p><a href="https://github.com/yrong/movies-python-bolt/blob/master/movies.py">my movie project</a></p>
+
+<pre><code>MATCH (movie:Movie {title:'A League of Their Own'}) 
+OPTIONAL MATCH (movie)&lt;-[r]-(person:Person)
+return movie.title as title,collect({name:person.name, type:(head(split(lower(type(r)), '_'))), roles:r.roles}) as cast
+</code></pre>
+
+<p><a href="http://www.markhneedham.com/blog/2013/03/20/neo4jcypher-with-collect-extract">markhneedham</a></p>
+
+<pre><code>START team = node:teams('name:&quot;Manchester United&quot;')
+MATCH team-[h:home_team|away_team]-game-[:on_day]-day 
+WITH day.name as d, game, team, h 
+MATCH team-[:home_team|away_team]-game-[:home_team|away_team]-opp 
+WITH d, COLLECT([type(h),opp.name]) AS games 
+RETURN d, 
+  EXTRACT(c in FILTER(x in games: HEAD(x) = &quot;home_team&quot;) : HEAD(TAIL(c))) AS home,   
+  EXTRACT(c in FILTER(x in games: HEAD(x) = &quot;away_team&quot;) : HEAD(TAIL(c))) AS away
+</code></pre>
+
+<h3 id="null-handling">null handling</h3>
+
+<h4 id="case-null-check">case&amp;&amp;null check</h4>
+
+<p><a href="http://stackoverflow.com/questions/24487418/cypher-remove-all-properties-with-a-particular-value">stackoverflow</a></p>
+
+<pre><code>load csv with headers from &quot;&quot; as line
+with line, case line.foo when '' then null else line.foo end as foo
+create (:User {name:line.name, foo:foo})
+</code></pre>
+
+<pre><code>MATCH (n:Asset)
+WHERE n.manageIP IS NOT NULL
+WITH n.manageIP as ips,n as asset
+REMOVE asset.manageIP
+return asset,ips
+</code></pre>
+
+<h4 id="foreach-check">foreach check</h4>
+
+<p><a href="http://www.markhneedham.com/blog/2014/08/22/neo4j-load-csv-handling-empty-columns/">markhneedham</a></p>
+
+<pre><code>load csv with headers from &quot;file:/tmp/foo.csv&quot; as row
+MERGE (p:Person {a: row.a})
+FOREACH(ignoreMe IN CASE WHEN trim(row.b) &lt;&gt; &quot;&quot; THEN [1] ELSE [] END | SET p.b = row.b)
+FOREACH(ignoreMe IN CASE WHEN trim(row.c) &lt;&gt; &quot;&quot; THEN [1] ELSE [] END | SET p.c = row.c)
+RETURN p
+</code></pre>
+
+<p><a href="http://stackoverflow.com/questions/27576427/cypher-neo4j-case-expression-with-merge">stackoverflow</a></p>
+
+<pre><code>FOREACH ( i in (CASE WHEN {asset_location} IS NOT NULL and {asset_location}.status = 'mounted' THEN [1] ELSE [] END) |
+   MERGE (cabinet:Cabinet {uuid:{asset_location}.cabinet})
+   MERGE (n)-[:LOCATED{status:&quot;mounted&quot;,u:{asset_location}.u,date_mounted:{asset_location}.date_mounted}]-&gt;(cabinet)
+)
+</code></pre>
+
+<h3 id="complex-json-structure-handling">complex json structure handling</h3>
+
+<p><a href="https://neo4j.com/blog/cypher-load-json-from-url/">neo4j-blog</a></p>
+
+<pre><code>Overall Response Structure
+{ &quot;items&quot;: [{
+    &quot;question_id&quot;: 24620768,
+    &quot;link&quot;: &quot;http://stackoverflow.com/questions/24620768/neo4j-cypher-query-get-last-n-elements&quot;,
+    &quot;title&quot;: &quot;Neo4j cypher query: get last N elements&quot;,
+    &quot;answer_count&quot;: 1,
+    &quot;score&quot;: 1,
+    .....
+    &quot;creation_date&quot;: 1404771217,
+    &quot;body_markdown&quot;: &quot;I have a graph....How can I do that?&quot;,
+    &quot;tags&quot;: [&quot;neo4j&quot;, &quot;cypher&quot;],
+    &quot;owner&quot;: {
+        &quot;reputation&quot;: 815,
+        &quot;user_id&quot;: 1212067,
+        ....
+        &quot;link&quot;: &quot;http://stackoverflow.com/users/1212067/&quot;
+    },
+    &quot;answers&quot;: [{
+        &quot;owner&quot;: {
+            &quot;reputation&quot;: 488,
+            &quot;user_id&quot;: 737080,
+            &quot;display_name&quot;: &quot;Chris Leishman&quot;,
+            ....
+        },
+        &quot;answer_id&quot;: 24620959,
+        &quot;share_link&quot;: &quot;http://stackoverflow.com/a/24620959&quot;,
+        ....
+        &quot;body_markdown&quot;: &quot;The simplest would be to use an ... some discussion on this here:...&quot;,
+        &quot;title&quot;: &quot;Neo4j cypher query: get last N elements&quot;
+    }]
+ }
+</code></pre>
+
+<pre><code>WITH {json} as data
+UNWIND data.items as q
+MERGE (question:Question {id:q.question_id}) ON CREATE
+  SET question.title = q.title, question.share_link = q.share_link, question.favorite_count = q.favorite_count
+
+MERGE (owner:User {id:q.owner.user_id}) ON CREATE SET owner.display_name = q.owner.display_name
+MERGE (owner)-[:ASKED]-&gt;(question)
+
+FOREACH (tagName IN q.tags | MERGE (tag:Tag {name:tagName}) MERGE (question)-[:TAGGED]-&gt;(tag))
+FOREACH (a IN q.answers |
+   MERGE (question)&lt;-[:ANSWERS]-(answer:Answer {id:a.answer_id})
+   MERGE (answerer:User {id:a.owner.user_id}) ON CREATE SET answerer.display_name = a.owner.display_name
+   MERGE (answer)&lt;-[:PROVIDED]-(answerer)
+)
+</code></pre>
+
+<h3 id="unwind-vs-foreach">unwind vs foreach</h3>
+
+<p><a href="http://stackoverflow.com/questions/30208963/how-to-create-relationship-and-merge-create-new-node-in-loop-in-neo4j">stackoverflow</a></p>
+
+<pre><code>MATCH (u:User {id:&quot;2&quot;})
+unwind [{id:&quot;21&quot;,name:&quot;b&quot;,year:&quot;2010&quot;},
+        {id:&quot;41&quot;,name:&quot;d&quot;,year:&quot;2011&quot;},
+        {id:&quot;51&quot;,name:&quot;e&quot;,year:&quot;2013&quot;}] as user
+merge (y:User {id: user.id, name: user.name,year:user.year})
+MERGE (u)-[:FRIEND]-&gt;(y)
+</code></pre>
+
+<p><a href="http://www.markhneedham.com/blog/2014/05/31/neo4j-cypher-unwind-vs-foreach/">markhneedham</a></p>
+
+<pre><code>WITH [{name: &quot;Event 1&quot;, timetree: {day: 1, month: 1, year: 2014}}, 
+      {name: &quot;Event 2&quot;, timetree: {day: 2, month: 1, year: 2014}}] AS events
+UNWIND events AS event
+CREATE (e:Event {name: event.name})
+WITH e, event.timetree AS timetree
+MATCH (year:Year {year: timetree.year }), 
+      (year)-[:HAS_MONTH]-&gt;(month {month: timetree.month }),
+      (month)-[:HAS_DAY]-&gt;(day {day: timetree.day })
+CREATE (e)-[:HAPPENED_ON]-&gt;(day)
+</code></pre>
+
+<p><a href="https://gist.github.com/CliffordAnderson/8e2fb338cdb90994b0a4">gist</a></p>
+
+<pre><code>match (a {name:&quot;Daniel&quot;}), (b {name:&quot;Jerry&quot;})
+with a,b
+match s = shortestPath(a-[]-b)
+unwind nodes(s) as n
+with collect(n) as m
+return head(m)
+</code></pre>
+    </article>
+
+    
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/post/2016-11-15-mocha-async-support/" data-toggle="tooltip" data-placement="top" title="mocha异步测试源码分析">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/post/2016-11-07-leetcode/" data-toggle="tooltip" data-placement="top" title="leetcode">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

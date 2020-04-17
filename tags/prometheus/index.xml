@@ -14,10 +14,10 @@
     
     <item>
       <title>prometheus v2.0 storage</title>
-      <link>https://yrong.github.io/blog/2017/07/08/prometheus/</link>
+      <link>https://yrong.github.io/blog/post/2017-07-08-prometheus/</link>
       <pubDate>Sat, 08 Jul 2017 00:00:00 +0000</pubDate>
       
-      <guid>https://yrong.github.io/blog/2017/07/08/prometheus/</guid>
+      <guid>https://yrong.github.io/blog/post/2017-07-08-prometheus/</guid>
       <description>&lt;p&gt;Writing a Time Series Database from Scratch&lt;/p&gt;</description>
     </item>
     

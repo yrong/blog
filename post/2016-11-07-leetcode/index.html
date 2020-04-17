@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>leetcode - yrong blog</title>
+  <meta property="og:title" content="leetcode - yrong blog" />
+  <meta name="twitter:title" content="leetcode - yrong blog" />
+  <meta name="description" content="leetcode部分题解">
+  <meta property="og:description" content="leetcode部分题解">
+  <meta name="twitter:description" content="leetcode部分题解">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2016-11-07-leetcode/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">leetcode</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>November 7, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/algorithom/">
+            <i class="fas fa-tag"></i>
+            algorithom
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#leetcode">LeetCode</a>
+<ul>
+<li>
+<ul>
+<li><a href="#reverse-a-linked-list">reverse a linked list</a></li>
+<li><a href="#find-the-middle-point">Find the middle point</a></li>
+<li><a href="#top-k-frequent-elements">Top K Frequent Elements</a></li>
+<li><a href="#best-time-to-buy-and-sell-stock-ii">Best Time to Buy and Sell Stock II</a></li>
+<li><a href="#implement-atoi-to-convert-a-string-to-an-integer">Implement atoi to convert a string to an integer</a></li>
+<li><a href="#increasing-triplet-subsequence">Increasing Triplet Subsequence</a></li>
+<li><a href="#remove-duplicates-from-sorted-array">Remove Duplicates from Sorted Array</a></li>
+<li><a href="#whether-an-integer-is-a-palindrome">whether an integer is a palindrome</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#o-m-n">O(m+n)</a></li>
+<li><a href="#o-m-logn">O(m*logn)</a></li>
+</ul>
+</nav>
+</aside>
+      <p>leetcode部分题解</p>
+
+<h2 id="leetcode">LeetCode</h2>
+
+<h4 id="reverse-a-linked-list">reverse a linked list</h4>
+
+<pre><code># Python program to reverse a linked list 
+# Time Complexity : O(n)
+# Space Complexity : O(1)
+ 
+# Node class 
+class Node:
+ 
+    # Constructor to initialize the node object
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+ 
+class LinkedList:
+ 
+    # Function to initialize head
+    def __init__(self):
+        self.head = None
+ 
+    # Function to reverse the linked list
+    def reverse(self):
+        prev = None
+        current = self.head
+        while(current is not None):
+            next = current.next
+            current.next = prev
+            prev = current
+            current = next
+        self.head = prev
+         
+    # Function to insert a new node at the beginning
+    def push(self, new_data):
+        new_node = Node(new_data)
+        new_node.next = self.head
+        self.head = new_node
+ 
+    # Utility function to print the linked LinkedList
+    def printList(self):
+        temp = self.head
+        while(temp):
+            print temp.data,
+            temp = temp.next
+ 
+ 
+# Driver program to test above functions
+llist = LinkedList()
+llist.push(20)
+llist.push(4)
+llist.push(15)
+llist.push(85)
+ 
+print &quot;Given Linked List&quot;
+llist.printList()
+llist.reverse()
+print &quot;\nReversed Linked List&quot;
+llist.printList()
+
+Given linked list
+85 15 4 20 
+Reversed Linked list 
+20 4 15 85 
+
+</code></pre>
+
+<h4 id="find-the-middle-point">Find the middle point</h4>
+
+<pre><code>public ListNode findMiddle(ListNode head) {
+    ListNode fast = head;
+    ListNode slow = head;
+    while (fast != null &amp;&amp; fast.next != null) {
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    return slow;
+}
+</code></pre>
+
+<h4 id="top-k-frequent-elements">Top K Frequent Elements</h4>
+
+<blockquote>
+<p>给定一个数组，求数组里出现频率最高的 K 个数字，比如对于数组 [1,1,1,2,2,3]，K=2 时，返回 [1,2]。解决该问题的思路比较常规，首先用 hashmap 记录每个数字的出现频率，然后可以用 heap 来求出现频率最高的 k 个数字。</p>
+</blockquote>
+
+<pre><code class="language-java">class Pair{
+    int num;
+    int count;
+    public Pair(int num, int count){
+        this.num=num;
+        this.count=count;
+    }
+}
+ 
+public class Solution {//基于map和SortedQ
+    public List&lt;Integer&gt; topKFrequent(int[] nums, int k) {
+        //count the frequency for each element
+        HashMap&lt;Integer, Integer&gt; map = new HashMap&lt;Integer, Integer&gt;();
+        for(int num: nums){
+            if(map.containsKey(num)){
+                map.put(num, map.get(num)+1);
+            }else{
+                map.put(num, 1);
+            }
+        }
+ 
+        // create a min heap
+        PriorityQueue&lt;Pair&gt; queue = new PriorityQueue&lt;Pair&gt;(new Comparator&lt;Pair&gt;(){
+            public int compare(Pair a, Pair b){
+                return a.count-b.count;
+            }
+        });
+ 
+        //maintain a heap of size k. 
+        for(Map.Entry&lt;Integer, Integer&gt; entry: map.entrySet()){
+            Pair p = new Pair(entry.getKey(), entry.getValue());
+            queue.offer(p);
+            if(queue.size()&gt;k){
+                queue.poll();
+            }
+        }
+ 
+        //get all elements from the heap
+        List&lt;Integer&gt; result = new ArrayList&lt;Integer&gt;();
+        while(queue.size()&gt;0){
+            result.add(queue.poll().num);
+        }
+        //reverse the order
+        Collections.reverse(result);
+ 
+        return result;
+    }
+}
+</code></pre>
+
+<pre><code class="language-python">class Solution(object):
+    def topKFrequent(self, nums, k):
+        &quot;&quot;&quot;
+        :type nums: List[int]
+        :type k: int
+        :rtype: List[int]
+        &quot;&quot;&quot;
+        counts = collections.Counter(nums)
+        heap = []
+        for key, cnt in counts.items():
+            if len(heap) &lt; k:
+                heapq.heappush(heap, (cnt, key))
+            else:
+                if heap[0][0] &lt; cnt:
+                    heapq.heappop(heap)
+                    heapq.heappush(heap, (cnt, key))
+        return [x[1] for x in heap]
+</code></pre>
+
+<h4 id="best-time-to-buy-and-sell-stock-ii">Best Time to Buy and Sell Stock II</h4>
+
+<blockquote>
+<p>假设有一个数组，它的第i个元素是一个给定的股票在第i天的价格。设计一个算法来找到最大的利润。你可以完成尽可能多的交易(多次买卖股票)。然而,你不能同时参与多个交易(你必须在再次购买前出售股票)。给出一个数组样例[2,1,2,0,1], 1买入，２卖出．０买入，１卖出．返回 2</p>
+</blockquote>
+
+<pre><code class="language-python">class Solution:
+    &quot;&quot;&quot;
+    @param prices: Given an integer array
+    @return: Maximum profit
+    &quot;&quot;&quot;
+    def maxProfit(self, prices):
+        # write your code here
+        total = 0
+        low, high = sys.maxint, sys.maxint
+        for x in prices:
+            if x &gt; high:
+                high = x
+            else:
+                total += high - low
+                high, low = x, x
+        return total + high - low      
+</code></pre>
+
+<pre><code class="language-java">public class Solution {
+    public int maxProfit(int[] prices) {
+        int profit = 0;
+        //从头到尾扫描prices,如果price[i] – price[i-1]大于零则计入最后的收益中。即贪心法
+        for (int i = 0; i &lt; prices.length - 1; i++) {
+            int diff = prices[i+1] - prices[i];
+            if (diff &gt; 0) {
+                profit += diff;
+            }
+        }
+        return profit;
+    }
+}
+</code></pre>
+
+<h4 id="implement-atoi-to-convert-a-string-to-an-integer">Implement atoi to convert a string to an integer</h4>
+
+<p>following cases should be considered</p>
+
+<ol>
+<li>null or empty string</li>
+<li>white spaces</li>
+<li>+/- sign</li>
+<li>calculate real value</li>
+<li>handle min &amp; max</li>
+</ol>
+
+<pre><code>public int atoi(String str) {
+  if (str == null || str.length() &lt; 1)
+    return 0;
+ 
+  // trim white spaces
+  str = str.trim();
+ 
+  char flag = '+';
+ 
+  // check negative or positive
+  int i = 0;
+  if (str.charAt(0) == '-') {
+    flag = '-';
+    i++;
+  } else if (str.charAt(0) == '+') {
+    i++;
+  }
+  // use double to store result
+  double result = 0;
+ 
+  // calculate value
+  while (str.length() &gt; i &amp;&amp; str.charAt(i) &gt;= '0' &amp;&amp; str.charAt(i) &lt;= '9') {
+    result = result * 10 + (str.charAt(i) - '0');
+    i++;
+  }
+ 
+  if (flag == '-')
+    result = -result;
+ 
+  // handle max and min
+  if (result &gt; Integer.MAX_VALUE)
+    return Integer.MAX_VALUE;
+ 
+  if (result &lt; Integer.MIN_VALUE)
+    return Integer.MIN_VALUE;
+ 
+  return (int) result;
+}
+</code></pre>
+
+<pre><code>import re
+
+class Solution(object):
+    def myAtoi(self, str):
+        &quot;&quot;&quot;
+        :type str: str
+        :rtype: int
+        &quot;&quot;&quot;
+        m = re.match(r'(\s)*(\+|\-|)(\d)*', str)
+        try:
+            s = int(m.group(0))
+            return min(max(s, -2147483648), 2147483647)
+        except:
+            return 0
+</code></pre>
+
+<h4 id="increasing-triplet-subsequence">Increasing Triplet Subsequence</h4>
+
+<blockquote>
+<p>Given an unsorted array return whether an increasing subsequence of length 3 exists or not in the array.Return true if there exists i, j, k such that arr[i] &lt; arr[j] &lt; arr[k] given 0 ≤ i &lt; j &lt; k ≤ n-1 else return false.</p>
+</blockquote>
+
+<pre><code>class Solution(object):
+    def increasingTriplet(self, nums):
+        &quot;&quot;&quot;
+        :type nums: List[int]
+        :rtype: bool
+        &quot;&quot;&quot;
+        x1 = x2 = 0x7fffffff
+        for num in nums:
+            if num &lt;= x1:
+                x1 = num
+            elif num &lt;= x2:  # x1 &lt; num &lt;= x2
+                x2 = num
+            else:            # x &lt; x2 &lt; num , so it return true
+                return True
+        return False
+</code></pre>
+
+<h4 id="remove-duplicates-from-sorted-array">Remove Duplicates from Sorted Array</h4>
+
+<blockquote>
+<p>Given a sorted array, remove the duplicates in place such that each element appear only once and return the new length. Do not allocate extra space for another array, you must do this in place with constant memory. For example, Given input array A = [1,1,2], Your function should return length = 2, and A is now [1,2].</p>
+</blockquote>
+
+<pre><code>class Solution:
+    &quot;&quot;&quot;
+    @param A: a list of integers
+    @return an integer
+    &quot;&quot;&quot;
+    def removeDuplicates(self, A):
+        # write your code here
+        if A == []:
+            return 0
+        count = 0
+        for i in range(0, len(A)):
+            if A[i] == A[i-1]:
+                continue
+            else:
+                A[count] = A[i]
+                count += 1
+        return count
+</code></pre>
+
+<h4 id="whether-an-integer-is-a-palindrome">whether an integer is a palindrome</h4>
+
+<blockquote>
+<p>Determine whether an integer is a palindrome. Do this without extra space.</p>
+</blockquote>
+
+<p>````
+class Solution:
+    # @return a boolean
+    def isPalindrome(self, x):
+        if x &lt; 0:
+            return False
+        div = 1
+        while x/div &gt;= 10:
+            div = div * 10</p>
+
+<pre><code>    while x:
+        left = x / div
+        right = x % 10
+
+        if left != right:
+            return False
+
+        x = ( x % div ) / 10
+        div = div / 100
+    return True
+</code></pre>
+
+<pre><code>
+
+#### Search a 2D Matrix II 
+
+Write an efficient algorithm that searches for a value in an m x n matrix. This matrix has the following properties:
+
+- Integers in each row are sorted in ascending from left to right.
+- Integers in each column are sorted in ascending from top to bottom.
+
+Consider the following matrix:
+
+</code></pre>
+
+<p>[
+  [1,   4,  7, 11, 15],
+  [2,   5,  8, 12, 19],
+  [3,   6,  9, 16, 22],
+  [10, 13, 14, 17, 24],
+  [18, 21, 23, 26, 30]
+]</p>
+
+<pre><code>Given target = 5, return true. Given target = 20, return false.
+
+</code></pre>
+
+<h1 id="o-m-n">O(m+n)</h1>
+
+<p>class Solution:
+    # @param {integer[][]} matrix
+    # @param {integer} target
+    # @return {boolean}
+    def searchMatrix(self, matrix, target):
+        y = len(matrix[0]) - 1
+        for x in range(len(matrix)):
+            while y and matrix[x][y] &gt; target:
+                y -= 1
+            if matrix[x][y] == target:
+                return True
+        return False</p>
+
+<pre><code>
+
+</code></pre>
+
+<h1 id="o-m-logn">O(m*logn)</h1>
+
+<p>class Solution:
+    # @param {integer[][]} matrix
+    # @param {integer} target
+    # @return {boolean}
+    def searchMatrix(self, matrix, target):
+        y = len(matrix[0]) - 1
+        def binSearch(nums, low, high):
+            while low &lt;= high:
+                mid = (low + high) / 2
+                if nums[mid] &gt; target:
+                    high = mid - 1
+                else:
+                    low = mid + 1
+            return high
+        for x in range(len(matrix)):
+            y = binSearch(matrix[x], 0, y)
+            if matrix[x][y] == target:
+                return True
+        return False</p>
+
+<pre><code>####  Swap Nodes in Pairs
+
+&gt; Given a linked list, swap every two adjacent nodes and return its head. For example, Given 1-&gt;2-&gt;3-&gt;4, you should return the list as 2-&gt;1-&gt;4-&gt;3. Your algorithm should use only constant space. You may not modify the values in the list, only nodes itself can be changed.
+
+</code></pre>
+
+<p>class Solution:
+    # @param head, a ListNode
+    # @return a ListNode
+    def swapPairs(self, head):
+        # Write your code here
+        if head == None or head.next == None:
+            return head
+        dummy = ListNode(0); dummy.next = head
+        p = dummy
+        while p.next and p.next.next:
+            tmp = p.next.next //store the second node as tmp
+            p.next.next = tmp.next  //link first node to third node
+            tmp.next = p.next  //link second node to first node
+            p.next = tmp   //link p to the second
+            p = p.next.next  // move p to the third
+        return dummy.next</p>
+
+<pre><code>
+</code></pre>
+
+<p>public class Solution {
+    /**
+     * @param head a ListNode
+     * @return a ListNode
+     */
+    public ListNode swapPairs(ListNode head) {
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;</p>
+
+<pre><code>    head = dummy;
+    while (head.next != null &amp;&amp; head.next.next != null) {
+        ListNode n1 = head.next, n2 = head.next.next;
+        // head-&gt;n1-&gt;n2-&gt;...
+        // =&gt; head-&gt;n2-&gt;n1-&gt;...
+        head.next = n2;
+        n1.next = n2.next;
+        n2.next = n1;
+        // move to next pair
+        head = n1;
+    }
+
+    return dummy.next;
+}
+</code></pre>
+
+<p>}</p>
+
+<pre><code>
+#### Count set bits in an integer ####
+
+</code></pre>
+
+<p>Input : n = 6
+Output : 2
+Binary representation of 6 is 110 and has 2 set bits</p>
+
+<p>Input : n = 13
+Output : 3
+Binary representation of 13 is 1101 and has 3 set bits</p>
+
+<pre><code>
+###### Iterative Method to Count Set Bits ######
+
+The iterative approach requires one iteration per bit. It runs utmost sizeof(int) number of times. Iteration terminates when no more bits are set. In worst case, on a 32-bit word with only the most significant bit set, it will loop through 32 iterations. This solution is the simplest one and useful if 1's are sparse and among the least significant bits.
+
+</code></pre>
+
+<p>/* Iterative approach of counting set bits*/
+#include <stdio.h>
+#include <string.h></p>
+
+<p>int countSetBits(unsigned int n)
+{
+  unsigned int c; // the total bits set in n
+  for (c = 0; n; n &gt;&gt;= 1)
+  {
+    c += n &amp; 1;
+  }
+  return c;
+}</p>
+
+<p>int main(void)
+{
+  unsigned int n;
+  printf(&ldquo;Enter a positive integer: &ldquo;);
+  scanf(&ldquo;%u&rdquo;, &amp;n);
+  printf(&ldquo;%d\n&rdquo;, countSetBits(n));
+}</p>
+
+<pre><code>
+###### Count Set Bits by Brian Kernighan's Algorithm　######
+
+Brian Kernighan's algorithm every time performs a bitwise AND operation between inputted integer n and n-1 and keep c incrementing by 1 until n becomes zero. This solution iterates the number of set bits times through the loop. For example, if we input 17 then loop will iterate only two times, whereas in former solution (iterative method to count set bits) it would iterate 5 times.
+
+Subtraction of 1 from a number toggles all the bits (from right to left) till the rightmost set bit(including the righmost set bit). So if we subtract a number by 1 and do bitwise &amp; with itself (n &amp; (n-1)), we unset the righmost set bit. If we do n &amp; (n-1) in a loop and count the no of times loop executes we get the set bit count.
+Beauty of the this solution is number of times it loops is equal to the number of set bits in a given integer.
+
+&gt; 
+  1.  Initialize count: = 0
+    2.  If integer n is not zero
+      (a) Do bitwise &amp; with (n-1) and assign the value back to n
+          n: = n&amp;(n-1)
+      (b) Increment count by 1
+      (c) go to step 2
+    3.  Else return count
+
+e.g countSetBits(9:1001) = 2    
+
+</code></pre>
+
+<p>n =  9 (1001)
+   count = 0</p>
+
+<p>Since 9 &gt; 0, subtract by 1 and do bitwise &amp; with (9-1)
+   n = 9&amp;8  (1001 &amp; 1000)
+   n = 8
+   count  = 1</p>
+
+<p>Since 8 &gt; 0, subtract by 1 and do bitwise &amp; with (8-1)
+   n = 8&amp;7  (1000 &amp; 0111)
+   n = 0
+   count = 2</p>
+
+<p>Since n = 0, return count which is 2 now.</p>
+
+<pre><code>
+</code></pre>
+
+<p>/* Brian Kernighan&rsquo;s algorithm  of counting set bits*/
+#include <stdio.h>
+#include <string.h></p>
+
+<p>int countSetBits(unsigned int n)
+{
+  unsigned int c; // the total bits set in n
+  for (c = 0; n; n = n &amp; (n-1))
+  {
+    c++;
+  }
+  return c;
+}</p>
+
+<p>int main(void)
+{
+  unsigned int n;
+  printf(&ldquo;Enter a positive integer: &ldquo;);
+  scanf(&ldquo;%u&rdquo;, &amp;n);
+  printf(&ldquo;%d\n&rdquo;, countSetBits(n));
+}</p>
+
+<pre><code>
+#### Coin Change 
+
+&gt; You are given coins of different denominations and a total amount of money amount. Write a function to compute the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return -1.
+
+***Example 1:***  
+coins = [1, 2, 5], amount = 11
+return 3 (11 = 5 + 5 + 1)
+
+***Example 2:***  
+coins = [2], amount = 3
+return -1.
+
+###### 动态规划（Dynamic Programming）
+
+状态转移方程：  
+
+&gt; Let dp[v] to be the minimum number of coins required to get the amount v.   
+dp[i+a_coin] = min(dp[i+a_coin], dp[i]+1) if dp[i] is reachable.   
+dp[i+a_coin] = dp[i+a_coin] is dp[i] is not reachable.   
+We initially set dp[i] to be -1. 
+
+
+</code></pre>
+
+<p>//This solution takes time O(n^2).
+class Solution(object):
+    def coinChange(self, coins, amount):
+        &ldquo;&rdquo;&rdquo;
+        :type coins: List[int]
+        :type amount: int
+        :rtype: int
+        &ldquo;&rdquo;&rdquo;
+        dp = [0] + [-1] * amount
+        for x in range(amount):
+            if dp[x] &lt; 0:
+                continue
+            for c in coins:
+                if x + c &gt; amount:
+                    continue
+                if dp[x + c] &lt; 0 or dp[x + c] &gt; dp[x] + 1:
+                    dp[x + c] = dp[x] + 1
+        return dp[amount]</p>
+
+<pre><code>
+###### 广度优先搜索（BFS）
+
+&gt; We maintain two queues: one of the amount so far(queue) and the other for the minimal steps for each amount(steps). The time is too much because of the contains method take n and total time is O(n^3).
+ 
+
+</code></pre>
+
+<p>class Solution(object):
+    def coinChange(self, coins, amount):
+        &ldquo;&rdquo;&rdquo;
+        :type coins: List[int]
+        :type amount: int
+        :rtype: int
+        &ldquo;&rdquo;&rdquo;
+        steps = collections.defaultdict(int)
+        queue = collections.deque([0])
+        steps[0] = 0
+        while queue:
+            front = queue.popleft()
+            level = steps[front]
+            if front == amount:
+                return level
+            for c in coins:
+                if front + c &gt; amount:
+                    continue
+                if front + c not in steps:
+                    queue += front + c,
+                    steps[front + c] = level + 1
+        return -1
+```</p>
+    </article>
+
+    
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/post/2016-11-11-neo4j-cypher/" data-toggle="tooltip" data-placement="top" title="Neo4j Cypher query">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/post/2016-11-04-virtual-dom/" data-toggle="tooltip" data-placement="top" title="reactjs源码分析">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

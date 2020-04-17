@@ -14,10 +14,10 @@
     
     <item>
       <title>bilibili crawler</title>
-      <link>https://yrong.github.io/blog/2017/04/09/bilibili-api/</link>
+      <link>https://yrong.github.io/blog/post/2017-04-09-bilibili-api/</link>
       <pubDate>Sun, 09 Apr 2017 00:00:00 +0000</pubDate>
       
-      <guid>https://yrong.github.io/blog/2017/04/09/bilibili-api/</guid>
+      <guid>https://yrong.github.io/blog/post/2017-04-09-bilibili-api/</guid>
       <description>&lt;p&gt;针对B站视频的爬虫实现&lt;/p&gt;</description>
     </item>
     

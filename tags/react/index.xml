@@ -14,10 +14,10 @@
     
     <item>
       <title>reactjs源码分析</title>
-      <link>https://yrong.github.io/blog/2016/11/04/virtual-dom/</link>
+      <link>https://yrong.github.io/blog/post/2016-11-04-virtual-dom/</link>
       <pubDate>Fri, 04 Nov 2016 00:00:00 +0000</pubDate>
       
-      <guid>https://yrong.github.io/blog/2016/11/04/virtual-dom/</guid>
+      <guid>https://yrong.github.io/blog/post/2016-11-04-virtual-dom/</guid>
       <description>&lt;p&gt;reactjs virtual dom 源码分析&lt;/p&gt;</description>
     </item>
     

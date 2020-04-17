@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>ElasticSearch Query DSL - yrong blog</title>
+  <meta property="og:title" content="ElasticSearch Query DSL - yrong blog" />
+  <meta name="twitter:title" content="ElasticSearch Query DSL - yrong blog" />
+  <meta name="description" content="ElasticSearch Query DSL Examples">
+  <meta property="og:description" content="ElasticSearch Query DSL Examples">
+  <meta name="twitter:description" content="ElasticSearch Query DSL Examples">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2016-10-13-elasticsearch-query-dsl/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">ElasticSearch Query DSL</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>October 13, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/elasticsearch/">
+            <i class="fas fa-tag"></i>
+            elasticsearch
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li><a href="#elasticsearch-query-dsl-examples">ElasticSearch Query DSL Examples</a>
+<ul>
+<li>
+<ul>
+<li><a href="#bucket-selector-aggregation-https-www-elastic-co-guide-en-elasticsearch-reference-master-search-aggregations-pipeline-bucket-selector-aggregation-html-bucket-script-aggregation-https-www-elastic-co-guide-en-elasticsearch-reference-master-search-aggregations-pipeline-bucket-script-aggregation-html"><a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-pipeline-bucket-selector-aggregation.html">bucket-selector-aggregation</a> &amp; <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-pipeline-bucket-script-aggregation.html">bucket-script-aggregation</a></a></li>
+<li><a href="#query-time-boosting-https-www-elastic-co-guide-en-elasticsearch-guide-current-query-time-boosting-html"><a href="https://www.elastic.co/guide/en/elasticsearch/guide/current/query-time-boosting.html">query-time-boosting</a></a></li>
+<li><a href="#phrase-matching-https-www-elastic-co-guide-en-elasticsearch-guide-current-slop-html"><a href="https://www.elastic.co/guide/en/elasticsearch/guide/current/slop.html">Phrase Matching</a></a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      <p>ElasticSearch Query DSL Examples</p>
+
+<h1 id="elasticsearch-query-dsl-examples">ElasticSearch Query DSL Examples</h1>
+
+<blockquote>
+<ul>
+<li>加载<a href="https://github.com/medcl/elasticsearch-analysis-ik">ik</a>分词插件,配置开启inline脚本</li>
+</ul>
+</blockquote>
+
+<pre><code>script.inline: true
+script.indexed: true
+</code></pre>
+
+<blockquote>
+<ul>
+<li>建索引</li>
+</ul>
+</blockquote>
+
+<pre><code class="language-bash">curl -XDELETE 'localhost:9200/text'
+curl -XPUT 'localhost:9200/text?pretty'
+</code></pre>
+
+<blockquote>
+<ul>
+<li>mapping定义</li>
+</ul>
+</blockquote>
+
+<pre><code class="language-bash">curl -XPOST http://localhost:9200/text/mytext/_mapping -d'
+{
+    &quot;mytext&quot;: {  
+        &quot;_all&quot;: {
+            &quot;analyzer&quot;: &quot;ik_max_word&quot;,
+            &quot;search_analyzer&quot;: &quot;ik_max_word&quot;,
+            &quot;term_vector&quot;: &quot;no&quot;,
+            &quot;store&quot;: &quot;false&quot;
+        },
+        &quot;properties&quot;: {
+            &quot;content&quot;: {
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;analyzer&quot;: &quot;ik_max_word&quot;,
+                &quot;search_analyzer&quot;: &quot;ik_max_word&quot;,
+                &quot;include_in_all&quot;: &quot;true&quot;,
+                &quot;boost&quot;: 8
+            },
+            &quot;ttl&quot;: {
+          		&quot;properties&quot;: {&quot;$date&quot;: { &quot;type&quot;: &quot;date&quot;}}
+        	}
+    }
+    }
+}'
+</code></pre>
+
+<blockquote>
+<ul>
+<li>导入测试数据</li>
+</ul>
+</blockquote>
+
+<pre><code class="language-bash">curl -XPUT 'localhost:9200/text/mytext/5?pretty' -d'
+{&quot;url&quot;: &quot;sina.com&quot;,&quot;content&quot;:&quot;今年反正我都会避让，不给自己找麻烦&quot;,&quot;ch&quot;:7,&quot;it&quot;:14361982,&quot;appid&quot;:{&quot;$numberLong&quot;:&quot;1&quot;},&quot;ttl&quot;:{&quot;$date&quot;:&quot;2015-07-09T23:59:40.631+0800&quot;}
+}
+'
+
+curl -XPUT 'localhost:9200/text/mytext/6?pretty' -d'
+{&quot;url&quot;: &quot;baidu.com&quot;,&quot;content&quot;:&quot;今年在上海租房火爆&quot;,&quot;ch&quot;:8,&quot;it&quot;:14361982,&quot;appid&quot;:{&quot;$numberLong&quot;:&quot;1&quot;},&quot;ttl&quot;:{&quot;$date&quot;:&quot;2015-07-09T23:59:40.631+0800&quot;}
+}
+'
+
+curl -XPUT 'localhost:9200/text/mytext/7?pretty' -d'
+{&quot;url&quot;: &quot;baidu.com&quot;,&quot;content&quot;:&quot;今年在南京租房火爆&quot;,&quot;ch&quot;:8,&quot;it&quot;:14361982,&quot;appid&quot;:{&quot;$numberLong&quot;:&quot;1&quot;},&quot;ttl&quot;:{&quot;$date&quot;:&quot;2015-07-09T23:59:40.631+0800&quot;}
+}
+'
+</code></pre>
+
+<h3 id="bucket-selector-aggregation-https-www-elastic-co-guide-en-elasticsearch-reference-master-search-aggregations-pipeline-bucket-selector-aggregation-html-bucket-script-aggregation-https-www-elastic-co-guide-en-elasticsearch-reference-master-search-aggregations-pipeline-bucket-script-aggregation-html"><a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-pipeline-bucket-selector-aggregation.html">bucket-selector-aggregation</a> &amp; <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-pipeline-bucket-script-aggregation.html">bucket-script-aggregation</a></h3>
+
+<p>context包含“今年”，按url聚合，聚合数&gt;1,order by聚合数，时间范围15/7/9-16/1/7</p>
+
+<pre><code class="language-bash">curl -XPOST 'localhost:9200/text/_search?pretty' -d'
+{
+  &quot;query&quot; : {
+    &quot;bool&quot;: {
+      &quot;must&quot;:[
+      {&quot;match&quot;:  { &quot;content&quot; : &quot;今年&quot; }},
+      {&quot;range&quot;:  {&quot;ttl.$date&quot; : {&quot;gt&quot; : &quot;2015-07-09&quot;,&quot;lt&quot; : &quot;2016-01-07&quot;}}}
+        ] 
+    }
+  },
+  &quot;aggs&quot;: {
+    &quot;urls&quot;: {
+      &quot;terms&quot;: {
+        &quot;field&quot;: &quot;url&quot;,
+        &quot;order&quot; : { &quot;_count&quot; : &quot;asc&quot;}
+      }, 
+      &quot;aggs&quot;: {
+        &quot;greater_than_filter&quot;: {
+          &quot;bucket_selector&quot;: {
+            &quot;buckets_path&quot;: {
+              &quot;url_count&quot;: &quot;_count&quot;
+            }, 
+            &quot;script&quot;: &quot;url_count &gt; 1&quot;
+          }
+        }
+      }
+    }
+  },
+  &quot;size&quot;: 0
+}
+'
+</code></pre>
+
+<h3 id="query-time-boosting-https-www-elastic-co-guide-en-elasticsearch-guide-current-query-time-boosting-html"><a href="https://www.elastic.co/guide/en/elasticsearch/guide/current/query-time-boosting.html">query-time-boosting</a></h3>
+
+<p>content包含租房，上海加权因子10，南京加权因子1</p>
+
+<pre><code class="language-bash">curl -XGET 'localhost:9200/text/_search?pretty' -d'
+{
+    &quot;query&quot;: {
+        &quot;bool&quot;: {
+            &quot;must&quot;: {
+                &quot;match&quot;: {
+                    &quot;content&quot;: &quot;租房&quot;
+                }
+            },
+            &quot;should&quot;: [ 
+                { &quot;match&quot;: { &quot;content&quot;: {&quot;query&quot;: &quot;上海&quot;,
+                        &quot;boost&quot;: 10 }}},
+                { &quot;match&quot;: { &quot;content&quot;: {&quot;query&quot;: &quot;南京&quot;,
+                        &quot;boost&quot;: 1} }}
+            ] 
+      }
+}}'
+</code></pre>
+
+<h3 id="phrase-matching-https-www-elastic-co-guide-en-elasticsearch-guide-current-slop-html"><a href="https://www.elastic.co/guide/en/elasticsearch/guide/current/slop.html">Phrase Matching</a></h3>
+
+<p>content包含“反正”和“避让”，间隔不超10词</p>
+
+<pre><code class="language-Bash">curl -XGET 'localhost:9200/text/_search?pretty' -d'
+{
+    &quot;query&quot;: {
+        &quot;match_phrase&quot;: {
+            &quot;content&quot;: {
+                &quot;query&quot;: &quot;反正 避让&quot;,
+                &quot;slop&quot;:  10
+            }
+        }
+    }
+}
+'
+</code></pre>
+    </article>
+
+    
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/post/2016-10-17-machine-learning-on-spark/" data-toggle="tooltip" data-placement="top" title="Machine Learning algorithm on Spark">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/post/2016-10-12-d3-data-visualization/" data-toggle="tooltip" data-placement="top" title="D3.js数据可视化">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

@@ -14,10 +14,10 @@
     
     <item>
       <title>nginx模块初始化</title>
-      <link>https://yrong.github.io/blog/2016/07/21/nginx-under-the-hood/</link>
+      <link>https://yrong.github.io/blog/post/2016-07-21-nginx-under-the-hood/</link>
       <pubDate>Thu, 21 Jul 2016 15:00:00 +0000</pubDate>
       
-      <guid>https://yrong.github.io/blog/2016/07/21/nginx-under-the-hood/</guid>
+      <guid>https://yrong.github.io/blog/post/2016-07-21-nginx-under-the-hood/</guid>
       <description>&lt;p&gt;nginx模块初始化&lt;/p&gt;</description>
     </item>
     

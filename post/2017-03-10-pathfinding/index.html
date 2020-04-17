@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>path finding algorithms - yrong blog</title>
+  <meta property="og:title" content="path finding algorithms - yrong blog" />
+  <meta name="twitter:title" content="path finding algorithms - yrong blog" />
+  <meta name="description" content="Path finding algorithom">
+  <meta property="og:description" content="Path finding algorithom">
+  <meta name="twitter:description" content="Path finding algorithom">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2017-03-10-pathfinding/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">path finding algorithms</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>March 10, 2017</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/algorithom/">
+            <i class="fas fa-tag"></i>
+            algorithom
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li><a href="#traversing-graphs-and-finding-paths">Traversing graphs and finding paths</a>
+<ul>
+<li><a href="#depth-first-search-dfs">Depth First Search (dfs)</a></li>
+<li><a href="#breadth-first-search-bfs">Breadth First Search (bfs)</a></li>
+<li><a href="#dijkstra">Dijkstra</a></li>
+<li><a href="#a-a-star">A* (A-star)</a></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      <p>Path finding algorithom</p>
+
+<h1 id="traversing-graphs-and-finding-paths">Traversing graphs and finding paths</h1>
+
+<p>Let&rsquo;s take a look at the diagram below:</p>
+
+<p><img src="http://web.mit.edu/eranki/www/tutorials/search/images/dfs_0.png" alt="" /></p>
+
+<p>This is a pretty typical problem, no? We have a starting point, and ending point, and a bunch of roads we can take to get there. We can even abstract this so that the roads are &ldquo;moves&rdquo; (of, say, a little sliding puzzle) and the points are states of the puzzle. Our goal is to find the shortest path possible to the end node in the fewest moves — and not take a long time to find it!</p>
+
+<h2 id="depth-first-search-dfs">Depth First Search (dfs)</h2>
+
+<p>The simplest (and least efficient) method of traversing a graph is the Depth First Search (dfs). Recursion suits this method well. Examine the pseudocode for a simple dfs:</p>
+
+<pre><code>// Simple dfs
+function dfs(node position)
+    color(position)
+    for each successor adjacent to node &quot;position&quot;
+    	if successor is colored, skip it
+        if next is the goal node, stop the search
+        else, dfs(successor)
+    end
+end
+</code></pre>
+
+<p>&ldquo;Coloring&rdquo; a node means marking it to show we&rsquo;ve gone there. This prevents a search from searching the same node more than once. This algorithm works &ndash; oh, it works. In fact, this method will always find you <em>a</em> path to the solution. Not that it&rsquo;s special or anything &ndash; the next two methods will always find the solution as well, only they won&rsquo;t take until Hell freezes over to find it. Take, for example, the poor sod below. He looks happy, but that&rsquo;s simply because he&rsquo;s an idiot. Looking for treasure in this vast cavern, this guy decided to systematically use dfs. He will eventually find the gold for sure. He may traverse the entire graph, though, when he could have simply looked to his left! This kind of blind search, not taking into account the location of the goal, is likely to take much more time than an intelligent search. But before improving on our guessing skills, let&rsquo;s examine another algorithm.</p>
+
+<p><img src="http://web.mit.edu/eranki/www/tutorials/search/images/dfs_0.png" alt="" /></p>
+
+<p><img src="http://web.mit.edu/eranki/www/tutorials/search/images/dfs_0a.png" alt="" /></p>
+
+<p><img src="http://web.mit.edu/eranki/www/tutorials/search/images/dfs_1.png" alt="" /></p>
+
+<p><img src="http://web.mit.edu/eranki/www/tutorials/search/images/dfs_2.png" alt="" /></p>
+
+<p><img src="http://web.mit.edu/eranki/www/tutorials/search/images/dfs_3.png" alt="" /></p>
+
+<p><img src="http://web.mit.edu/eranki/www/tutorials/search/images/dfs_4.png" alt="" /></p>
+
+<pre><code>...
+</code></pre>
+
+<h2 id="breadth-first-search-bfs">Breadth First Search (bfs)</h2>
+
+<p>Yep, you saw it coming. This algorithm is much nicer than dfs because not only are you guaranteed a path to the goal, but you&rsquo;re guaranteed the shortest path. An improvement, indeed. So in this method, we examine each of the nodes next to the node in question before we go deeper. This has the effect of forming concentric &ldquo;circles&rdquo; around the node with each ply of the search. Since we&rsquo;re slowly moving out from the center we&rsquo;re going to reach the goal as quickly as possible. This method is marginally harder to implement, but it&rsquo;s still easy. Take a gander at the pseudocode. Note that this is <em>not</em> recursive (since we have to look at all the options before going deeper).</p>
+
+<pre><code>// Simple bfs
+structure node
+    position pos
+    node *parent
+end
+
+function bfs(node start_position)
+    add start_position to the queue
+    while the queue is not empty
+        pop a node off the queue, call it &quot;item&quot;
+        color item on the graph // make sure we don't search it again
+        generate the 8 successors to item
+        set the parent of each successor to &quot;item&quot; // this is so we can backtrack our final solution
+        for each successor
+            if the successor is the goal node, end the search
+            else, push it to the back of the queue // So we can search this node
+        end
+    end
+
+    if we have a goal node, look at its ancestry to find the path (node-&gt;parent-&gt;parent-&gt;parent..., etc)
+    if not, the queue was empty and we didn't find a path :^\
+end
+</code></pre>
+
+<p>Take a look at the progression of a typical bfs down below. Note that the path found by the computer is south, south, northwest &ndash; the shortest path. It could well have been south, east, east, southwest, west, northwest by dfs.</p>
+
+<p><img src="http://web.mit.edu/eranki/www/tutorials/search/images/bfs_0.png" alt="" /></p>
+
+<p><img src="http://web.mit.edu/eranki/www/tutorials/search/images/bfs_1.png" alt="" /></p>
+
+<p><img src="http://web.mit.edu/eranki/www/tutorials/search/images/bfs_2.png" alt="" /></p>
+
+<p><img src="http://web.mit.edu/eranki/www/tutorials/search/images/bfs_3.png" alt="" /></p>
+
+<h2 id="dijkstra">Dijkstra</h2>
+
+<p>Using the Dijkstra algorithm, it is possible to determine the shortest distance (or the least effort / lowest cost) between a start node and any other node in a graph. The idea of the algorithm is to continiously calculate the shortest distance beginning from a starting point, and to exclude longer distances when making an update. It consists of the following steps:</p>
+
+<ol>
+<li>Initialization of all nodes with distance &ldquo;infinite&rdquo;; initialization of the starting node with 0</li>
+<li>Marking of the distance of the starting node as permanent, all other distances as temporarily.</li>
+<li>Setting of starting node as active.</li>
+<li>Calculation of the temporary distances of all neighbour nodes of the active node by summing up its distance with the weights of the edges.</li>
+<li>If such a calculated distance of a node is smaller as the current one, update the distance and set the current node as antecessor. This step is also called update and is Dijkstra&rsquo;s central idea.</li>
+<li>Setting of the node with the minimal temporary distance as active. Mark its distance as permanent.</li>
+<li>Repeating of steps 4 to 7 until there aren&rsquo;t any nodes left with a permanent distance, which neighbours still have temporary distances.</li>
+</ol>
+
+<pre><code>function Dijkstra(Graph, source):
+    for each vertex v in Graph:	// Initialization
+        dist[v] := infinity	// initial distance from source to vertex v is set to infinite
+        previous[v] := undefined	// Previous node in optimal path from source
+    dist[source] := 0	// Distance from source to source
+    Q := the set of all nodes in Graph	// all nodes in the graph are unoptimized - thus are in Q
+    while Q is not empty:	// main loop
+        u := node in Q with smallest dist[ ]
+        remove u from Q
+        for each neighbor v of u:	// where v has not yet been removed from Q.
+            alt := dist[u] + dist_between(u, v)
+            if alt &lt; dist[v]	// Relax (u,v)
+                dist[v] := alt
+                previous[v] := u
+    return previous[ ]
+</code></pre>
+
+<p><img src="http://interactivepython.org/courselib/static/pythonds/_images/dijkstraa.png" alt="" /></p>
+
+<p><img src="http://interactivepython.org/courselib/static/pythonds/_images/dijkstrab.png" alt="" /></p>
+
+<p><img src="http://interactivepython.org/courselib/static/pythonds/_images/dijkstrac.png" alt="" /></p>
+
+<p><img src="http://interactivepython.org/courselib/static/pythonds/_images/dijkstrad.png" alt="" /></p>
+
+<p><img src="http://interactivepython.org/courselib/static/pythonds/_images/dijkstrae.png" alt="" /></p>
+
+<p><img src="http://interactivepython.org/courselib/static/pythonds/_images/dijkstraf.png" alt="" /></p>
+
+<h2 id="a-a-star">A* (A-star)</h2>
+
+<p>Ah&hellip; Now to the heart of pathfinding, A<em>! You&rsquo;ve probably heard of this algorithm, because it&rsquo;s the leading pathfinding algorithm (plus, that&rsquo;s the name of this tutorial and I&rsquo;ll be a monkey&rsquo;s uncle if you weren&rsquo;t searching for an A</em> tutorial). This is the algorithm typically used in games like Warcraft III. A* is not bfs, nor is it dfs. In fact, it&rsquo;s a combination of Dijkstra&rsquo;s algorithm (which I haven&rsquo;t added to the this tutorial&hellip; yet) and best-first. Don&rsquo;t worry, though, the algorithm is very easy t o understand.</p>
+
+<p>The question arises while programming bfs and dfs: What if instead of blindly guessing the next node to traverse like in a simple dfs we pick the node which looks most promising? A* searches exactly like that: in a nutshell, we generate our possibilities and pick the one with the least projected cost. Once a possibility is generated and its cost is calculated, it stays in the list of possibilities until all the better nodes have been searched before it.</p>
+
+<p>First, let&rsquo;s define the cost function. The cost of a node, <code>f</code>, is given by the following partial differential equation (just kidding ;^)):</p>
+
+<pre><code>f = g + h
+</code></pre>
+
+<p>&ldquo;Clever&rdquo;, you say, &ldquo;but what are g and h?&rdquo;. Good question. <code>g</code> is the cost it took to get to the node, most likely the number of squares we passed by from the start. <code>h</code> is our guess as to how much it&rsquo;ll cost to reach the goal from that node. It&rsquo;s our heuristic (a heuristic, informally, is something which is not a definite series of steps to a solution (like an algorithm) but it helps us determine our answers is a rough way). A* will find you the best path in a very short time provided your h is perfect. In this case, we obviously can&rsquo;t determine h perfectly without doing some other pathfinding so we just use an approximation. Very rarely (if ever) is your h perfect. Take a look at the diagram below, a square grid such as one you&rsquo;d find in an RTS. The brown spots mark spaces that are blocked (by buildings, people, or natural barriers). Blue and green are the starting point and goal, respectively.</p>
+
+<p>In searching, say we generate the purple square. Its g, the maroon solid line, is the distance from the starting point. Since we moved 5 squares east (at a distance cost of 1) and one square northeast (at a cost of √2), our g is 5+&amp;rad ic;2, about 6.414. We don&rsquo;t have to recalculate g entirely each node. We can just add the distance to the parent node plus the parent&rsquo;s g. With maps like these, we can define h as the linear distance to the goal. I&rsquo;m not going to coun t those squares, so this is left as, er, an &ldquo;exercise to the reader&rdquo;. ;^)</p>
+
+<p>Tip: Do we really need to store the euclidean distance in g and h? Think about it. If we used the <em>square</em> of the distances, our comparisons between nodes will still be the same.</p>
+
+<p><img src="http://web.mit.edu/eranki/www/tutorials/search/images/grid.png" alt="" /></p>
+
+<p>We&rsquo;re going to have to modify our node structures to hold the new information. Our nodes are going to look something like this when we&rsquo;re done (same as before, but we snuck in an f, g, and h. Technically we don&rsquo;t need the &lsquo;f&rsquo; because it&rsquo;s simply g+h, but we want to save our poor processors the extra add operation):</p>
+
+<pre><code>struct node {
+    node *parent;
+    int x, y;
+    float f, g, h;
+}
+</code></pre>
+
+<p>Alright, so now that we can calculate the cost, let&rsquo;s actually do A*, shall we? First, we create lists open and closed. open is similar to bfs&rsquo;s queue, and closed is similar to the coloring technique we used before. However, we have to make a list because coloring doesn&rsquo;t store cost information. So we pop the element with the least f off the open list, and generate its successors. If one of its successors is the goal, we&rsquo;re golden and can stop the search. For each successor, calculate its cost and add it to the open list. At the end of this iteration, put the node we popped off the open list on the closed list. This is best illustrated in pseudocode:</p>
+
+<pre><code>// A*
+initialize the open list
+initialize the closed list
+put the starting node on the open list (you can leave its f at zero)
+
+while the open list is not empty
+    find the node with the least f on the open list, call it &quot;q&quot;
+    pop q off the open list
+    generate q's 8 successors and set their parents to q
+    for each successor
+    	if successor is the goal, stop the search
+        successor.g = q.g + distance between successor and q
+        successor.h = distance from goal to successor
+        successor.f = successor.g + successor.h
+
+        if a node with the same position as successor is in the OPEN list \
+            which has a lower f than successor, skip this successor
+        if a node with the same position as successor is in the CLOSED list \
+            which has a lower f than successor, skip this successor
+        otherwise, add the node to the open list
+    end
+    push q on the closed list
+end
+</code></pre>
+
+<p>It&rsquo;s important to note that we may search the same point a few times — but only if the new path is more promising than the last time we searched it!</p>
+    </article>
+
+    
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/post/2017-03-18-vertx-blueprint/" data-toggle="tooltip" data-placement="top" title="Vertx Micro Shop">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/post/2017-03-02-owncloud/" data-toggle="tooltip" data-placement="top" title="own cloud internal">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

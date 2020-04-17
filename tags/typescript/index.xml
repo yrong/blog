@@ -14,10 +14,10 @@
     
     <item>
       <title>Introduction to nestjs</title>
-      <link>https://yrong.github.io/blog/2018/06/09/intro-to-netjs/</link>
+      <link>https://yrong.github.io/blog/post/2018-06-09-nestjs/</link>
       <pubDate>Sat, 09 Jun 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://yrong.github.io/blog/2018/06/09/intro-to-netjs/</guid>
+      <guid>https://yrong.github.io/blog/post/2018-06-09-nestjs/</guid>
       <description>代码分析 入口main.ts import { NestFactory } from &#39;@nestjs/core&#39;; import { ApplicationModule } from &#39;./app.module&#39;; async function bootstrap() { const app = await NestFactory.create(ApplicationModule); await app.listen(3000); } bootstrap(); NestFactory构造 public async create( module: any, serverOrOptions?: any, options?: NestApplicationOptions, ): Promise&amp;lt; INestApplication &amp;amp; (INestExpressApplication | INestFastifyApplication) &amp;gt; { const</description>
     </item>
     

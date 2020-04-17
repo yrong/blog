@@ -14,10 +14,10 @@
     
     <item>
       <title>Machine Learning algorithm on Spark</title>
-      <link>https://yrong.github.io/blog/2016/10/17/machine-learning-on-spark/</link>
+      <link>https://yrong.github.io/blog/post/2016-10-17-machine-learning-on-spark/</link>
       <pubDate>Mon, 17 Oct 2016 15:00:00 +0000</pubDate>
       
-      <guid>https://yrong.github.io/blog/2016/10/17/machine-learning-on-spark/</guid>
+      <guid>https://yrong.github.io/blog/post/2016-10-17-machine-learning-on-spark/</guid>
       <description>&lt;p&gt;page rank and decision tree on spark&lt;/p&gt;</description>
     </item>
     
