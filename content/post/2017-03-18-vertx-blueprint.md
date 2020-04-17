@@ -2,12 +2,10 @@
 author: Ron
 catalog: true
 date: 2017-03-18T00:00:00Z
-header-img: img/post-bg-os-metro.jpg
 tags:
 - vertx
 - microservice
 title: Vertx Micro Shop
-url: /2017/03/18/vertx-blueprint/
 ---
 
 Vert.x Micro Shop 微服务应用
@@ -41,4 +39,4 @@ Vert.x Micro Shop 微服务应用
 
 ## 架构
 
-![Microservice Architecture]({{ site.baseurl }}/img/micro-service/entire-architecture.png)
+![Microservice Architecture](/blog/img/micro-service/entire-architecture.png)

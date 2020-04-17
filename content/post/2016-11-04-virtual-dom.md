@@ -2,12 +2,10 @@
 author: Ron
 catalog: true
 date: 2016-11-04T00:00:00Z
-header-img: img/post-bg-js-version.jpg
 tags:
 - react
 - javascript
 title: reactjs源码分析
-url: /2016/11/04/virtual-dom/
 ---
 
 reactjs virtual dom 源码分析
@@ -424,7 +422,7 @@ ReactCompositeComponent.prototype.mountComponent = function(rootID){
 ```
 实现并不难，ReactClass的render一定是返回一个虚拟节点(包括element和text)，这个时候我们使用instantiateReactComponent去得到实例，再使用mountComponent拿到结果作为当前自定义元素的结果。应该说本身自定义元素不负责具体的内容，他更多的是负责生命周期。具体的内容是由它的render方法返回的虚拟节点来负责渲染的。本质上也是递归的去渲染内容的过程。同时因为这种递归的特性，父组件的componentWillMount一定在某个子组件的componentWillMount之前调用，而父组件的componentDidMount肯定在子组件之后．上面实现了三种类型的元素，其实我们发现本质上没有太大的区别，都是有自己对应component类来处理自己的渲染过程。大概的关系是下面这样。
 
-![]({{ site.baseurl }}/img/TB1NPA_JpXXXXcVXXXXXXXXXXXX-1024-768.jpg)
+![](/blog/img/TB1NPA_JpXXXXcVXXXXXXXXXXXX-1024-768.jpg)
 
 ## 更新机制
 
@@ -432,7 +430,7 @@ ReactCompositeComponent.prototype.mountComponent = function(rootID){
 
 在React中，树的算法其实非常简单，那就是两棵树只会对同一层次的节点进行比较。如下图所示：
 
-![]({{ site.baseurl }}/img/0909000.png)
+![](/blog/img/0909000.png)
 
 React只会对相同颜色方框内的DOM节点进行比较，即同一个父节点下的所有子节点。当发现节点已经不存在，则该节点及其子节点会被完全删除掉，不会用于进一步的比较。这样只需要对树进行一次遍历，便能完成整个DOM树的比较。
 
@@ -465,7 +463,7 @@ renderB: <span />
 
 例如，考虑有下面的DOM结构转换：
 
-![]({{ site.baseurl }}/img/0909001.png)
+![](/blog/img/0909001.png)
 
 A节点被整个移动到D节点下，直观的考虑DOM Diff操作应该是
 
@@ -906,7 +904,7 @@ REMOVE_NODE |老的component不在新的集合里的，我们需要删除
 
 所以我们找出了这三种类型的差异，组装成具体的差异对象，然后加到了差异队列里面。比如我们看下面这个例子，假设下面这些是某个父元素的子元素集合，上面到下面代表了变动流程：
 
-![]({{ site.baseurl }}/img/TB1oUcQJpXXXXawXVXXXXXXXXXX-1024-768.jpg)
+![](/blog/img/TB1oUcQJpXXXXawXVXXXXXXXXXX-1024-768.jpg)
 
 数字我们可以理解为给element的key。正方形代表element。圆形代表了component。当然也是实际上的dom节点的位置。从上到下，我们的4 2 1里 2 ，1可以复用之前的component,让他们通知自己的子节点更新后，再告诉2和1，他们在新的集合里需要移动的位置（在我们这里就是组装差异对象加到队列）。3需要删除，4需要新增。好了，整个的diff就完成了，这个时候当递归完成，我们就需要开始做patch的动作了，把这些差异对象实打实的反映到具体的dom节点上。我们看下_patch的实现：
 
@@ -1016,11 +1014,11 @@ ReactDOMComponent.prototype._diff = function(diffQueue, nextChildrenElements){
 
 如下图，老集合中包含节点：A、B、C、D，更新后的新集合中包含节点：B、A、D、C，此时新老集合进行 diff 差异化对比，发现 B != A，则创建并插入 B 至新集合，删除老集合 A；以此类推，创建并插入 A、D 和 C，删除 B、C 和 D。
 
-![]({{ site.baseurl }}/img/2111537988-56fe2b9eaeb62_articlex.jpeg)
+![](/blog/img/2111537988-56fe2b9eaeb62_articlex.jpeg)
 
 React 发现这类操作繁琐冗余，因为这些都是相同的节点，但由于位置发生变化，导致需要进行繁杂低效的删除、创建操作，其实只要对这些节点进行位置移动即可。针对这一现象，React 提出优化策略：允许开发者对同一层级的同组子节点，添加唯一key进行区分，虽然只是小小的改动，性能上却发生了翻天覆地的变化！新老集合所包含的节点，如下图所示，新老集合进行diff差异化对比，通过key发现新老集合中的节点都是相同的节点，因此无需进行节点删除和创建，只需要将老集合中节点的位置进行移动，更新为新集合中节点的位置，此时 React 给出的 diff 结果为：B、D 不做任何操作，A、C 进行移动操作，即可。
 
-![]({{ site.baseurl }}/img/1450771059-56fe2ba43c916_articlex.jpeg)
+![](/blog/img/1450771059-56fe2ba43c916_articlex.jpeg)
 
 以上图为例，可以更为清晰直观的描述 diff 的差异对比过程：
 
@@ -1045,7 +1043,7 @@ React 发现这类操作繁琐冗余，因为这些都是相同的节点，但�
 - 从新集合中取得 A，判断老集合中存在相同节点 A，由于 A 在老集合中的位置A._mountIndex = 0，此时 lastIndex = 2，因此不对 A 进行移动操作；更新 lastIndex ＝ 2，并将 A 的位置更新为新集合中的位置，nextIndex++ 进入下一个节点的判断。
 - 当完成新集合中所有节点 diff 时，最后还需要对老集合进行循环遍历，判断是否存在新集合中没有但老集合中仍存在的节点，发现存在这样的节点 D，因此删除节点 D，到此 diff 全部完成。
 
-![]({{ site.baseurl }}/img/703547875-56fe2bb3d3157_articlex.jpeg)
+![](/blog/img/703547875-56fe2bb3d3157_articlex.jpeg)
 
 可以看到我们多加了个lastIndex，这个代表最后一次访问的老集合节点的最大的位置。而我们加了个判断，只有_mountIndex小于这个lastIndex的才会需要加入差异队列。有了这个判断上面的例子2就不需要move。而程序也可以好好的运行，实际上大部分都是2这种情况。这是一种顺序优化，lastIndex一直在更新，代表了当前访问的最右的老的集合的元素。我们假设上一个元素是A,添加后更新了lastIndex。如果我们这时候来个新元素B，比lastIndex还大说明当前元素在老的集合里面就比上一个A靠后。所以这个元素就算不加入差异队列，也不会影响到其他人，不会影响到后面的path插入节点。因为我们从patch里面知道，新的集合都是按顺序从头开始插入元素的，只有当新元素比lastIndex小时才需要变更。其实只要仔细推敲下上面那个例子，就可以理解这种优化手段了。这样整个的更新机制就完成了。
 

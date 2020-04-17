@@ -2,11 +2,9 @@
 author: Ron
 catalog: true
 date: 2017-05-01T00:00:00Z
-header-img: img/post-bg-os-kuaidi.jpg
 tags:
 - wordpress
 title: wordpress code analysis
-url: /2017/05/01/wordpress/
 ---
 
 wordpress code analysis

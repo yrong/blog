@@ -2,11 +2,9 @@
 author: Ron
 catalog: true
 date: 2016-12-26T00:00:00Z
-header-img: images/43512f4cd64854790e900211d3f1e927_r.png
 tags:
 - python
 title: meta program in python
-url: /2016/12/26/meta-program/
 ---
 
 meta program in python

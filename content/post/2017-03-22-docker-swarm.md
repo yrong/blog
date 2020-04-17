@@ -2,11 +2,9 @@
 author: Ron
 catalog: true
 date: 2017-03-22T00:00:00Z
-header-img: img/post-bg-os-metro.jpg
 tags:
 - docker
 title: Docker Swarm Proxy
-url: /2017/03/22/docker-swarm/
 ---
 
 Integrating Proxy With Docker Swarm
@@ -93,7 +91,7 @@ docker service create --name go-demo \
   vfarcic/go-demo
 ```
 
-![Docker Swarm cluster with three nodes, two networks and a few containers]({{ site.baseurl }}/img/swarm/swarm-nodes-proxy-sdn.png)
+![Docker Swarm cluster with three nodes, two networks and a few containers](/blog/img/swarm/swarm-nodes-proxy-sdn.png)
 
 Now both containers are running somewhere inside the cluster and are able to communicate with each other through the *go-demo* network. Let's bring the proxy into the mix. We'll use [HAProxy](http://www.haproxy.org/). The principles we'll explore are the same no matter which one will be your choice.
 
@@ -126,7 +124,7 @@ Through the proxy we just run we can observe one of the cool features of the net
 
 The last argument is the environment variable *MODE* that tells the proxy that containers will be deployed to a Swarm cluster. Please consult the project [README](https://github.com/vfarcic/docker-flow-proxy) for other combinations.
 
-![Docker Swarm cluster with the proxy service]({{ site.baseurl }}/img/swarm/swarm-nodes-proxy.png)
+![Docker Swarm cluster with the proxy service](/blog/img/swarm/swarm-nodes-proxy.png)
 
 > Please note that the proxy, even though it is running inside one of the nodes, is placed outside to better illustrate the logical separation.
 
@@ -234,7 +232,7 @@ docker service scale go-demo=5
 
 Within a few moments, five instances of the *go-demo* service will be running.
 
-![Docker Swarm cluster scaled go-demo service and the proxy instance]({{ site.baseurl }}/img/swarm/swarm-nodes-proxy-scaled.png)
+![Docker Swarm cluster scaled go-demo service and the proxy instance](/blog/img/swarm/swarm-nodes-proxy-scaled.png)
 
 What should we do to make the proxy balance requests across all instances? The answer is nothing. No action is necessary on our part.
 

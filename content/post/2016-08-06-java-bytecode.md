@@ -2,11 +2,9 @@
 author: Ron
 catalog: true
 date: 2016-08-06T15:00:00Z
-header-img: img/post-bg-os-metro.jpg
 tags:
 - java
 title: Java字节码解析
-url: /2016/08/06/java-bytecode/
 ---
 
 

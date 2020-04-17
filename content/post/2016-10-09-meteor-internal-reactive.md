@@ -2,12 +2,10 @@
 author: Ron
 catalog: false
 date: 2016-10-09T18:00:00Z
-header-img: img/post-bg-js-version.jpg
 tags:
 - meteor
 - javascript
 title: meteor的响应式数据源和响应式执行环境
-url: /2016/10/09/meteor-internal-reactive/
 ---
 
 meteor的响应式数据源实现原理

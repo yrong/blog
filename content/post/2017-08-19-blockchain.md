@@ -6,7 +6,6 @@ tags:
 - blockchain
 - javascript
 title: Build Your Own Blockchains in JavaScript from Zero
-url: /2017/08/19/blockchain/
 ---
 
 

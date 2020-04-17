@@ -2,11 +2,9 @@
 author: Ron
 catalog: true
 date: 2016-10-19T15:00:00Z
-header-img: img/post-bg-os-metro.jpg
 tags:
 - neo4j
 title: 用图数据库解决关系型数据库存在的问题
-url: /2016/10/19/neo4j-replace-rdbms/
 ---
 
 用图数据库解决关系型数据库存在的问题
@@ -16,7 +14,7 @@ url: /2016/10/19/neo4j-replace-rdbms/
 
 ## Rdbms
 
-![]({{ site.baseurl }}/img/rdbms-er-order.png)
+![](/blog/img/rdbms-er-order.png)
 
 `which customers buying this product also bought that product`
 
@@ -32,7 +30,7 @@ url: /2016/10/19/neo4j-replace-rdbms/
 
 ## Rdbms
 
-![]({{ site.baseurl }}/img/rdbms-er-friend.png)
+![](/blog/img/rdbms-er-friend.png)
 
 > Alice’s friends-of-friends
 
@@ -56,7 +54,7 @@ queries  that  extend  to  four,  five,  or  six  degrees  of  friendship deteri
 
 ## Rdbms
 
-![]({{ site.baseurl }}/img/id4AloN.png)
+![](/blog/img/id4AloN.png)
 
 quick script to init schema and load data
 
@@ -221,7 +219,7 @@ RETURN u.name
 
 ## The Model
 
-![image of movie model]({{ site.baseurl }}/img/model.png)
+![image of movie model](/blog/img/model.png)
 
 ### Nodes
 

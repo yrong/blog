@@ -2,11 +2,9 @@
 author: Ron
 catalog: false
 date: 2016-10-03T15:00:00Z
-header-img: img/post-bg-kuaidi.jpg
 tags:
 - elasticsearch
 title: ElasticSearch的存储结构
-url: /2016/10/03/elasticsearch-storelayer/
 ---
 
 ElasticSearch的存储结构

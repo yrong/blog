@@ -5,7 +5,6 @@ date: 2017-05-12T00:00:00Z
 tags:
 - golang
 title: websocketd code analysis
-url: /2017/05/12/websocketd/
 ---
 
 websocketd is a small command-line tool that will wrap an existing command-line interface program, and allow it to be accessed via a WebSocket.

@@ -2,11 +2,9 @@
 author: Ron
 catalog: true
 date: 2016-11-20T00:00:00Z
-header-img: img/post-bg-js-version.jpg
 tags:
 - javascript
 title: super tiny vue
-url: /2016/11/20/super-tiny-vue/
 ---
 
 super tiny vue implementation

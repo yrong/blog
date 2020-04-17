@@ -2,12 +2,10 @@
 authors: Ron
 catalog: true
 date: 2017-02-10T00:00:00Z
-header-img: img/post-bg-kuaidi.jpg
 tags:
 - serverless
 - microservice
 title: Serverless AWS Lambda Examples
-url: /2017/02/10/serverless/
 ---
 
 serverless aws lamba examples

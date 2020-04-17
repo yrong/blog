@@ -2,12 +2,10 @@
 author: Ron
 catalog: true
 date: 2016-10-12T18:00:00Z
-header-img: images/learn-to-d3/banner.png
 tags:
 - d3
 - javascript
 title: D3.js数据可视化
-url: /2016/10/12/d3-data-visualization/
 ---
 
 D3.js数据可视化
@@ -484,7 +482,7 @@ d3.select('.time')
 
 
 
-![]({{ site.baseurl }}/images/learn-to-d3/tree-02.png)
+![](/blog/images/learn-to-d3/tree-02.png)
 
 ```
 <!DOCTYPE html>
@@ -688,7 +686,7 @@ treenode和links的初始化,参见[树布局](https://github.com/d3/d3/wiki/%E6
 
 定义节点深度(level)和水平(x,y坐标系已互换)位置的关系.
 
-![]({{ site.baseurl }}/images/learn-to-d3/tree-05.png)
+![](/blog/images/learn-to-d3/tree-05.png)
 
 
 ```

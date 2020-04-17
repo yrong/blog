@@ -2,11 +2,9 @@
 author: Ron
 catalog: true
 date: 2016-11-15T00:00:00Z
-header-img: img/post-bg-js-version.jpg
 tags:
 - javascript
 title: mocha异步测试源码分析
-url: /2016/11/15/mocha-async-support/
 ---
 
 mocha异步测试源码分析
@@ -56,7 +54,7 @@ describe('User', function() {
 
 ### 数据结构
 
-![]({{ site.baseurl }}/img/mocha-data-structure.png)
+![](/blog/img/mocha-data-structure.png)
 
 ### 源码分析部分
 

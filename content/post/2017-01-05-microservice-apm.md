@@ -2,12 +2,10 @@
 author: Ron
 catalog: true
 date: 2017-01-05T00:00:00Z
-header-img: img/post-bg-os-metro.jpg
 tags:
 - apm
 - microservice
 title: 分布式环境系统监控
-url: /2017/01/05/microservice-apm/
 ---
 
 分布式环境系统监控Zipkin&Pinpoint

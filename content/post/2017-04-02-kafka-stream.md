@@ -2,11 +2,9 @@
 author: Ron
 catalog: true
 date: 2017-04-02T00:00:00Z
-header-img: img/post-bg-os-metro.jpg
 tags:
 - kafka
 title: kafka-streams
-url: /2017/04/02/kafka-stream/
 ---
 
 kafka流的一个实例

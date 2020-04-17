@@ -2,11 +2,9 @@
 author: Ron
 catalog: true
 date: 2017-01-10T00:00:00Z
-header-img: img/post-bg-kuaidi.jpg
 tags:
 - game-server
 title: leaf&&gonet2&&pomelo
-url: /2017/01/10/game-server/
 ---
 
 game server frameworks like leaf&&gonet2&&pomelo
@@ -597,7 +595,7 @@ func init() {
 
 ## agent(网关）
 
-![]({{ site.baseurl }}/img/20150813104731049)
+![](/blog/img/20150813104731049)
 
 
 ### 特性

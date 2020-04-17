@@ -6,7 +6,6 @@ tags:
 - golang
 - prometheus
 title: prometheus v2.0 storage
-url: /2017/07/08/prometheus/
 ---
 
 

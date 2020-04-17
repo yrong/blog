@@ -2,11 +2,9 @@
 author: Ron
 catalog: true
 date: 2016-11-11T15:00:00Z
-header-img: img/post-bg-os-metro.jpg
 tags:
 - neo4j
 title: Neo4j Cypher query
-url: /2016/11/11/neo4j-cypher/
 ---
 
 Neo4j Cypher Query

@@ -2,11 +2,9 @@
 author: Ron
 catalog: true
 date: 2017-04-09T00:00:00Z
-header-img: img/post-bg-kuaidi.jpg
 tags:
 - crawler
 title: bilibili crawler
-url: /2017/04/09/bilibili-api/
 ---
 
 针对B站视频的爬虫实现

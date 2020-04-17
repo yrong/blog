@@ -2,11 +2,9 @@
 author: Ron
 catalog: true
 date: 2016-11-17T00:00:00Z
-header-img: img/post-bg-js-version.jpg
 tags:
 - javascript
 title: es6 top10 features
-url: /2016/11/17/es6-top10-features/
 ---
 
 es6 top10 features

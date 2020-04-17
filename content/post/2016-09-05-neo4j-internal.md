@@ -2,11 +2,9 @@
 author: Ron
 catalog: false
 date: 2016-09-05T15:00:00Z
-header-img: img/post-bg-os-metro.jpg
 tags:
 - neo4j
 title: Neo4j Internal
-url: /2016/09/05/neo4j-internal/
 ---
 
 Neo4j中数据是如何存储的

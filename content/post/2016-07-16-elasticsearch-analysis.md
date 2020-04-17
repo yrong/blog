@@ -2,11 +2,9 @@
 author: Ron
 catalog: false
 date: 2016-07-16T18:00:00Z
-header-img: img/post-bg-universe.jpg
 tags:
 - elasticsearch
 title: ElasticSearch源码解析之文档索引
-url: /2016/07/16/elasticsearch-analysis/
 ---
 
 

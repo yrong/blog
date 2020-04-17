@@ -2,11 +2,9 @@
 author: Ron
 catalog: false
 date: 2016-07-21T15:00:00Z
-header-img: img/post-bg-os-metro.jpg
 tags:
 - nginx
 title: nginx模块初始化
-url: /2016/07/21/nginx-under-the-hood/
 ---
 
 nginx模块初始化

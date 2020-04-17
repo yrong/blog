@@ -2,11 +2,9 @@
 author: Ron
 catalog: false
 date: 2016-10-17T15:00:00Z
-header-img: img/post-bg-os-metro.jpg
 tags:
 - spark
 title: Machine Learning algorithm on Spark
-url: /2016/10/17/machine-learning-on-spark/
 ---
 
 page rank and decision tree on spark
@@ -27,7 +25,7 @@ The last two steps repeat for several iterations, during which the algorithm wil
 
 ### 实例 ###
 
-![]({{ site.baseurl }}/img/Screen-Shot-1.png)
+![](/blog/img/Screen-Shot-1.png)
 
 Above diagram shows there are 4 web pages with theirs outboundlinks.
 
@@ -46,7 +44,7 @@ Solution:
 val links = sc.parallelize(List(("MapR",List("Baidu","Blogger")),("Baidu", List("MapR")),("Blogger",List("Google","Baidu")),("Google", List("MapR")))).partitionBy(new HashPartitioner(4)).persist()
 var ranks = links.mapValues(v => 1.0)
 ```
-![]({{ site.baseurl }}/img/Screen Shot 2016-03-02 at 1.28.40 PM.png)
+![](/blog/img/Screen Shot 2016-03-02 at 1.28.40 PM.png)
 
 > On each iteration, have page p send a contribution of rank(p)/numNeighbors(p) to its neighbors (the pages it has links to).
 
@@ -54,7 +52,7 @@ var ranks = links.mapValues(v => 1.0)
 val contributions = links.join(ranks).flatMap { case (url, (links, rank)) => links.map(dest => (dest, rank / links.size)) }
 ```
 
-![]({{ site.baseurl }}/img/Screen Shot 2016-03-02 at 1.33.56 PM.png)
+![](/blog/img/Screen Shot 2016-03-02 at 1.33.56 PM.png)
 
 See above contributions in red, and it matches the calculations using scala:
 
@@ -68,7 +66,7 @@ res26: Array[(String, Double)] = Array((MapR,1.0), (Baidu,0.5), (Blogger,0.5), (
 ```
 val ranks = contributions.reduceByKey((x, y) => x + y).mapValues(v => 0.15 + 0.85*v)
 ```
-![]({{ site.baseurl }}/img/Screen Shot 2016-03-02 at 1.41.26 PM.png)
+![](/blog/img/Screen Shot 2016-03-02 at 1.41.26 PM.png)
 
 After 1st iteration, current pagerank value for each page is:
 
@@ -125,7 +123,7 @@ $$ Gains(U,T_2)=Ent(U)-Ent(U|T_2)=0.520 $$
 ### Spark实例 ### 
 
 
-[测试数据]({{ site.baseurl }}/data/rita2014jan.csv)
+[测试数据](/blog/data/rita2014jan.csv)
 
 
 
@@ -298,4 +296,4 @@ fnRatio: Double = 0.15875875875875875
 
 Model.toDebugString prints out the decision tree, which asks the following questions to determine if the flight was delayed or not:
 
-![]({{ site.baseurl }}/img/spark-machine-tutorial-blog-img13.png)
+![](/blog/img/spark-machine-tutorial-blog-img13.png)

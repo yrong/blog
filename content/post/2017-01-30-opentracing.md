@@ -2,12 +2,10 @@
 authors: Ron
 catalog: true
 date: 2017-01-30T00:00:00Z
-header-img: img/post-bg-os-metro.jpg
 tags:
 - apm
 - microservice
 title: OpenTracing use cases
-url: /2017/01/30/opentracing/
 ---
 
 openTracing use cases

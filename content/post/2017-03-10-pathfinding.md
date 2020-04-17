@@ -2,11 +2,9 @@
 author: Ron
 catalog: true
 date: 2017-03-10T00:00:00Z
-header-img: img/post-bg-kuaidi.jpg
 tags:
 - algorithom
 title: path finding algorithms
-url: /2017/03/10/pathfinding/
 ---
 
 Path finding algorithom

@@ -2,11 +2,9 @@
 author: Ron
 catalog: false
 date: 2016-10-13T18:00:00Z
-header-img: img/post-bg-kuaidi.jpg
 tags:
 - elasticsearch
 title: ElasticSearch Query DSL
-url: /2016/10/13/elasticsearch-query-dsl/
 ---
 
 ElasticSearch Query DSL Examples

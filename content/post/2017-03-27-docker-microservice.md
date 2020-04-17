@@ -2,12 +2,10 @@
 author: Ron
 catalog: true
 date: 2017-03-27T00:00:00Z
-header-img: img/post-bg-kuaidi.jpg
 tags:
 - docker
 - microservice
 title: Build a NodeJS microservice and deploy it to Docker
-url: /2017/03/27/docker-microservice/
 ---
 
 Build a NodeJS microservice and deploy it to Docker
@@ -24,7 +22,7 @@ We’ll use a simple NodeJS service with a MongoDB for our backend.
 
 ### Architecture
 
-![Microservice Architecture]({{ site.baseurl }}/img/micro-service/1-XdnoQCqmM_faIljmW5nxFA.png)
+![Microservice Architecture](/blog/img/micro-service/1-XdnoQCqmM_faIljmW5nxFA.png)
 
 ### Microservices
 
@@ -41,7 +39,7 @@ We’ll use a simple NodeJS service with a MongoDB for our backend.
 
 The API Gateway encapsulates the internal system architecture and provides an API that is tailored to each client. It might have other responsibilities such as authentication, monitoring, load balancing, caching, request shaping and management, and static response handling.
 
-![Microservice Api Gateway]({{ site.baseurl }}/img/micro-service/1-Mjx_b0EII3RrPvn3Bw6K1w.png)
+![Microservice Api Gateway](/blog/img/micro-service/1-Mjx_b0EII3RrPvn3Bw6K1w.png)
 
 
 ### Blog posts

@@ -2,11 +2,9 @@
 author: Ron
 catalog: false
 date: 2016-10-11T18:00:00Z
-header-img: img/post-bg-os-metro.jpg
 tags:
 - vertx
 title: vertx源码分析
-url: /2016/10/11/vertx-internal/
 ---
 
 vertx源码分析
