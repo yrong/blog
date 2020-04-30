@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Nest介绍 - yrong blog</title>
+  <meta property="og:title" content="Nest介绍 - yrong blog" />
+  <meta name="twitter:title" content="Nest介绍 - yrong blog" />
+  <meta name="description" content="Nest 基础功能 —— Module Nest 主要特性中的模块化开发，就源自与此。Nest 使用 Module 来组织应用程序结构，每个应用程序至少有一个模块，即根模块。根模块是 Nest 开始">
+  <meta property="og:description" content="Nest 基础功能 —— Module Nest 主要特性中的模块化开发，就源自与此。Nest 使用 Module 来组织应用程序结构，每个应用程序至少有一个模块，即根模块。根模块是 Nest 开始">
+  <meta name="twitter:description" content="Nest 基础功能 —— Module Nest 主要特性中的模块化开发，就源自与此。Nest 使用 Module 来组织应用程序结构，每个应用程序至少有一个模块，即根模块。根模块是 Nest 开始">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2019-01-04-nest/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Nest介绍</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>January 4, 2019</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/typescript/">
+            <i class="fas fa-tag"></i>
+            Typescript
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li><a href="#nest-基础功能-module">Nest 基础功能 —— Module</a>
+<ul>
+<li><a href="#module-有什么实际作用">Module 有什么实际作用？</a></li>
+<li><a href="#关于-module-注解">关于 @Module() 注解</a></li>
+<li><a href="#理解-module-是如何管理依赖注入">理解 Module 是如何管理依赖注入</a>
+<ul>
+<li><a href="#模块的重导出">模块的重导出</a></li>
+<li><a href="#能否在一个被定义为模块的类中使用依赖注入">能否在一个被定义为模块的类中使用依赖注入？</a></li>
+</ul></li>
+<li><a href="#全局模块">全局模块</a></li>
+<li><a href="#动态模块">动态模块</a></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      
+
+<h1 id="nest-基础功能-module">Nest 基础功能 —— Module</h1>
+
+<p>Nest 主要特性中的模块化开发，就源自与此。Nest 使用 <code>Module</code> 来组织应用程序结构，每个应用程序至少有一个模块，即根模块。根模块是 Nest 开始排列应用程序树的地方。事实上，根模块可能是应用程序中唯一的模块，尤其是当应用程序很小时。然而，对于大型应用来说，这是没有意义的。在大多数情况下，您将有很多模块，每个模块都有一组与其密切相关的功能。</p>
+
+<h2 id="module-有什么实际作用">Module 有什么实际作用？</h2>
+
+<p>在上两节（<code>Controller</code> 和 <code>Provider</code>）中，我们学到了如何在 Nest 中定义并编写 <strong>控制器</strong> 和 <strong>提供者</strong>，本节，我们使用 <code>Module</code> 来组织这些 <code>Controller</code> 和 <code>Provider</code>，为他们在 <strong>同模块范围内</strong> 建立依赖的“桥梁”。</p>
+
+<p>现在，让我们编写一个简单的模块，用来组织 <code>CatsController</code> 和 <code>CatsService</code>：</p>
+
+<pre><code class="language-typescript">import { Module } from '@nestjs/common';
+import { CatsController } from './cats.controller';
+import { CatsService } from './cats.service';
+
+@Module({
+  controllers: [CatsController],
+  providers: [CatsService],
+})
+export class CatsModule {}
+</code></pre>
+
+<p>只有这样，Nest 才可以在 <code>CatsController</code> 中通过其构造函数，依赖注入 <code>CatsService</code>。</p>
+
+<h2 id="关于-module-注解">关于 @Module() 注解</h2>
+
+<p><code>@Module()</code> 注解用来将一个类定义为 Nest 应用程序中的一个模块，在 <code>Controller</code> 中，我们了解到 Nest 中的几乎所有注解都是一个函数，<code>@Module()</code> 也不例外，他的参数可以传入一个对象，用来描述这个模块拥有哪些 <strong>控制器</strong> 和 <strong>提供者</strong>，并且告诉 Nest <code>IOC</code> 容器这个模块导入(<code>imports</code>)了哪些其他模块、导出(<code>exports</code>)了他自己的哪些提供者。</p>
+
+<p>模块定义的完整示例：</p>
+
+<pre><code class="language-typescript">import { Module } from '@nestjs/common';
+import { CatsController } from './cats.controller';
+import { CatsService } from './cats.service';
+
+@Module({
+    imports: [],
+    controllers: [CatsController],
+    providers: [CatsService],
+    exports: [CatsService]
+})
+export class CatsModule { }
+</code></pre>
+
+<h2 id="理解-module-是如何管理依赖注入">理解 Module 是如何管理依赖注入</h2>
+
+<p>在 Nest 中，一个模块对依赖注入有着至关重要的作用，在上述例子中，如果我们将 <code>providers</code> 数组中的 <code>CatsService</code> 去掉，在启动 Nest 程序时，他会告诉你类似如下的错误：</p>
+
+<pre><code class="language-none">[ExceptionHandler] Nest can't resolve dependencies of the CatsController (?). Please verify whether [0] argument is available in the current context.
+</code></pre>
+
+<p>这个错误的意思是说，Nest 不能处理 <code>CatsController</code> 中的依赖关系，即他无法自动的将 <code>CatsController</code> 构造器中的 <strong>第1个</strong> 依赖关系注入到 IOC 容器中。而且他还指明，请检查在当前上下文中，<code>CatsController</code> 构造器的 <strong>第1个</strong> 参数是否可见。</p>
+
+<p>这里的当前上下文指的就是 <code>CatsModule</code>，因为 <code>CatsController</code> 要依赖 <code>CatsService</code> 来完成其功能，但是在当前上下文又找不到 <code>CatsService</code> 这个实例(对象)，所以 Nest 在启动的时候才会出现这种错误。</p>
+
+<p>通俗的讲，如果要在 <code>controllers</code> 中的类使用当前模块的其他提供者(<code>Provider</code>)，那么就必须将其增加到当前模块的 <code>providers</code> 中去。</p>
+
+<p>上述只是说明了在一个模块中，如何让 <code>Module</code> 去管理 <code>controllers</code> 和 <code>providers</code> 的依赖关系。但是，如果当前模块的 <code>Controller</code> 和 <code>Provider</code> 需要注入其他模块中的 <code>Provider</code> 呢？如果当前模块又需要给其他模块提供他的 <code>Provider</code> 呢？</p>
+
+<p>这里就要用到 <code>@Module()</code> 注解中的 <code>imports</code> 和 <code>exports</code> 了，<code>imports</code> 告诉当前模块的 <code>Controller</code> 和 <code>Provider</code> 注入的非当前模块的 <code>Provider</code> 来自于哪个模块，而 <code>exports</code> 告诉当前模块要将他的哪些 <code>Provider</code> 提供给其他模块。</p>
+
+<blockquote>
+<p>注意：如果要在当前模块使用其他模块的提供者，那么就必须在被导入的其他模块中，将该提供者放入 <code>exports</code> 数组中去。</p>
+</blockquote>
+
+<p>让我们通过一个简单的例子来理解这个看似复杂的依赖关系：</p>
+
+<pre><code class="language-typescript">// 以下仅提供简化后的代码用于理解模块中的依赖注入
+
+@Module({
+    imports: [FishModule],
+    controllers: [CatsController],
+    providers: [CatsService],
+    exports: []
+})
+export class CatsModule { }
+
+@Module({
+    imports: [],
+    controllers: [FishController],
+    providers: [FishService],
+    exports: [FishService]
+})
+export class FishModule { }
+</code></pre>
+
+<p>在上述例子中，<code>CatsModule</code> 中的 <code>CatsService</code> 要使用 <code>FishModule</code> 中的 <code>FinshService</code>，只需要在 <code>CatsModule</code> 中导入 <code>FishModule</code> 并且在 <code>FishModule</code> 导出 <code>FishService</code> 即可。</p>
+
+<blockquote>
+<p>注意：在当前模块 imports 中导入的模块，相当于将被导入模块的导出提供者注入到当前模块范围内的 IOC 容器中，以便当前模块的控制器和提供者在其构造器中依赖注入他。</p>
+
+<p>在 Nest 中，默认情况下，模块是单例的，因此我们可以在不同模块间共用相同的实例。</p>
+</blockquote>
+
+<h3 id="模块的重导出">模块的重导出</h3>
+
+<p>什么是模块的重导出？如果要将当前模块导入的模块分享给其他模块，那只需要将当前模块导入的模块放到其 <code>exports</code> 数组中即可。这种形式的导出，就叫模块的重导出。示例：</p>
+
+<pre><code class="language-typescript">@Module({
+  imports: [CommonModule],
+  exports: [CommonModule]
+})
+export class CoreModule {}
+</code></pre>
+
+<h3 id="能否在一个被定义为模块的类中使用依赖注入">能否在一个被定义为模块的类中使用依赖注入？</h3>
+
+<p>答案是肯定的，很多情况下，比如出于配置的目的，我们需要在模块类中注入某些提供者并且使用他们的公共方法时，Nest 是允许在模块类中注入提供者的。这些提供者必须来自于当前模块范围内，也就是说，可以使用 <code>@Module()</code> 注解中 <code>providers</code> 所提供的任何提供者，也可以使用 <code>imports</code> 中导入的模块所导出的提供者。</p>
+
+<p>但是！在一个模块类中，是不能导入一个出现循环依赖的提供者的。</p>
+
+<blockquote>
+<p>Tips: 本节暂不进行循环依赖的讲解</p>
+</blockquote>
+
+<h2 id="全局模块">全局模块</h2>
+
+<p>如果你必须在很多地方都导入相同的模块，这会出现大量的冗余。但是 Nest 将提供者封装在模块范围内，如果不导入模块，就无法在其他地方使用他们导出的提供者。但是有时候，你可能只是想提供一组随时可用的提供者，例如：<code>helpers</code>、<code>database connection</code> 等等。针对这种特殊情况，Nest 提供了一个很强大的功能 —— <strong>全局模块</strong>，全局模块一旦被导入到根模块，在其他所有模块中即可轻松的使用这个全局模块导出的提供者，而且也不用在其他模块导入这个全局模块。</p>
+
+<p>将一个模块定义为全局模块，只需要在类上额外增加一个注解 <code>@Global()</code> 即可，示例：</p>
+
+<pre><code class="language-typescript">import { Module, Global } from '@nestjs/common';
+
+@Global()
+@Module({
+  imports: [],
+  controllers: [],
+  providers: [],
+  exports: []
+})
+export class CatsModule {}
+</code></pre>
+
+<blockquote>
+<p>注意：Nest 中只能定义一个全局模块！</p>
+
+<p>将所有东西都放在全局模块内是一个不好的决定，全局模块只是用于减少必要的文件数量，<code>imports</code> 仍然是使模块 API 透明的最佳方式。</p>
+</blockquote>
+
+<h2 id="动态模块">动态模块</h2>
+
+<p>Nest 模块系统具有一个称为动态模块的特性。他能够让我们创建可定制的模块，当导入模块并向其传入某些选项参数，这个模块根据这些选项参数来动态的创建不同特性的模块，这种通过导入时传入参数并动态创建模块的特性称为 <strong>动态模块</strong>。</p>
+
+<p>下面以一个数据库模块来演示动态模块的使用：</p>
+
+<pre><code class="language-typescript">import { Module, DynamicModule } from '@nestjs/common';
+import { createDatabaseProviders } from './database.providers';
+import { Connection } from './connection.provider';
+
+@Module({
+  providers: [Connection],
+})
+export class DatabaseModule {
+  static forRoot(entities = [], options?): DynamicModule {
+    const providers = createDatabaseProviders(options, entities);
+    return {
+      module: DatabaseModule,
+      providers: providers,
+      exports: providers,
+    };
+  }
+}
+</code></pre>
+
+<p>默认情况下，该模块定义了 <code>Connection</code> 提供者，但是根据传递的 options(选项)和 entities(实体)，他还导出了提供者，例如存储库。事实上，动态模块扩展了基本模块元数据。当我们需要动态注册提供者时，这一重要功能非常有用。然后可以通过以下方式导入数据库模块：</p>
+
+<pre><code class="language-typescript">import { Module } from '@nestjs/common';
+import { DatabaseModule } from './database/database.module';
+import { User } from './users/entities/user.entity';
+
+@Module({
+  imports: [
+    DatabaseModule.forRoot([User]),
+  ],
+})
+export class ApplicationModule {}
+</code></pre>
+
+<p>如果需要将这个动态模块导出时，可以省略函数调用部分：</p>
+
+<pre><code class="language-typescript">import { Module } from '@nestjs/common';
+import { DatabaseModule } from './database/database.module';
+import { User } from './users/entities/user.entity';
+
+@Module({
+  imports: [
+    DatabaseModule.forRoot([User]),
+  ],
+  exports: [DatabaseModule]
+})
+export class ApplicationModule {}
+</code></pre>
+
+    </article>
+
+    
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer pager-noitem">&lt; Newer</li>
+      <li class="pager-older">
+        <a href="/blog/post/2018-12-12-leetcode-problems/" data-toggle="tooltip" data-placement="top" title="leetcode-problems">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>
