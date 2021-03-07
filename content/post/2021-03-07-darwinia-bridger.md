@@ -16,7 +16,7 @@ title: Darwinia Bridge
 
 # Projects Navigation
 
-## [Darwinia Bridge Module](https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge)
+## [Darwinia Bridge](https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge)
 
 [cross-chain introduction](https://darwinianetwork.medium.com/darwinia-how-to-build-future-internet-of-tokens-ea99c2888eb1)
 
@@ -53,16 +53,18 @@ Services for bridger which retrieve header data from public chains and generate 
 
 ## [Wormhole](https://github.com/darwinia-network/wormhole)
 
-[CrossChain UI](https://docs.darwinia.network/docs/en/wiki-tut-wormhole-general/)
+### Background
+
+[wiki](https://docs.darwinia.network/docs/en/wiki-tut-wormhole-general/)
 
 
-## WorkFlow && Core Logic
+# WorkFlow && Core Logic
 
-### Ethereum To Darwinia
+## Ethereum To Darwinia
 
-#### wormhole
+### wormhole
 
-##### invoke token contract
+#### invoke token contract
 
 ```
 function redeemTokenEth(account, params, callback) {
@@ -78,9 +80,9 @@ function redeemTokenEth(account, params, callback) {
 
 [issuing-burn](https://github.com/darwinia-network/darwinia-bridge-on-ethereum/blob/master/issuing-burn/IssuingBurn.sol)
 
-#### contract
+### contract
 
-##### burn token and send BurnAndRedeem event
+#### burn token and send BurnAndRedeem event
 
 ```
 function tokenFallback(
@@ -95,9 +97,9 @@ function tokenFallback(
 }
 ```
 
-#### bridger
+### bridger
 
-##### scan ethereum txs from token contracts
+#### scan ethereum txs from token contracts
 
 ```
 if l.topics.contains(&contracts.ring) || l.topics.contains(&contracts.kton)
@@ -114,7 +116,7 @@ if l.topics.contains(&contracts.ring) || l.topics.contains(&contracts.kton)
 ...       
 ```
 
-##### affirm
+#### affirm
 
 * will start the relay game in darwinia
 
@@ -140,7 +142,7 @@ let msg = MsgExtrinsic(ex);
 extrinsics_service.send(msg).await?;
 ```
 
-##### redeem 
+#### redeem 
 
 * redeem after the end of relay game and block parcel confirmed
 
@@ -168,7 +170,7 @@ let msg = MsgExtrinsic(ex);
 extrinsics_service.send(msg).await?;
 ```
 
-##### guard vote_pending_relay_header_parcel
+#### guard vote_pending_relay_header_parcel
 
 * tech_comm member arbitrate as replacement for the relay game arbitrate
 
@@ -186,9 +188,9 @@ if pending_block_number > last_confirmed
 }
 ```
 
-#### shadow
+### shadow
 
-* mmr root
+#### mmr root
 
 ```
 fn get_mmr_root(&self, leaf_index: u64) -> Result<Option<String>> {
@@ -199,7 +201,8 @@ fn get_mmr_root(&self, leaf_index: u64) -> Result<Option<String>> {
 }
 ```
 
-* mmr proof
+#### mmr proof
+
 ```
 fn gen_proof(&self, member: u64, last_leaf: u64) -> Result<Vec<String>> {
     let mmr_size = cmmr::leaf_index_to_mmr_size(last_leaf);
@@ -209,12 +212,13 @@ fn gen_proof(&self, member: u64, last_leaf: u64) -> Result<Vec<String>> {
 ```
 
 
-#### darwinia relay game 
+### darwinia relay game 
 
 [RelayerGame Rule](https://github.com/darwinia-network/darwinia-common/blob/master/frame/bridge/relayer-game/README.md)
+
 [RelayerGame Protocol](https://github.com/darwinia-network/darwinia-common/blob/master/primitives/relay/src/relayer_game.rs)
 
-##### start game from affirm extrinsic
+#### start game
 
 ```
 #[weight = 0]
@@ -232,7 +236,7 @@ optional_ethereum_relay_proofs: Option<EthereumRelayProofs>
 }
 ```
 
-##### challenge&extend game from extrinsic
+#### challenge&extend game
 
 ```
 pub fn dispute_and_affirm(
@@ -249,7 +253,7 @@ fn extend_affirmation(
 ) 
 ```
 
-##### update games
+#### update games
 
 find the relayer win and confirm_relay_header_parcels
 
@@ -346,7 +350,7 @@ pub fn update_games(game_ids: Vec<RelayHeaderId<T, I>>) -> DispatchResult {
 }
 ```
 
-##### verify ethash proof and mmr proof in game
+#### verify proof in game
 
 ```
 fn verify_relay_proofs(
@@ -356,33 +360,33 @@ fn verify_relay_proofs(
 		optional_best_confirmed_relay_header_id: Option<&Self::RelayHeaderId>,
 	) -> DispatchResult {
 		
-		//verify ethash_proof
-		ensure!(
-			Self::verify_header(header, ethash_proof),
-			<Error<T>>::HeaderInv
-		);
-        ...
-        //verify mmr
-		ensure!(
-            Self::verify_mmr(
-                last_leaf,
-                mmr_root,
-                mmr_proof
-                    .iter()
-                    .map(|h| array_unchecked!(h, 0, 32).into())
-                    .collect(),
-                vec![(
-                    *best_confirmed_block_number,
-                    best_confirmed_block_header_hash
-                )],
-            ),
-            <Error<T>>::MMRInv
-        );
-        ...
-	}
+    //verify ethash_proof
+    ensure!(
+        Self::verify_header(header, ethash_proof),
+        <Error<T>>::HeaderInv
+    );
+    ...
+    //verify mmr
+    ensure!(
+        Self::verify_mmr(
+            last_leaf,
+            mmr_root,
+            mmr_proof
+                .iter()
+                .map(|h| array_unchecked!(h, 0, 32).into())
+                .collect(),
+            vec![(
+                *best_confirmed_block_number,
+                best_confirmed_block_header_hash
+            )],
+        ),
+        <Error<T>>::MMRInv
+    );
+    ...
+}
 ```
 
-##### confirm relay parcel after the game finished
+#### confirm relay parcel after game
 
 ```
 pub fn update_confirmeds_with_reason(
@@ -407,11 +411,11 @@ pub fn update_confirmeds_with_reason(
 }
 ```
 
-#### [darwinia backing module](https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge/ethereum/backing)
+### [darwinia backing module](https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge/ethereum/backing)
 
 redeem will happen only after game finished and block confirmed
 
-##### redeem from extrinsic
+#### redeem
 
 ```
 /// Redeem balances
@@ -434,7 +438,7 @@ pub fn redeem(origin, act: RedeemFor, proof: EthereumReceiptProofThing<T>) {
 }
 ```
 
-##### parse BurnAndRedeem event
+#### parse BurnAndRedeem event
 
 ```
 fn parse_token_redeem_proof(
@@ -453,7 +457,7 @@ fn parse_token_redeem_proof(
 }
 ```
 
-##### finish the transfer
+#### finish the transfer
 
 ```
 C::transfer(
@@ -469,11 +473,11 @@ VerifiedProof::insert(tx_index, true);
 ```
 
 
-### Darwinia To Ethereum
+## Darwinia To Ethereum
 
-#### wormhole 
+### wormhole 
 
-##### lock token
+#### lock token
 
 ```
 async function ethereumBackingLockDarwinia(account, params, callback, t) {
@@ -493,9 +497,9 @@ async function ethereumBackingLockDarwinia(account, params, callback, t) {
 }
 ```
 
-#### darwinia backing module
+### darwinia backing module
 
-##### lock balance and send ScheduleMMRRootEvent
+#### lock balance and send ScheduleMMRRootEvent
 
 ```
 // Lock some balances into the module account
@@ -539,9 +543,9 @@ pub fn lock(
 }
 ```
 
-#### bridger
+### bridger
 
-##### handle ScheduleMMRRootEvent
+#### handle ScheduleMMRRootEvent
 
 ```
 // call ethereum_backing.lock will emit the event
@@ -557,7 +561,7 @@ pub fn lock(
       }
   }
 ```
-##### submit signed_mmr_root extrinsic
+#### submit signed_mmr_root extrinsic
 
 ```
 Extrinsic::SignAndSendMmrRoot(block_number) => {
@@ -580,9 +584,9 @@ Extrinsic::SignAndSendMmrRoot(block_number) => {
 }
 ```
 
-#### [relay authorities in darwinia](https://github.com/darwinia-network/darwinia-common/blob/master/frame/bridge/relay-authorities/src/lib.rs)
+### [darwinia relay authorities](https://github.com/darwinia-network/darwinia-common/blob/master/frame/bridge/relay-authorities/src/lib.rs)
 
-##### verify signature and send MMRRootSigned event
+#### verify signature and send MMRRootSigned event
 
 ```
 /// Verify
@@ -611,9 +615,9 @@ pub fn submit_signed_mmr_root(
 }
 ```
 
-#### wormhole
+### wormhole
 
-##### invoke VerifyProof contract
+#### invoke VerifyProof contract
 
 * only after MMRRootSigned
 
@@ -671,9 +675,9 @@ export async function darwiniaToEthereumVerifyProof(account, {
 }
 ```
 
-#### contract
+### contract
 
-##### issue mint
+#### issue mint
 
 [Issuing-Mint](https://github.com/darwinia-network/darwinia-bridge-on-ethereum/blob/master/contracts/TokenIssuing.sol)
 
@@ -725,7 +729,7 @@ function verifyProof(
     }
 ```
 
-##### verify mmr
+#### verify mmr
 
 [verify proof](https://github.com/darwinia-network/darwinia-bridge-on-ethereum/blob/master/contracts/Relay.sol)
 
