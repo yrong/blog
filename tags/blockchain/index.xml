@@ -20,7 +20,7 @@
       <guid>https://yrong.github.io/blog/post/2021-03-07-darwinia-bridger/</guid>
       <description>Theory White Paper
 Darwinia-Ethereum Bridge
-Projects Navigation Darwinia Bridge Module cross-chain introduction
+Projects Navigation Darwinia Bridge cross-chain introduction
 cross-chain overview
 Background Patricia Merkle Trees
 Mining difficulty calculate
@@ -30,7 +30,8 @@ Bridger Relayers (aka. Bridgers) in Darwinia Network are offchain worker clients
 Background actix
 deprecated dj
 Shadow Services for bridger which retrieve header data from public chains and generate mmr proof
-Background ffi</description>
+Background ffi
+Wormhole Background wiki</description>
     </item>
     
     <item>

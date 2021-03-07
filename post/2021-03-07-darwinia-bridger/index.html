@@ -8,7 +8,7 @@
   <meta name="twitter:title" content="Darwinia Bridge - yrong blog" />
   <meta name="description" content="Theory White Paper
 Darwinia-Ethereum Bridge
-Projects Navigation Darwinia Bridge Module cross-chain introduction
+Projects Navigation Darwinia Bridge cross-chain introduction
 cross-chain overview
 Background Patricia Merkle Trees
 Mining difficulty calculate
@@ -18,10 +18,11 @@ Bridger Relayers (aka. Bridgers) in Darwinia Network are offchain worker clients
 Background actix
 deprecated dj
 Shadow Services for bridger which retrieve header data from public chains and generate mmr proof
-Background ffi">
+Background ffi
+Wormhole Background wiki">
   <meta property="og:description" content="Theory White Paper
 Darwinia-Ethereum Bridge
-Projects Navigation Darwinia Bridge Module cross-chain introduction
+Projects Navigation Darwinia Bridge cross-chain introduction
 cross-chain overview
 Background Patricia Merkle Trees
 Mining difficulty calculate
@@ -31,14 +32,16 @@ Bridger Relayers (aka. Bridgers) in Darwinia Network are offchain worker clients
 Background actix
 deprecated dj
 Shadow Services for bridger which retrieve header data from public chains and generate mmr proof
-Background ffi">
+Background ffi
+Wormhole Background wiki">
   <meta name="twitter:description" content="Theory White Paper
 Darwinia-Ethereum Bridge
-Projects Navigation Darwinia Bridge Module cross-chain introduction
+Projects Navigation Darwinia Bridge cross-chain introduction
 cross-chain overview
 Background Patricia Merkle Trees
 Mining difficulty calculate
-mmr …">
+mmr
+relay …">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="https://yrong.github.io/blog/post/2021-03-07-darwinia-bridger/" />
@@ -92,7 +95,7 @@ mmr …">
 <li><a href="#theory">Theory</a></li>
 <li><a href="#projects-navigation">Projects Navigation</a>
 <ul>
-<li><a href="#darwinia-bridge-module-https-github-com-darwinia-network-darwinia-common-tree-master-frame-bridge"><a href="https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge">Darwinia Bridge Module</a></a>
+<li><a href="#darwinia-bridge-https-github-com-darwinia-network-darwinia-common-tree-master-frame-bridge"><a href="https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge">Darwinia Bridge</a></a>
 <ul>
 <li><a href="#background">Background</a></li>
 </ul></li>
@@ -104,7 +107,11 @@ mmr …">
 <ul>
 <li><a href="#background-2">Background</a></li>
 </ul></li>
-<li><a href="#wormhole-https-github-com-darwinia-network-wormhole"><a href="https://github.com/darwinia-network/wormhole">Wormhole</a></a></li>
+<li><a href="#wormhole-https-github-com-darwinia-network-wormhole"><a href="https://github.com/darwinia-network/wormhole">Wormhole</a></a>
+<ul>
+<li><a href="#background-3">Background</a></li>
+</ul></li>
+</ul></li>
 <li><a href="#workflow-core-logic">WorkFlow &amp;&amp; Core Logic</a>
 <ul>
 <li><a href="#ethereum-to-darwinia">Ethereum To Darwinia</a>
@@ -124,18 +131,22 @@ mmr …">
 <li><a href="#redeem">redeem</a></li>
 <li><a href="#guard-vote-pending-relay-header-parcel">guard vote_pending_relay_header_parcel</a></li>
 </ul></li>
-<li><a href="#shadow">shadow</a></li>
+<li><a href="#shadow">shadow</a>
+<ul>
+<li><a href="#mmr-root">mmr root</a></li>
+<li><a href="#mmr-proof">mmr proof</a></li>
+</ul></li>
 <li><a href="#darwinia-relay-game">darwinia relay game</a>
 <ul>
-<li><a href="#start-game-from-affirm-extrinsic">start game from affirm extrinsic</a></li>
-<li><a href="#challenge-extend-game-from-extrinsic">challenge&amp;extend game from extrinsic</a></li>
+<li><a href="#start-game">start game</a></li>
+<li><a href="#challenge-extend-game">challenge&amp;extend game</a></li>
 <li><a href="#update-games">update games</a></li>
-<li><a href="#verify-ethash-proof-and-mmr-proof-in-game">verify ethash proof and mmr proof in game</a></li>
-<li><a href="#confirm-relay-parcel-after-the-game-finished">confirm relay parcel after the game finished</a></li>
+<li><a href="#verify-proof-in-game">verify proof in game</a></li>
+<li><a href="#confirm-relay-parcel-after-game">confirm relay parcel after game</a></li>
 </ul></li>
 <li><a href="#darwinia-backing-module-https-github-com-darwinia-network-darwinia-common-tree-master-frame-bridge-ethereum-backing"><a href="https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge/ethereum/backing">darwinia backing module</a></a>
 <ul>
-<li><a href="#redeem-from-extrinsic">redeem from extrinsic</a></li>
+<li><a href="#redeem-1">redeem</a></li>
 <li><a href="#parse-burnandredeem-event">parse BurnAndRedeem event</a></li>
 <li><a href="#finish-the-transfer">finish the transfer</a></li>
 </ul></li>
@@ -155,7 +166,7 @@ mmr …">
 <li><a href="#handle-schedulemmrrootevent">handle ScheduleMMRRootEvent</a></li>
 <li><a href="#submit-signed-mmr-root-extrinsic">submit signed_mmr_root extrinsic</a></li>
 </ul></li>
-<li><a href="#relay-authorities-in-darwinia-https-github-com-darwinia-network-darwinia-common-blob-master-frame-bridge-relay-authorities-src-lib-rs"><a href="https://github.com/darwinia-network/darwinia-common/blob/master/frame/bridge/relay-authorities/src/lib.rs">relay authorities in darwinia</a></a>
+<li><a href="#darwinia-relay-authorities-https-github-com-darwinia-network-darwinia-common-blob-master-frame-bridge-relay-authorities-src-lib-rs"><a href="https://github.com/darwinia-network/darwinia-common/blob/master/frame/bridge/relay-authorities/src/lib.rs">darwinia relay authorities</a></a>
 <ul>
 <li><a href="#verify-signature-and-send-mmrrootsigned-event">verify signature and send MMRRootSigned event</a></li>
 </ul></li>
@@ -167,7 +178,6 @@ mmr …">
 <ul>
 <li><a href="#issue-mint">issue mint</a></li>
 <li><a href="#verify-mmr">verify mmr</a></li>
-</ul></li>
 </ul></li>
 </ul></li>
 </ul></li>
@@ -184,7 +194,7 @@ mmr …">
 
 <h1 id="projects-navigation">Projects Navigation</h1>
 
-<h2 id="darwinia-bridge-module-https-github-com-darwinia-network-darwinia-common-tree-master-frame-bridge"><a href="https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge">Darwinia Bridge Module</a></h2>
+<h2 id="darwinia-bridge-https-github-com-darwinia-network-darwinia-common-tree-master-frame-bridge"><a href="https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge">Darwinia Bridge</a></h2>
 
 <p><a href="https://darwinianetwork.medium.com/darwinia-how-to-build-future-internet-of-tokens-ea99c2888eb1">cross-chain introduction</a></p>
 
@@ -220,15 +230,17 @@ mmr …">
 
 <h2 id="wormhole-https-github-com-darwinia-network-wormhole"><a href="https://github.com/darwinia-network/wormhole">Wormhole</a></h2>
 
-<p><a href="https://docs.darwinia.network/docs/en/wiki-tut-wormhole-general/">CrossChain UI</a></p>
+<h3 id="background-3">Background</h3>
 
-<h2 id="workflow-core-logic">WorkFlow &amp;&amp; Core Logic</h2>
+<p><a href="https://docs.darwinia.network/docs/en/wiki-tut-wormhole-general/">wiki</a></p>
 
-<h3 id="ethereum-to-darwinia">Ethereum To Darwinia</h3>
+<h1 id="workflow-core-logic">WorkFlow &amp;&amp; Core Logic</h1>
 
-<h4 id="wormhole">wormhole</h4>
+<h2 id="ethereum-to-darwinia">Ethereum To Darwinia</h2>
 
-<h5 id="invoke-token-contract">invoke token contract</h5>
+<h3 id="wormhole">wormhole</h3>
+
+<h4 id="invoke-token-contract">invoke token contract</h4>
 
 <pre><code>function redeemTokenEth(account, params, callback) {
     let web3js = new Web3(window.ethereum || window.web3.currentProvider);
@@ -243,9 +255,9 @@ mmr …">
 
 <p><a href="https://github.com/darwinia-network/darwinia-bridge-on-ethereum/blob/master/issuing-burn/IssuingBurn.sol">issuing-burn</a></p>
 
-<h4 id="contract">contract</h4>
+<h3 id="contract">contract</h3>
 
-<h5 id="burn-token-and-send-burnandredeem-event">burn token and send BurnAndRedeem event</h5>
+<h4 id="burn-token-and-send-burnandredeem-event">burn token and send BurnAndRedeem event</h4>
 
 <pre><code>function tokenFallback(
     address _from,
@@ -259,9 +271,9 @@ mmr …">
 }
 </code></pre>
 
-<h4 id="bridger">bridger</h4>
+<h3 id="bridger">bridger</h3>
 
-<h5 id="scan-ethereum-txs-from-token-contracts">scan ethereum txs from token contracts</h5>
+<h4 id="scan-ethereum-txs-from-token-contracts">scan ethereum txs from token contracts</h4>
 
 <pre><code>if l.topics.contains(&amp;contracts.ring) || l.topics.contains(&amp;contracts.kton)
 {
@@ -277,7 +289,7 @@ mmr …">
 ...       
 </code></pre>
 
-<h5 id="affirm">affirm</h5>
+<h4 id="affirm">affirm</h4>
 
 <ul>
 <li>will start the relay game in darwinia</li>
@@ -304,7 +316,7 @@ let msg = MsgExtrinsic(ex);
 extrinsics_service.send(msg).await?;
 </code></pre>
 
-<h5 id="redeem">redeem</h5>
+<h4 id="redeem">redeem</h4>
 
 <ul>
 <li>redeem after the end of relay game and block parcel confirmed</li>
@@ -333,7 +345,7 @@ let msg = MsgExtrinsic(ex);
 extrinsics_service.send(msg).await?;
 </code></pre>
 
-<h5 id="guard-vote-pending-relay-header-parcel">guard vote_pending_relay_header_parcel</h5>
+<h4 id="guard-vote-pending-relay-header-parcel">guard vote_pending_relay_header_parcel</h4>
 
 <ul>
 <li>tech_comm member arbitrate as replacement for the relay game arbitrate</li>
@@ -352,11 +364,9 @@ extrinsics_service.send(msg).await?;
 }
 </code></pre>
 
-<h4 id="shadow">shadow</h4>
+<h3 id="shadow">shadow</h3>
 
-<ul>
-<li>mmr root</li>
-</ul>
+<h4 id="mmr-root">mmr root</h4>
 
 <pre><code>fn get_mmr_root(&amp;self, leaf_index: u64) -&gt; Result&lt;Option&lt;String&gt;&gt; {
     ...
@@ -366,23 +376,22 @@ extrinsics_service.send(msg).await?;
 }
 </code></pre>
 
-<ul>
-<li>mmr proof
-<code>
-fn gen_proof(&amp;self, member: u64, last_leaf: u64) -&gt; Result&lt;Vec&lt;String&gt;&gt; {
-let mmr_size = cmmr::leaf_index_to_mmr_size(last_leaf);
-let mmr = MMR::&lt;[u8; 32], MergeHash, _&gt;::new(mmr_size, store);
-let proof = mmr.gen_proof(vec![cmmr::leaf_index_to_pos(member)])?;
+<h4 id="mmr-proof">mmr proof</h4>
+
+<pre><code>fn gen_proof(&amp;self, member: u64, last_leaf: u64) -&gt; Result&lt;Vec&lt;String&gt;&gt; {
+    let mmr_size = cmmr::leaf_index_to_mmr_size(last_leaf);
+    let mmr = MMR::&lt;[u8; 32], MergeHash, _&gt;::new(mmr_size, store);
+    let proof = mmr.gen_proof(vec![cmmr::leaf_index_to_pos(member)])?;
 }
-</code></li>
-</ul>
+</code></pre>
 
-<h4 id="darwinia-relay-game">darwinia relay game</h4>
+<h3 id="darwinia-relay-game">darwinia relay game</h3>
 
-<p><a href="https://github.com/darwinia-network/darwinia-common/blob/master/frame/bridge/relayer-game/README.md">RelayerGame Rule</a>
-<a href="https://github.com/darwinia-network/darwinia-common/blob/master/primitives/relay/src/relayer_game.rs">RelayerGame Protocol</a></p>
+<p><a href="https://github.com/darwinia-network/darwinia-common/blob/master/frame/bridge/relayer-game/README.md">RelayerGame Rule</a></p>
 
-<h5 id="start-game-from-affirm-extrinsic">start game from affirm extrinsic</h5>
+<p><a href="https://github.com/darwinia-network/darwinia-common/blob/master/primitives/relay/src/relayer_game.rs">RelayerGame Protocol</a></p>
+
+<h4 id="start-game">start game</h4>
 
 <pre><code>#[weight = 0]
 pub fn affirm(
@@ -399,7 +408,7 @@ optional_ethereum_relay_proofs: Option&lt;EthereumRelayProofs&gt;
 }
 </code></pre>
 
-<h5 id="challenge-extend-game-from-extrinsic">challenge&amp;extend game from extrinsic</h5>
+<h4 id="challenge-extend-game">challenge&amp;extend game</h4>
 
 <pre><code>pub fn dispute_and_affirm(
     origin,
@@ -415,7 +424,7 @@ fn extend_affirmation(
 ) 
 </code></pre>
 
-<h5 id="update-games">update games</h5>
+<h4 id="update-games">update games</h4>
 
 <p>find the relayer win and confirm_relay_header_parcels</p>
 
@@ -511,7 +520,7 @@ fn extend_affirmation(
 }
 </code></pre>
 
-<h5 id="verify-ethash-proof-and-mmr-proof-in-game">verify ethash proof and mmr proof in game</h5>
+<h4 id="verify-proof-in-game">verify proof in game</h4>
 
 <pre><code>fn verify_relay_proofs(
 		relay_header_id: &amp;Self::RelayHeaderId,
@@ -520,33 +529,33 @@ fn extend_affirmation(
 		optional_best_confirmed_relay_header_id: Option&lt;&amp;Self::RelayHeaderId&gt;,
 	) -&gt; DispatchResult {
 		
-		//verify ethash_proof
-		ensure!(
-			Self::verify_header(header, ethash_proof),
-			&lt;Error&lt;T&gt;&gt;::HeaderInv
-		);
-        ...
-        //verify mmr
-		ensure!(
-            Self::verify_mmr(
-                last_leaf,
-                mmr_root,
-                mmr_proof
-                    .iter()
-                    .map(|h| array_unchecked!(h, 0, 32).into())
-                    .collect(),
-                vec![(
-                    *best_confirmed_block_number,
-                    best_confirmed_block_header_hash
-                )],
-            ),
-            &lt;Error&lt;T&gt;&gt;::MMRInv
-        );
-        ...
-	}
+    //verify ethash_proof
+    ensure!(
+        Self::verify_header(header, ethash_proof),
+        &lt;Error&lt;T&gt;&gt;::HeaderInv
+    );
+    ...
+    //verify mmr
+    ensure!(
+        Self::verify_mmr(
+            last_leaf,
+            mmr_root,
+            mmr_proof
+                .iter()
+                .map(|h| array_unchecked!(h, 0, 32).into())
+                .collect(),
+            vec![(
+                *best_confirmed_block_number,
+                best_confirmed_block_header_hash
+            )],
+        ),
+        &lt;Error&lt;T&gt;&gt;::MMRInv
+    );
+    ...
+}
 </code></pre>
 
-<h5 id="confirm-relay-parcel-after-the-game-finished">confirm relay parcel after the game finished</h5>
+<h4 id="confirm-relay-parcel-after-game">confirm relay parcel after game</h4>
 
 <pre><code>pub fn update_confirmeds_with_reason(
     relay_header_parcel: EthereumRelayHeaderParcel,
@@ -570,11 +579,11 @@ fn extend_affirmation(
 }
 </code></pre>
 
-<h4 id="darwinia-backing-module-https-github-com-darwinia-network-darwinia-common-tree-master-frame-bridge-ethereum-backing"><a href="https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge/ethereum/backing">darwinia backing module</a></h4>
+<h3 id="darwinia-backing-module-https-github-com-darwinia-network-darwinia-common-tree-master-frame-bridge-ethereum-backing"><a href="https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge/ethereum/backing">darwinia backing module</a></h3>
 
 <p>redeem will happen only after game finished and block confirmed</p>
 
-<h5 id="redeem-from-extrinsic">redeem from extrinsic</h5>
+<h4 id="redeem-1">redeem</h4>
 
 <pre><code>/// Redeem balances
 ///
@@ -596,7 +605,7 @@ pub fn redeem(origin, act: RedeemFor, proof: EthereumReceiptProofThing&lt;T&gt;)
 }
 </code></pre>
 
-<h5 id="parse-burnandredeem-event">parse BurnAndRedeem event</h5>
+<h4 id="parse-burnandredeem-event">parse BurnAndRedeem event</h4>
 
 <pre><code>fn parse_token_redeem_proof(
 		proof_record: &amp;EthereumReceiptProofThing&lt;T&gt;,
@@ -614,7 +623,7 @@ pub fn redeem(origin, act: RedeemFor, proof: EthereumReceiptProofThing&lt;T&gt;)
 }
 </code></pre>
 
-<h5 id="finish-the-transfer">finish the transfer</h5>
+<h4 id="finish-the-transfer">finish the transfer</h4>
 
 <pre><code>C::transfer(
     &amp;Self::account_id(),
@@ -628,11 +637,11 @@ pub fn redeem(origin, act: RedeemFor, proof: EthereumReceiptProofThing&lt;T&gt;)
 VerifiedProof::insert(tx_index, true);
 </code></pre>
 
-<h3 id="darwinia-to-ethereum">Darwinia To Ethereum</h3>
+<h2 id="darwinia-to-ethereum">Darwinia To Ethereum</h2>
 
-<h4 id="wormhole-1">wormhole</h4>
+<h3 id="wormhole-1">wormhole</h3>
 
-<h5 id="lock-token">lock token</h5>
+<h4 id="lock-token">lock token</h4>
 
 <pre><code>async function ethereumBackingLockDarwinia(account, params, callback, t) {
     try {
@@ -651,9 +660,9 @@ VerifiedProof::insert(tx_index, true);
 }
 </code></pre>
 
-<h4 id="darwinia-backing-module">darwinia backing module</h4>
+<h3 id="darwinia-backing-module">darwinia backing module</h3>
 
-<h5 id="lock-balance-and-send-schedulemmrrootevent">lock balance and send ScheduleMMRRootEvent</h5>
+<h4 id="lock-balance-and-send-schedulemmrrootevent">lock balance and send ScheduleMMRRootEvent</h4>
 
 <pre><code>// Lock some balances into the module account
 /// which very similar to lock some assets into the contract on ethereum side
@@ -696,9 +705,9 @@ pub fn lock(
 }
 </code></pre>
 
-<h4 id="bridger-1">bridger</h4>
+<h3 id="bridger-1">bridger</h3>
 
-<h5 id="handle-schedulemmrrootevent">handle ScheduleMMRRootEvent</h5>
+<h4 id="handle-schedulemmrrootevent">handle ScheduleMMRRootEvent</h4>
 
 <pre><code>// call ethereum_backing.lock will emit the event
   EventInfo::ScheduleMMRRootEvent(event) =&gt; {
@@ -714,7 +723,7 @@ pub fn lock(
   }
 </code></pre>
 
-<h5 id="submit-signed-mmr-root-extrinsic">submit signed_mmr_root extrinsic</h5>
+<h4 id="submit-signed-mmr-root-extrinsic">submit signed_mmr_root extrinsic</h4>
 
 <pre><code>Extrinsic::SignAndSendMmrRoot(block_number) =&gt; {
     if let Some(darwinia2ethereum) = &amp;darwinia2ethereum {
@@ -736,9 +745,9 @@ pub fn lock(
 }
 </code></pre>
 
-<h4 id="relay-authorities-in-darwinia-https-github-com-darwinia-network-darwinia-common-blob-master-frame-bridge-relay-authorities-src-lib-rs"><a href="https://github.com/darwinia-network/darwinia-common/blob/master/frame/bridge/relay-authorities/src/lib.rs">relay authorities in darwinia</a></h4>
+<h3 id="darwinia-relay-authorities-https-github-com-darwinia-network-darwinia-common-blob-master-frame-bridge-relay-authorities-src-lib-rs"><a href="https://github.com/darwinia-network/darwinia-common/blob/master/frame/bridge/relay-authorities/src/lib.rs">darwinia relay authorities</a></h3>
 
-<h5 id="verify-signature-and-send-mmrrootsigned-event">verify signature and send MMRRootSigned event</h5>
+<h4 id="verify-signature-and-send-mmrrootsigned-event">verify signature and send MMRRootSigned event</h4>
 
 <pre><code>/// Verify
 /// - the relay requirement is valid
@@ -766,9 +775,9 @@ pub fn submit_signed_mmr_root(
 }
 </code></pre>
 
-<h4 id="wormhole-2">wormhole</h4>
+<h3 id="wormhole-2">wormhole</h3>
 
-<h5 id="invoke-verifyproof-contract">invoke VerifyProof contract</h5>
+<h4 id="invoke-verifyproof-contract">invoke VerifyProof contract</h4>
 
 <ul>
 <li>only after MMRRootSigned</li>
@@ -827,9 +836,9 @@ export async function darwiniaToEthereumVerifyProof(account, {
 }
 </code></pre>
 
-<h4 id="contract-1">contract</h4>
+<h3 id="contract-1">contract</h3>
 
-<h5 id="issue-mint">issue mint</h5>
+<h4 id="issue-mint">issue mint</h4>
 
 <p><a href="https://github.com/darwinia-network/darwinia-bridge-on-ethereum/blob/master/contracts/TokenIssuing.sol">Issuing-Mint</a></p>
 
@@ -880,7 +889,7 @@ export async function darwiniaToEthereumVerifyProof(account, {
     }
 </code></pre>
 
-<h5 id="verify-mmr">verify mmr</h5>
+<h4 id="verify-mmr">verify mmr</h4>
 
 <p><a href="https://github.com/darwinia-network/darwinia-bridge-on-ethereum/blob/master/contracts/Relay.sol">verify proof</a></p>
 
