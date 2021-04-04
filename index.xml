@@ -22,7 +22,8 @@
 Projects election
 staking
 npos
-Optimizations  To reduce the number of edges, i.e. to minimize the number of validators any nominator selects To ensure, as much as possible, an even distribution of stake among the validators Reduce the amount of block computation time  Offline phragment substrate-debug-kit improvement</description>
+Optimizations  To reduce the number of edges, i.e. to minimize the number of validators any nominator selects To ensure, as much as possible, an even distribution of stake among the validators Reduce the amount of block computation time  Offline phragment substrate-debug-kit
+improvement</description>
     </item>
     
     <item>
