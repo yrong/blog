@@ -1,7 +1,7 @@
 ---
 author: Ron
 catalog: true
-date: 2021-03-07
+date: 2021-04-02
 tags:
 - BlockChain 
 title: Darwinia Bridge
@@ -11,6 +11,8 @@ title: Darwinia Bridge
 
 [White Paper](https://darwinia.network/ChainRelay_Technical_Paper(Preview)_EN.pdf)
 
+[Principle](https://docs.darwinia.network/docs/en/rfc-0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains/)
+
 [Darwinia-Ethereum Bridge](https://docs.google.com/document/d/1NVDSk6KZXV5CjE20cNPA8Swmmd89IYeWyN0T9lRBOEM)
 
 
@@ -18,11 +20,13 @@ title: Darwinia Bridge
 
 ## [Darwinia Bridge](https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge)
 
-[cross-chain introduction](https://darwinianetwork.medium.com/darwinia-how-to-build-future-internet-of-tokens-ea99c2888eb1)
-
 [cross-chain overview](https://miro.medium.com/max/700/0*W_Q1-GWv4JeCCQ7x)
 
 ### Background
+
+[ERC223](https://github.com/Dexaran/ERC223-token-standard)
+
+[ERC721](https://zhuanlan.zhihu.com/p/35019858)
 
 [Patricia Merkle Trees](https://eth.wiki/concepts/light-client-protocol)
 
@@ -30,7 +34,7 @@ title: Darwinia Bridge
 
 [mmr](https://github.com/nervosnetwork/merkle-mountain-range)
 
-[relay game](https://github.com/darwinia-network/relayer-game)
+[relay game](https://github.com/darwinia-network/darwinia-common/blob/master/frame/bridge/relayer-game/README.md)
 
 
 ## [Bridger](https://github.com/darwinia-network/bridger)
