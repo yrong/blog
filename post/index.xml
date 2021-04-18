@@ -7,36 +7,33 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
-    <lastBuildDate>Sun, 04 Apr 2021 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 17 Apr 2021 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://yrong.github.io/blog/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Phragmen election</title>
-      <link>https://yrong.github.io/blog/post/2021-04-04-phragmen/</link>
-      <pubDate>Sun, 04 Apr 2021 00:00:00 +0000</pubDate>
+      <title>bifrost defi</title>
+      <link>https://yrong.github.io/blog/post/2021-04-17-bifrost/</link>
+      <pubDate>Sat, 17 Apr 2021 00:00:00 +0000</pubDate>
       
-      <guid>https://yrong.github.io/blog/post/2021-04-04-phragmen/</guid>
-      <description>Theory Rationale
-Projects election
-staking
-npos
-Optimizations  To reduce the number of edges, i.e. to minimize the number of validators any nominator selects To ensure, as much as possible, an even distribution of stake among the validators Reduce the amount of block computation time  Offline phragment substrate-debug-kit
-improvement</description>
+      <guid>https://yrong.github.io/blog/post/2021-04-17-bifrost/</guid>
+      <description>&lt;p&gt;Bifrost is a parachain that allows users to deposit their staking tokens and mint vTokens to get staking liquidity.&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Darwinia Bridge</title>
-      <link>https://yrong.github.io/blog/post/2021-03-07-darwinia-bridger/</link>
-      <pubDate>Sun, 07 Mar 2021 00:00:00 +0000</pubDate>
+      <link>https://yrong.github.io/blog/post/2021-04-02-darwinia-bridger/</link>
+      <pubDate>Fri, 02 Apr 2021 00:00:00 +0000</pubDate>
       
-      <guid>https://yrong.github.io/blog/post/2021-03-07-darwinia-bridger/</guid>
+      <guid>https://yrong.github.io/blog/post/2021-04-02-darwinia-bridger/</guid>
       <description>Theory White Paper
+Principle
 Darwinia-Ethereum Bridge
-Projects Navigation Darwinia Bridge cross-chain introduction
-cross-chain overview
-Background Patricia Merkle Trees
+Projects Navigation Darwinia Bridge cross-chain overview
+Background ERC223
+ERC721
+Patricia Merkle Trees
 Mining difficulty calculate
 mmr
 relay game
@@ -44,8 +41,16 @@ Bridger Relayers (aka. Bridgers) in Darwinia Network are offchain worker clients
 Background actix
 deprecated dj
 Shadow Services for bridger which retrieve header data from public chains and generate mmr proof
-Background ffi
-Wormhole Background wiki</description>
+Background ffi</description>
+    </item>
+    
+    <item>
+      <title>Phragmen election</title>
+      <link>https://yrong.github.io/blog/post/2021-03-07-phragmen/</link>
+      <pubDate>Sun, 07 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/post/2021-03-07-phragmen/</guid>
+      <description>&lt;p&gt;The problem that Phragmén’s methods try to solve is that of electing a set of a given numbers of persons from a larger set of candidates. Phragmén discussed this in the context of a parliamentary election in a multi-member constituency; the same problem can, of course, also occur in local elections, but also in many other situations such as electing a board or a committee in an organization.&lt;/p&gt;</description>
     </item>
     
     <item>
