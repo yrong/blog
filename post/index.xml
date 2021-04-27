@@ -7,10 +7,29 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
-    <lastBuildDate>Sat, 17 Apr 2021 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 26 Apr 2021 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://yrong.github.io/blog/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>substrate tips</title>
+      <link>https://yrong.github.io/blog/post/2021-04-26-substrate/</link>
+      <pubDate>Mon, 26 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/post/2021-04-26-substrate/</guid>
+      <description> upgrade to substrate 3.0 guidelines
+check
+example
+macros
+runtime migration  kb
+ examples  examples
+ tips  custom order
+include deprecated types
+check storage version
+ weights  doc
+ </description>
+    </item>
     
     <item>
       <title>bifrost defi</title>
