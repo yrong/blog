@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Prometheus on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/prometheus/</link>
+    <description>Recent content in Prometheus on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Sat, 08 Jul 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/prometheus/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>prometheus v2.0 storage</title>
+      <link>https://yrong.github.io/blog/post/2017-07-08-prometheus/</link>
+      <pubDate>Sat, 08 Jul 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/post/2017-07-08-prometheus/</guid>
+      <description>&lt;p&gt;Writing a Time Series Database from Scratch&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

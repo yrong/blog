@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Apm on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/apm/</link>
+    <description>Recent content in Apm on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Mon, 30 Jan 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/apm/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>OpenTracing use cases</title>
+      <link>https://yrong.github.io/blog/post/2017-01-30-opentracing/</link>
+      <pubDate>Mon, 30 Jan 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/post/2017-01-30-opentracing/</guid>
+      <description>&lt;p&gt;openTracing use cases&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>分布式环境系统监控</title>
+      <link>https://yrong.github.io/blog/post/2017-01-05-microservice-apm/</link>
+      <pubDate>Thu, 05 Jan 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/post/2017-01-05-microservice-apm/</guid>
+      <description>&lt;p&gt;分布式环境系统监控Zipkin&amp;amp;Pinpoint&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

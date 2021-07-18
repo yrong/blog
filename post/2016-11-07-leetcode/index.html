@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>leetcode - yrong blog</title>
+  <meta property="og:title" content="leetcode - yrong blog" />
+  <meta name="twitter:title" content="leetcode - yrong blog" />
+  <meta name="description" content="leetcode部分题解">
+  <meta property="og:description" content="leetcode部分题解">
+  <meta name="twitter:description" content="leetcode部分题解">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2016-11-07-leetcode/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">leetcode</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>November 7, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/algorithom/">
+            <i class="fas fa-tag"></i>
+            algorithom
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li><a href="#subarray-sum-equals-k">subarray-sum-equals-k</a>
+<ul>
+<li><a href="#题目描述">题目描述</a></li>
+<li><a href="#思路">思路</a></li>
+<li><a href="#关键点解析">关键点解析</a></li>
+<li><a href="#代码">代码</a></li>
+</ul></li>
+<li><a href="#jump-game">jump-game</a>
+<ul>
+<li><a href="#题目描述-1">题目描述</a></li>
+<li><a href="#思路-1">思路</a></li>
+<li><a href="#关键点解析-1">关键点解析</a></li>
+<li><a href="#代码-1">代码</a></li>
+</ul></li>
+<li><a href="#1014-最佳观光组合">1014. 最佳观光组合</a>
+<ul>
+<li><a href="#题目描述-2">题目描述</a></li>
+<li><a href="#思路-2">思路</a></li>
+<li><a href="#关键点解析-2">关键点解析</a></li>
+<li><a href="#代码-2">代码</a></li>
+<li><a href="#小技巧">小技巧</a></li>
+</ul></li>
+<li><a href="#merge-intervals">merge-intervals</a>
+<ul>
+<li><a href="#题目描述-3">题目描述</a></li>
+<li><a href="#思路-3">思路</a></li>
+<li><a href="#关键点解析-3">关键点解析</a></li>
+<li><a href="#代码-3">代码</a></li>
+</ul></li>
+<li><a href="#others">Others</a>
+<ul>
+<li><a href="#reverse-a-linked-list">reverse a linked list</a></li>
+<li><a href="#find-the-middle-point">Find the middle point</a></li>
+<li><a href="#top-k-frequent-elements">Top K Frequent Elements</a></li>
+<li><a href="#best-time-to-buy-and-sell-stock-ii">Best Time to Buy and Sell Stock II</a></li>
+<li><a href="#implement-atoi-to-convert-a-string-to-an-integer">Implement atoi to convert a string to an integer</a></li>
+<li><a href="#increasing-triplet-subsequence">Increasing Triplet Subsequence</a></li>
+<li><a href="#remove-duplicates-from-sorted-array">Remove Duplicates from Sorted Array</a></li>
+<li><a href="#whether-an-integer-is-a-palindrome">whether an integer is a palindrome</a></li>
+<li><a href="#search-a-2d-matrix-ii">Search a 2D Matrix II</a></li>
+<li><a href="#swap-nodes-in-pairs">Swap Nodes in Pairs</a></li>
+<li><a href="#count-set-bits-in-an-integer">Count set bits in an integer</a>
+<ul>
+<li><a href="#iterative-method-to-count-set-bits">Iterative Method to Count Set Bits</a></li>
+<li><a href="#count-set-bits-by-brian-kernighan-s-algorithm">Count Set Bits by Brian Kernighan&rsquo;s Algorithm</a></li>
+</ul></li>
+<li><a href="#coin-change">Coin Change</a>
+<ul>
+<li><a href="#动态规划-dynamic-programming">动态规划（Dynamic Programming）</a></li>
+<li><a href="#广度优先搜索-bfs">广度优先搜索（BFS）</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      <p>leetcode部分题解</p>
+
+<h1 id="subarray-sum-equals-k">subarray-sum-equals-k</h1>
+
+<p><a href="https://leetcode.com/problems/subarray-sum-equals-k/description/">https://leetcode.com/problems/subarray-sum-equals-k/description/</a></p>
+
+<h2 id="题目描述">题目描述</h2>
+
+<pre><code>Given an array of integers and an integer k, you need to find the total number of continuous subarrays whose sum equals to k.
+
+Example 1:
+Input:nums = [1,1,1], k = 2
+Output: 2
+Note:
+The length of the array is in range [1, 20,000].
+The range of numbers in the array is [-1000, 1000] and the range of the integer k is [-1e7, 1e7].
+
+</code></pre>
+
+<h2 id="思路">思路</h2>
+
+<p>符合直觉的做法是暴力求解所有的子数组，然后分别计算和，如果等于k,count就+1.这种做法的时间复杂度为O(n^2).</p>
+
+<p>这里有一种更加巧妙的方法，我们可以借助额外的空间，使用hashmap来简化时间复杂度，这种算法的时间复杂度可以达到O(n).</p>
+
+<p>我们维护一个hashmap，hashmap的key为累加值acc，value为累加值acc出现的次数。
+我们迭代数组，然后不断更新acc和hashmap，如果acc 等于k，那么很明显应该+1. 如果hashmap[acc - k] 存在，
+我们就把它加到结果中去即可。</p>
+
+<p>语言比较难以解释，我画了一个图来演示nums = [1,2,3,3,0,3,4,2], k = 6的情况。</p>
+
+<p><img src="/blog/img/leetcode/560.subarray-sum-equals-k.jpg" alt="560.subarray-sum-equals-k" /></p>
+
+<p>如图，当访问到nums[3]的时候，hashmap如图所示，这个时候count为2.
+其中之一是[1,2,3],这个好理解。还有一个是[3,3].</p>
+
+<p>这个[3,3]正是我们通过hashmap[acc - k]即hashmap[9 - 6]得到的。</p>
+
+<h2 id="关键点解析">关键点解析</h2>
+
+<ul>
+<li>可以利用hashmap记录和的累加值来避免重复计算</li>
+</ul>
+
+<h2 id="代码">代码</h2>
+
+<ul>
+<li>语言支持：JS, Python</li>
+</ul>
+
+<p>Javascript Code:</p>
+
+<pre><code class="language-js">/*
+ * @lc app=leetcode id=560 lang=javascript
+ *
+ * [560] Subarray Sum Equals K
+ */
+/**
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {number}
+ */
+var subarraySum = function(nums, k) {
+  const hashmap = {};
+  let acc = 0;
+  let count = 0;
+
+  for (let i = 0; i &lt; nums.length; i++) {
+    acc += nums[i];
+
+    if (acc === k) count++;
+
+    if (hashmap[acc - k] !== void 0) {
+      count += hashmap[acc - k];
+    }
+
+    if (hashmap[acc] === void 0) {
+      hashmap[acc] = 1;
+    } else {
+      hashmap[acc] += 1;
+    }
+  }
+
+  return count;
+};
+</code></pre>
+
+<p>Python Code:</p>
+
+<pre><code class="language-python">class Solution:
+    def subarraySum(self, nums: List[int], k: int) -&gt; int:
+        d = {}
+        acc = count = 0
+        for num in nums:
+            acc += num
+            if acc == k:
+                count += 1
+            if acc - k in d:
+                count += d[acc-k]
+            if acc in d:
+                d[acc] += 1
+            else:
+                d[acc] = 1
+        return count
+</code></pre>
+
+<h1 id="jump-game">jump-game</h1>
+
+<p><a href="https://leetcode.com/problems/jump-game/description/">https://leetcode.com/problems/jump-game/description/</a></p>
+
+<h2 id="题目描述-1">题目描述</h2>
+
+<pre><code>Given an array of non-negative integers, you are initially positioned at the first index of the array.
+
+Each element in the array represents your maximum jump length at that position.
+
+Determine if you are able to reach the last index.
+
+Example 1:
+
+Input: [2,3,1,1,4]
+Output: true
+Explanation: Jump 1 step from index 0 to 1, then 3 steps to the last index.
+Example 2:
+
+Input: [3,2,1,0,4]
+Output: false
+Explanation: You will always arrive at index 3 no matter what. Its maximum
+             jump length is 0, which makes it impossible to reach the last index.
+
+</code></pre>
+
+<h2 id="思路-1">思路</h2>
+
+<p>这道题目是一道典型的<code>回溯</code>类型题目。
+思路就是用一个变量记录当前能够到达的最大的索引，我们逐个遍历数组中的元素去更新这个索引。
+变量完成判断这个索引是否大于数组下表即可。</p>
+
+<h2 id="关键点解析-1">关键点解析</h2>
+
+<ul>
+<li>建模 (记录和更新当前位置能够到达的最大的索引即可)</li>
+</ul>
+
+<h2 id="代码-1">代码</h2>
+
+<ul>
+<li>语言支持: Javascript，Python3</li>
+</ul>
+
+<pre><code class="language-js">
+/*
+ * @lc app=leetcode id=55 lang=javascript
+ *
+ * [55] Jump Game
+ *
+ * https://leetcode.com/problems/jump-game/description/
+ *
+ * algorithms
+ * Medium (31.38%)
+ * Total Accepted:    252.4K
+ * Total Submissions: 797.2K
+ * Testcase Example:  '[2,3,1,1,4]'
+ *
+ * Given an array of non-negative integers, you are initially positioned at the
+ * first index of the array.
+ *
+ * Each element in the array represents your maximum jump length at that
+ * position.
+ *
+ * Determine if you are able to reach the last index.
+ *
+ * Example 1:
+ *
+ *
+ * Input: [2,3,1,1,4]
+ * Output: true
+ * Explanation: Jump 1 step from index 0 to 1, then 3 steps to the last
+ * index.
+ *
+ *
+ * Example 2:
+ *
+ *
+ * Input: [3,2,1,0,4]
+ * Output: false
+ * Explanation: You will always arrive at index 3 no matter what. Its
+ * maximum
+ * jump length is 0, which makes it impossible to reach the last index.
+ *
+ *
+ */
+/**
+ * @param {number[]} nums
+ * @return {boolean}
+ */
+var canJump = function(nums) {
+  let max = 0; // 能够走到的数组下标
+
+  for(let i = 0; i &lt; nums.length; i++) {
+      if (max &lt; i) return false; // 当前这一步都走不到，后面更走不到了
+      max = Math.max(nums[i] + i, max);
+  }
+
+  return max &gt;= nums.length - 1
+};
+
+</code></pre>
+
+<p>Python3 Code:</p>
+
+<pre><code class="language-Python">class Solution:
+    def canJump(self, nums: List[int]) -&gt; bool:
+        &quot;&quot;&quot;思路同上&quot;&quot;&quot;
+        _max = 0
+        _len = len(nums)
+        for i in range(_len-1):
+            if _max &lt; i:
+                return False
+            _max = max(_max, nums[i] + i)
+            # 下面这个判断可有可无，但提交的时候数据会好看点
+            if _max &gt;= _len - 1:
+                return True
+        return _max &gt;= _len - 1
+</code></pre>
+
+<h1 id="1014-最佳观光组合">1014. 最佳观光组合</h1>
+
+<p><a href="https://leetcode-cn.com/problems/best-sightseeing-pair/description/">https://leetcode-cn.com/problems/best-sightseeing-pair/description/</a></p>
+
+<h2 id="题目描述-2">题目描述</h2>
+
+<p>给定正整数数组  A，A[i]  表示第 i 个观光景点的评分，并且两个景点  i 和  j  之间的距离为  j - i。</p>
+
+<p>一对景点（i &lt; j）组成的观光组合的得分为（A[i] + A[j] + i - j）：景点的评分之和减去它们两者之间的距离。</p>
+
+<p>返回一对观光景点能取得的最高分。</p>
+
+<p>示例：</p>
+
+<p>输入：[8,1,5,2,6]
+输出：11
+解释：i = 0, j = 2, A[i] + A[j] + i - j = 8 + 5 + 0 - 2 = 11</p>
+
+<p>提示：</p>
+
+<p>2 &lt;= A.length &lt;= 50000
+1 &lt;= A[i] &lt;= 1000</p>
+
+<h2 id="思路-2">思路</h2>
+
+<p>最简单的思路就是两两组合，找出最大的，妥妥超时，我们来看下代码：</p>
+
+<pre><code class="language-python">class Solution:
+    def maxScoreSightseeingPair(self, A: List[int]) -&gt; int:
+        n = len(A)
+        res = 0
+        for i in range(n - 1):
+            for j in range(i + 1, n):
+                res = max(res, A[i] + A[j] + i - j)
+        return res
+</code></pre>
+
+<p>我们思考如何优化。 其实我们可以遍历一遍数组，对于数组的每一项<code>A[j] - j</code> 我们都去前面找<code>最大</code>的 A[i] + i （这样才能保证结果最大）。</p>
+
+<p>我们考虑使用动态规划来解决, 我们使用 dp[i] 来表示 数组 A 前 i 项的<code>A[i] + i</code>的最大值。</p>
+
+<pre><code class="language-python">class Solution:
+    def maxScoreSightseeingPair(self, A: List[int]) -&gt; int:
+        n = len(A)
+        dp = [float('-inf')] * (n + 1)
+        res = 0
+        for i in range(n):
+            dp[i + 1] = max(dp[i], A[i] + i)
+            res = max(res, dp[i] + A[i] - i)
+        return res
+</code></pre>
+
+<p>如上其实我们发现，dp[i + 1] 只和 dp[i] 有关，这是一个空间优化的信号。我们其实可以使用一个变量来记录，而不必要使用一个数组，代码见下方。</p>
+
+<h2 id="关键点解析-2">关键点解析</h2>
+
+<ul>
+<li>空间换时间</li>
+<li>dp 空间优化</li>
+</ul>
+
+<h2 id="代码-2">代码</h2>
+
+<pre><code class="language-python">class Solution:
+    def maxScoreSightseeingPair(self, A: List[int]) -&gt; int:
+        n = len(A)
+        pre = A[0] + 0
+        res = 0
+        for i in range(1, n):
+            res = max(res, pre + A[i] - i)
+            pre = max(pre, A[i] + i)
+        return res
+</code></pre>
+
+<h2 id="小技巧">小技巧</h2>
+
+<p>Python 的代码如果不使用 max，而是使用 if else 效率目测会更高，大家可以试一下。</p>
+
+<pre><code class="language-python">class Solution:
+    def maxScoreSightseeingPair(self, A: List[int]) -&gt; int:
+        n = len(A)
+        pre = A[0] + 0
+        res = 0
+        for i in range(1, n):
+            # res = max(res, pre + A[i] - i)
+            # pre = max(pre, A[i] + i)
+            res = res if res &gt; pre + A[i] - i else pre + A[i] - i
+            pre = pre if pre &gt; A[i] + i else A[i] + i
+        return res
+</code></pre>
+
+<h1 id="merge-intervals">merge-intervals</h1>
+
+<p><a href="https://leetcode.com/problems/merge-intervals/description/">https://leetcode.com/problems/merge-intervals/description/</a></p>
+
+<h2 id="题目描述-3">题目描述</h2>
+
+<pre><code>Given a collection of intervals, merge all overlapping intervals.
+
+Example 1:
+
+Input: [[1,3],[2,6],[8,10],[15,18]]
+Output: [[1,6],[8,10],[15,18]]
+Explanation: Since intervals [1,3] and [2,6] overlaps, merge them into [1,6].
+Example 2:
+
+Input: [[1,4],[4,5]]
+Output: [[1,5]]
+Explanation: Intervals [1,4] and [4,5] are considered overlapping.
+NOTE: input types have been changed on April 15, 2019. Please reset to default code definition to get new method signature.
+
+</code></pre>
+
+<h2 id="思路-3">思路</h2>
+
+<ul>
+<li>先对数组进行排序，排序的依据就是每一项的第一个元素的大小。</li>
+<li>然后我们对数组进行遍历，遍历的时候两两运算（具体运算逻辑见下）</li>
+<li>判断是否相交，如果不相交，则跳过</li>
+
+<li><p>如果相交，则合并两项</p>
+
+<h2 id="关键点解析-3">关键点解析</h2></li>
+
+<li><p>对数组进行排序简化操作</p></li>
+
+<li><p>如果不排序，需要借助一些hack,这里不介绍了</p></li>
+</ul>
+
+<h2 id="代码-3">代码</h2>
+
+<ul>
+<li>语言支持: Javascript，Python3</li>
+</ul>
+
+<pre><code class="language-js">
+
+/*
+ * @lc app=leetcode id=56 lang=javascript
+ *
+ * [56] Merge Intervals
+ */
+/**
+ * @param {number[][]} intervals
+ * @return {number[][]}
+ */
+
+function intersected(a, b) {
+  if (a[0] &gt; b[1] || a[1] &lt; b[0]) return false;
+  return true;
+}
+
+function mergeTwo(a, b) {
+  return [Math.min(a[0], b[0]), Math.max(a[1], b[1])];
+}
+var merge = function(intervals) {
+  // 这种算法需要先排序
+  intervals.sort((a, b) =&gt; a[0] - b[0]);
+  for (let i = 0; i &lt; intervals.length - 1; i++) {
+    const cur = intervals[i];
+    const next = intervals[i + 1];
+
+    if (intersected(cur, next)) {
+      intervals[i] = undefined;
+      intervals[i + 1] = mergeTwo(cur, next);
+    }
+  }
+  return intervals.filter(q =&gt; q);
+};
+</code></pre>
+
+<p>Python3 Code:</p>
+
+<pre><code class="language-Python">class Solution:
+    def merge(self, intervals: List[List[int]]) -&gt; List[List[int]]:
+        &quot;&quot;&quot;先排序，后合并&quot;&quot;&quot;
+        if len(intervals) &lt;= 1:
+            return intervals
+        
+        # 排序
+        def get_first(a_list):
+            return a_list[0]
+        intervals.sort(key=get_first)
+        
+        # 合并
+        res = [intervals[0]]
+        for i in range(1, len(intervals)):
+            if intervals[i][0] &lt;= res[-1][1]:
+                res[-1] = [res[-1][0], max(res[-1][1], intervals[i][1])]
+            else:
+                res.append(intervals[i])
+        
+        return res
+</code></pre>
+
+<h1 id="others">Others</h1>
+
+<h2 id="reverse-a-linked-list">reverse a linked list</h2>
+
+<pre><code># Python program to reverse a linked list 
+# Time Complexity : O(n)
+# Space Complexity : O(1)
+ 
+# Node class 
+class Node:
+ 
+    # Constructor to initialize the node object
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+ 
+class LinkedList:
+ 
+    # Function to initialize head
+    def __init__(self):
+        self.head = None
+ 
+    # Function to reverse the linked list
+    def reverse(self):
+        prev = None
+        current = self.head
+        while(current is not None):
+            next = current.next
+            current.next = prev
+            prev = current
+            current = next
+        self.head = prev
+         
+    # Function to insert a new node at the beginning
+    def push(self, new_data):
+        new_node = Node(new_data)
+        new_node.next = self.head
+        self.head = new_node
+ 
+    # Utility function to print the linked LinkedList
+    def printList(self):
+        temp = self.head
+        while(temp):
+            print temp.data,
+            temp = temp.next
+ 
+ 
+# Driver program to test above functions
+llist = LinkedList()
+llist.push(20)
+llist.push(4)
+llist.push(15)
+llist.push(85)
+ 
+print &quot;Given Linked List&quot;
+llist.printList()
+llist.reverse()
+print &quot;\nReversed Linked List&quot;
+llist.printList()
+
+Given linked list
+85 15 4 20 
+Reversed Linked list 
+20 4 15 85 
+
+</code></pre>
+
+<h2 id="find-the-middle-point">Find the middle point</h2>
+
+<pre><code>public ListNode findMiddle(ListNode head) {
+    ListNode fast = head;
+    ListNode slow = head;
+    while (fast != null &amp;&amp; fast.next != null) {
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    return slow;
+}
+</code></pre>
+
+<h2 id="top-k-frequent-elements">Top K Frequent Elements</h2>
+
+<blockquote>
+<p>给定一个数组，求数组里出现频率最高的 K 个数字，比如对于数组 [1,1,1,2,2,3]，K=2 时，返回 [1,2]。解决该问题的思路比较常规，首先用 hashmap 记录每个数字的出现频率，然后可以用 heap 来求出现频率最高的 k 个数字。</p>
+</blockquote>
+
+<pre><code class="language-java">class Pair{
+    int num;
+    int count;
+    public Pair(int num, int count){
+        this.num=num;
+        this.count=count;
+    }
+}
+ 
+public class Solution {//基于map和SortedQ
+    public List&lt;Integer&gt; topKFrequent(int[] nums, int k) {
+        //count the frequency for each element
+        HashMap&lt;Integer, Integer&gt; map = new HashMap&lt;Integer, Integer&gt;();
+        for(int num: nums){
+            if(map.containsKey(num)){
+                map.put(num, map.get(num)+1);
+            }else{
+                map.put(num, 1);
+            }
+        }
+ 
+        // create a min heap
+        PriorityQueue&lt;Pair&gt; queue = new PriorityQueue&lt;Pair&gt;(new Comparator&lt;Pair&gt;(){
+            public int compare(Pair a, Pair b){
+                return a.count-b.count;
+            }
+        });
+ 
+        //maintain a heap of size k. 
+        for(Map.Entry&lt;Integer, Integer&gt; entry: map.entrySet()){
+            Pair p = new Pair(entry.getKey(), entry.getValue());
+            queue.offer(p);
+            if(queue.size()&gt;k){
+                queue.poll();
+            }
+        }
+ 
+        //get all elements from the heap
+        List&lt;Integer&gt; result = new ArrayList&lt;Integer&gt;();
+        while(queue.size()&gt;0){
+            result.add(queue.poll().num);
+        }
+        //reverse the order
+        Collections.reverse(result);
+ 
+        return result;
+    }
+}
+</code></pre>
+
+<pre><code class="language-python">class Solution(object):
+    def topKFrequent(self, nums, k):
+        &quot;&quot;&quot;
+        :type nums: List[int]
+        :type k: int
+        :rtype: List[int]
+        &quot;&quot;&quot;
+        counts = collections.Counter(nums)
+        heap = []
+        for key, cnt in counts.items():
+            if len(heap) &lt; k:
+                heapq.heappush(heap, (cnt, key))
+            else:
+                if heap[0][0] &lt; cnt:
+                    heapq.heappop(heap)
+                    heapq.heappush(heap, (cnt, key))
+        return [x[1] for x in heap]
+</code></pre>
+
+<h2 id="best-time-to-buy-and-sell-stock-ii">Best Time to Buy and Sell Stock II</h2>
+
+<blockquote>
+<p>假设有一个数组，它的第i个元素是一个给定的股票在第i天的价格。设计一个算法来找到最大的利润。你可以完成尽可能多的交易(多次买卖股票)。然而,你不能同时参与多个交易(你必须在再次购买前出售股票)。给出一个数组样例[2,1,2,0,1], 1买入，２卖出．０买入，１卖出．返回 2</p>
+</blockquote>
+
+<pre><code class="language-python">class Solution:
+    &quot;&quot;&quot;
+    @param prices: Given an integer array
+    @return: Maximum profit
+    &quot;&quot;&quot;
+    def maxProfit(self, prices):
+        # write your code here
+        total = 0
+        low, high = sys.maxint, sys.maxint
+        for x in prices:
+            if x &gt; high:
+                high = x
+            else:
+                total += high - low
+                high, low = x, x
+        return total + high - low      
+</code></pre>
+
+<pre><code class="language-java">public class Solution {
+    public int maxProfit(int[] prices) {
+        int profit = 0;
+        //从头到尾扫描prices,如果price[i] – price[i-1]大于零则计入最后的收益中。即贪心法
+        for (int i = 0; i &lt; prices.length - 1; i++) {
+            int diff = prices[i+1] - prices[i];
+            if (diff &gt; 0) {
+                profit += diff;
+            }
+        }
+        return profit;
+    }
+}
+</code></pre>
+
+<h2 id="implement-atoi-to-convert-a-string-to-an-integer">Implement atoi to convert a string to an integer</h2>
+
+<p>following cases should be considered</p>
+
+<ol>
+<li>null or empty string</li>
+<li>white spaces</li>
+<li>+/- sign</li>
+<li>calculate real value</li>
+<li>handle min &amp; max</li>
+</ol>
+
+<pre><code>public int atoi(String str) {
+  if (str == null || str.length() &lt; 1)
+    return 0;
+ 
+  // trim white spaces
+  str = str.trim();
+ 
+  char flag = '+';
+ 
+  // check negative or positive
+  int i = 0;
+  if (str.charAt(0) == '-') {
+    flag = '-';
+    i++;
+  } else if (str.charAt(0) == '+') {
+    i++;
+  }
+  // use double to store result
+  double result = 0;
+ 
+  // calculate value
+  while (str.length() &gt; i &amp;&amp; str.charAt(i) &gt;= '0' &amp;&amp; str.charAt(i) &lt;= '9') {
+    result = result * 10 + (str.charAt(i) - '0');
+    i++;
+  }
+ 
+  if (flag == '-')
+    result = -result;
+ 
+  // handle max and min
+  if (result &gt; Integer.MAX_VALUE)
+    return Integer.MAX_VALUE;
+ 
+  if (result &lt; Integer.MIN_VALUE)
+    return Integer.MIN_VALUE;
+ 
+  return (int) result;
+}
+</code></pre>
+
+<pre><code>import re
+
+class Solution(object):
+    def myAtoi(self, str):
+        &quot;&quot;&quot;
+        :type str: str
+        :rtype: int
+        &quot;&quot;&quot;
+        m = re.match(r'(\s)*(\+|\-|)(\d)*', str)
+        try:
+            s = int(m.group(0))
+            return min(max(s, -2147483648), 2147483647)
+        except:
+            return 0
+</code></pre>
+
+<h2 id="increasing-triplet-subsequence">Increasing Triplet Subsequence</h2>
+
+<blockquote>
+<p>Given an unsorted array return whether an increasing subsequence of length 3 exists or not in the array.Return true if there exists i, j, k such that arr[i] &lt; arr[j] &lt; arr[k] given 0 ≤ i &lt; j &lt; k ≤ n-1 else return false.</p>
+</blockquote>
+
+<pre><code>class Solution(object):
+    def increasingTriplet(self, nums):
+        &quot;&quot;&quot;
+        :type nums: List[int]
+        :rtype: bool
+        &quot;&quot;&quot;
+        x1 = x2 = 0x7fffffff
+        for num in nums:
+            if num &lt;= x1:
+                x1 = num
+            elif num &lt;= x2:  # x1 &lt; num &lt;= x2
+                x2 = num
+            else:            # x &lt; x2 &lt; num , so it return true
+                return True
+        return False
+</code></pre>
+
+<h2 id="remove-duplicates-from-sorted-array">Remove Duplicates from Sorted Array</h2>
+
+<blockquote>
+<p>Given a sorted array, remove the duplicates in place such that each element appear only once and return the new length. Do not allocate extra space for another array, you must do this in place with constant memory. For example, Given input array A = [1,1,2], Your function should return length = 2, and A is now [1,2].</p>
+</blockquote>
+
+<pre><code>class Solution:
+    &quot;&quot;&quot;
+    @param A: a list of integers
+    @return an integer
+    &quot;&quot;&quot;
+    def removeDuplicates(self, A):
+        # write your code here
+        if A == []:
+            return 0
+        count = 0
+        for i in range(0, len(A)):
+            if A[i] == A[i-1]:
+                continue
+            else:
+                A[count] = A[i]
+                count += 1
+        return count
+</code></pre>
+
+<h2 id="whether-an-integer-is-a-palindrome">whether an integer is a palindrome</h2>
+
+<blockquote>
+<p>Determine whether an integer is a palindrome. Do this without extra space.</p>
+</blockquote>
+
+<pre><code>class Solution:
+    # @return a boolean
+    def isPalindrome(self, x):
+        if x &lt; 0:
+            return False
+        div = 1
+        while x/div &gt;= 10:
+            div = div * 10
+            
+        while x:
+            left = x / div
+            right = x % 10
+            
+            if left != right:
+                return False
+            
+            x = ( x % div ) / 10
+            div = div / 100
+        return True
+</code></pre>
+
+<h2 id="search-a-2d-matrix-ii">Search a 2D Matrix II</h2>
+
+<p>Write an efficient algorithm that searches for a value in an m x n matrix. This matrix has the following properties:</p>
+
+<ul>
+<li>Integers in each row are sorted in ascending from left to right.</li>
+<li>Integers in each column are sorted in ascending from top to bottom.</li>
+</ul>
+
+<p>Consider the following matrix:</p>
+
+<pre><code>[
+  [1,   4,  7, 11, 15],
+  [2,   5,  8, 12, 19],
+  [3,   6,  9, 16, 22],
+  [10, 13, 14, 17, 24],
+  [18, 21, 23, 26, 30]
+]
+</code></pre>
+
+<p>Given target = 5, return true. Given target = 20, return false.</p>
+
+<pre><code># O(m+n)
+class Solution: 
+    # @param {integer[][]} matrix
+    # @param {integer} target
+    # @return {boolean}
+    def searchMatrix(self, matrix, target):
+        y = len(matrix[0]) - 1
+        for x in range(len(matrix)):
+            while y and matrix[x][y] &gt; target:
+                y -= 1
+            if matrix[x][y] == target:
+                return True
+        return False
+</code></pre>
+
+<pre><code># O(m*logn)
+class Solution:
+    # @param {integer[][]} matrix
+    # @param {integer} target
+    # @return {boolean}
+    def searchMatrix(self, matrix, target):
+        y = len(matrix[0]) - 1
+        def binSearch(nums, low, high):
+            while low &lt;= high:
+                mid = (low + high) / 2
+                if nums[mid] &gt; target:
+                    high = mid - 1
+                else:
+                    low = mid + 1
+            return high
+        for x in range(len(matrix)):
+            y = binSearch(matrix[x], 0, y)
+            if matrix[x][y] == target:
+                return True
+        return False
+
+</code></pre>
+
+<h2 id="swap-nodes-in-pairs">Swap Nodes in Pairs</h2>
+
+<blockquote>
+<p>Given a linked list, swap every two adjacent nodes and return its head. For example, Given 1-&gt;2-&gt;3-&gt;4, you should return the list as 2-&gt;1-&gt;4-&gt;3. Your algorithm should use only constant space. You may not modify the values in the list, only nodes itself can be changed.</p>
+</blockquote>
+
+<pre><code>class Solution:
+    # @param head, a ListNode
+    # @return a ListNode
+    def swapPairs(self, head):
+        # Write your code here
+        if head == None or head.next == None:
+            return head
+        dummy = ListNode(0); dummy.next = head
+        p = dummy
+        while p.next and p.next.next:
+            tmp = p.next.next //store the second node as tmp
+            p.next.next = tmp.next  //link first node to third node
+            tmp.next = p.next  //link second node to first node
+            p.next = tmp   //link p to the second
+            p = p.next.next  // move p to the third
+        return dummy.next
+</code></pre>
+
+<pre><code>public class Solution {
+    /**
+     * @param head a ListNode
+     * @return a ListNode
+     */
+    public ListNode swapPairs(ListNode head) {
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
+        
+        head = dummy;
+        while (head.next != null &amp;&amp; head.next.next != null) {
+            ListNode n1 = head.next, n2 = head.next.next;
+            // head-&gt;n1-&gt;n2-&gt;...
+            // =&gt; head-&gt;n2-&gt;n1-&gt;...
+            head.next = n2;
+            n1.next = n2.next;
+            n2.next = n1;
+            // move to next pair
+            head = n1;
+        }
+        
+        return dummy.next;
+    }
+}
+</code></pre>
+
+<h2 id="count-set-bits-in-an-integer">Count set bits in an integer</h2>
+
+<pre><code>Input : n = 6
+Output : 2
+Binary representation of 6 is 110 and has 2 set bits
+
+Input : n = 13
+Output : 3
+Binary representation of 13 is 1101 and has 3 set bits
+</code></pre>
+
+<h3 id="iterative-method-to-count-set-bits">Iterative Method to Count Set Bits</h3>
+
+<p>The iterative approach requires one iteration per bit. It runs utmost sizeof(int) number of times. Iteration terminates when no more bits are set. In worst case, on a 32-bit word with only the most significant bit set, it will loop through 32 iterations. This solution is the simplest one and useful if 1&rsquo;s are sparse and among the least significant bits.</p>
+
+<pre><code>/* Iterative approach of counting set bits*/
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+ 
+int countSetBits(unsigned int n)
+{
+  unsigned int c; // the total bits set in n
+  for (c = 0; n; n &gt;&gt;= 1)
+  {
+    c += n &amp; 1;
+  }
+  return c;
+}
+ 
+int main(void)
+{
+  unsigned int n;
+  printf(&quot;Enter a positive integer: &quot;);
+  scanf(&quot;%u&quot;, &amp;n);
+  printf(&quot;%d\n&quot;, countSetBits(n));
+}
+</code></pre>
+
+<h3 id="count-set-bits-by-brian-kernighan-s-algorithm">Count Set Bits by Brian Kernighan&rsquo;s Algorithm</h3>
+
+<p>Brian Kernighan&rsquo;s algorithm every time performs a bitwise AND operation between inputted integer n and n-1 and keep c incrementing by 1 until n becomes zero. This solution iterates the number of set bits times through the loop. For example, if we input 17 then loop will iterate only two times, whereas in former solution (iterative method to count set bits) it would iterate 5 times.</p>
+
+<p>Subtraction of 1 from a number toggles all the bits (from right to left) till the rightmost set bit(including the righmost set bit). So if we subtract a number by 1 and do bitwise &amp; with itself (n &amp; (n-1)), we unset the righmost set bit. If we do n &amp; (n-1) in a loop and count the no of times loop executes we get the set bit count.
+Beauty of the this solution is number of times it loops is equal to the number of set bits in a given integer.</p>
+
+<blockquote>
+<ol>
+<li>Initialize count: = 0
+
+<ol>
+<li>If integer n is not zero
+(a) Do bitwise &amp; with (n-1) and assign the value back to n
+  n: = n&amp;(n-1)
+(b) Increment count by 1
+&copy; go to step 2</li>
+<li>Else return count</li>
+</ol></li>
+</ol>
+</blockquote>
+
+<p>e.g countSetBits(9:1001) = 2</p>
+
+<pre><code>   n =  9 (1001)
+   count = 0
+
+   Since 9 &gt; 0, subtract by 1 and do bitwise &amp; with (9-1)
+   n = 9&amp;8  (1001 &amp; 1000)
+   n = 8
+   count  = 1
+
+   Since 8 &gt; 0, subtract by 1 and do bitwise &amp; with (8-1)
+   n = 8&amp;7  (1000 &amp; 0111)
+   n = 0
+   count = 2
+
+   Since n = 0, return count which is 2 now.
+</code></pre>
+
+<pre><code>/* Brian Kernighan's algorithm  of counting set bits*/
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+ 
+int countSetBits(unsigned int n)
+{
+  unsigned int c; // the total bits set in n
+  for (c = 0; n; n = n &amp; (n-1))
+  {
+    c++;
+  }
+  return c;
+}
+ 
+int main(void)
+{
+  unsigned int n;
+  printf(&quot;Enter a positive integer: &quot;);
+  scanf(&quot;%u&quot;, &amp;n);
+  printf(&quot;%d\n&quot;, countSetBits(n));
+}
+</code></pre>
+
+<h2 id="coin-change">Coin Change</h2>
+
+<blockquote>
+<p>You are given coins of different denominations and a total amount of money amount. Write a function to compute the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return -1.</p>
+</blockquote>
+
+<p><strong><em>Example 1:</em></strong><br />
+coins = [1, 2, 5], amount = 11
+return 3 (11 = 5 + 5 + 1)</p>
+
+<p><strong><em>Example 2:</em></strong><br />
+coins = [2], amount = 3
+return -1.</p>
+
+<h3 id="动态规划-dynamic-programming">动态规划（Dynamic Programming）</h3>
+
+<p>状态转移方程：</p>
+
+<blockquote>
+<p>Let dp[v] to be the minimum number of coins required to get the amount v.<br />
+dp[i+a_coin] = min(dp[i+a_coin], dp[i]+1) if dp[i] is reachable.<br />
+dp[i+a_coin] = dp[i+a_coin] is dp[i] is not reachable.<br />
+We initially set dp[i] to be -1.</p>
+</blockquote>
+
+<pre><code>//This solution takes time O(n^2).
+class Solution(object):
+    def coinChange(self, coins, amount):
+        &quot;&quot;&quot;
+        :type coins: List[int]
+        :type amount: int
+        :rtype: int
+        &quot;&quot;&quot;
+        dp = [0] + [-1] * amount
+        for x in range(amount):
+            if dp[x] &lt; 0:
+                continue
+            for c in coins:
+                if x + c &gt; amount:
+                    continue
+                if dp[x + c] &lt; 0 or dp[x + c] &gt; dp[x] + 1:
+                    dp[x + c] = dp[x] + 1
+        return dp[amount]        
+</code></pre>
+
+<h3 id="广度优先搜索-bfs">广度优先搜索（BFS）</h3>
+
+<blockquote>
+<p>We maintain two queues: one of the amount so far(queue) and the other for the minimal steps for each amount(steps). The time is too much because of the contains method take n and total time is O(n^3).</p>
+</blockquote>
+
+<pre><code>class Solution(object):
+    def coinChange(self, coins, amount):
+        &quot;&quot;&quot;
+        :type coins: List[int]
+        :type amount: int
+        :rtype: int
+        &quot;&quot;&quot;
+        steps = collections.defaultdict(int)
+        queue = collections.deque([0])
+        steps[0] = 0
+        while queue:
+            front = queue.popleft()
+            level = steps[front]
+            if front == amount:
+                return level
+            for c in coins:
+                if front + c &gt; amount:
+                    continue
+                if front + c not in steps:
+                    queue += front + c,
+                    steps[front + c] = level + 1
+        return -1
+</code></pre>
+    </article>
+
+    
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/post/2016-11-11-neo4j-cypher/" data-toggle="tooltip" data-placement="top" title="Neo4j Cypher query">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/post/2016-11-04-virtual-dom/" data-toggle="tooltip" data-placement="top" title="reactjs源码分析">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

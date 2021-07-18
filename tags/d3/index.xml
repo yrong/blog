@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>D3 on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/d3/</link>
+    <description>Recent content in D3 on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Wed, 12 Oct 2016 18:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/d3/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>D3.js数据可视化</title>
+      <link>https://yrong.github.io/blog/post/2016-10-12-d3-data-visualization/</link>
+      <pubDate>Wed, 12 Oct 2016 18:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/post/2016-10-12-d3-data-visualization/</guid>
+      <description>&lt;p&gt;D3.js数据可视化&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>程序员必备工具之Jupyter - yrong blog</title>
+  <meta property="og:title" content="程序员必备工具之Jupyter - yrong blog" />
+  <meta name="twitter:title" content="程序员必备工具之Jupyter - yrong blog" />
+  <meta name="description" content="Python利器">
+  <meta property="og:description" content="Python利器">
+  <meta name="twitter:description" content="Python利器">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2016-10-21-jupyter/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">程序员必备工具之Jupyter</h1>
+      <h2 class="article-subtitle">Python利器</h2>
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>October 21, 2016</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/python/">
+            <i class="fas fa-tag"></i>
+            python
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#ipython-和-jupyter">IPython 和 Jupyter</a></li>
+<li><a href="#安装">安装</a>
+<ul>
+<li>
+<ul>
+<li><a href="#远程使用">远程使用</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#快捷操作">快捷操作</a>
+<ul>
+<li>
+<ul>
+<li><a href="#单元类型-cell-type">单元类型 (cell type)</a></li>
+<li><a href="#常用快捷">常用快捷</a></li>
+<li><a href="#拆分单元-split-cell">拆分单元 (split cell)</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#查看对象信息">查看对象信息</a></li>
+<li><a href="#魔术命令">魔术命令</a></li>
+<li><a href="#转换">转换</a></li>
+<li><a href="#data-science-libraries">Data Science Libraries</a>
+<ul>
+<li>
+<ul>
+<li><a href="#pandas">Pandas</a></li>
+<li><a href="#seaborn">Seaborn</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+</aside>
+      <p>程序员必备工具之Jupyter</p>
+
+<h2 id="ipython-和-jupyter">IPython 和 Jupyter</h2>
+
+<p>IPython 是一个 Python REPl shell，环境远比 Python 自带的强大，而 Jupyter Notebook 则是一个基于 IPython REPl 的 Web 应用，运行结果可保存为后缀.ipynb，交互性强，所见即所得，数据分析，写分析报告等的不二利器。</p>
+
+<p>官方解释：</p>
+
+<blockquote>
+<p>The Jupyter Notebook is a web application that allows you to create and share documents that contain live code, equations, visualizations and explanatory text. Uses include: data cleaning and transformation, numerical simulation, statistical modeling, machine learning and much more.</p>
+</blockquote>
+
+<h2 id="安装">安装</h2>
+
+<p>如果安装了 <a href="https://www.continuum.io/downloads">Anaconda</a>，那么你已经有 Jupyter 了，打开终端，输入 <code>jupyter notebook</code> 即可。</p>
+
+<h4 id="远程使用">远程使用</h4>
+
+<p>如果有远程使用的需求，则需把远程服务器配置下。</p>
+
+<pre><code># 服务器下载 ssh 服务，如 Debian
+sudo apt-get install openssh-server
+# 不知道 ssh 是否打开，可以把他重启下
+sudo service sshd restart
+</code></pre>
+
+<p>然后可以在局域网用其他电脑访问下，Mac 可直接在终端输入 <code>ssh username@ip</code>, 这里的 ip 指的局域网下的这台服务器的 ip，建议在路由器设置成静态 ip，若在外网使用，则需在路由器里面设置好端口转发。</p>
+
+<p>然后参考官方教程 <a href="http://jupyter-notebook.readthedocs.org/en/latest/public_server.html">Running a notebook server</a> 配置，有几个地方要注意下：</p>
+
+<p>jupyter_notebook_config.py 这个文件里面 certfile 和 keyfile 的地址应为绝对地址，如我的是</p>
+
+<pre><code>jupyter notebook --certfile=/home/scott/.jupyter/mycert.pem --keyfile /home/scott/.jupyter/mykey.key
+</code></pre>
+
+<p>一大串输入很麻烦，也易出错，建议打开 .zshrc，并在底部添加一行：</p>
+
+<pre><code>alias jn='jupyter notebook --certfile=/home/scott/.jupyter/mycert.pem --keyfile /home/scott/.jupyter/mykey.key'
+</code></pre>
+
+<p>这样到其他电脑键入：</p>
+
+<pre><code>jn
+</code></pre>
+
+<p>若能看到类似下方的输出，证明配置成功了。</p>
+
+<pre><code>[I 09:56:29.937 NotebookApp] The Jupyter Notebook is running at: https://[all ip addresses on your system]:8889/
+</code></pre>
+
+<p>我的端口配置的是 <code>8889</code>， 你也可以设置成其他的，再到路由器里配置下端口转发，大功告成。如果有用 R，也可用类似的方法配置下 <a href="https://www.rstudio.com/products/rstudio/download-server/">RStudio Server</a>，超简单。</p>
+
+<h2 id="快捷操作">快捷操作</h2>
+
+<p>Jupyter Notebook 的快捷键是一大亮点，如果有看过我这篇文章 <a href="http://scottming.com/2016/01/01/remap_keyboard/">《让 CapsLock 键更实用》</a>（昨天顺手把 karabiner 配置的 gist 更新了），并对 Mac 或 Win 做了配置，那么你熟悉几个 Jupyter 的快捷，用 Jupyter 写报告之类基本上不需要鼠标了。</p>
+
+<h4 id="单元类型-cell-type">单元类型 (cell type)</h4>
+
+<p><code>Jupyter Notebook</code>文档由一系列的单元 (cell) 组成，主要用的两类单元是：</p>
+
+<ul>
+<li><code>markdown cell</code>，命令模式下，按 <code>m</code> 可将单元切换为 <code>markdown cell</code> 。</li>
+<li><code>code cell</code>，命令模式下，按 <code>y</code> 可将单元切换为 <code>code cell</code> 。</li>
+</ul>
+
+<h4 id="常用快捷">常用快捷</h4>
+
+<ul>
+<li>查看快捷键帮助: <code>h</code></li>
+<li>保存: <code>s</code></li>
+<li>cell 间移动: <code>j</code>, <code>k</code></li>
+<li>添加 cell: <code>a</code>, <code>b</code></li>
+<li>删除 cell: <code>dd</code></li>
+<li>cell 编辑: <code>x</code>, <code>c</code>, <code>v</code>, <code>z</code></li>
+<li>中断 kernel: <code>ii</code></li>
+<li>重启 kernel: <code>00</code></li>
+<li>注释 code: <code>Ctrl + /</code></li>
+</ul>
+
+<h4 id="拆分单元-split-cell">拆分单元 (split cell)</h4>
+
+<p>编辑模式下按 <code>control + shift + -</code> 可拆分 c ell</p>
+
+<h2 id="查看对象信息">查看对象信息</h2>
+
+<pre><code class="language-python">import numpy as np
+</code></pre>
+
+<p>按 <code>tab</code> 键查看提示信息</p>
+
+<pre><code class="language-python">np.&lt;tab&gt;
+</code></pre>
+
+<p>查找 <code>numpy</code> 模块下，名称含有 <code>cos</code> 的对象</p>
+
+<pre><code class="language-python">np.*cos*?
+</code></pre>
+
+<p>提供 numpy 模块的帮助信息</p>
+
+<pre><code class="language-python">np?
+</code></pre>
+
+<p>提供 numpy 模块更详细的帮助信息</p>
+
+<pre><code class="language-python">np??
+</code></pre>
+
+<p>查看 docstring</p>
+
+<pre><code class="language-python">%pdoc np
+</code></pre>
+
+<h2 id="魔术命令">魔术命令</h2>
+
+<p>最常用的是这个 <code>%matplotlib inline</code>，有点类似 <code>ipython --pylab</code>，画图用的；测试程序运行时间则只需把 <code>%time</code> 放在前面。</p>
+
+<p>更多魔术命令可在 Jupyter Notebook 里键入：</p>
+
+<pre><code class="language-python">%lsmagic
+</code></pre>
+
+<h2 id="转换">转换</h2>
+
+<pre><code># ipynb 文件转为 html
+jupyter nbconvert --to html filename.ipynb
+</code></pre>
+
+<p>更多转换内容，请键入：</p>
+
+<pre><code>jupyter notebook --help
+
+</code></pre>
+
+<p>转换 rst、py、md 等格式都是非常方便的，但转 pdf，对中文的支持不好。必须先装 LaTex，LaTex 则需先把字体等调好。</p>
+
+<p>embed video</p>
+
+<pre><code>from IPython.display import YouTubeVideo
+YouTubeVideo('wxVx54ax47s') # Yes, it can also embed youtube videos.
+
+</code></pre>
+
+<h2 id="data-science-libraries">Data Science Libraries</h2>
+
+<h4 id="pandas">Pandas</h4>
+
+<p>go through most of the  <a href="http://pandas.pydata.org/pandas-docs/stable/10min.html">documentation</a> as a first step,Here are a few quick tricks to whet your appetite:</p>
+
+<pre><code>import pandas as pd
+
+df = pd.DataFrame({ 'A' : 1.,
+                    'B' : pd.Timestamp('20130102'),
+                    'C' : pd.Series(1, index=list(range(4)), dtype='float32'),
+                    'D' : pd.Series([1, 2, 1, 2], dtype='int32'),
+                    'E' : pd.Categorical([&quot;test&quot;, &quot;train&quot;, &quot;test&quot;, &quot;train&quot;]),
+                    'F' : 'foo' })
+df
+</code></pre>
+
+<p>| |A |B |C |D |E |F
+|0 |1 |2013-01-02  |1 |1 |test  |foo
+|1 |1 |2013-01-02  |1 |2 |train |foo
+|2 |1 |2013-01-02  |1 |1 |test  |foo
+|3 |1 |2013-01-02  |1 |2 |train |foo</p>
+
+<pre><code>df.B
+</code></pre>
+
+<p>|0   |2013-01-02
+|1   |2013-01-02
+|2   |2013-01-02
+|3   |2013-01-02</p>
+
+<p>Name: B, dtype: datetime64[ns]</p>
+
+<p>Compute the sum of D for each category in E:</p>
+
+<pre><code>df.groupby('E').sum().D
+</code></pre>
+
+<p>E</p>
+
+<p>|test     |2
+|train    |4</p>
+
+<p>Name: D, dtype: int32</p>
+
+<h4 id="seaborn">Seaborn</h4>
+
+<p>While pandas comes prepackaged with anaconda, seaborn is not directly included but can easily be installed with <code>conda install seaborn</code>. Seaborn essentially treats Matplotlib as a core library (just like Pandas does with NumPy)</p>
+
+<pre><code>%matplotlib inline 
+
+import seaborn as sns
+
+# Load one of the test data sets that come with seaborn
+tips = sns.load_dataset(&quot;tips&quot;)
+
+# statistical plot including the best fitting linear regression line 
+sns.jointplot(&quot;total_bill&quot;, &quot;tip&quot;, tips, kind='reg');
+</code></pre>
+
+<p><img src="/blog/img/line-model.png" alt="" /></p>
+
+<pre><code>tips.head()
+</code></pre>
+
+<p>| |total_bill  |tip |sex |smoker  |day time  |size
+|0 |16.99 |1.01  |Female  |No  |Sun Dinner  |2
+|1 |10.34 |1.66  |Male  |No  |Sun Dinner  |3
+|2 |21.01 |3.50  |Male  |No  |Sun Dinner  |3
+|3 |23.68 |3.31  |Male  |No  |Sun Dinner  |2
+|4 |24.59 |3.61  |Female  |No  |Sun Dinner  |4</p>
+
+<p>We might ask if smokers tip differently than non-smokers. Without seaborn, this would require a pandas groupby together with the complex code for plotting a linear regression. With seaborn, we can provide the column name we wish to split by as a keyword argument to col:</p>
+
+<pre><code>sns.lmplot(&quot;total_bill&quot;, &quot;tip&quot;, tips, col=&quot;smoker&quot;);
+</code></pre>
+
+<p><img src="/blog/img/line-model-2.png" alt="" /></p>
+    </article>
+
+    
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/post/2016-10-23-xss-csrf/" data-toggle="tooltip" data-placement="top" title="XSS与CSRF两种跨站攻击">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/post/2016-10-19-neo4j-replace-rdbms/" data-toggle="tooltip" data-placement="top" title="用图数据库解决关系型数据库存在的问题">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

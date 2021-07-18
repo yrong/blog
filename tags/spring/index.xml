@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Spring on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/spring/</link>
+    <description>Recent content in Spring on yrong blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <lastBuildDate>Fri, 20 Jan 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://yrong.github.io/blog/tags/spring/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Reactive Programming with Spring Reactor</title>
+      <link>https://yrong.github.io/blog/post/2017-01-20-frp/</link>
+      <pubDate>Fri, 20 Jan 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://yrong.github.io/blog/post/2017-01-20-frp/</guid>
+      <description>&lt;p&gt;reactive programming with spring reactor&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

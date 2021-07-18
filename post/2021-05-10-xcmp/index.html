@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>xcmp research - yrong blog</title>
+  <meta property="og:title" content="xcmp research - yrong blog" />
+  <meta name="twitter:title" content="xcmp research - yrong blog" />
+  <meta name="description" content="XCMP Research  xcm format implementation examples  workflow xcm types transact call data(pallet &amp; call index required) #[derive(Encode, Decode)] pub enum RelayTemplatePalletCall { #[codec(index = 100)] // the index should match the position of the module in `construct_runtime!` DoSomething(DoSomethingCall), } #[derive(Encode, Decode)] pub enum DoSomethingCall { #[codec(index = 0)] // the index should match the position of the dispatchable in the target pallet Something(u32), } #[derive(Encode, Decode)] pub enum CrowdloanPalletCall { #[codec(index = 27)] // the index should match the position of the module in `construct_runtime!">
+  <meta property="og:description" content="XCMP Research  xcm format implementation examples  workflow xcm types transact call data(pallet &amp; call index required) #[derive(Encode, Decode)] pub enum RelayTemplatePalletCall { #[codec(index = 100)] // the index should match the position of the module in `construct_runtime!` DoSomething(DoSomethingCall), } #[derive(Encode, Decode)] pub enum DoSomethingCall { #[codec(index = 0)] // the index should match the position of the dispatchable in the target pallet Something(u32), } #[derive(Encode, Decode)] pub enum CrowdloanPalletCall { #[codec(index = 27)] // the index should match the position of the module in `construct_runtime!">
+  <meta name="twitter:description" content="XCMP Research  xcm format implementation examples  workflow xcm types transact call data(pallet &amp; call index required) #[derive(Encode, Decode)] pub enum RelayTemplatePalletCall { #[codec(index = …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2021-05-10-xcmp/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.54.0" />
+
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/js/fontawesome.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">xcmp research</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>May 10, 2021</time></li>
+        <li class="article-meta-tags">
+          <a href="/blog/tags/blockchain/">
+            <i class="fas fa-tag"></i>
+            BlockChain
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+      
+
+<h1 id="xcmp-research">XCMP Research</h1>
+
+<ul>
+<li><a href="https://github.com/paritytech/xcm-format">xcm format</a></li>
+<li><a href="https://w3f.github.io/parachain-implementers-guide">implementation</a></li>
+<li><a href="https://p-adek.tower.im/p/io5i?">examples</a></li>
+</ul>
+
+<h1 id="workflow">workflow</h1>
+
+<p><img src="https://i.imgur.com/QQNMbah.png" alt="" /></p>
+
+<h1 id="xcm-types">xcm types</h1>
+
+<h2 id="transact">transact</h2>
+
+<h3 id="call-data-pallet-call-index-required">call data(pallet &amp; call index required)</h3>
+
+<pre><code>#[derive(Encode, Decode)]
+pub enum RelayTemplatePalletCall {
+	#[codec(index = 100)] // the index should match the position of the module in `construct_runtime!`
+	DoSomething(DoSomethingCall),
+}
+
+#[derive(Encode, Decode)]
+pub enum DoSomethingCall {
+	#[codec(index = 0)] // the index should match the position of the dispatchable in the target pallet
+	Something(u32),
+}
+
+#[derive(Encode, Decode)]
+pub enum CrowdloanPalletCall {
+	#[codec(index = 27)] // the index should match the position of the module in `construct_runtime!`
+	CrowdloanContribute(ContributeCall),
+}
+
+#[derive(Debug, PartialEq, Encode, Decode)]
+pub struct Contribution {
+	#[codec(compact)]
+	index: ParaId,
+	#[codec(compact)]
+	value: BalanceOf,
+	signature: Option&lt;MultiSignature&gt;,
+}
+
+#[derive(Encode, Decode)]
+pub enum ContributeCall {
+	#[codec(index = 1)] // the index should match the position of the dispatchable in the target pallet
+	Contribute(Contribution),
+}
+</code></pre>
+
+<h3 id="format">format</h3>
+
+<pre><code>let call = RelayTemplatePalletCall::DoSomething(DoSomethingCall::Something(some_value)).encode();
+
+let msg = Xcm::Transact {
+    origin_type: OriginKind::SovereignAccount,
+    require_weight_at_most: u64::MAX,
+    call: call.into(),
+};
+</code></pre>
+
+<h2 id="asset-transfer">asset transfer</h2>
+
+<h3 id="depositreserveasset">DepositReserveAsset</h3>
+
+<pre><code> Xcm::WithdrawAsset {
+ assets: vec![MultiAsset::ConcreteFungible {
+     id: location,
+     amount: amount.into(),
+ }],
+ effects: vec![
+     Order::BuyExecution {
+        fees: MultiAsset::All,
+        weight: 0,
+        debt,
+        halt_on_error: false,
+        xcm: vec![]
+    },
+     Order::DepositReserveAsset {
+         assets: vec![MultiAsset::All],
+         dest: MultiLocation::X1(
+             Junction::Parent,
+         ),
+         effects: vec![
+              Order::DepositAsset {
+              assets: vec![MultiAsset::All],
+              dest: MultiLocation::X1(Junction::AccountId32 {
+                    network: NetworkId::Any,
+                    id: T::AccountId32Converter::convert(account),
+              }),
+          }],
+     }],
+}
+</code></pre>
+
+<h2 id="teleport">Teleport</h2>
+
+<pre><code>let msg = Xcm::WithdrawAsset {
+    assets:vec![MultiAsset::ConcreteFungible { id: MultiLocation::Null, amount: some_value }],
+    effects: vec![
+        Order::BuyExecution {
+            fees: MultiAsset::All,
+            weight: 0,
+            debt,
+            halt_on_error: false,
+            xcm: vec![]
+        },
+        Order::InitiateTeleport {
+            assets: vec![MultiAsset::All],
+            dest: MultiLocation::X1(Junction::Parachain(para_id)),
+            effects: vec![
+                Order::BuyExecution {
+                    fees: MultiAsset::All,
+                    weight: 0,
+                    debt,
+                    halt_on_error: false,
+                    xcm: vec![]
+                },
+                Order::DepositAsset {
+                    assets: vec![MultiAsset::All],
+                    dest: MultiLocation::X1(account_32.clone()),
+                },
+            ]
+        }
+    ]
+};
+</code></pre>
+
+<h2 id="test-code">test code</h2>
+
+<p><a href="https://github.com/bifrost-finance/bifrost/pull/117">relax xcm filter</a></p>
+
+<p><a href="https://github.com/yrong/cumulus/blob/394c41bb72b668177fa5246d239fb681c08a6a56/polkadot-parachains/pallets/ping/src/lib.rs#L245-L449">callable function</a></p>
+
+<h2 id="test-envirionment">test envirionment</h2>
+
+<pre><code>host:bifrost-build-machine
+relaychain:19944
+parachain:19947
+</code></pre>
+
+<h2 id="todo">todo</h2>
+
+<ul>
+<li><a href="https://github.com/paritytech/cumulus/blob/16b7b72271901a1486e5fdea30723df9eece53b2/polkadot-parachains/rococo-runtime/src/lib.rs#L275-L286">implement bifrost AssetTransactor</a></li>
+<li>integrate with salp</li>
+<li>trace the progress of xcm polkadot</li>
+<li>other xcm type test&amp;hrmp test</li>
+</ul>
+
+    </article>
+
+    
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/post/2021-07-10-bridge/" data-toggle="tooltip" data-placement="top" title="Light client bridge">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/post/2021-04-26-substrate/" data-toggle="tooltip" data-placement="top" title="substrate tips">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>
