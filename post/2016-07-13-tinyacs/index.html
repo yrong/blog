@@ -62,22 +62,6 @@
         </li>
       </ul>
       
-<aside class="toc">
-  <nav id="TableOfContents">
-<ul>
-<li><a href="#acs-cwmp-https-www-broadband-forum-org-cwmp-php"><a href="https://www.broadband-forum.org/cwmp.php">ACS CWMP</a></a>
-<ul>
-<li><a href="#infrastructure-and-message-flow-for-nbi-request">Infrastructure and message flow for nbi request</a></li>
-<li><a href="#installation-requirements">Installation Requirements</a></li>
-<li><a href="#build-and-start">Build and Start</a>
-<ul>
-<li><a href="#back-end">Back end</a></li>
-<li><a href="#front-end">Front end</a></li>
-</ul></li>
-</ul></li>
-</ul>
-</nav>
-</aside>
       <p>A blazing fast TR-069 auto configuration server (ACS) built with Vertx,Redis, and MongoDB</p>
 
 <h1 id="acs-cwmp-https-www-broadband-forum-org-cwmp-php"><a href="https://www.broadband-forum.org/cwmp.php">ACS CWMP</a></h1>
@@ -104,68 +88,25 @@
 <li>cpe server translate cwmp response to nbi response and send it back to nbi server</li>
 </ol>
 
-<h2 id="installation-requirements">Installation Requirements</h2>
+<h2 id="tech-stacks">Tech Stacks</h2>
 
 <ul>
-<li><p><a href="http://vertx.io/vertx2/install.html">vertx</a>
+<li><p><a href="http://vertx.io">vertx</a>
 事件驱动异步开源框架(nodejs on jvm)</p></li>
 
-<li><p><a href="https://docs.mongodb.com/manual/installation/">mongodb</a>
+<li><p><a href="https://www.mongodb.com/">mongodb</a>
 开源文档数据库</p></li>
 
-<li><p><a href="http://redis.io/topics/quickstart">redis</a>
+<li><p><a href="http://redis.io">redis</a>
 缓存数据结构服务器(small and fast)</p></li>
 
-<li><p><a href="https://www.meteor.com/install">meteor</a>
+<li><p><a href="https://www.meteor.com">meteor</a>
 全栈javascript开发框架(最快方式构建javascript app,including web,mobile,desktop)</p></li>
 </ul>
 
-<h2 id="build-and-start">Build and Start</h2>
+<h2 id="front-end-https-github-com-yrong-tinyacs-ui"><a href="https://github.com/yrong/tinyacs-ui">Front end</a></h2>
 
-<h3 id="back-end">Back end</h3>
-
-<ul>
-<li>build from source</li>
-</ul>
-
-<pre><code class="language-bash">git clone https://github.com/yrong/tinyacs tinyacs
-$ cd tinyacs &amp;&amp; mvn clean install
-</code></pre>
-
-<ul>
-<li>Start Acs-Nbi Server</li>
-</ul>
-
-<pre><code class="language-bash">$ sh restartNbi.sh
-</code></pre>
-
-<p>This is the northbound interface module. It exposes a REST API on port 8081 by default(see conf/cwmp-acs-default-properties.sh). This is needed for the GUI front end to communicate with.</p>
-
-<ul>
-<li>Start Acs-Cpe Server</li>
-</ul>
-
-<pre><code class="language-bash">$ sh restartCpe.sh
-</code></pre>
-
-<p>This is the service that the CPEs will communicate with. It listens to port 8080 by default (see conf/cwmp-acs-default-properties.sh). Configure the ACS URL of your devices accordingly.</p>
-
-<ul>
-<li>Start Cpe Simulator</li>
-</ul>
-
-<pre><code class="language-bash">$ sh restartSim.sh
-</code></pre>
-
-<p>This is the service that simulate a CPE</p>
-
-<h3 id="front-end">Front end</h3>
-
-<pre><code class="language-bash">git clone https://github.com/yrong/tinyacs-ui tinyacs-ui
-$ cd tinyacs-ui &amp;&amp; MONGO_URL=mongodb://localhost:27017/cwmp meteor
-</code></pre>
-
-<p>This is the Front end(based on meteor) of tinyacs and will communicate with Acs-Nbi Server</p>
+<p>This is the Front end based on <a href="https://www.meteor.com">meteor</a> of tinyacs and will communicate with Acs-Nbi Server</p>
     </article>
 
     
