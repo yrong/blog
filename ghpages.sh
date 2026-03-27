@@ -1,12 +1,15 @@
 
 #!/bin/sh
 
-DIR=$(dirname "$0")
+set -e
 
-if [[ $(git status -s) ]]
+DIR=$(dirname "$0")
+cd "$DIR"
+
+if [ -n "$(git status --porcelain)" ]
 then
     echo "The working directory is dirty. Please commit any pending changes."
-    exit 1;
+    exit 1
 fi
 
 echo "Deleting old publication"
@@ -25,4 +28,15 @@ echo "Generating site"
 hugo
 
 echo "Updating gh-pages branch"
-cd public && git add --all && git commit -m "Publishing to gh-pages (publish.sh)"
+cd public
+git add --all
+
+if git diff --cached --quiet
+then
+    echo "No changes to publish on gh-pages"
+else
+    git commit -m "Publishing to gh-pages (publish.sh)"
+fi
+
+echo "Pushing gh-pages branch"
+git push origin gh-pages
