@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Terminology in Polkadot - yrong blog</title>
+  <meta property="og:title" content="Terminology in Polkadot - yrong blog" />
+  <meta name="twitter:title" content="Terminology in Polkadot - yrong blog" />
+  <meta name="description" content="Terminology
+PoV (Proof of Validity)
+The PoV is the data package produced by parachain collators and sent to Relay Chain validators.
+
+
+Purpose: It acts as the &ldquo;argument&rdquo; or evidence that a parachain has transitioned its state correctly
+
+
+Contents: It typically includes the L2&rsquo;s state proof and the witness data (extra data needed for verification)
+
+
+Size: A PoV block is often around 5MB of untrusted data provided to the validator group">
+  <meta property="og:description" content="Terminology
+PoV (Proof of Validity)
+The PoV is the data package produced by parachain collators and sent to Relay Chain validators.
+
+
+Purpose: It acts as the &ldquo;argument&rdquo; or evidence that a parachain has transitioned its state correctly
+
+
+Contents: It typically includes the L2&rsquo;s state proof and the witness data (extra data needed for verification)
+
+
+Size: A PoV block is often around 5MB of untrusted data provided to the validator group">
+  <meta name="twitter:description" content="Terminology
+PoV (Proof of Validity)
+The PoV is the data package produced by parachain collators and sent to Relay Chain validators.
+
+
+Purpose: It acts as the &ldquo;argument&rdquo; or evidence that a …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2021-10-09-polkadot/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Terminology in Polkadot</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>October 9, 2021</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/blockchain/">
+            <i class="fa-solid fa-tag"></i>
+            BlockChain
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/polkadot/">
+            <i class="fa-solid fa-tag"></i>
+            Polkadot
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+      <h1 id="terminology">Terminology</h1>
+<h2 id="pov-proof-of-validity">PoV (Proof of Validity)</h2>
+<p>The PoV is the data package produced by parachain collators and sent to Relay Chain validators.</p>
+<ul>
+<li>
+<p>Purpose: It acts as the &ldquo;argument&rdquo; or evidence that a parachain has transitioned its state correctly</p>
+</li>
+<li>
+<p>Contents: It typically includes the L2&rsquo;s state proof and the witness data (extra data needed for verification)</p>
+</li>
+<li>
+<p>Size: A PoV block is often around 5MB of untrusted data provided to the validator group</p>
+</li>
+</ul>
+<h2 id="pvf-parachain-validation-function">PVF (Parachain Validation Function)</h2>
+<p>The PVF is the specific logic or code stored on the Relay Chain that validators execute to check a parachain block</p>
+<ul>
+<li>
+<p>Purpose: It is the function that processes the PoV to ensure the parachain is proceeding correctly</p>
+</li>
+<li>
+<p>Execution: While the code is stored on the Relay Chain, it is executed &ldquo;in core&rdquo; (off-chain) by validators assigned to that parachain&rsquo;s core</p>
+</li>
+<li>
+<p>Composition: In some contexts, the combination of the state proof and the parachain block is referred to collectively as the PVF</p>
+</li>
+</ul>
+<h2 id="validity--availability">Validity &amp; Availability</h2>
+<ul>
+<li>
+<p>Validity (Proof-of-Validity): Parachain collators produce blocks and send them to validators, who verify the state transitions are valid, rejecting invalid blocks.</p>
+</li>
+<li>
+<p>Data Availability: Before inclusion in the Relay Chain, validators ensure the parachain block data is available (not hidden) by dividing it into erasure-coded chunks, requiring 2/3+ approval.</p>
+</li>
+<li>
+<p>Approval Process: After a block is &ldquo;backed&rdquo; (tentatively approved), it goes through a secondary, more thorough check by a larger group of validators to confirm its final validity.</p>
+</li>
+<li>
+<p>Finality: Once validity and availability are confirmed, the</p>
+</li>
+</ul>
+<h2 id="erasure-coding">Erasure Coding</h2>
+<p>The cryptographic method used in Polkadot to ensure Data Availability (DA) without requiring every validator to store every piece of data from every parachain.</p>
+<ul>
+<li>
+<p>Distribution: The total number of chunks created is equal to the total number of validators in the network. Each validator is sent exactly one unique chunk</p>
+</li>
+<li>
+<p>Reconstruction: The original large message can be reconstructed by collecting only a fraction of these chunks. In Polkadot, this fraction is 1/3</p>
+</li>
+</ul>
+<h1 id="reference">Reference</h1>
+<p><a href="https://medium.com/polkadot-network/the-path-of-a-parachain-block-47d05765d7a">https://medium.com/polkadot-network/the-path-of-a-parachain-block-47d05765d7a</a></p>
+
+    </article>
+
+    
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2021-10-09-polkadot/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Terminology%20in%20Polkadot%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2021-10-09-polkadot/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer pager-noitem">&lt; Newer</li>
+      <li class="pager-older">
+        <a href="/blog/post/2021-07-10-bridge/" data-toggle="tooltip" data-placement="top" title="Light client bridge">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

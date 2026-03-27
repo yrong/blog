@@ -1,104 +1,71 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Blockchain on yrong blog</title>
+    <title>BlockChain on yrong blog</title>
     <link>https://yrong.github.io/blog/tags/blockchain/</link>
-    <description>Recent content in Blockchain on yrong blog</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <description>Recent content in BlockChain on yrong blog</description>
+    <generator>Hugo</generator>
     <language>en</language>
-    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
-    <lastBuildDate>Sat, 10 Jul 2021 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="https://yrong.github.io/blog/tags/blockchain/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
+    <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
+    <lastBuildDate>Sat, 09 Oct 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://yrong.github.io/blog/tags/blockchain/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Terminology in Polkadot</title>
+      <link>https://yrong.github.io/blog/post/2021-10-09-polkadot/</link>
+      <pubDate>Sat, 09 Oct 2021 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2021-10-09-polkadot/</guid>
+      <description>&lt;h1 id=&#34;terminology&#34;&gt;Terminology&lt;/h1&gt;&#xA;&lt;h2 id=&#34;pov-proof-of-validity&#34;&gt;PoV (Proof of Validity)&lt;/h2&gt;&#xA;&lt;p&gt;The PoV is the data package produced by parachain collators and sent to Relay Chain validators.&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;Purpose: It acts as the &amp;ldquo;argument&amp;rdquo; or evidence that a parachain has transitioned its state correctly&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;Contents: It typically includes the L2&amp;rsquo;s state proof and the witness data (extra data needed for verification)&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;Size: A PoV block is often around 5MB of untrusted data provided to the validator group&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Light client bridge</title>
       <link>https://yrong.github.io/blog/post/2021-07-10-bridge/</link>
-      <pubDate>Sat, 10 Jul 2021 00:00:00 +0000</pubDate>
-      
+      <pubDate>Sat, 10 Jul 2021 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/post/2021-07-10-bridge/</guid>
-      <description>Light client bridge Light client bridge will relay every block from source chain to target chain, normally for asset transfer just need to lock asset in some backing module or smart contract in source chain and mint the mapping asset in target chain
-Components Since the chain cannot directly access each other, the cross-chain data submission needs to be completed by a third party. This third party is the bridge relayers.</description>
+      <description>&lt;h1 id=&#34;light-client-bridge&#34;&gt;Light client bridge&lt;/h1&gt;&#xA;&lt;p&gt;Light client bridge will relay every block from source chain to target chain, normally for asset transfer just need to lock asset in some backing module or smart contract in source chain and mint the mapping asset in target chain&lt;/p&gt;&#xA;&lt;h2 id=&#34;components&#34;&gt;Components&lt;/h2&gt;&#xA;&lt;p&gt;Since the chain cannot directly access each other, the cross-chain data submission needs to be completed by a third party. This third party is the bridge relayers.&#xA;Anyone can become a bridge relayer, and the bridge relayer obtains income by completing the relay task between the bridges. This incentive can promote the stable existence of bridge relayers to ensure the bridge’s regular operation.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>xcmp research</title>
       <link>https://yrong.github.io/blog/post/2021-05-10-xcmp/</link>
-      <pubDate>Mon, 10 May 2021 00:00:00 +0000</pubDate>
-      
+      <pubDate>Mon, 10 May 2021 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/post/2021-05-10-xcmp/</guid>
-      <description>XCMP Research  xcm format implementation examples  workflow xcm types transact call data(pallet &amp;amp; call index required) #[derive(Encode, Decode)] pub enum RelayTemplatePalletCall { #[codec(index = 100)] // the index should match the position of the module in `construct_runtime!` DoSomething(DoSomethingCall), } #[derive(Encode, Decode)] pub enum DoSomethingCall { #[codec(index = 0)] // the index should match the position of the dispatchable in the target pallet Something(u32), } #[derive(Encode, Decode)] pub enum CrowdloanPalletCall { #[codec(index = 27)] // the index should match the position of the module in `construct_runtime!</description>
+      <description>&lt;h1 id=&#34;xcmp-research&#34;&gt;XCMP Research&lt;/h1&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://github.com/paritytech/xcm-format&#34;&gt;xcm format&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://w3f.github.io/parachain-implementers-guide&#34;&gt;implementation&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://p-adek.tower.im/p/io5i?&#34;&gt;examples&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h1 id=&#34;workflow&#34;&gt;workflow&lt;/h1&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://i.imgur.com/QQNMbah.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h1 id=&#34;xcm-types&#34;&gt;xcm types&lt;/h1&gt;&#xA;&lt;h2 id=&#34;transact&#34;&gt;transact&lt;/h2&gt;&#xA;&lt;h3 id=&#34;call-datapallet--call-index-required&#34;&gt;call data(pallet &amp;amp; call index required)&lt;/h3&gt;&#xA;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;#[derive(Encode, Decode)]&#xA;pub enum RelayTemplatePalletCall {&#xA;&#x9;#[codec(index = 100)] // the index should match the position of the module in `construct_runtime!`&#xA;&#x9;DoSomething(DoSomethingCall),&#xA;}&#xA;&#xA;#[derive(Encode, Decode)]&#xA;pub enum DoSomethingCall {&#xA;&#x9;#[codec(index = 0)] // the index should match the position of the dispatchable in the target pallet&#xA;&#x9;Something(u32),&#xA;}&#xA;&#xA;#[derive(Encode, Decode)]&#xA;pub enum CrowdloanPalletCall {&#xA;&#x9;#[codec(index = 27)] // the index should match the position of the module in `construct_runtime!`&#xA;&#x9;CrowdloanContribute(ContributeCall),&#xA;}&#xA;&#xA;#[derive(Debug, PartialEq, Encode, Decode)]&#xA;pub struct Contribution {&#xA;&#x9;#[codec(compact)]&#xA;&#x9;index: ParaId,&#xA;&#x9;#[codec(compact)]&#xA;&#x9;value: BalanceOf,&#xA;&#x9;signature: Option&amp;lt;MultiSignature&amp;gt;,&#xA;}&#xA;&#xA;#[derive(Encode, Decode)]&#xA;pub enum ContributeCall {&#xA;&#x9;#[codec(index = 1)] // the index should match the position of the dispatchable in the target pallet&#xA;&#x9;Contribute(Contribution),&#xA;}&#xA;&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;format&#34;&gt;format&lt;/h3&gt;&#xA;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;let call = RelayTemplatePalletCall::DoSomething(DoSomethingCall::Something(some_value)).encode();&#xA;&#xA;let msg = Xcm::Transact {&#xA;    origin_type: OriginKind::SovereignAccount,&#xA;    require_weight_at_most: u64::MAX,&#xA;    call: call.into(),&#xA;};&#xA;&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;asset-transfer&#34;&gt;asset transfer&lt;/h2&gt;&#xA;&lt;h3 id=&#34;depositreserveasset&#34;&gt;DepositReserveAsset&lt;/h3&gt;&#xA;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt; Xcm::WithdrawAsset {&#xA; assets: vec![MultiAsset::ConcreteFungible {&#xA;     id: location,&#xA;     amount: amount.into(),&#xA; }],&#xA; effects: vec![&#xA;     Order::BuyExecution {&#xA;        fees: MultiAsset::All,&#xA;        weight: 0,&#xA;        debt,&#xA;        halt_on_error: false,&#xA;        xcm: vec![]&#xA;    },&#xA;     Order::DepositReserveAsset {&#xA;         assets: vec![MultiAsset::All],&#xA;         dest: MultiLocation::X1(&#xA;             Junction::Parent,&#xA;         ),&#xA;         effects: vec![&#xA;              Order::DepositAsset {&#xA;              assets: vec![MultiAsset::All],&#xA;              dest: MultiLocation::X1(Junction::AccountId32 {&#xA;                    network: NetworkId::Any,&#xA;                    id: T::AccountId32Converter::convert(account),&#xA;              }),&#xA;          }],&#xA;     }],&#xA;}&#xA;&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;teleport&#34;&gt;Teleport&lt;/h2&gt;&#xA;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;let msg = Xcm::WithdrawAsset {&#xA;    assets:vec![MultiAsset::ConcreteFungible { id: MultiLocation::Null, amount: some_value }],&#xA;    effects: vec![&#xA;        Order::BuyExecution {&#xA;            fees: MultiAsset::All,&#xA;            weight: 0,&#xA;            debt,&#xA;            halt_on_error: false,&#xA;            xcm: vec![]&#xA;        },&#xA;        Order::InitiateTeleport {&#xA;            assets: vec![MultiAsset::All],&#xA;            dest: MultiLocation::X1(Junction::Parachain(para_id)),&#xA;            effects: vec![&#xA;                Order::BuyExecution {&#xA;                    fees: MultiAsset::All,&#xA;                    weight: 0,&#xA;                    debt,&#xA;                    halt_on_error: false,&#xA;                    xcm: vec![]&#xA;                },&#xA;                Order::DepositAsset {&#xA;                    assets: vec![MultiAsset::All],&#xA;                    dest: MultiLocation::X1(account_32.clone()),&#xA;                },&#xA;            ]&#xA;        }&#xA;    ]&#xA;};&#xA;&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;test-code&#34;&gt;test code&lt;/h2&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/bifrost-finance/bifrost/pull/117&#34;&gt;relax xcm filter&lt;/a&gt;&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>substrate tips</title>
       <link>https://yrong.github.io/blog/post/2021-04-26-substrate/</link>
-      <pubDate>Mon, 26 Apr 2021 00:00:00 +0000</pubDate>
-      
+      <pubDate>Mon, 26 Apr 2021 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/post/2021-04-26-substrate/</guid>
-      <description> upgrade to substrate 3.0 guidelines
-check
-example
-macros
-runtime migration  kb
- examples  examples
- tips  custom order
-include deprecated types
-check storage version
- weights  doc
- </description>
+      <description>&lt;h1 id=&#34;upgrade-to-substrate-30&#34;&gt;upgrade to substrate 3.0&lt;/h1&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://crates.parity.io/frame_support/attr.pallet.html#upgrade-guidelines&#34;&gt;guidelines&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://crates.parity.io/frame_support/attr.pallet.html#checking-upgrade-guidelines&#34;&gt;check&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/paritytech/substrate/pull/7984/&#34;&gt;example&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/paritytech/substrate/blob/master/frame/support/src/lib.rs&#34;&gt;macros&lt;/a&gt;&lt;/p&gt;&#xA;&lt;h1 id=&#34;runtime-migration&#34;&gt;runtime migration&lt;/h1&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://substrate.dev/docs/en/knowledgebase/runtime/upgrades#storage-migrations&#34;&gt;kb&lt;/a&gt;&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;h2 id=&#34;examples&#34;&gt;examples&lt;/h2&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/apopiak/substrate-migrations&#34;&gt;examples&lt;/a&gt;&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;h3 id=&#34;tips&#34;&gt;tips&lt;/h3&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/hicommonwealth/edgeware-node/blob/7b66f4f0a9ec184fdebcccd41533acc728ebe9dc/node/runtime/src/lib.rs#L845-L866&#34;&gt;custom order&lt;/a&gt;&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/hicommonwealth/substrate/blob/5f3933f5735a75d2d438341ec6842f269b886aaa/frame/indices/src/migration.rs#L5-L22&#34;&gt;include deprecated types&lt;/a&gt;&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/paritytech/substrate/blob/c79b522a11bbc7b3cf2f4a9c0a6627797993cb79/frame/elections-phragmen/src/lib.rs#L119-L157&#34;&gt;check storage version&lt;/a&gt;&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;h3 id=&#34;weights&#34;&gt;weights&lt;/h3&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://crates.parity.io/frame_support/weights/index.html&#34;&gt;doc&lt;/a&gt;&lt;/p&gt;&#xA;&lt;/blockquote&gt;</description>
     </item>
-    
     <item>
       <title>bifrost defi</title>
       <link>https://yrong.github.io/blog/post/2021-04-17-bifrost/</link>
-      <pubDate>Sat, 17 Apr 2021 00:00:00 +0000</pubDate>
-      
+      <pubDate>Sat, 17 Apr 2021 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/post/2021-04-17-bifrost/</guid>
       <description>&lt;p&gt;Bifrost is a parachain that allows users to deposit their staking tokens and mint vTokens to get staking liquidity.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Darwinia Bridge</title>
       <link>https://yrong.github.io/blog/post/2021-04-02-darwinia-bridger/</link>
-      <pubDate>Fri, 02 Apr 2021 00:00:00 +0000</pubDate>
-      
+      <pubDate>Fri, 02 Apr 2021 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/post/2021-04-02-darwinia-bridger/</guid>
-      <description>Theory White Paper
-Principle
-Darwinia-Ethereum Bridge
-Projects Navigation Darwinia Bridge cross-chain overview
-Background ERC223
-ERC721
-Patricia Merkle Trees
-Mining difficulty calculate
-mmr
-relay game
-Bridger Relayers (aka. Bridgers) in Darwinia Network are offchain worker clients which help relay the headers and messages between source chains and target chains
-Background actix
-deprecated dj
-Shadow Services for bridger which retrieve header data from public chains and generate mmr proof
-Background ffi</description>
+      <description>&lt;h1 id=&#34;theory&#34;&gt;Theory&lt;/h1&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://darwinia.network/ChainRelay_Technical_Paper(Preview)_EN.pdf&#34;&gt;White Paper&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://docs.darwinia.network/docs/en/rfc-0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains/&#34;&gt;Principle&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://docs.google.com/document/d/1NVDSk6KZXV5CjE20cNPA8Swmmd89IYeWyN0T9lRBOEM&#34;&gt;Darwinia-Ethereum Bridge&lt;/a&gt;&lt;/p&gt;&#xA;&lt;h1 id=&#34;projects-navigation&#34;&gt;Projects Navigation&lt;/h1&gt;&#xA;&lt;h2 id=&#34;darwinia-bridge&#34;&gt;&lt;a href=&#34;https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge&#34;&gt;Darwinia Bridge&lt;/a&gt;&lt;/h2&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://miro.medium.com/max/700/0*W_Q1-GWv4JeCCQ7x&#34;&gt;cross-chain overview&lt;/a&gt;&lt;/p&gt;&#xA;&lt;h3 id=&#34;background&#34;&gt;Background&lt;/h3&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/Dexaran/ERC223-token-standard&#34;&gt;ERC223&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://zhuanlan.zhihu.com/p/35019858&#34;&gt;ERC721&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://eth.wiki/concepts/light-client-protocol&#34;&gt;Patricia Merkle Trees&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md&#34;&gt;Mining difficulty calculate&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/nervosnetwork/merkle-mountain-range&#34;&gt;mmr&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/darwinia-network/darwinia-common/blob/master/frame/bridge/relayer-game/README.md&#34;&gt;relay game&lt;/a&gt;&lt;/p&gt;&#xA;&lt;h2 id=&#34;bridger&#34;&gt;&lt;a href=&#34;https://github.com/darwinia-network/bridger&#34;&gt;Bridger&lt;/a&gt;&lt;/h2&gt;&#xA;&lt;p&gt;Relayers (aka. Bridgers) in Darwinia Network are offchain worker clients which help relay the headers and messages between source chains and target chains&lt;/p&gt;&#xA;&lt;h3 id=&#34;background-1&#34;&gt;Background&lt;/h3&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/actix/actix&#34;&gt;actix&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;deprecated &lt;a href=&#34;https://github.com/darwinia-network/dj&#34;&gt;dj&lt;/a&gt;&lt;/p&gt;&#xA;&lt;h2 id=&#34;shadow&#34;&gt;&lt;a href=&#34;https://github.com/darwinia-network/shadow&#34;&gt;Shadow&lt;/a&gt;&lt;/h2&gt;&#xA;&lt;p&gt;Services for bridger which retrieve header data from public chains and generate mmr proof&lt;/p&gt;&#xA;&lt;h3 id=&#34;background-2&#34;&gt;Background&lt;/h3&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#using-extern-functions-to-call-external-code&#34;&gt;ffi&lt;/a&gt;&lt;/p&gt;&#xA;&lt;h2 id=&#34;wormhole&#34;&gt;&lt;a href=&#34;https://github.com/darwinia-network/wormhole&#34;&gt;Wormhole&lt;/a&gt;&lt;/h2&gt;&#xA;&lt;h3 id=&#34;background-3&#34;&gt;Background&lt;/h3&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://docs.darwinia.network/docs/en/wiki-tut-wormhole-general/&#34;&gt;wiki&lt;/a&gt;&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Phragmen election</title>
       <link>https://yrong.github.io/blog/post/2021-03-07-phragmen/</link>
-      <pubDate>Sun, 07 Mar 2021 00:00:00 +0000</pubDate>
-      
+      <pubDate>Sun, 07 Mar 2021 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/post/2021-03-07-phragmen/</guid>
       <description>&lt;p&gt;The problem that Phragmén’s methods try to solve is that of electing a set of a given numbers of persons from a larger set of candidates. Phragmén discussed this in the context of a parliamentary election in a multi-member constituency; the same problem can, of course, also occur in local elections, but also in many other situations such as electing a board or a committee in an organization.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Build Your Own Blockchains in JavaScript from Zero</title>
       <link>https://yrong.github.io/blog/post/2017-08-19-blockchain/</link>
-      <pubDate>Sat, 19 Aug 2017 00:00:00 +0000</pubDate>
-      
+      <pubDate>Sat, 19 Aug 2017 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/post/2017-08-19-blockchain/</guid>
       <description>&lt;p&gt;Build Your Own Blockchains in JavaScript from Zero (Scratch)&lt;/p&gt;</description>
     </item>
-    
   </channel>
 </rss>

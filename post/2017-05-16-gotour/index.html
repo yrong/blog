@@ -14,22 +14,23 @@
   <meta property="og:url" content="https://yrong.github.io/blog/post/2017-05-16-gotour/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
-
+  <meta name="generator" content="Hugo 0.159.1">
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -49,8 +50,8 @@
       <ul class="article-meta">
         <li class="article-meta-date"><time>May 16, 2017</time></li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/golang/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/golang/">
+            <i class="fa-solid fa-tag"></i>
             golang
           </a>&nbsp;
         </li>
@@ -58,20 +59,15 @@
       
 <aside class="toc">
   <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#directory">Directory</a></li>
-<li><a href="#source-code">Source code</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#directory">Directory</a></li>
+    <li><a href="#source-code">Source code</a></li>
+  </ul>
 </nav>
 </aside>
       <p>GoTour as a web project to study golang</p>
-
 <h2 id="directory">Directory</h2>
-
-<pre><code>➜  tour git:(master) ✗ tree -L 1
+<pre tabindex="0"><code>➜  tour git:(master) ✗ tree -L 1
 .
 ├── app.yaml
 ├── AUTHORS
@@ -92,31 +88,21 @@
 ├── TRANSLATE
 ├── tree
 └── wc
-</code></pre>
-
-<p>solutions：文档中execise的答案，与go-tour网站无关</p>
-
+</code></pre><p>solutions：文档中execise的答案，与go-tour网站无关</p>
 <p>static：这个文件夹是存放静态资源，js，css，html都是放在这里面</p>
-
 <p>tree：这个文件夹存放程序自动生成一个树的代码包。这个是具体的功能才使用到的，与网站无关</p>
-
 <p>wc：测试套件。这个是具体的练习题中才使用的到，与网站无关</p>
-
 <p>pic：对图片的处理包。这个是具体的练习题中才使用到的，与网站无关</p>
-
 <p>gotour：这个才是真正的go-tour的入口，main包在这里</p>
-
 <h2 id="source-code">Source code</h2>
-
 <p>从gotour/local.go入口</p>
-
-<pre><code>func main() {
+<pre tabindex="0"><code>func main() {
 ...
-    if err := initTour(root, &quot;SocketTransport&quot;); err != nil {
+    if err := initTour(root, &#34;SocketTransport&#34;); err != nil {
 		log.Fatal(err)
 	}
     //response with uiContent generated as following
-	http.HandleFunc(&quot;/&quot;, rootHandler)
+	http.HandleFunc(&#34;/&#34;, rootHandler)
 	/*lessons encoded as json
 	lesson := Lesson{
               		doc.Title,
@@ -124,47 +110,44 @@
               		make([]Page, len(doc.Sections)),
               	}
     */
-	http.HandleFunc(&quot;/lesson/&quot;, lessonHandler)
+	http.HandleFunc(&#34;/lesson/&#34;, lessonHandler)
 
-	origin := &amp;url.URL{Scheme: &quot;http&quot;, Host: host + &quot;:&quot; + port}
+	origin := &amp;url.URL{Scheme: &#34;http&#34;, Host: host + &#34;:&#34; + port}
 	//websocket to invoke golang code dynamiclly
 	http.Handle(socketPath, socket.NewHandler(origin))
 
 	// Keep these static file handlers in sync with ../app.yaml.
 	static := http.FileServer(http.Dir(root))
-	http.Handle(&quot;/content/img/&quot;, static)
-	http.Handle(&quot;/static/&quot;, static)
-	imgDir := filepath.Join(root, &quot;static&quot;, &quot;img&quot;)
-	http.Handle(&quot;/favicon.ico&quot;, http.FileServer(http.Dir(imgDir)))
+	http.Handle(&#34;/content/img/&#34;, static)
+	http.Handle(&#34;/static/&#34;, static)
+	imgDir := filepath.Join(root, &#34;static&#34;, &#34;img&#34;)
+	http.Handle(&#34;/favicon.ico&#34;, http.FileServer(http.Dir(imgDir)))
 ...
 }
-</code></pre>
-
-<p>initTour初始化资源</p>
-
-<pre><code>func initTour(root, transport string) error {
+</code></pre><p>initTour初始化资源</p>
+<pre tabindex="0"><code>func initTour(root, transport string) error {
 	// Make sure playground is enabled before rendering.
 	present.PlayEnabled = true
 
 	// Set up templates.
-	action := filepath.Join(root, &quot;template&quot;, &quot;action.tmpl&quot;)//template for lesson
+	action := filepath.Join(root, &#34;template&#34;, &#34;action.tmpl&#34;)//template for lesson
 	//take https://godoc.org/golang.org/x/tools/present for reference
 	tmpl, err := present.Template().ParseFiles(action)
 	if err != nil {
-		return fmt.Errorf(&quot;parse templates: %v&quot;, err)
+		return fmt.Errorf(&#34;parse templates: %v&#34;, err)
 	}
 
 	// Init lessons.
-	contentPath := filepath.Join(root, &quot;content&quot;)
+	contentPath := filepath.Join(root, &#34;content&#34;)
 	if err := initLessons(tmpl, contentPath); err != nil {
-		return fmt.Errorf(&quot;init lessons: %v&quot;, err)
+		return fmt.Errorf(&#34;init lessons: %v&#34;, err)
 	}
 
 	// Init UI
-	index := filepath.Join(root, &quot;template&quot;, &quot;index.tmpl&quot;)//template for ui
+	index := filepath.Join(root, &#34;template&#34;, &#34;index.tmpl&#34;)//template for ui
 	ui, err := template.ParseFiles(index)
 	if err != nil {
-		return fmt.Errorf(&quot;parse index.tmpl: %v&quot;, err)
+		return fmt.Errorf(&#34;parse index.tmpl: %v&#34;, err)
 	}
 	buf := new(bytes.Buffer)
 
@@ -174,7 +157,7 @@
 	}{socketAddr(), template.JS(transport)}
     //generate uiContent
 	if err := ui.Execute(buf, data); err != nil {
-		return fmt.Errorf(&quot;render UI: %v&quot;, err)
+		return fmt.Errorf(&#34;render UI: %v&#34;, err)
 	}
 	uiContent = buf.Bytes()
 
@@ -192,7 +175,7 @@ func initLessons(tmpl *template.Template, content string) error {
 		return err
 	}
 	for _, f := range files {
-		if filepath.Ext(f) != &quot;.article&quot; {//one lesson for each article
+		if filepath.Ext(f) != &#34;.article&#34; {//one lesson for each article
 			continue
 		}
 		/*lesson := Lesson{
@@ -202,9 +185,9 @@ func initLessons(tmpl *template.Template, content string) error {
           	}*/
 		content, err := parseLesson(tmpl, filepath.Join(content, f))
 		if err != nil {
-			return fmt.Errorf(&quot;parsing %v: %v&quot;, f, err)
+			return fmt.Errorf(&#34;parsing %v: %v&#34;, f, err)
 		}
-		name := strings.TrimSuffix(f, &quot;.article&quot;)
+		name := strings.TrimSuffix(f, &#34;.article&#34;)
 		lessons[name] = content
 	}
 	return nil
@@ -216,52 +199,49 @@ func initScript(root string) error {
 	modTime := time.Now()
 	b := new(bytes.Buffer)
 
-	content, ok := static.Files[&quot;playground.js&quot;]
+	content, ok := static.Files[&#34;playground.js&#34;]
 	if !ok {
-		return fmt.Errorf(&quot;playground.js not found in static files&quot;)
+		return fmt.Errorf(&#34;playground.js not found in static files&#34;)
 	}
 	b.WriteString(content)
 
 	// Keep this list in dependency order
 	files := []string{
-		&quot;static/lib/jquery.min.js&quot;,
-		&quot;static/lib/jquery-ui.min.js&quot;,
-		&quot;static/lib/angular.min.js&quot;,
-		&quot;static/lib/codemirror/lib/codemirror.js&quot;,
-		&quot;static/lib/codemirror/mode/go/go.js&quot;,
-		&quot;static/lib/angular-ui.min.js&quot;,
-		&quot;static/js/app.js&quot;,
-		&quot;static/js/controllers.js&quot;,
-		&quot;static/js/directives.js&quot;,
-		&quot;static/js/services.js&quot;,
-		&quot;static/js/values.js&quot;,
+		&#34;static/lib/jquery.min.js&#34;,
+		&#34;static/lib/jquery-ui.min.js&#34;,
+		&#34;static/lib/angular.min.js&#34;,
+		&#34;static/lib/codemirror/lib/codemirror.js&#34;,
+		&#34;static/lib/codemirror/mode/go/go.js&#34;,
+		&#34;static/lib/angular-ui.min.js&#34;,
+		&#34;static/js/app.js&#34;,
+		&#34;static/js/controllers.js&#34;,
+		&#34;static/js/directives.js&#34;,
+		&#34;static/js/services.js&#34;,
+		&#34;static/js/values.js&#34;,
 	}
 
 	for _, file := range files {
 		f, err := ioutil.ReadFile(filepath.Join(root, file))
 		if err != nil {
-			return fmt.Errorf(&quot;couldn't open %v: %v&quot;, file, err)
+			return fmt.Errorf(&#34;couldn&#39;t open %v: %v&#34;, file, err)
 		}
 		_, err = b.Write(f)
 		if err != nil {
-			return fmt.Errorf(&quot;error concatenating %v: %v&quot;, file, err)
+			return fmt.Errorf(&#34;error concatenating %v: %v&#34;, file, err)
 		}
 	}
 
-	http.HandleFunc(&quot;/script.js&quot;, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set(&quot;Content-type&quot;, &quot;application/javascript&quot;)
+	http.HandleFunc(&#34;/script.js&#34;, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(&#34;Content-type&#34;, &#34;application/javascript&#34;)
 		// Set expiration time in one week.
-		w.Header().Set(&quot;Cache-control&quot;, &quot;max-age=604800&quot;)
-		http.ServeContent(w, r, &quot;&quot;, modTime, bytes.NewReader(b.Bytes()))
+		w.Header().Set(&#34;Cache-control&#34;, &#34;max-age=604800&#34;)
+		http.ServeContent(w, r, &#34;&#34;, modTime, bytes.NewReader(b.Bytes()))
 	})
 
 	return nil
 }
-</code></pre>
-
-<p>websocket handler</p>
-
-<pre><code>func NewHandler(origin *url.URL) websocket.Server {
+</code></pre><p>websocket handler</p>
+<pre tabindex="0"><code>func NewHandler(origin *url.URL) websocket.Server {
 	return websocket.Server{
 		Config:    websocket.Config{Origin: origin},
 		Handshake: handshake,
@@ -307,11 +287,11 @@ func socketHandler(c *websocket.Conn) {
 		select {
 		case m := &lt;-in:
 			switch m.Kind {
-			case &quot;run&quot;:
-				log.Println(&quot;running snippet from:&quot;, c.Request().RemoteAddr)
+			case &#34;run&#34;:
+				log.Println(&#34;running snippet from:&#34;, c.Request().RemoteAddr)
 				proc[m.Id].Kill()
 				proc[m.Id] = startProcess(m.Id, m.Body, out, m.Options)
-			case &quot;kill&quot;:
+			case &#34;kill&#34;:
 				proc[m.Id].Kill()
 			}
 		case err := &lt;-errc:
@@ -327,11 +307,33 @@ func socketHandler(c *websocket.Conn) {
 		}
 	}
 }
-
 </code></pre>
     </article>
 
     
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2017-05-16-gotour/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=gotour%20code%20analysis%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2017-05-16-gotour/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
 
 
     <ul class="pager article-pager">
@@ -346,7 +348,7 @@ func socketHandler(c *websocket.Conn) {
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>

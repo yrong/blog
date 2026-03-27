@@ -14,22 +14,23 @@
   <meta property="og:url" content="https://yrong.github.io/blog/post/2016-10-13-elasticsearch-query-dsl/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
-
+  <meta name="generator" content="Hugo 0.159.1">
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -49,8 +50,8 @@
       <ul class="article-meta">
         <li class="article-meta-date"><time>October 13, 2016</time></li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/elasticsearch/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/elasticsearch/">
+            <i class="fa-solid fa-tag"></i>
             elasticsearch
           </a>&nbsp;
         </li>
@@ -58,176 +59,173 @@
       
 <aside class="toc">
   <nav id="TableOfContents">
-<ul>
-<li><a href="#elasticsearch-query-dsl-examples">ElasticSearch Query DSL Examples</a>
-<ul>
-<li>
-<ul>
-<li><a href="#bucket-selector-aggregation-https-www-elastic-co-guide-en-elasticsearch-reference-master-search-aggregations-pipeline-bucket-selector-aggregation-html-bucket-script-aggregation-https-www-elastic-co-guide-en-elasticsearch-reference-master-search-aggregations-pipeline-bucket-script-aggregation-html"><a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-pipeline-bucket-selector-aggregation.html">bucket-selector-aggregation</a> &amp; <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-pipeline-bucket-script-aggregation.html">bucket-script-aggregation</a></a></li>
-<li><a href="#query-time-boosting-https-www-elastic-co-guide-en-elasticsearch-guide-current-query-time-boosting-html"><a href="https://www.elastic.co/guide/en/elasticsearch/guide/current/query-time-boosting.html">query-time-boosting</a></a></li>
-<li><a href="#phrase-matching-https-www-elastic-co-guide-en-elasticsearch-guide-current-slop-html"><a href="https://www.elastic.co/guide/en/elasticsearch/guide/current/slop.html">Phrase Matching</a></a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#bucket-selector-aggregation--bucket-script-aggregation">bucket-selector-aggregation &amp; bucket-script-aggregation</a></li>
+        <li><a href="#query-time-boosting">query-time-boosting</a></li>
+        <li><a href="#phrase-matching">Phrase Matching</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
 </aside>
       <p>ElasticSearch Query DSL Examples</p>
-
 <h1 id="elasticsearch-query-dsl-examples">ElasticSearch Query DSL Examples</h1>
-
 <blockquote>
 <ul>
 <li>加载<a href="https://github.com/medcl/elasticsearch-analysis-ik">ik</a>分词插件,配置开启inline脚本</li>
 </ul>
 </blockquote>
-
-<pre><code>script.inline: true
+<pre tabindex="0"><code>script.inline: true
 script.indexed: true
-</code></pre>
-
-<blockquote>
+</code></pre><blockquote>
 <ul>
 <li>建索引</li>
 </ul>
 </blockquote>
-
-<pre><code class="language-bash">curl -XDELETE 'localhost:9200/text'
-curl -XPUT 'localhost:9200/text?pretty'
-</code></pre>
-
-<blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -XDELETE <span style="color:#e6db74">&#39;localhost:9200/text&#39;</span>
+</span></span><span style="display:flex;"><span>curl -XPUT <span style="color:#e6db74">&#39;localhost:9200/text?pretty&#39;</span>
+</span></span></code></pre></div><blockquote>
 <ul>
 <li>mapping定义</li>
 </ul>
 </blockquote>
-
-<pre><code class="language-bash">curl -XPOST http://localhost:9200/text/mytext/_mapping -d'
-{
-    &quot;mytext&quot;: {  
-        &quot;_all&quot;: {
-            &quot;analyzer&quot;: &quot;ik_max_word&quot;,
-            &quot;search_analyzer&quot;: &quot;ik_max_word&quot;,
-            &quot;term_vector&quot;: &quot;no&quot;,
-            &quot;store&quot;: &quot;false&quot;
-        },
-        &quot;properties&quot;: {
-            &quot;content&quot;: {
-                &quot;type&quot;: &quot;string&quot;,
-                &quot;analyzer&quot;: &quot;ik_max_word&quot;,
-                &quot;search_analyzer&quot;: &quot;ik_max_word&quot;,
-                &quot;include_in_all&quot;: &quot;true&quot;,
-                &quot;boost&quot;: 8
-            },
-            &quot;ttl&quot;: {
-          		&quot;properties&quot;: {&quot;$date&quot;: { &quot;type&quot;: &quot;date&quot;}}
-        	}
-    }
-    }
-}'
-</code></pre>
-
-<blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -XPOST http://localhost:9200/text/mytext/_mapping -d<span style="color:#e6db74">&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;mytext&#34;: {  
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;_all&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            &#34;analyzer&#34;: &#34;ik_max_word&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            &#34;search_analyzer&#34;: &#34;ik_max_word&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            &#34;term_vector&#34;: &#34;no&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            &#34;store&#34;: &#34;false&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        },
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;properties&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            &#34;content&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                &#34;type&#34;: &#34;string&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                &#34;analyzer&#34;: &#34;ik_max_word&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                &#34;search_analyzer&#34;: &#34;ik_max_word&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                &#34;include_in_all&#34;: &#34;true&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                &#34;boost&#34;: 8
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            },
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            &#34;ttl&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">          		&#34;properties&#34;: {&#34;$date&#34;: { &#34;type&#34;: &#34;date&#34;}}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        	}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">}&#39;</span>
+</span></span></code></pre></div><blockquote>
 <ul>
 <li>导入测试数据</li>
 </ul>
 </blockquote>
-
-<pre><code class="language-bash">curl -XPUT 'localhost:9200/text/mytext/5?pretty' -d'
-{&quot;url&quot;: &quot;sina.com&quot;,&quot;content&quot;:&quot;今年反正我都会避让，不给自己找麻烦&quot;,&quot;ch&quot;:7,&quot;it&quot;:14361982,&quot;appid&quot;:{&quot;$numberLong&quot;:&quot;1&quot;},&quot;ttl&quot;:{&quot;$date&quot;:&quot;2015-07-09T23:59:40.631+0800&quot;}
-}
-'
-
-curl -XPUT 'localhost:9200/text/mytext/6?pretty' -d'
-{&quot;url&quot;: &quot;baidu.com&quot;,&quot;content&quot;:&quot;今年在上海租房火爆&quot;,&quot;ch&quot;:8,&quot;it&quot;:14361982,&quot;appid&quot;:{&quot;$numberLong&quot;:&quot;1&quot;},&quot;ttl&quot;:{&quot;$date&quot;:&quot;2015-07-09T23:59:40.631+0800&quot;}
-}
-'
-
-curl -XPUT 'localhost:9200/text/mytext/7?pretty' -d'
-{&quot;url&quot;: &quot;baidu.com&quot;,&quot;content&quot;:&quot;今年在南京租房火爆&quot;,&quot;ch&quot;:8,&quot;it&quot;:14361982,&quot;appid&quot;:{&quot;$numberLong&quot;:&quot;1&quot;},&quot;ttl&quot;:{&quot;$date&quot;:&quot;2015-07-09T23:59:40.631+0800&quot;}
-}
-'
-</code></pre>
-
-<h3 id="bucket-selector-aggregation-https-www-elastic-co-guide-en-elasticsearch-reference-master-search-aggregations-pipeline-bucket-selector-aggregation-html-bucket-script-aggregation-https-www-elastic-co-guide-en-elasticsearch-reference-master-search-aggregations-pipeline-bucket-script-aggregation-html"><a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-pipeline-bucket-selector-aggregation.html">bucket-selector-aggregation</a> &amp; <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-pipeline-bucket-script-aggregation.html">bucket-script-aggregation</a></h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -XPUT <span style="color:#e6db74">&#39;localhost:9200/text/mytext/5?pretty&#39;</span> -d<span style="color:#e6db74">&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">{&#34;url&#34;: &#34;sina.com&#34;,&#34;content&#34;:&#34;今年反正我都会避让，不给自己找麻烦&#34;,&#34;ch&#34;:7,&#34;it&#34;:14361982,&#34;appid&#34;:{&#34;$numberLong&#34;:&#34;1&#34;},&#34;ttl&#34;:{&#34;$date&#34;:&#34;2015-07-09T23:59:40.631+0800&#34;}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>curl -XPUT <span style="color:#e6db74">&#39;localhost:9200/text/mytext/6?pretty&#39;</span> -d<span style="color:#e6db74">&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">{&#34;url&#34;: &#34;baidu.com&#34;,&#34;content&#34;:&#34;今年在上海租房火爆&#34;,&#34;ch&#34;:8,&#34;it&#34;:14361982,&#34;appid&#34;:{&#34;$numberLong&#34;:&#34;1&#34;},&#34;ttl&#34;:{&#34;$date&#34;:&#34;2015-07-09T23:59:40.631+0800&#34;}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>curl -XPUT <span style="color:#e6db74">&#39;localhost:9200/text/mytext/7?pretty&#39;</span> -d<span style="color:#e6db74">&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">{&#34;url&#34;: &#34;baidu.com&#34;,&#34;content&#34;:&#34;今年在南京租房火爆&#34;,&#34;ch&#34;:8,&#34;it&#34;:14361982,&#34;appid&#34;:{&#34;$numberLong&#34;:&#34;1&#34;},&#34;ttl&#34;:{&#34;$date&#34;:&#34;2015-07-09T23:59:40.631+0800&#34;}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;</span>
+</span></span></code></pre></div><h3 id="bucket-selector-aggregation--bucket-script-aggregation"><a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-pipeline-bucket-selector-aggregation.html">bucket-selector-aggregation</a> &amp; <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-pipeline-bucket-script-aggregation.html">bucket-script-aggregation</a></h3>
 <p>context包含“今年”，按url聚合，聚合数&gt;1,order by聚合数，时间范围15/7/9-16/1/7</p>
-
-<pre><code class="language-bash">curl -XPOST 'localhost:9200/text/_search?pretty' -d'
-{
-  &quot;query&quot; : {
-    &quot;bool&quot;: {
-      &quot;must&quot;:[
-      {&quot;match&quot;:  { &quot;content&quot; : &quot;今年&quot; }},
-      {&quot;range&quot;:  {&quot;ttl.$date&quot; : {&quot;gt&quot; : &quot;2015-07-09&quot;,&quot;lt&quot; : &quot;2016-01-07&quot;}}}
-        ] 
-    }
-  },
-  &quot;aggs&quot;: {
-    &quot;urls&quot;: {
-      &quot;terms&quot;: {
-        &quot;field&quot;: &quot;url&quot;,
-        &quot;order&quot; : { &quot;_count&quot; : &quot;asc&quot;}
-      }, 
-      &quot;aggs&quot;: {
-        &quot;greater_than_filter&quot;: {
-          &quot;bucket_selector&quot;: {
-            &quot;buckets_path&quot;: {
-              &quot;url_count&quot;: &quot;_count&quot;
-            }, 
-            &quot;script&quot;: &quot;url_count &gt; 1&quot;
-          }
-        }
-      }
-    }
-  },
-  &quot;size&quot;: 0
-}
-'
-</code></pre>
-
-<h3 id="query-time-boosting-https-www-elastic-co-guide-en-elasticsearch-guide-current-query-time-boosting-html"><a href="https://www.elastic.co/guide/en/elasticsearch/guide/current/query-time-boosting.html">query-time-boosting</a></h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -XPOST <span style="color:#e6db74">&#39;localhost:9200/text/_search?pretty&#39;</span> -d<span style="color:#e6db74">&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;query&#34; : {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;bool&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      &#34;must&#34;:[
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      {&#34;match&#34;:  { &#34;content&#34; : &#34;今年&#34; }},
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      {&#34;range&#34;:  {&#34;ttl.$date&#34; : {&#34;gt&#34; : &#34;2015-07-09&#34;,&#34;lt&#34; : &#34;2016-01-07&#34;}}}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        ] 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  },
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;aggs&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;urls&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      &#34;terms&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;field&#34;: &#34;url&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;order&#34; : { &#34;_count&#34; : &#34;asc&#34;}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      }, 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      &#34;aggs&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;greater_than_filter&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">          &#34;bucket_selector&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            &#34;buckets_path&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">              &#34;url_count&#34;: &#34;_count&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            }, 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            &#34;script&#34;: &#34;url_count &gt; 1&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">          }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  },
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  &#34;size&#34;: 0
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;</span>
+</span></span></code></pre></div><h3 id="query-time-boosting"><a href="https://www.elastic.co/guide/en/elasticsearch/guide/current/query-time-boosting.html">query-time-boosting</a></h3>
 <p>content包含租房，上海加权因子10，南京加权因子1</p>
-
-<pre><code class="language-bash">curl -XGET 'localhost:9200/text/_search?pretty' -d'
-{
-    &quot;query&quot;: {
-        &quot;bool&quot;: {
-            &quot;must&quot;: {
-                &quot;match&quot;: {
-                    &quot;content&quot;: &quot;租房&quot;
-                }
-            },
-            &quot;should&quot;: [ 
-                { &quot;match&quot;: { &quot;content&quot;: {&quot;query&quot;: &quot;上海&quot;,
-                        &quot;boost&quot;: 10 }}},
-                { &quot;match&quot;: { &quot;content&quot;: {&quot;query&quot;: &quot;南京&quot;,
-                        &quot;boost&quot;: 1} }}
-            ] 
-      }
-}}'
-</code></pre>
-
-<h3 id="phrase-matching-https-www-elastic-co-guide-en-elasticsearch-guide-current-slop-html"><a href="https://www.elastic.co/guide/en/elasticsearch/guide/current/slop.html">Phrase Matching</a></h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -XGET <span style="color:#e6db74">&#39;localhost:9200/text/_search?pretty&#39;</span> -d<span style="color:#e6db74">&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;query&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;bool&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            &#34;must&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                &#34;match&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                    &#34;content&#34;: &#34;租房&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            },
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            &#34;should&#34;: [ 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                { &#34;match&#34;: { &#34;content&#34;: {&#34;query&#34;: &#34;上海&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                        &#34;boost&#34;: 10 }}},
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                { &#34;match&#34;: { &#34;content&#34;: {&#34;query&#34;: &#34;南京&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                        &#34;boost&#34;: 1} }}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            ] 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">}}&#39;</span>
+</span></span></code></pre></div><h3 id="phrase-matching"><a href="https://www.elastic.co/guide/en/elasticsearch/guide/current/slop.html">Phrase Matching</a></h3>
 <p>content包含“反正”和“避让”，间隔不超10词</p>
-
-<pre><code class="language-Bash">curl -XGET 'localhost:9200/text/_search?pretty' -d'
-{
-    &quot;query&quot;: {
-        &quot;match_phrase&quot;: {
-            &quot;content&quot;: {
-                &quot;query&quot;: &quot;反正 避让&quot;,
-                &quot;slop&quot;:  10
-            }
-        }
-    }
-}
-'
-</code></pre>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Bash" data-lang="Bash"><span style="display:flex;"><span>curl -XGET <span style="color:#e6db74">&#39;localhost:9200/text/_search?pretty&#39;</span> -d<span style="color:#e6db74">&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;query&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;match_phrase&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            &#34;content&#34;: {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                &#34;query&#34;: &#34;反正 避让&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                &#34;slop&#34;:  10
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;</span>
+</span></span></code></pre></div>
     </article>
 
     
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2016-10-13-elasticsearch-query-dsl/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=ElasticSearch%20Query%20DSL%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2016-10-13-elasticsearch-query-dsl/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
 
 
     <ul class="pager article-pager">
@@ -242,7 +240,7 @@ curl -XPUT 'localhost:9200/text/mytext/7?pretty' -d'
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>

@@ -1,25 +1,22 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Lua on yrong blog</title>
     <link>https://yrong.github.io/blog/tags/lua/</link>
     <description>Recent content in Lua on yrong blog</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <generator>Hugo</generator>
     <language>en</language>
-    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
+    <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
     <lastBuildDate>Mon, 09 Apr 2018 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="https://yrong.github.io/blog/tags/lua/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <atom:link href="https://yrong.github.io/blog/tags/lua/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Introduction to Skynet</title>
       <link>https://yrong.github.io/blog/post/2018-04-09-skynet/</link>
-      <pubDate>Mon, 09 Apr 2018 00:00:00 +0000</pubDate>
-      
+      <pubDate>Mon, 09 Apr 2018 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/post/2018-04-09-skynet/</guid>
-      <description>代码结构 首先要关注一下config.path文件。 skynet/example/config.path root = &amp;quot;./&amp;quot; luaservice = root..&amp;quot;service/?.lua;&amp;quot;..root..&amp;quot;test/?.lua;&amp;quot;..root..&amp;quot;examples/?.lua;&amp;quot;..root..&amp;quot;test/?/init.lua&amp;quot; lualoader = root .. &amp;quot;lualib/loader.lua&amp;quot; lua_path = root..&amp;quot;lualib/?.lua;&amp;quot;..root..&amp;quot;lualib/?/init.lua&amp;quot; lua_cpath = root .. &amp;quot;luaclib/?.so&amp;quot; snax = root..&amp;quot;examples/?.lua;&amp;quot;..root..&amp;quot;test/?.lua&amp;quot; root代表的是skynet所在的目录。 lu</description>
+      <description>&lt;h2 id=&#34;代码结构&#34;&gt;代码结构&lt;/h2&gt;&#xA;&lt;p&gt;首先要关注一下config.path文件。&lt;/p&gt;&#xA;&lt;p&gt;skynet/example/config.path&lt;/p&gt;&#xA;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;root = &amp;#34;./&amp;#34;&#xA;luaservice = root..&amp;#34;service/?.lua;&amp;#34;..root..&amp;#34;test/?.lua;&amp;#34;..root..&amp;#34;examples/?.lua;&amp;#34;..root..&amp;#34;test/?/init.lua&amp;#34;&#xA;lualoader = root .. &amp;#34;lualib/loader.lua&amp;#34;&#xA;lua_path = root..&amp;#34;lualib/?.lua;&amp;#34;..root..&amp;#34;lualib/?/init.lua&amp;#34;&#xA;lua_cpath = root .. &amp;#34;luaclib/?.so&amp;#34;&#xA;snax = root..&amp;#34;examples/?.lua;&amp;#34;..root..&amp;#34;test/?.lua&amp;#34;&#xA;&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;root代表的是skynet所在的目录。&#xA;luaservice代表服务所在的目录。&#xA;lualoader 用哪一段 lua 代码加载 lua 服务。通常配置为 lualib/loader.lua ，再由这段代码解析服务名称，进一步加载 lua 代码。不用去修改它。&#xA;lua_path和lua_cpath代表require要加载的文件所在的目录。&#xA;snax代表使用snax框架写的服务所在的目录。&lt;/p&gt;</description>
     </item>
-    
   </channel>
 </rss>

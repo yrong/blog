@@ -6,85 +6,18 @@
   <title>Introduction to nestjs - yrong blog</title>
   <meta property="og:title" content="Introduction to nestjs - yrong blog" />
   <meta name="twitter:title" content="Introduction to nestjs - yrong blog" />
-  <meta name="description" content="代码分析 入口main.ts import { NestFactory } from &#39;@nestjs/core&#39;; import { ApplicationModule } from &#39;./app.module&#39;; async function bootstrap() { const app = await NestFactory.create(ApplicationModule); await app.listen(3000); } bootstrap(); NestFactory构造 public async create( module: any, serverOrOptions?: any, options?: NestApplicationOptions, ): Promise&lt; INestApplication &amp; (INestExpressApplication | INestFastifyApplication) &gt; { const">
-  <meta property="og:description" content="代码分析 入口main.ts import { NestFactory } from &#39;@nestjs/core&#39;; import { ApplicationModule } from &#39;./app.module&#39;; async function bootstrap() { const app = await NestFactory.create(ApplicationModule); await app.listen(3000); } bootstrap(); NestFactory构造 public async create( module: any, serverOrOptions?: any, options?: NestApplicationOptions, ): Promise&lt; INestApplication &amp; (INestExpressApplication | INestFastifyApplication) &gt; { const">
-  <meta name="twitter:description" content="代码分析 入口main.ts import { NestFactory } from &#39;@nestjs/core&#39;; import { ApplicationModule } from &#39;./app.module&#39;; async function bootstrap() { const app = await NestFactory.create(ApplicationModule); await …">
-  <meta name="author" content="Ronyang"/>
-  <meta property="og:site_name" content="yrong blog" />
-  <meta property="og:url" content="https://yrong.github.io/blog/post/2018-06-09-nestjs/" />
-  <meta property="og:type" content="article" />
-  <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
-
-  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
-  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
-  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
-
-  <script src="/blog/js/script.js"></script>
-  <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
-</head>
-
-<body>
-
-<header class="site-header">
-  <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
-    <ul class="site-navi-items">
-      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
-      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
-      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
-    </ul>
-  </nav>
-</header>
-<hr class="site-header-bottom">
-
-  <div class="main" role="main">
-    <article class="article">
-      
-      
-      <h1 class="article-title">Introduction to nestjs</h1>
-      
-      <hr class="article-title-bottom">
-      <ul class="article-meta">
-        <li class="article-meta-date"><time>June 9, 2018</time></li>
-        <li class="article-meta-tags">
-          <a href="/blog/tags/typescript/">
-            <i class="fas fa-tag"></i>
-            typescript
-          </a>&nbsp;
-        </li>
-      </ul>
-      
-<aside class="toc">
-  <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#代码分析">代码分析</a></li>
-</ul></li>
-</ul>
-</nav>
-</aside>
-      
-
-<h2 id="代码分析">代码分析</h2>
-
-<p>入口main.ts</p>
-
-<pre><code>import { NestFactory } from '@nestjs/core';
-import { ApplicationModule } from './app.module';
+  <meta name="description" content="代码分析
+入口main.ts
+import { NestFactory } from &#39;@nestjs/core&#39;;
+import { ApplicationModule } from &#39;./app.module&#39;;
 
 async function bootstrap() {
   const app = await NestFactory.create(ApplicationModule);
   await app.listen(3000);
 }
 bootstrap();
-</code></pre>
-
-<p>NestFactory构造</p>
-
-<pre><code>public async create(
+NestFactory构造
+public async create(
     module: any,
     serverOrOptions?: any,
     options?: NestApplicationOptions,
@@ -107,17 +40,155 @@ bootstrap();
       new NestApplication(container, httpServer, applicationConfig, appOptions),
     );
   }
-</code></pre>
 
-<ul>
+第一个参数是使用是传入的类似angularmodule的对象
+第二个参数可以是设置参数，也可以是类似express的MVC，如官网提到的fastify，覆盖默认使用的express
+第三个参数就是设置参数
+
+初始化模块">
+  <meta property="og:description" content="代码分析
+入口main.ts
+import { NestFactory } from &#39;@nestjs/core&#39;;
+import { ApplicationModule } from &#39;./app.module&#39;;
+
+async function bootstrap() {
+  const app = await NestFactory.create(ApplicationModule);
+  await app.listen(3000);
+}
+bootstrap();
+NestFactory构造
+public async create(
+    module: any,
+    serverOrOptions?: any,
+    options?: NestApplicationOptions,
+  ): Promise&lt;
+    INestApplication &amp; (INestExpressApplication | INestFastifyApplication)
+  &gt; {
+    const isHttpServer = serverOrOptions &amp;&amp; serverOrOptions.patch;
+    // tslint:disable-next-line:prefer-const
+    let [httpServer, appOptions] = isHttpServer
+      ? [serverOrOptions, options]
+      : [ExpressFactory.create()/* 默认使用Express*/, serverOrOptions];
+
+    const applicationConfig = new ApplicationConfig();
+    const container = new NestContainer(applicationConfig);//生成容器container;传入了配置对象
+    httpServer = this.applyExpressAdapter(httpServer);//初始化http服务
+
+    this.applyLogger(appOptions);//日志输出对象
+    await this.initialize(module, container, applicationConfig, httpServer);
+    return this.createNestInstance&lt;NestApplication&gt;(
+      new NestApplication(container, httpServer, applicationConfig, appOptions),
+    );
+  }
+
+第一个参数是使用是传入的类似angularmodule的对象
+第二个参数可以是设置参数，也可以是类似express的MVC，如官网提到的fastify，覆盖默认使用的express
+第三个参数就是设置参数
+
+初始化模块">
+  <meta name="twitter:description" content="代码分析
+入口main.ts
+import { NestFactory } from &#39;@nestjs/core&#39;;
+import { ApplicationModule } from &#39;./app.module&#39;;
+
+async function bootstrap() {
+  const app = await …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2018-06-09-nestjs/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Introduction to nestjs</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>June 9, 2018</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/typescript/">
+            <i class="fa-solid fa-tag"></i>
+            typescript
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#代码分析">代码分析</a></li>
+  </ul>
+</nav>
+</aside>
+      <h2 id="代码分析">代码分析</h2>
+<p>入口main.ts</p>
+<pre tabindex="0"><code>import { NestFactory } from &#39;@nestjs/core&#39;;
+import { ApplicationModule } from &#39;./app.module&#39;;
+
+async function bootstrap() {
+  const app = await NestFactory.create(ApplicationModule);
+  await app.listen(3000);
+}
+bootstrap();
+</code></pre><p>NestFactory构造</p>
+<pre tabindex="0"><code>public async create(
+    module: any,
+    serverOrOptions?: any,
+    options?: NestApplicationOptions,
+  ): Promise&lt;
+    INestApplication &amp; (INestExpressApplication | INestFastifyApplication)
+  &gt; {
+    const isHttpServer = serverOrOptions &amp;&amp; serverOrOptions.patch;
+    // tslint:disable-next-line:prefer-const
+    let [httpServer, appOptions] = isHttpServer
+      ? [serverOrOptions, options]
+      : [ExpressFactory.create()/* 默认使用Express*/, serverOrOptions];
+
+    const applicationConfig = new ApplicationConfig();
+    const container = new NestContainer(applicationConfig);//生成容器container;传入了配置对象
+    httpServer = this.applyExpressAdapter(httpServer);//初始化http服务
+
+    this.applyLogger(appOptions);//日志输出对象
+    await this.initialize(module, container, applicationConfig, httpServer);
+    return this.createNestInstance&lt;NestApplication&gt;(
+      new NestApplication(container, httpServer, applicationConfig, appOptions),
+    );
+  }
+</code></pre><ul>
 <li>第一个参数是使用是传入的类似angularmodule的对象</li>
 <li>第二个参数可以是设置参数，也可以是类似express的MVC，如官网提到的fastify，覆盖默认使用的express</li>
 <li>第三个参数就是设置参数</li>
 </ul>
-
 <p>初始化模块</p>
-
-<pre><code>private async initialize(
+<pre tabindex="0"><code>private async initialize(
     module,
     container: NestContainer,
     config = new ApplicationConfig(),
@@ -142,20 +213,14 @@ bootstrap();
       process.abort();
     }
   }
-</code></pre>
-
-<p>扫描当前文件的依赖</p>
-
-<pre><code>public async scan(module: Type&lt;any&gt;) {
+</code></pre><p>扫描当前文件的依赖</p>
+<pre tabindex="0"><code>public async scan(module: Type&lt;any&gt;) {
     await this.scanForModules(module);
     await this.scanModulesForDependencies();
     this.container.bindGlobalScope();
   }
-</code></pre>
-
-<p>scanForModules扫描及保存模块（包括imports进来的模块）</p>
-
-<pre><code>public async scanForModules(
+</code></pre><p>scanForModules扫描及保存模块（包括imports进来的模块）</p>
+<pre tabindex="0"><code>public async scanForModules(
     module: Type&lt;any&gt; | DynamicModule,
     scope: Type&lt;any&gt;[] = [],
   ) {
@@ -166,11 +231,8 @@ bootstrap();
       await this.scanForModules(innerModule, [].concat(scope, module));
     }
   }
-</code></pre>
-
-<p>容器对象的insertModule</p>
-
-<pre><code>
+</code></pre><p>容器对象的insertModule</p>
+<pre tabindex="0"><code>
 public async insertModule(
     metatype: Type&lt;any&gt; | DynamicModule | Promise&lt;DynamicModule&gt;,
     scope: Type&lt;any&gt;[],
@@ -197,11 +259,8 @@ public async insertModule(
 
     return module;
   }
-</code></pre>
-
-<p>扫描模块里的依赖项，作依赖注入的准备工作，其实就是处理Module的配置项await this.scanModulesForDependencies();</p>
-
-<pre><code>async scanModulesForDependencies() {
+</code></pre><p>扫描模块里的依赖项，作依赖注入的准备工作，其实就是处理Module的配置项await this.scanModulesForDependencies();</p>
+<pre tabindex="0"><code>async scanModulesForDependencies() {
         const modules = this.container.getModules();
         for (const [token, { metatype }] of modules) {
             await this.reflectImports(metatype, token, metatype.name);
@@ -212,10 +271,32 @@ public async insertModule(
         this.calculateModulesDistance(modules);
     }
 </code></pre>
-
     </article>
 
     
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2018-06-09-nestjs/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Introduction%20to%20nestjs%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2018-06-09-nestjs/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
 
 
     <ul class="pager article-pager">
@@ -230,7 +311,7 @@ public async insertModule(
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>

@@ -11,24 +11,25 @@
   <meta property="og:url" content="https://yrong.github.io/blog/tags/typescript/" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
+  <meta name="generator" content="Hugo 0.159.1">
   <link href="/blog/tags/typescript/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
   <link href="/blog/tags/typescript/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
-
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -38,11 +39,8 @@
 </header>
 <hr class="site-header-bottom">
 
-  <div class="breadcrumb">
-    <a href="/blog/tags/">Tags</a> / Typescript
-  </div>
   <div class="main" role="main">
-    <section class="list taxonomy-list">
+    <section class="list term-list">
       <article class="article">
         <a href="/blog/post/2019-01-04-nest/" class="article-titles">
           <h2 class="article-title">Nest介绍</h2>
@@ -51,14 +49,15 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>January 4, 2019</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/typescript/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/typescript/">
+              <i class="fa-solid fa-tag"></i>
               Typescript
             </a>&nbsp;
           </li>
         </ul>
         <div class="article-content">
-          Nest 基础功能 —— Module Nest 主要特性中的模块化开发，就源自与此。Nest 使用 Module 来组织应用程序结构，每个应用程序至少有一个模块，即根模块。根模块是 Nest 开始
+          <h1 id="nest-基础功能--module">Nest 基础功能 —— Module</h1>
+<p>Nest 主要特性中的模块化开发，就源自与此。Nest 使用 <code>Module</code> 来组织应用程序结构，每个应用程序至少有一个模块，即根模块。根模块是 Nest 开始排列应用程序树的地方。事实上，根模块可能是应用程序中唯一的模块，尤其是当应用程序很小时。然而，对于大型应用来说，这是没有意义的。在大多数情况下，您将有很多模块，每个模块都有一组与其密切相关的功能。</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2019-01-04-nest/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -71,31 +70,69 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>June 9, 2018</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/typescript/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/typescript/">
+              <i class="fa-solid fa-tag"></i>
               typescript
             </a>&nbsp;
           </li>
         </ul>
         <div class="article-content">
-          代码分析 入口main.ts import { NestFactory } from '@nestjs/core'; import { ApplicationModule } from './app.module'; async function bootstrap() { const app = await NestFactory.create(ApplicationModule); await app.listen(3000); } bootstrap(); NestFactory构造 public async create( module: any, serverOrOptions?: any, options?: NestApplicationOptions, ): Promise&lt; INestApplication &amp; (INestExpressApplication | INestFastifyApplication) &gt; { const
+          <h2 id="代码分析">代码分析</h2>
+<p>入口main.ts</p>
+<pre tabindex="0"><code>import { NestFactory } from &#39;@nestjs/core&#39;;
+import { ApplicationModule } from &#39;./app.module&#39;;
+
+async function bootstrap() {
+  const app = await NestFactory.create(ApplicationModule);
+  await app.listen(3000);
+}
+bootstrap();
+</code></pre><p>NestFactory构造</p>
+<pre tabindex="0"><code>public async create(
+    module: any,
+    serverOrOptions?: any,
+    options?: NestApplicationOptions,
+  ): Promise&lt;
+    INestApplication &amp; (INestExpressApplication | INestFastifyApplication)
+  &gt; {
+    const isHttpServer = serverOrOptions &amp;&amp; serverOrOptions.patch;
+    // tslint:disable-next-line:prefer-const
+    let [httpServer, appOptions] = isHttpServer
+      ? [serverOrOptions, options]
+      : [ExpressFactory.create()/* 默认使用Express*/, serverOrOptions];
+
+    const applicationConfig = new ApplicationConfig();
+    const container = new NestContainer(applicationConfig);//生成容器container;传入了配置对象
+    httpServer = this.applyExpressAdapter(httpServer);//初始化http服务
+
+    this.applyLogger(appOptions);//日志输出对象
+    await this.initialize(module, container, applicationConfig, httpServer);
+    return this.createNestInstance&lt;NestApplication&gt;(
+      new NestApplication(container, httpServer, applicationConfig, appOptions),
+    );
+  }
+</code></pre><ul>
+<li>第一个参数是使用是传入的类似angularmodule的对象</li>
+<li>第二个参数可以是设置参数，也可以是类似express的MVC，如官网提到的fastify，覆盖默认使用的express</li>
+<li>第三个参数就是设置参数</li>
+</ul>
+<p>初始化模块</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2018-06-09-nestjs/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
     </section>
     
-
   </div>
 
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-rsslink">
       <a href="/blog/tags/typescript/index.xml" type="application/rss+xml" target="_blank" title="RSS">
-        <i class="fas fa-rss"></i>
+        <i class="fa-solid fa-rss"></i>
       </a>
     </li>
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>

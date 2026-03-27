@@ -14,22 +14,23 @@
   <meta property="og:url" content="https://yrong.github.io/blog/post/2017-08-19-blockchain/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
-
+  <meta name="generator" content="Hugo 0.159.1">
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -49,14 +50,14 @@
       <ul class="article-meta">
         <li class="article-meta-date"><time>August 19, 2017</time></li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/blockchain/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/blockchain/">
+            <i class="fa-solid fa-tag"></i>
             blockchain
           </a>&nbsp;
         </li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/javascript/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/javascript/">
+            <i class="fa-solid fa-tag"></i>
             javascript
           </a>&nbsp;
         </li>
@@ -64,33 +65,27 @@
       
 <aside class="toc">
   <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#decentralize-payments">Decentralize Payments</a></li>
-<li><a href="#code-a-blockchain-in-javascript-in-20-lines">Code, A Blockchain in JavaScript in 20 Lines</a></li>
-<li><a href="#code-a-blockchain-in-javascript-in-20-lines-a-blockchain-is-a-data-structure-cont">Code, A Blockchain in JavaScript in 20 Lines! A Blockchain is a Data Structure (Cont.)</a></li>
-<li><a href="#code-a-blockchain-in-javascript-in-20-lines-a-blockchain-is-a-data-structure-cont-1">Code, A Blockchain in JavaScript in 20 Lines! A Blockchain is a Data Structure (Cont.)</a></li>
-<li><a href="#what-about-proof-of-work-what-about-consensus">What about Proof-of-Work? What about Consensus?</a></li>
-<li><a href="#what-about-proof-of-work-what-about-consensus-cont">What about Proof-of-Work? What about Consensus? (Cont.)</a></li>
-<li><a href="#what-about-proof-of-work-what-about-consensus-cont-1">What about Proof-of-Work? What about Consensus? (Cont.)</a></li>
-<li><a href="#what-about-proof-of-work-what-about-consensus-cont-2">What about Proof-of-Work? What about Consensus? (Cont.)</a></li>
-<li><a href="#the-world-s-worst-database-bitcoin-blockchain-mining">The World&rsquo;s Worst Database - Bitcoin Blockchain Mining</a></li>
-<li><a href="#tulips-on-the-blockchain-adding-transactions">Tulips on the Blockchain! Adding Transactions</a></li>
-<li><a href="#tulips-on-the-blockchain-adding-transactions-cont">Tulips on the Blockchain! Adding Transactions (Cont.)</a></li>
-<li><a href="#tulips-on-the-blockchain-adding-transactions-cont-1">Tulips on the Blockchain! Adding Transactions (Cont.)</a></li>
-<li><a href="#tulips-on-the-blockchain-adding-transactions-cont-2">Tulips on the Blockchain! Adding Transactions (Cont.)</a></li>
-<li><a href="#what-s-blockchain-lite-javascript-edition">What&rsquo;s Blockchain Lite - JavaScript Edition?</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#decentralize-payments">Decentralize Payments</a></li>
+    <li><a href="#code-a-blockchain-in-javascript-in-20-lines">Code, A Blockchain in JavaScript in 20 Lines</a></li>
+    <li><a href="#code-a-blockchain-in-javascript-in-20-lines-a-blockchain-is-a-data-structure-cont">Code, A Blockchain in JavaScript in 20 Lines! A Blockchain is a Data Structure (Cont.)</a></li>
+    <li><a href="#code-a-blockchain-in-javascript-in-20-lines-a-blockchain-is-a-data-structure-cont-1">Code, A Blockchain in JavaScript in 20 Lines! A Blockchain is a Data Structure (Cont.)</a></li>
+    <li><a href="#what-about-proof-of-work-what-about-consensus">What about Proof-of-Work? What about Consensus?</a></li>
+    <li><a href="#what-about-proof-of-work-what-about-consensus-cont">What about Proof-of-Work? What about Consensus? (Cont.)</a></li>
+    <li><a href="#what-about-proof-of-work-what-about-consensus-cont-1">What about Proof-of-Work? What about Consensus? (Cont.)</a></li>
+    <li><a href="#what-about-proof-of-work-what-about-consensus-cont-2">What about Proof-of-Work? What about Consensus? (Cont.)</a></li>
+    <li><a href="#the-worlds-worst-database---bitcoin-blockchain-mining">The World&rsquo;s Worst Database - Bitcoin Blockchain Mining</a></li>
+    <li><a href="#tulips-on-the-blockchain-adding-transactions">Tulips on the Blockchain! Adding Transactions</a></li>
+    <li><a href="#tulips-on-the-blockchain-adding-transactions-cont">Tulips on the Blockchain! Adding Transactions (Cont.)</a></li>
+    <li><a href="#tulips-on-the-blockchain-adding-transactions-cont-1">Tulips on the Blockchain! Adding Transactions (Cont.)</a></li>
+    <li><a href="#tulips-on-the-blockchain-adding-transactions-cont-2">Tulips on the Blockchain! Adding Transactions (Cont.)</a></li>
+    <li><a href="#whats-blockchain-lite---javascript-edition">What&rsquo;s Blockchain Lite - JavaScript Edition?</a></li>
+  </ul>
 </nav>
 </aside>
       <p>Build Your Own Blockchains in JavaScript from Zero (Scratch)</p>
-
 <h2 id="decentralize-payments">Decentralize Payments</h2>
-
 <p>What&rsquo;s Blockchain?</p>
-
 <ul>
 <li>Distributed Database?</li>
 <li>Hyper Ledger Book?</li>
@@ -99,19 +94,13 @@
 <li>Lottery? Central Bank?</li>
 <li>Byzantine-Generals Solution?</li>
 </ul>
-
 <p>Yes. Yes. Yes. Blockchain! Blockchain! Blockchain!</p>
-
 <p>(Source: <a href="https://github.com/openblockchains/whatsblockchain">openblockchains/whatsblockchain</a>)</p>
-
 <h2 id="code-a-blockchain-in-javascript-in-20-lines">Code, A Blockchain in JavaScript in 20 Lines</h2>
-
 <p>What&rsquo;s Blockchain?</p>
-
 <p>It&rsquo;s a list (chain) of blocks linked and secured by digital fingerprints (also known as
 crypto hashes).</p>
-
-<pre><code>const SHA256 = require( &quot;js-sha256&quot; )     // for hash checksum digest function SHA256
+<pre tabindex="0"><code>const SHA256 = require( &#34;js-sha256&#34; )     // for hash checksum digest function SHA256
 
 class Block {
 
@@ -131,87 +120,67 @@ class Block {
                 this.previousHash )
     return sha.hex()
   }
-</code></pre>
-
-<p>(Source: <a href="https://github.com/openblockchains/awesome-blockchains/blob/master/blockchain.js/blockchain.js">openblockchains/awesome-blockchains/blockchain.js</a>)</p>
-
+</code></pre><p>(Source: <a href="https://github.com/openblockchains/awesome-blockchains/blob/master/blockchain.js/blockchain.js">openblockchains/awesome-blockchains/blockchain.js</a>)</p>
 <p>Yes, that&rsquo;s it.</p>
-
 <h2 id="code-a-blockchain-in-javascript-in-20-lines-a-blockchain-is-a-data-structure-cont">Code, A Blockchain in JavaScript in 20 Lines! A Blockchain is a Data Structure (Cont.)</h2>
-
 <p>Let&rsquo;s add two helpers (<code>first</code>, <code>next</code>) for building (&ldquo;mining&rdquo;) blocks.</p>
-
-<pre><code>class Block {
+<pre tabindex="0"><code>class Block {
   ...
-  static first( data=&quot;Genesis&quot; ) {    // create genesis (big bang! first) block
-    // uses index zero (0) and arbitrary previousHash (&quot;0&quot;)
-    return new Block( 0, data, &quot;0&quot; )
+  static first( data=&#34;Genesis&#34; ) {    // create genesis (big bang! first) block
+    // uses index zero (0) and arbitrary previousHash (&#34;0&#34;)
+    return new Block( 0, data, &#34;0&#34; )
   }
 
-  static next( previous, data=&quot;Transaction Data...&quot; ) {
+  static next( previous, data=&#34;Transaction Data...&#34; ) {
     return new Block( previous.index+1, data, previous.hash )
   }
 }
-</code></pre>
-
-<p>(Source: <a href="https://github.com/openblockchains/awesome-blockchains/blob/master/blockchain.js/blockchain.js">openblockchains/awesome-blockchains/blockchain.js</a>)</p>
-
+</code></pre><p>(Source: <a href="https://github.com/openblockchains/awesome-blockchains/blob/master/blockchain.js/blockchain.js">openblockchains/awesome-blockchains/blockchain.js</a>)</p>
 <p>Let&rsquo;s get started -  build a blockchain a block at a time!</p>
-
-<pre><code>b0 = Block.first( &quot;Genesis&quot; )
-b1 = Block.next( b0, &quot;Transaction Data...&quot; )
-b2 = Block.next( b1, &quot;Transaction Data......&quot; )
-b3 = Block.next( b2, &quot;More Transaction Data...&quot; )
+<pre tabindex="0"><code>b0 = Block.first( &#34;Genesis&#34; )
+b1 = Block.next( b0, &#34;Transaction Data...&#34; )
+b2 = Block.next( b1, &#34;Transaction Data......&#34; )
+b3 = Block.next( b2, &#34;More Transaction Data...&#34; )
 
 blockchain = [b0, b1, b2, b3]
 
 console.log( blockchain )
-</code></pre>
-
-<h2 id="code-a-blockchain-in-javascript-in-20-lines-a-blockchain-is-a-data-structure-cont-1">Code, A Blockchain in JavaScript in 20 Lines! A Blockchain is a Data Structure (Cont.)</h2>
-
+</code></pre><h2 id="code-a-blockchain-in-javascript-in-20-lines-a-blockchain-is-a-data-structure-cont-1">Code, A Blockchain in JavaScript in 20 Lines! A Blockchain is a Data Structure (Cont.)</h2>
 <blockquote>
 <p>Wait, so a blockchain is just a linked list?</p>
-
 <p>No. A linked list is only required to have a reference to the previous element,
 a block must have an identifier depending on the previous block&rsquo;s identifier,
 meaning that you cannot replace a block without recomputing every single block that comes after.
 In this implementation that happens as the previous digest is input in the calc_hash method.</p>
 </blockquote>
-
 <p>will log something like:</p>
-
-<pre><code>[ Block {
+<pre tabindex="0"><code>[ Block {
       index: 0,
       timestamp: 2017-09-18T08:25:54,
-      data: 'Genesis',
-      previousHash: '0',
-      hash:         'c396de4c03ddb5275661982adc75ce5fc5905d2a2457d1266c74436c1f3c50f1' },
+      data: &#39;Genesis&#39;,
+      previousHash: &#39;0&#39;,
+      hash:         &#39;c396de4c03ddb5275661982adc75ce5fc5905d2a2457d1266c74436c1f3c50f1&#39; },
     Block {
       index: 1,
       timestamp: 2017-09-18T08:25:54,
-      data: 'Transaction Data...',
-      previousHash: 'c396de4c03ddb5275661982adc75ce5fc5905d2a2457d1266c74436c1f3c50f1',
-      hash:         '493131e09c069645c82795c96e4715cea0f5558be514b5096d853a5b9899154a' },
+      data: &#39;Transaction Data...&#39;,
+      previousHash: &#39;c396de4c03ddb5275661982adc75ce5fc5905d2a2457d1266c74436c1f3c50f1&#39;,
+      hash:         &#39;493131e09c069645c82795c96e4715cea0f5558be514b5096d853a5b9899154a&#39; },
     Block {
       index: 2,
       timestamp: 2017-09-18T08:25:54,
-      data: 'Transaction Data......',
-      previousHash: '493131e09c069645c82795c96e4715cea0f5558be514b5096d853a5b9899154a',
-      hash:         '97aa3cb5052615d60ff8e6b41bef606562588c4874f011970ac2f218e2f0f4a8' },
+      data: &#39;Transaction Data......&#39;,
+      previousHash: &#39;493131e09c069645c82795c96e4715cea0f5558be514b5096d853a5b9899154a&#39;,
+      hash:         &#39;97aa3cb5052615d60ff8e6b41bef606562588c4874f011970ac2f218e2f0f4a8&#39; },
     Block {
       index: 3,
       timestamp: 2017-09-18T08:25:54,
-      data: 'More Transaction Data...',
-      previousHash: '97aa3cb5052615d60ff8e6b41bef606562588c4874f011970ac2f218e2f0f4a8',
-      hash:         'e10e020f832e46c2b60e1c3c0412bd370b2fde5f0f782c16eb87d0313ea0d3a3' } ]
-</code></pre>
-
-<h2 id="what-about-proof-of-work-what-about-consensus">What about Proof-of-Work? What about Consensus?</h2>
-
+      data: &#39;More Transaction Data...&#39;,
+      previousHash: &#39;97aa3cb5052615d60ff8e6b41bef606562588c4874f011970ac2f218e2f0f4a8&#39;,
+      hash:         &#39;e10e020f832e46c2b60e1c3c0412bd370b2fde5f0f782c16eb87d0313ea0d3a3&#39; } ]
+</code></pre><h2 id="what-about-proof-of-work-what-about-consensus">What about Proof-of-Work? What about Consensus?</h2>
 <p>Making (Hash) Mining a Lottery - Find the Lucky Number</p>
-
-<pre><code>calcHash() {
+<pre tabindex="0"><code>calcHash() {
   var sha = SHA256.create()
   sha.update( this.index.toString() +
               this.timestamp.toString() +
@@ -219,53 +188,32 @@ In this implementation that happens as the previous digest is input in the calc_
               this.previousHash )
   return sha.hex()
 }
-</code></pre>
-
-<p>The computer (node) in the blockchain network that computes the
+</code></pre><p>The computer (node) in the blockchain network that computes the
 next block with a valid hash wins the lottery?</p>
-
 <p>For adding a block to the chain you get a reward! You get 25 Bitcoin! (†)</p>
-
 <p>Bitcoin adds a block every ten minutes.</p>
-
-<p>(†) The reward gets halfed. In Sep&rsquo;17 you&rsquo;ll get 12.5 Bitcoin.</p>
-
+<p>(†) The reward gets halfed. In Sep'17 you&rsquo;ll get 12.5 Bitcoin.</p>
 <h2 id="what-about-proof-of-work-what-about-consensus-cont">What about Proof-of-Work? What about Consensus? (Cont.)</h2>
-
 <p>Random SHA256 hash #1: <code>c396de4c03ddb5275661982adc75ce5fc5905d2a2457d1266c74436c1f3c50f1</code></p>
-
 <p>Random SHA256 hash #2: <code>493131e09c069645c82795c96e4715cea0f5558be514b5096d853a5b9899154a</code></p>
-
 <p>Triva Q: What&rsquo;s SHA256?</p>
-
 <ul>
 <li>(A) Still Hacking Anyway</li>
 <li>(B) Secure Hash Algorithm</li>
-<li>&copy; Sweet Home Austria</li>
+<li>(C) Sweet Home Austria</li>
 <li>(D) Super High Aperture</li>
 </ul>
-
 <h2 id="what-about-proof-of-work-what-about-consensus-cont-1">What about Proof-of-Work? What about Consensus? (Cont.)</h2>
-
 <p>A: SHA256 == Secure Hash Algorithms 256 Bits</p>
-
 <p>Trivia: Designed by the National Security Agency (NSA) of the United States of America (USA).</p>
-
 <p>Secure == Random  e.g. Change one Letter and the Hash will Change Completely</p>
-
 <p>Making (Hash) Mining a Lottery - Find the Lucky Number</p>
-
 <p>Find a hash that starts with ten leading zeros e.g.</p>
-
 <p><code>0000000000069645c82795c96e4715cea0f5558be514b5096d853a5b9899154a</code></p>
-
 <p>Hard to compute! Easy to check / validate.</p>
-
 <h2 id="what-about-proof-of-work-what-about-consensus-cont-2">What about Proof-of-Work? What about Consensus? (Cont.)</h2>
-
 <p>Making (Hash) Mining a Lottery - Find the Lucky Number (Nonce)</p>
-
-<pre><code>computeHashWithProofOfWork( difficulty=&quot;00&quot; ) {
+<pre tabindex="0"><code>computeHashWithProofOfWork( difficulty=&#34;00&#34; ) {
     var nonce = 0
     while( true ) {
       var hash = this.calcHashWithNonce( nonce )
@@ -285,12 +233,8 @@ calcHashWithNonce( nonce=0 ) {
                 this.previousHash )
     return sha.hex()
 }
-</code></pre>
-
-<p>(Source: <a href="https://github.com/openblockchains/awesome-blockchains/blob/master/blockchain.js/blockchain_with_proof_of_work.js">awesome-blockchains/blockchain_with_proof_of_work.js</a>)</p>
-
-<h2 id="the-world-s-worst-database-bitcoin-blockchain-mining">The World&rsquo;s Worst Database - Bitcoin Blockchain Mining</h2>
-
+</code></pre><p>(Source: <a href="https://github.com/openblockchains/awesome-blockchains/blob/master/blockchain.js/blockchain_with_proof_of_work.js">awesome-blockchains/blockchain_with_proof_of_work.js</a>)</p>
+<h2 id="the-worlds-worst-database---bitcoin-blockchain-mining">The World&rsquo;s Worst Database - Bitcoin Blockchain Mining</h2>
 <ul>
 <li>Uses approximately the same amount of electricity as could power an average American household
 for a day per transaction</li>
@@ -304,264 +248,244 @@ accepted/committed except by reading it out of the blockchain itself (and even t
 <li>Can only be used as a transaction ledger denominated in a single currency,
 or to store/timestamp a maximum of 80 bytes per transaction</li>
 </ul>
-
 <p>(Source: <a href="https://tonyarcieri.com/on-the-dangers-of-a-blockchain-monoculture">Tony Arcieri - On the dangers of a blockchain monoculture</a>)</p>
-
 <h2 id="tulips-on-the-blockchain-adding-transactions">Tulips on the Blockchain! Adding Transactions</h2>
-
 <p>Learn by Example from the Real World (Anno 1637) - Buy! Sell! Hold! Enjoy the Beauty of Admiral of Admirals, Semper Augustus and More.</p>
-
 <p><strong>Transactions (Hyper) Ledger Book</strong></p>
-
 <table>
-<thead>
-<tr>
-<th>From</th>
-<th>To</th>
-<th>What</th>
-<th align="right">Qty</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>Dutchgrown (†)</td>
-<td>Vincent</td>
-<td>Tulip Bloemendaal Sunset</td>
-<td align="right">10</td>
-</tr>
-
-<tr>
-<td>Keukenhof (†)</td>
-<td>Anne</td>
-<td>Tulip Semper Augustus</td>
-<td align="right">7</td>
-</tr>
-
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td align="right"></td>
-</tr>
-
-<tr>
-<td>Flowers (†)</td>
-<td>Ruben</td>
-<td>Tulip Admiral van Eijck</td>
-<td align="right">5</td>
-</tr>
-
-<tr>
-<td>Vicent</td>
-<td>Anne</td>
-<td>Tulip Bloemendaal Sunset</td>
-<td align="right">3</td>
-</tr>
-
-<tr>
-<td>Anne</td>
-<td>Julia</td>
-<td>Tulip Semper Augustus</td>
-<td align="right">1</td>
-</tr>
-
-<tr>
-<td>Julia</td>
-<td>Luuk</td>
-<td>Tulip Semper Augustus</td>
-<td align="right">1</td>
-</tr>
-
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td align="right"></td>
-</tr>
-
-<tr>
-<td>Bloom &amp; Blossom (†)</td>
-<td>Daisy</td>
-<td>Tulip Admiral of Admirals</td>
-<td align="right">8</td>
-</tr>
-
-<tr>
-<td>Vincent</td>
-<td>Max</td>
-<td>Tulip Bloemendaal Sunset</td>
-<td align="right">2</td>
-</tr>
-
-<tr>
-<td>Anne</td>
-<td>Martijn</td>
-<td>Tulip Semper Augustus</td>
-<td align="right">2</td>
-</tr>
-
-<tr>
-<td>Ruben</td>
-<td>Julia</td>
-<td>Tulip Admiral van Eijck</td>
-<td align="right">2</td>
-</tr>
-
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td align="right"></td>
-</tr>
-
-<tr>
-<td>Teleflora (†)</td>
-<td>Max</td>
-<td>Tulip Red Impression</td>
-<td align="right">11</td>
-</tr>
-
-<tr>
-<td>Anne</td>
-<td>Naomi</td>
-<td>Tulip Bloemendaal Sunset</td>
-<td align="right">1</td>
-</tr>
-
-<tr>
-<td>Daisy</td>
-<td>Vincent</td>
-<td>Tulip Admiral of Admirals</td>
-<td align="right">3</td>
-</tr>
-
-<tr>
-<td>Julia</td>
-<td>Mina</td>
-<td>Tulip Admiral van Eijck</td>
-<td align="right">1</td>
-</tr>
-
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td align="right"></td>
-</tr>
-
-<tr>
-<td>Max</td>
-<td>Isabel</td>
-<td>Tulip Red Impression</td>
-<td align="right">2</td>
-</tr>
-</tbody>
+  <thead>
+      <tr>
+          <th>From</th>
+          <th>To</th>
+          <th>What</th>
+          <th style="text-align: right">Qty</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Dutchgrown (†)</td>
+          <td>Vincent</td>
+          <td>Tulip Bloemendaal Sunset</td>
+          <td style="text-align: right">10</td>
+      </tr>
+      <tr>
+          <td>Keukenhof (†)</td>
+          <td>Anne</td>
+          <td>Tulip Semper Augustus</td>
+          <td style="text-align: right">7</td>
+      </tr>
+      <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td style="text-align: right"></td>
+      </tr>
+      <tr>
+          <td>Flowers (†)</td>
+          <td>Ruben</td>
+          <td>Tulip Admiral van Eijck</td>
+          <td style="text-align: right">5</td>
+      </tr>
+      <tr>
+          <td>Vicent</td>
+          <td>Anne</td>
+          <td>Tulip Bloemendaal Sunset</td>
+          <td style="text-align: right">3</td>
+      </tr>
+      <tr>
+          <td>Anne</td>
+          <td>Julia</td>
+          <td>Tulip Semper Augustus</td>
+          <td style="text-align: right">1</td>
+      </tr>
+      <tr>
+          <td>Julia</td>
+          <td>Luuk</td>
+          <td>Tulip Semper Augustus</td>
+          <td style="text-align: right">1</td>
+      </tr>
+      <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td style="text-align: right"></td>
+      </tr>
+      <tr>
+          <td>Bloom &amp; Blossom (†)</td>
+          <td>Daisy</td>
+          <td>Tulip Admiral of Admirals</td>
+          <td style="text-align: right">8</td>
+      </tr>
+      <tr>
+          <td>Vincent</td>
+          <td>Max</td>
+          <td>Tulip Bloemendaal Sunset</td>
+          <td style="text-align: right">2</td>
+      </tr>
+      <tr>
+          <td>Anne</td>
+          <td>Martijn</td>
+          <td>Tulip Semper Augustus</td>
+          <td style="text-align: right">2</td>
+      </tr>
+      <tr>
+          <td>Ruben</td>
+          <td>Julia</td>
+          <td>Tulip Admiral van Eijck</td>
+          <td style="text-align: right">2</td>
+      </tr>
+      <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td style="text-align: right"></td>
+      </tr>
+      <tr>
+          <td>Teleflora (†)</td>
+          <td>Max</td>
+          <td>Tulip Red Impression</td>
+          <td style="text-align: right">11</td>
+      </tr>
+      <tr>
+          <td>Anne</td>
+          <td>Naomi</td>
+          <td>Tulip Bloemendaal Sunset</td>
+          <td style="text-align: right">1</td>
+      </tr>
+      <tr>
+          <td>Daisy</td>
+          <td>Vincent</td>
+          <td>Tulip Admiral of Admirals</td>
+          <td style="text-align: right">3</td>
+      </tr>
+      <tr>
+          <td>Julia</td>
+          <td>Mina</td>
+          <td>Tulip Admiral van Eijck</td>
+          <td style="text-align: right">1</td>
+      </tr>
+      <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td style="text-align: right"></td>
+      </tr>
+      <tr>
+          <td>Max</td>
+          <td>Isabel</td>
+          <td>Tulip Red Impression</td>
+          <td style="text-align: right">2</td>
+      </tr>
+  </tbody>
 </table>
-
 <p>(†): Grower Transaction - New Tulips on the Market!</p>
-
 <p>(Source: <a href="https://github.com/openblockchains/tulips">openblockchains/tulips</a>)</p>
-
 <h2 id="tulips-on-the-blockchain-adding-transactions-cont">Tulips on the Blockchain! Adding Transactions (Cont.)</h2>
-
 <p><strong>Quotes - Blockchains are the next Internets / Tulips</strong></p>
-
 <blockquote>
 <p>People who compare digital tokens to tulips are essentially saying digital tokens are a bubble backed
 by nothing but pure hype and speculation.</p>
-
 <p>What they fail to understand is that tulips come from dirt, not a blockchain.</p>
-
 <p>And as we all know, blockchain is possibly the best technological innovation since the internet.
 It will have a tremendous impact on global business and society in general.
 &ndash; <a href="http://tuliptoken.com">TulipToken</a></p>
 </blockquote>
-
 <h2 id="tulips-on-the-blockchain-adding-transactions-cont-1">Tulips on the Blockchain! Adding Transactions (Cont.)</h2>
-
-<pre><code>let b0 = Block.first(
-        { from: &quot;Dutchgrown&quot;, to: &quot;Vincent&quot;, what: &quot;Tulip Bloemendaal Sunset&quot;, qty: 10 },
-        { from: &quot;Keukenhof&quot;,  to: &quot;Anne&quot;,    what: &quot;Tulip Semper Augustus&quot;,    qty: 7  } )
+<pre tabindex="0"><code>let b0 = Block.first(
+        { from: &#34;Dutchgrown&#34;, to: &#34;Vincent&#34;, what: &#34;Tulip Bloemendaal Sunset&#34;, qty: 10 },
+        { from: &#34;Keukenhof&#34;,  to: &#34;Anne&#34;,    what: &#34;Tulip Semper Augustus&#34;,    qty: 7  } )
 
 let b1 = Block.next( b0,
-        { from: &quot;Flowers&quot;, to: &quot;Ruben&quot;, what: &quot;Tulip Admiral van Eijck&quot;,  qty: 5 },
-        { from: &quot;Vicent&quot;,  to: &quot;Anne&quot;,  what: &quot;Tulip Bloemendaal Sunset&quot;, qty: 3 },
-        { from: &quot;Anne&quot;,    to: &quot;Julia&quot;, what: &quot;Tulip Semper Augustus&quot;,    qty: 1 },
-        { from: &quot;Julia&quot;,   to: &quot;Luuk&quot;,  what: &quot;Tulip Semper Augustus&quot;,    qty: 1 } )
+        { from: &#34;Flowers&#34;, to: &#34;Ruben&#34;, what: &#34;Tulip Admiral van Eijck&#34;,  qty: 5 },
+        { from: &#34;Vicent&#34;,  to: &#34;Anne&#34;,  what: &#34;Tulip Bloemendaal Sunset&#34;, qty: 3 },
+        { from: &#34;Anne&#34;,    to: &#34;Julia&#34;, what: &#34;Tulip Semper Augustus&#34;,    qty: 1 },
+        { from: &#34;Julia&#34;,   to: &#34;Luuk&#34;,  what: &#34;Tulip Semper Augustus&#34;,    qty: 1 } )
 
 let b2 = Block.next( b1,
-        { from: &quot;Bloom &amp; Blossom&quot;, to: &quot;Daisy&quot;,   what: &quot;Tulip Admiral of Admirals&quot;, qty: 8 },
-        { from: &quot;Vincent&quot;,         to: &quot;Max&quot;,     what: &quot;Tulip Bloemendaal Sunset&quot;,  qty: 2 },
-        { from: &quot;Anne&quot;,            to: &quot;Martijn&quot;, what: &quot;Tulip Semper Augustus&quot;,     qty: 2 },
-        { from: &quot;Ruben&quot;,           to: &quot;Julia&quot;,   what: &quot;Tulip Admiral van Eijck&quot;,   qty: 2 } )
+        { from: &#34;Bloom &amp; Blossom&#34;, to: &#34;Daisy&#34;,   what: &#34;Tulip Admiral of Admirals&#34;, qty: 8 },
+        { from: &#34;Vincent&#34;,         to: &#34;Max&#34;,     what: &#34;Tulip Bloemendaal Sunset&#34;,  qty: 2 },
+        { from: &#34;Anne&#34;,            to: &#34;Martijn&#34;, what: &#34;Tulip Semper Augustus&#34;,     qty: 2 },
+        { from: &#34;Ruben&#34;,           to: &#34;Julia&#34;,   what: &#34;Tulip Admiral van Eijck&#34;,   qty: 2 } )
 ...
-</code></pre>
-
-<h2 id="tulips-on-the-blockchain-adding-transactions-cont-2">Tulips on the Blockchain! Adding Transactions (Cont.)</h2>
-
+</code></pre><h2 id="tulips-on-the-blockchain-adding-transactions-cont-2">Tulips on the Blockchain! Adding Transactions (Cont.)</h2>
 <p>resulting in:</p>
-
-<pre><code>[ Block {
+<pre tabindex="0"><code>[ Block {
     index:     0,
     timestamp: 1637-09-25 17:39:21,
     data:
-     [ { from: 'Dutchgrown', to: 'Vincent',  what: 'Tulip Bloemendaal Sunset', qty: 10 },
-       { from: 'Keukenhof',  to: 'Anne',     what: 'Tulip Semper Augustus',    qty: 7 } ],
-    previousHash: '0',
-    hash:         '7cb2df9eee29ca77c99eb4591a25dcbdfa9609aff2bd3558d1a0fe22acd08a51' },
+     [ { from: &#39;Dutchgrown&#39;, to: &#39;Vincent&#39;,  what: &#39;Tulip Bloemendaal Sunset&#39;, qty: 10 },
+       { from: &#39;Keukenhof&#39;,  to: &#39;Anne&#39;,     what: &#39;Tulip Semper Augustus&#39;,    qty: 7 } ],
+    previousHash: &#39;0&#39;,
+    hash:         &#39;7cb2df9eee29ca77c99eb4591a25dcbdfa9609aff2bd3558d1a0fe22acd08a51&#39; },
   Block {
     index:     1,
     timestamp: 1637-09-25 17:49:21,
     data:
-     [ { from: 'Flowers',  to: 'Ruben',  what: 'Tulip Admiral van Eijck',   qty: 5 },
-       { from: 'Vicent',   to: 'Anne',   what: 'Tulip Bloemendaal Sunset',  qty: 3 },
-       { from: 'Anne',     to: 'Julia',  what: 'Tulip Semper Augustus',     qty: 1 },
-       { from: 'Julia',    to: 'Luuk',   what: 'Tulip Semper Augustus',     qty: 1 } ],
-    previousHash: '7cb2df9eee29ca77c99eb4591a25dcbdfa9609aff2bd3558d1a0fe22acd08a51',
-    hash:         'a7464e98290039f467e7abf6699180205f5151e76b57a79b39f43acc39d75660' },
+     [ { from: &#39;Flowers&#39;,  to: &#39;Ruben&#39;,  what: &#39;Tulip Admiral van Eijck&#39;,   qty: 5 },
+       { from: &#39;Vicent&#39;,   to: &#39;Anne&#39;,   what: &#39;Tulip Bloemendaal Sunset&#39;,  qty: 3 },
+       { from: &#39;Anne&#39;,     to: &#39;Julia&#39;,  what: &#39;Tulip Semper Augustus&#39;,     qty: 1 },
+       { from: &#39;Julia&#39;,    to: &#39;Luuk&#39;,   what: &#39;Tulip Semper Augustus&#39;,     qty: 1 } ],
+    previousHash: &#39;7cb2df9eee29ca77c99eb4591a25dcbdfa9609aff2bd3558d1a0fe22acd08a51&#39;,
+    hash:         &#39;a7464e98290039f467e7abf6699180205f5151e76b57a79b39f43acc39d75660&#39; },
   Block {
     index:     2,
     timestamp: 1637-09-25 17:59:21,
     data:
-     [ { from: 'Bloom &amp; Blossom', to: 'Daisy',    what: 'Tulip Admiral of Admirals', qty: 8 },
-       { from: 'Vincent',         to: 'Max',      what: 'Tulip Bloemendaal Sunset',  qty: 2 },
-       { from: 'Anne',            to: 'Martijn',  what: 'Tulip Semper Augustus',     qty: 2 },
-       { from: 'Ruben',           to: 'Julia',    what: 'Tulip Admiral van Eijck',   qty: 2 } ],
-    previousHash: 'a7464e98290039f467e7abf6699180205f5151e76b57a79b39f43acc39d75660',
-    hash:         'b7e4952f801651c1e14d61d77b869d18268b46c468923089f1da33e3959b56b9' },
+     [ { from: &#39;Bloom &amp; Blossom&#39;, to: &#39;Daisy&#39;,    what: &#39;Tulip Admiral of Admirals&#39;, qty: 8 },
+       { from: &#39;Vincent&#39;,         to: &#39;Max&#39;,      what: &#39;Tulip Bloemendaal Sunset&#39;,  qty: 2 },
+       { from: &#39;Anne&#39;,            to: &#39;Martijn&#39;,  what: &#39;Tulip Semper Augustus&#39;,     qty: 2 },
+       { from: &#39;Ruben&#39;,           to: &#39;Julia&#39;,    what: &#39;Tulip Admiral van Eijck&#39;,   qty: 2 } ],
+    previousHash: &#39;a7464e98290039f467e7abf6699180205f5151e76b57a79b39f43acc39d75660&#39;,
+    hash:         &#39;b7e4952f801651c1e14d61d77b869d18268b46c468923089f1da33e3959b56b9&#39; },
   ...
 ]
-</code></pre>
-
-<h2 id="what-s-blockchain-lite-javascript-edition">What&rsquo;s Blockchain Lite - JavaScript Edition?</h2>
-
+</code></pre><h2 id="whats-blockchain-lite---javascript-edition">What&rsquo;s Blockchain Lite - JavaScript Edition?</h2>
 <p>blockchain-lite library / module (npm: <a href="https://www.npmjs.com/package/blockchain-lite"><code>blockchain-lite</code></a>) -
 build your own blockchain with crypto hashes -
 revolutionize the world with blockchains, blockchains, blockchains one block at a time</p>
-
 <p><strong>Usage</strong></p>
-
 <p>Let&rsquo;s get started.  Build your own blockchain one block at a time.
 Example:</p>
-
-<pre><code class="language-js">const Blocks = require( &quot;blockchain-lite&quot; )
-
-// use basic block
-let Block = Blocks.basic
-
-let b0 = Block.first( 'Genesis' )
-let b1 = Block.next( b0, 'Transaction Data...' )
-let b2 = Block.next( b1, 'Transaction Data......' )
-let b3 = Block.next( b2, 'More Transaction Data...' )
-
-let blockchain = [b0, b1, b2, b3]
-
-console.log( blockchain )
-</code></pre>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">Blocks</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>( <span style="color:#e6db74">&#34;blockchain-lite&#34;</span> )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// use basic block
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">Block</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Blocks</span>.<span style="color:#a6e22e">basic</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">b0</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Block</span>.<span style="color:#a6e22e">first</span>( <span style="color:#e6db74">&#39;Genesis&#39;</span> )
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">b1</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Block</span>.<span style="color:#a6e22e">next</span>( <span style="color:#a6e22e">b0</span>, <span style="color:#e6db74">&#39;Transaction Data...&#39;</span> )
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">b2</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Block</span>.<span style="color:#a6e22e">next</span>( <span style="color:#a6e22e">b1</span>, <span style="color:#e6db74">&#39;Transaction Data......&#39;</span> )
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">b3</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Block</span>.<span style="color:#a6e22e">next</span>( <span style="color:#a6e22e">b2</span>, <span style="color:#e6db74">&#39;More Transaction Data...&#39;</span> )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">blockchain</span> <span style="color:#f92672">=</span> [<span style="color:#a6e22e">b0</span>, <span style="color:#a6e22e">b1</span>, <span style="color:#a6e22e">b2</span>, <span style="color:#a6e22e">b3</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>( <span style="color:#a6e22e">blockchain</span> )
+</span></span></code></pre></div>
     </article>
 
     
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2017-08-19-blockchain/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Build%20Your%20Own%20Blockchains%20in%20JavaScript%20from%20Zero%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2017-08-19-blockchain/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
 
 
     <ul class="pager article-pager">
@@ -576,7 +500,7 @@ console.log( blockchain )
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>

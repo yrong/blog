@@ -1,34 +1,29 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Typescript on yrong blog</title>
     <link>https://yrong.github.io/blog/tags/typescript/</link>
     <description>Recent content in Typescript on yrong blog</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <generator>Hugo</generator>
     <language>en</language>
-    <copyright>&amp;copy; Copyright 2017 Ronyang</copyright>
+    <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
+    <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
     <lastBuildDate>Fri, 04 Jan 2019 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="https://yrong.github.io/blog/tags/typescript/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <atom:link href="https://yrong.github.io/blog/tags/typescript/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Nest介绍</title>
       <link>https://yrong.github.io/blog/post/2019-01-04-nest/</link>
-      <pubDate>Fri, 04 Jan 2019 00:00:00 +0000</pubDate>
-      
+      <pubDate>Fri, 04 Jan 2019 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/post/2019-01-04-nest/</guid>
-      <description>Nest 基础功能 —— Module Nest 主要特性中的模块化开发，就源自与此。Nest 使用 Module 来组织应用程序结构，每个应用程序至少有一个模块，即根模块。根模块是 Nest 开始</description>
+      <description>&lt;h1 id=&#34;nest-基础功能--module&#34;&gt;Nest 基础功能 —— Module&lt;/h1&gt;&#xA;&lt;p&gt;Nest 主要特性中的模块化开发，就源自与此。Nest 使用 &lt;code&gt;Module&lt;/code&gt; 来组织应用程序结构，每个应用程序至少有一个模块，即根模块。根模块是 Nest 开始排列应用程序树的地方。事实上，根模块可能是应用程序中唯一的模块，尤其是当应用程序很小时。然而，对于大型应用来说，这是没有意义的。在大多数情况下，您将有很多模块，每个模块都有一组与其密切相关的功能。&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Introduction to nestjs</title>
       <link>https://yrong.github.io/blog/post/2018-06-09-nestjs/</link>
-      <pubDate>Sat, 09 Jun 2018 00:00:00 +0000</pubDate>
-      
+      <pubDate>Sat, 09 Jun 2018 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/post/2018-06-09-nestjs/</guid>
-      <description>代码分析 入口main.ts import { NestFactory } from &#39;@nestjs/core&#39;; import { ApplicationModule } from &#39;./app.module&#39;; async function bootstrap() { const app = await NestFactory.create(ApplicationModule); await app.listen(3000); } bootstrap(); NestFactory构造 public async create( module: any, serverOrOptions?: any, options?: NestApplicationOptions, ): Promise&amp;lt; INestApplication &amp;amp; (INestExpressApplication | INestFastifyApplication) &amp;gt; { const</description>
+      <description>&lt;h2 id=&#34;代码分析&#34;&gt;代码分析&lt;/h2&gt;&#xA;&lt;p&gt;入口main.ts&lt;/p&gt;&#xA;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;import { NestFactory } from &amp;#39;@nestjs/core&amp;#39;;&#xA;import { ApplicationModule } from &amp;#39;./app.module&amp;#39;;&#xA;&#xA;async function bootstrap() {&#xA;  const app = await NestFactory.create(ApplicationModule);&#xA;  await app.listen(3000);&#xA;}&#xA;bootstrap();&#xA;&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;NestFactory构造&lt;/p&gt;&#xA;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;public async create(&#xA;    module: any,&#xA;    serverOrOptions?: any,&#xA;    options?: NestApplicationOptions,&#xA;  ): Promise&amp;lt;&#xA;    INestApplication &amp;amp; (INestExpressApplication | INestFastifyApplication)&#xA;  &amp;gt; {&#xA;    const isHttpServer = serverOrOptions &amp;amp;&amp;amp; serverOrOptions.patch;&#xA;    // tslint:disable-next-line:prefer-const&#xA;    let [httpServer, appOptions] = isHttpServer&#xA;      ? [serverOrOptions, options]&#xA;      : [ExpressFactory.create()/* 默认使用Express*/, serverOrOptions];&#xA;&#xA;    const applicationConfig = new ApplicationConfig();&#xA;    const container = new NestContainer(applicationConfig);//生成容器container;传入了配置对象&#xA;    httpServer = this.applyExpressAdapter(httpServer);//初始化http服务&#xA;&#xA;    this.applyLogger(appOptions);//日志输出对象&#xA;    await this.initialize(module, container, applicationConfig, httpServer);&#xA;    return this.createNestInstance&amp;lt;NestApplication&amp;gt;(&#xA;      new NestApplication(container, httpServer, applicationConfig, appOptions),&#xA;    );&#xA;  }&#xA;&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;&#xA;&lt;li&gt;第一个参数是使用是传入的类似angularmodule的对象&lt;/li&gt;&#xA;&lt;li&gt;第二个参数可以是设置参数，也可以是类似express的MVC，如官网提到的fastify，覆盖默认使用的express&lt;/li&gt;&#xA;&lt;li&gt;第三个参数就是设置参数&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;初始化模块&lt;/p&gt;</description>
     </item>
-    
   </channel>
 </rss>

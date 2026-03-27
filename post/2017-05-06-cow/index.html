@@ -14,22 +14,23 @@
   <meta property="og:url" content="https://yrong.github.io/blog/post/2017-05-06-cow/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
-
+  <meta name="generator" content="Hugo 0.159.1">
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -49,8 +50,8 @@
       <ul class="article-meta">
         <li class="article-meta-date"><time>May 6, 2017</time></li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/golang/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/golang/">
+            <i class="fa-solid fa-tag"></i>
             golang
           </a>&nbsp;
         </li>
@@ -58,76 +59,60 @@
       
 <aside class="toc">
   <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#features">Features</a></li>
-<li><a href="#visited-site-recording">Visited site recording</a></li>
-<li><a href="#how-does-cow-detect-blocked-sites">How does COW detect blocked sites</a></li>
-<li><a href="#example-configuration">Example Configuration</a></li>
-<li><a href="#implementation-design">Implementation Design</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#visited-site-recording">Visited site recording</a></li>
+    <li><a href="#how-does-cow-detect-blocked-sites">How does COW detect blocked sites</a></li>
+    <li><a href="#example-configuration">Example Configuration</a></li>
+    <li><a href="#implementation-design">Implementation Design</a></li>
+  </ul>
 </nav>
 </aside>
       <p>COW is a HTTP proxy to simplify bypassing the great firewall. It tries to automatically identify blocked websites and only use parent proxy for those sites.</p>
-
 <h2 id="features">Features</h2>
-
 <ul>
 <li>As a HTTP proxy, can be used by mobile devices</li>
 <li>Supports HTTP, SOCKS5, <a href="https://github.com/clowwindy/shadowsocks/wiki/Shadowsocks-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E">shadowsocks</a> and COW itself as parent proxy
-
 <ul>
 <li>Supports simple load balancing between multiple parent proxies</li>
-</ul></li>
+</ul>
+</li>
 <li>Automatically identify blocked websites, only use parent proxy for those sites</li>
 <li>Generate and serve PAC file for browser to bypass COW for best performance
-
 <ul>
 <li>Contain domains that can be directly accessed (recorded accoring to your visit history)</li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
 <h2 id="visited-site-recording">Visited site recording</h2>
-
 <p>COW records all visited hosts and visit count in <code>stat</code> (which is a json file) under the same directory with config file.</p>
-
 <ul>
 <li><strong>For unknown site, first try direct access, use parent proxy upon failure. After 2 minutes, try direct access again</strong>
-
 <ul>
 <li>Builtin <a href="site_blocked.go">common blocked site</a> in order to reduce time to discover blockage and the use parent proxy</li>
-</ul></li>
+</ul>
+</li>
 <li>Hosts will be put into PAC after a few times of successful direct visit</li>
 <li>Hosts will use parent proxy if direct access failed for a few times
-
 <ul>
 <li>To avoid mistakes, will try direct access with some probability</li>
-</ul></li>
+</ul>
+</li>
 <li>Host will be deleted if not visited for a few days</li>
 <li>Hosts under builtin/manually specified blocked and direct domains will not appear in <code>stat</code></li>
 </ul>
-
 <h2 id="how-does-cow-detect-blocked-sites">How does COW detect blocked sites</h2>
-
 <p>Upon the following error, one domain is considered to be blocked</p>
-
 <ul>
 <li>Server connection reset</li>
 <li>Connection to server timeout</li>
 <li>Read from server timeout</li>
 </ul>
-
 <p>COW will retry HTTP request upon these errors, But if there&rsquo;s some data sent back to the client, connection with the client will be dropped to signal error..</p>
-
 <p>Server connection reset is usually reliable in detecting blocked sites. But timeout is not. COW tries to estimate timeout value every 30 seconds, in order to avoid considering normal sites as blocked when network condition is bad. Revert to direct access after two minutes upon first blockage is also to avoid mistakes.</p>
-
 <p>If automatica timeout retry causes problem for you, try to change <code>readTimeout</code> and <code>dialTimeout</code> in configuration.</p>
-
 <h2 id="example-configuration">Example Configuration</h2>
-
-<pre><code># Line starting with # is comment and will be ignored
+<pre tabindex="0"><code># Line starting with # is comment and will be ignored
 # Local proxy listen address
 listen = http://127.0.0.1:7777
 
@@ -140,25 +125,20 @@ proxy = http://user:password@127.0.0.1:8080
 proxy = ss://aes-128-cfb:password@1.2.3.4:8388
 # cow parent proxy
 proxy = cow://aes-128-cfb:password@1.2.3.4:8388
-</code></pre>
-
-<h2 id="implementation-design">Implementation Design</h2>
-
+</code></pre><h2 id="implementation-design">Implementation Design</h2>
 <p>COW uses separate goroutines to read client requests and server responses.</p>
-
 <ul>
 <li>For each client, COW will create one <em>goroutine</em> to
-
 <ul>
 <li>accept client request (read from client connection)</li>
 <li>create connection if not exist</li>
 <li>send request to the server (write to server connection)</li>
 <li>reading response from the web server (read from server connection)</li>
 <li>send response back to the client (write to client connection)</li>
-</ul></li>
 </ul>
-
-<pre><code>/*entrance*/
+</li>
+</ul>
+<pre tabindex="0"><code>/*entrance*/
 func main() {
 	quit = make(chan struct{})
 	// Parse flags after load config to allow override options in config
@@ -184,7 +164,7 @@ func main() {
 	}
 	wg.Wait()
 	if relaunch {
-		info.Println(&quot;Relunching cow...&quot;)
+		info.Println(&#34;Relunching cow...&#34;)
 		// Need to fork me.
 		argv0, err := lookPath()
 		if nil != err {
@@ -197,19 +177,17 @@ func main() {
 			errl.Println(err)
 		}
 	}
-	debug.Println(&quot;the main process is , exiting...&quot;)
+	debug.Println(&#34;the main process is , exiting...&#34;)
 
 }
-</code></pre>
-
-<pre><code>//listen and serve proxy request from all clients
+</code></pre><pre tabindex="0"><code>//listen and serve proxy request from all clients
 func (hp *httpProxy) Serve(wg *sync.WaitGroup, quit &lt;-chan struct{}) {
     	defer func() {
     		wg.Done()
     	}()
-    	ln, err := net.Listen(&quot;tcp&quot;, hp.addr)
+    	ln, err := net.Listen(&#34;tcp&#34;, hp.addr)
     	if err != nil {
-    		fmt.Println(&quot;listen http failed:&quot;, err)
+    		fmt.Println(&#34;listen http failed:&#34;, err)
     		return
     	}
     	var exit bool
@@ -220,19 +198,19 @@ func (hp *httpProxy) Serve(wg *sync.WaitGroup, quit &lt;-chan struct{}) {
     	}()
     	host, _, _ := net.SplitHostPort(hp.addr)
     	var pacURL string
-    	if host == &quot;&quot; || host == &quot;0.0.0.0&quot; {
-    		pacURL = fmt.Sprintf(&quot;http://&lt;hostip&gt;:%s/pac&quot;, hp.port)
-    	} else if hp.addrInPAC == &quot;&quot; {
-    		pacURL = fmt.Sprintf(&quot;http://%s/pac&quot;, hp.addr)
+    	if host == &#34;&#34; || host == &#34;0.0.0.0&#34; {
+    		pacURL = fmt.Sprintf(&#34;http://&lt;hostip&gt;:%s/pac&#34;, hp.port)
+    	} else if hp.addrInPAC == &#34;&#34; {
+    		pacURL = fmt.Sprintf(&#34;http://%s/pac&#34;, hp.addr)
     	} else {
-    		pacURL = fmt.Sprintf(&quot;http://%s/pac&quot;, hp.addrInPAC)
+    		pacURL = fmt.Sprintf(&#34;http://%s/pac&#34;, hp.addrInPAC)
     	}
-    	info.Printf(&quot;COW %s listen http %s, PAC url %s\n&quot;, version, hp.addr, pacURL)
+    	info.Printf(&#34;COW %s listen http %s, PAC url %s\n&#34;, version, hp.addr, pacURL)
 
     	for {
     		conn, err := ln.Accept()
     		if err != nil &amp;&amp; !exit {
-    			errl.Printf(&quot;http proxy(%s) accept %v\n&quot;, ln.Addr(), err)
+    			errl.Printf(&#34;http proxy(%s) accept %v\n&#34;, ln.Addr(), err)
     			if isErrTooManyOpenFd(err) {
     				connPool.CloseAll()
     			}
@@ -240,7 +218,7 @@ func (hp *httpProxy) Serve(wg *sync.WaitGroup, quit &lt;-chan struct{}) {
     			continue
     		}
     		if exit {
-    			debug.Println(&quot;exiting the http listner&quot;)
+    			debug.Println(&#34;exiting the http listner&#34;)
     			break
     		}
     		c := newClientConn(conn, hp)
@@ -248,9 +226,7 @@ func (hp *httpProxy) Serve(wg *sync.WaitGroup, quit &lt;-chan struct{}) {
     		go c.serve()
     	}
     }
-</code></pre>
-
-<pre><code>/*gorouting to serve request from one client*/
+</code></pre><pre tabindex="0"><code>/*gorouting to serve request from one client*/
 func (c *clientConn) serve() {
 	var r Request
 	var rp Response
@@ -273,16 +249,16 @@ func (c *clientConn) serve() {
 	for {
 
 		if err = parseRequest(c, &amp;r); err != nil {//parse request from client
-			debug.Printf(&quot;cli(%s) parse request %v\n&quot;, c.RemoteAddr(), err)
+			debug.Printf(&#34;cli(%s) parse request %v\n&#34;, c.RemoteAddr(), err)
 			if err == io.EOF || isErrConnReset(err) {
 				return
 			}
 			if err != errClientTimeout {
-				sendErrorPage(c, &quot;404 Bad request&quot;, &quot;Bad request&quot;, err.Error())
+				sendErrorPage(c, &#34;404 Bad request&#34;, &#34;Bad request&#34;, err.Error())
 				return
 			}
 			sendErrorPage(c, statusRequestTimeout, statusRequestTimeout,
-				&quot;Your browser didn't send a complete request in time.&quot;)
+				&#34;Your browser didn&#39;t send a complete request in time.&#34;)
 			return
 		}
 
@@ -290,15 +266,15 @@ func (c *clientConn) serve() {
 	    //build server connection based on the parsed request
 		if sv, err = c.getServerConn(&amp;r); err != nil {
 			if debug {
-				debug.Printf(&quot;cli(%s) failed to get server conn %v\n&quot;, c.RemoteAddr(), &amp;r)
+				debug.Printf(&#34;cli(%s) failed to get server conn %v\n&#34;, c.RemoteAddr(), &amp;r)
 			}
 			// Failed connection will send error page back to the client.
 			// For CONNECT, the client read buffer is released in copyClient2Server,
-			// so can't go back to getRequest.
+			// so can&#39;t go back to getRequest.
 			if err == errPageSent &amp;&amp; !r.isConnect {
 				if r.hasBody() {
 					// skip request body
-					debug.Printf(&quot;cli(%s) skip request body %v\n&quot;, c.RemoteAddr(), &amp;r)
+					debug.Printf(&#34;cli(%s) skip request body %v\n&#34;, c.RemoteAddr(), &amp;r)
 					sendBody(SinkWriter{}, c.bufRd, int(r.ContLen), r.Chunking)
 				}
 				continue
@@ -321,7 +297,7 @@ func (c *clientConn) serve() {
 		_, isCowConn := sv.Conn.(cowConn)
 		if rp.ConnectionKeepAlive || isCowConn {
 			if debug {
-				debug.Printf(&quot;cli(%s) connPool put %s&quot;, c.RemoteAddr(), sv.hostPort)
+				debug.Printf(&#34;cli(%s) connPool put %s&#34;, c.RemoteAddr(), sv.hostPort)
 			}
 			// If the server connection is not going to be used soon,
 			// release buffer before putting back to pool can save memory.
@@ -329,21 +305,19 @@ func (c *clientConn) serve() {
 			connPool.Put(sv)
 		} else {
 			if debug {
-				debug.Printf(&quot;cli(%s) server %s close conn\n&quot;, c.RemoteAddr(), sv.hostPort)
+				debug.Printf(&#34;cli(%s) server %s close conn\n&#34;, c.RemoteAddr(), sv.hostPort)
 			}
 			sv.Close()
 		}
 		if !r.ConnectionKeepAlive {
 			if debug {
-				debug.Printf(&quot;cli(%s) close connection\n&quot;, c.RemoteAddr())
+				debug.Printf(&#34;cli(%s) close connection\n&#34;, c.RemoteAddr())
 			}
 			return
 		}
 	}
 }
-</code></pre>
-
-<pre><code>// Connect to requested server according to whether it's marked as blocked.
+</code></pre><pre tabindex="0"><code>// Connect to requested server according to whether it&#39;s marked as blocked.
 // If direct connection fails, try parent proxies.
 func (c *clientConn) connect(r *Request, siteInfo *VisitCnt) (srvconn net.Conn, err error) {
 	var errMsg string
@@ -351,7 +325,7 @@ func (c *clientConn) connect(r *Request, siteInfo *VisitCnt) (srvconn net.Conn, 
 		if srvconn, err = parentProxy.connect(r.URL); err == nil {
 			return
 		}
-		errMsg = genErrMsg(r, nil, &quot;Parent proxy connection failed, always use parent proxy.&quot;)
+		errMsg = genErrMsg(r, nil, &#34;Parent proxy connection failed, always use parent proxy.&#34;)
 		goto fail
 	}
 	if siteInfo.AsBlocked() &amp;&amp; !parentProxy.empty() {
@@ -362,7 +336,7 @@ func (c *clientConn) connect(r *Request, siteInfo *VisitCnt) (srvconn net.Conn, 
 		if srvconn, err = connectDirect(r.URL, siteInfo); err == nil {
 			return
 		}
-		errMsg = genErrMsg(r, nil, &quot;Parent proxy and direct connection failed, maybe blocked site.&quot;)
+		errMsg = genErrMsg(r, nil, &#34;Parent proxy and direct connection failed, maybe blocked site.&#34;)
 	} else {
 		// In case of error on direction connection, try parent server
 		if srvconn, err = connectDirect(r.URL, siteInfo); err == nil {
@@ -370,7 +344,7 @@ func (c *clientConn) connect(r *Request, siteInfo *VisitCnt) (srvconn net.Conn, 
 		}
 		// net.Dial does two things: DNS lookup and TCP connection.
 		// GFW may cause failure here: make it time out or reset connection.
-		// debug.Printf(&quot;type of err %T %v\n&quot;, err, err)
+		// debug.Printf(&#34;type of err %T %v\n&#34;, err, err)
 
 		// RST during TCP handshake is valid and would return as connection
 		// refused error. My observation is that GFW does not use RST to stop
@@ -381,23 +355,46 @@ func (c *clientConn) connect(r *Request, siteInfo *VisitCnt) (srvconn net.Conn, 
 		if srvconn, socksErr = parentProxy.connect(r.URL); socksErr == nil {
 			c.handleBlockedRequest(r, err)//flag as blocked
 			if debug {
-				debug.Printf(&quot;cli(%s) direct connection failed, use parent proxy for %v\n&quot;,
+				debug.Printf(&#34;cli(%s) direct connection failed, use parent proxy for %v\n&#34;,
 					c.RemoteAddr(), r)
 			}
 			return srvconn, nil
 		}
 		errMsg = genErrMsg(r, nil,
-			&quot;Direct and parent proxy connection failed, maybe blocked site.&quot;)
+			&#34;Direct and parent proxy connection failed, maybe blocked site.&#34;)
 	}
 
 fail:
-	sendErrorPage(c, &quot;504 Connection failed&quot;, err.Error(), errMsg)
+	sendErrorPage(c, &#34;504 Connection failed&#34;, err.Error(), errMsg)
 	return nil, errPageSent
 }
 </code></pre>
     </article>
 
     
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2017-05-06-cow/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=cow%20code%20analysis%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2017-05-06-cow/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
 
 
     <ul class="pager article-pager">
@@ -412,7 +409,7 @@ fail:
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>

@@ -11,24 +11,25 @@
   <meta property="og:url" content="https://yrong.github.io/blog/" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
+  <meta name="generator" content="Hugo 0.159.1">
   <link href="/blog/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
   <link href="/blog/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
-
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -41,6 +42,39 @@
   <div class="main" role="main">
     <section class="list home-list">
       <article class="article">
+        <a href="/blog/post/2018-04-09-skynet/" class="article-titles">
+          <h2 class="article-title">Introduction to Skynet</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 9, 2018</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/lua/">
+              <i class="fa-solid fa-tag"></i>
+              lua
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <h2 id="代码结构">代码结构</h2>
+<p>首先要关注一下config.path文件。</p>
+<p>skynet/example/config.path</p>
+<pre tabindex="0"><code>root = &#34;./&#34;
+luaservice = root..&#34;service/?.lua;&#34;..root..&#34;test/?.lua;&#34;..root..&#34;examples/?.lua;&#34;..root..&#34;test/?/init.lua&#34;
+lualoader = root .. &#34;lualib/loader.lua&#34;
+lua_path = root..&#34;lualib/?.lua;&#34;..root..&#34;lualib/?/init.lua&#34;
+lua_cpath = root .. &#34;luaclib/?.so&#34;
+snax = root..&#34;examples/?.lua;&#34;..root..&#34;test/?.lua&#34;
+</code></pre><p>root代表的是skynet所在的目录。
+luaservice代表服务所在的目录。
+lualoader 用哪一段 lua 代码加载 lua 服务。通常配置为 lualib/loader.lua ，再由这段代码解析服务名称，进一步加载 lua 代码。不用去修改它。
+lua_path和lua_cpath代表require要加载的文件所在的目录。
+snax代表使用snax框架写的服务所在的目录。</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2018-04-09-skynet/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/post/2018-02-09-gomodule/" class="article-titles">
           <h2 class="article-title">Introduction to Go Modules</h2>
           
@@ -48,8 +82,8 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>February 9, 2018</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/golang/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/golang/">
+              <i class="fa-solid fa-tag"></i>
               golang
             </a>&nbsp;
           </li>
@@ -68,14 +102,14 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>August 19, 2017</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/blockchain/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
               blockchain
             </a>&nbsp;
           </li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/javascript/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/javascript/">
+              <i class="fa-solid fa-tag"></i>
               javascript
             </a>&nbsp;
           </li>
@@ -94,14 +128,14 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>July 8, 2017</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/golang/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/golang/">
+              <i class="fa-solid fa-tag"></i>
               golang
             </a>&nbsp;
           </li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/prometheus/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/prometheus/">
+              <i class="fa-solid fa-tag"></i>
               prometheus
             </a>&nbsp;
           </li>
@@ -120,14 +154,14 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>May 26, 2017</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/golang/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/golang/">
+              <i class="fa-solid fa-tag"></i>
               golang
             </a>&nbsp;
           </li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/yacc/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/yacc/">
+              <i class="fa-solid fa-tag"></i>
               yacc
             </a>&nbsp;
           </li>
@@ -146,8 +180,8 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>May 16, 2017</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/golang/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/golang/">
+              <i class="fa-solid fa-tag"></i>
               golang
             </a>&nbsp;
           </li>
@@ -166,8 +200,8 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>May 12, 2017</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/golang/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/golang/">
+              <i class="fa-solid fa-tag"></i>
               golang
             </a>&nbsp;
           </li>
@@ -186,8 +220,8 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>May 6, 2017</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/golang/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/golang/">
+              <i class="fa-solid fa-tag"></i>
               golang
             </a>&nbsp;
           </li>
@@ -206,8 +240,8 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>May 1, 2017</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/wordpress/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/wordpress/">
+              <i class="fa-solid fa-tag"></i>
               wordpress
             </a>&nbsp;
           </li>
@@ -226,14 +260,14 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>April 25, 2017</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/microservice/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/microservice/">
+              <i class="fa-solid fa-tag"></i>
               microservice
             </a>&nbsp;
           </li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/golang/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/golang/">
+              <i class="fa-solid fa-tag"></i>
               golang
             </a>&nbsp;
           </li>
@@ -244,133 +278,47 @@
         <div class="article-readmore"><a href="/blog/post/2017-04-25-go-micro/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
-      <article class="article">
-        <a href="/blog/post/2017-04-20-kafka/" class="article-titles">
-          <h2 class="article-title">kafka in depth analysis</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>April 20, 2017</time></li>
-          <li class="article-meta-tags">
-            <a href="/blog/tags/kafka/">
-              <i class="fas fa-tag"></i>
-              kafka
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <p>kafka架构分析</p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2017-04-20-kafka/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
     </section>
     
-
-<ul class="pagination">
-    
-    <li class="page-item">
-        <a href="/blog/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
-    </li>
-    
-    <li class="page-item">
-    <a href="/blog/" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
-    </li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item"><a class="page-link" href="/blog/">1</a></li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item active"><a class="page-link" href="/blog/page/2/">2</a></li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item"><a class="page-link" href="/blog/page/3/">3</a></li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item disabled"><span aria-hidden="true">&nbsp;&hellip;&nbsp;</span></li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item"><a class="page-link" href="/blog/page/7/">7</a></li>
-    
-    
-    <li class="page-item">
-    <a href="/blog/page/3/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
-    </li>
-    
-    <li class="page-item">
-        <a href="/blog/page/7/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
-    </li>
-    
-</ul>
-
+    <ul class="pagination pagination-default">
+      <li class="page-item">
+        <a href="/blog/" aria-label="First" class="page-link" role="button"><span aria-hidden="true">&laquo;&laquo;</span></a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/" aria-label="Previous" class="page-link" role="button"><span aria-hidden="true">&laquo;</span></a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/" aria-label="Page 1" class="page-link" role="button">1</a>
+      </li>
+      <li class="page-item active">
+        <a aria-current="page" aria-label="Page 2" class="page-link" role="button">2</a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/page/3/" aria-label="Page 3" class="page-link" role="button">3</a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/page/4/" aria-label="Page 4" class="page-link" role="button">4</a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/page/5/" aria-label="Page 5" class="page-link" role="button">5</a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/page/3/" aria-label="Next" class="page-link" role="button"><span aria-hidden="true">&raquo;</span></a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/page/7/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
+      </li>
+    </ul>
   </div>
 
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-rsslink">
       <a href="/blog/index.xml" type="application/rss+xml" target="_blank" title="RSS">
-        <i class="fas fa-rss"></i>
+        <i class="fa-solid fa-rss"></i>
       </a>
     </li>
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>

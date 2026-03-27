@@ -14,22 +14,23 @@
   <meta property="og:url" content="https://yrong.github.io/blog/post/2017-07-08-prometheus/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
-
+  <meta name="generator" content="Hugo 0.159.1">
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -49,14 +50,14 @@
       <ul class="article-meta">
         <li class="article-meta-date"><time>July 8, 2017</time></li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/golang/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/golang/">
+            <i class="fa-solid fa-tag"></i>
             golang
           </a>&nbsp;
         </li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/prometheus/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/prometheus/">
+            <i class="fa-solid fa-tag"></i>
             prometheus
           </a>&nbsp;
         </li>
@@ -64,29 +65,23 @@
       
 <aside class="toc">
   <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#design">Design</a></li>
-<li><a href="#on-disk-layout">On-disk layout</a>
-<ul>
-<li><a href="#disk-space-estimation">disk-space-estimation</a></li>
-</ul></li>
-<li><a href="#metrix">metrix</a></li>
-<li><a href="#benchmarks">Benchmarks</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#design">Design</a></li>
+    <li><a href="#on-disk-layout">On-disk layout</a>
+      <ul>
+        <li><a href="#disk-space-estimation">disk-space-estimation</a></li>
+      </ul>
+    </li>
+    <li><a href="#metrix">metrix</a></li>
+    <li><a href="#benchmarks">Benchmarks</a></li>
+  </ul>
 </nav>
 </aside>
       <p>Writing a Time Series Database from Scratch</p>
-
 <h2 id="design">Design</h2>
-
 <p><a href="https://fabxc.org/tsdb/">Writing a Time Series Database from Scratch</a></p>
-
 <h2 id="on-disk-layout">On-disk layout</h2>
-
-<pre><code>./data/01BKGV7JBM69T2G1BGBGM6KB12
+<pre tabindex="0"><code>./data/01BKGV7JBM69T2G1BGBGM6KB12
 ./data/01BKGV7JBM69T2G1BGBGM6KB12/meta.json
 ./data/01BKGV7JBM69T2G1BGBGM6KB12/wal
 ./data/01BKGV7JBM69T2G1BGBGM6KB12/wal/000002
@@ -107,92 +102,83 @@
 ./data/01BKGV7JC0RY8A6MACW02A2PJD/chunks
 ./data/01BKGV7JC0RY8A6MACW02A2PJD/chunks/000001
 ./data/01BKGV7JC0RY8A6MACW02A2PJD/tombstones
-</code></pre>
-
-<h3 id="disk-space-estimation">disk-space-estimation</h3>
-
+</code></pre><h3 id="disk-space-estimation">disk-space-estimation</h3>
 <blockquote>
 <p>needed_disk_space = retention_time_seconds * ingested_samples_per_second * bytes_per_sample</p>
 </blockquote>
-
 <h2 id="metrix">metrix</h2>
-
 <p>v1.x</p>
-
-<pre><code>prometheus_local_storage_memory_series: 时间序列持有的内存当前块数量
+<pre tabindex="0"><code>prometheus_local_storage_memory_series: 时间序列持有的内存当前块数量
 prometheus_local_storage_memory_chunks: 在内存中持久块的当前数量
 prometheus_local_storage_chunks_to_persist: 当前仍然需要持久化到磁盘的的内存块数量
 prometheus_local_storage_persistence_urgency_score: 上述讨论的紧急程度分数
 如果Prometheus处于冲动模式下，prometheus_local_storage_rushed_mode值等于1; 否则等于0.
-</code></pre>
-
-<p>v2.x</p>
-
-<pre><code># HELP prometheus_tsdb_blocks_loaded Number of currently loaded data blocks
+</code></pre><p>v2.x</p>
+<pre tabindex="0"><code># HELP prometheus_tsdb_blocks_loaded Number of currently loaded data blocks
 # TYPE prometheus_tsdb_blocks_loaded gauge
 prometheus_tsdb_blocks_loaded 3
 # HELP prometheus_tsdb_compaction_chunk_range Final time range of chunks on their first compaction
 # TYPE prometheus_tsdb_compaction_chunk_range histogram
-prometheus_tsdb_compaction_chunk_range_bucket{le=&quot;100&quot;} 0
-prometheus_tsdb_compaction_chunk_range_bucket{le=&quot;400&quot;} 0
-prometheus_tsdb_compaction_chunk_range_bucket{le=&quot;1600&quot;} 0
-prometheus_tsdb_compaction_chunk_range_bucket{le=&quot;6400&quot;} 0
-prometheus_tsdb_compaction_chunk_range_bucket{le=&quot;25600&quot;} 0
-prometheus_tsdb_compaction_chunk_range_bucket{le=&quot;102400&quot;} 0
-prometheus_tsdb_compaction_chunk_range_bucket{le=&quot;409600&quot;} 0
-prometheus_tsdb_compaction_chunk_range_bucket{le=&quot;1.6384e+06&quot;} 1807
-prometheus_tsdb_compaction_chunk_range_bucket{le=&quot;6.5536e+06&quot;} 6022
-prometheus_tsdb_compaction_chunk_range_bucket{le=&quot;2.62144e+07&quot;} 6022
-prometheus_tsdb_compaction_chunk_range_bucket{le=&quot;+Inf&quot;} 6022
+prometheus_tsdb_compaction_chunk_range_bucket{le=&#34;100&#34;} 0
+prometheus_tsdb_compaction_chunk_range_bucket{le=&#34;400&#34;} 0
+prometheus_tsdb_compaction_chunk_range_bucket{le=&#34;1600&#34;} 0
+prometheus_tsdb_compaction_chunk_range_bucket{le=&#34;6400&#34;} 0
+prometheus_tsdb_compaction_chunk_range_bucket{le=&#34;25600&#34;} 0
+prometheus_tsdb_compaction_chunk_range_bucket{le=&#34;102400&#34;} 0
+prometheus_tsdb_compaction_chunk_range_bucket{le=&#34;409600&#34;} 0
+prometheus_tsdb_compaction_chunk_range_bucket{le=&#34;1.6384e+06&#34;} 1807
+prometheus_tsdb_compaction_chunk_range_bucket{le=&#34;6.5536e+06&#34;} 6022
+prometheus_tsdb_compaction_chunk_range_bucket{le=&#34;2.62144e+07&#34;} 6022
+prometheus_tsdb_compaction_chunk_range_bucket{le=&#34;+Inf&#34;} 6022
 prometheus_tsdb_compaction_chunk_range_sum 1.0056692784e+10
 prometheus_tsdb_compaction_chunk_range_count 6022
 # HELP prometheus_tsdb_compaction_chunk_samples Final number of samples on their first compaction
 # TYPE prometheus_tsdb_compaction_chunk_samples histogram
-prometheus_tsdb_compaction_chunk_samples_bucket{le=&quot;4&quot;} 0
-prometheus_tsdb_compaction_chunk_samples_bucket{le=&quot;6&quot;} 0
-prometheus_tsdb_compaction_chunk_samples_bucket{le=&quot;9&quot;} 0
-prometheus_tsdb_compaction_chunk_samples_bucket{le=&quot;13.5&quot;} 0
-prometheus_tsdb_compaction_chunk_samples_bucket{le=&quot;20.25&quot;} 0
-prometheus_tsdb_compaction_chunk_samples_bucket{le=&quot;30.375&quot;} 0
-prometheus_tsdb_compaction_chunk_samples_bucket{le=&quot;45.5625&quot;} 0
-prometheus_tsdb_compaction_chunk_samples_bucket{le=&quot;68.34375&quot;} 1206
-prometheus_tsdb_compaction_chunk_samples_bucket{le=&quot;102.515625&quot;} 1807
-prometheus_tsdb_compaction_chunk_samples_bucket{le=&quot;153.7734375&quot;} 6022
-prometheus_tsdb_compaction_chunk_samples_bucket{le=&quot;230.66015625&quot;} 6022
-prometheus_tsdb_compaction_chunk_samples_bucket{le=&quot;345.990234375&quot;} 6022
-prometheus_tsdb_compaction_chunk_samples_bucket{le=&quot;+Inf&quot;} 6022
+prometheus_tsdb_compaction_chunk_samples_bucket{le=&#34;4&#34;} 0
+prometheus_tsdb_compaction_chunk_samples_bucket{le=&#34;6&#34;} 0
+prometheus_tsdb_compaction_chunk_samples_bucket{le=&#34;9&#34;} 0
+prometheus_tsdb_compaction_chunk_samples_bucket{le=&#34;13.5&#34;} 0
+prometheus_tsdb_compaction_chunk_samples_bucket{le=&#34;20.25&#34;} 0
+prometheus_tsdb_compaction_chunk_samples_bucket{le=&#34;30.375&#34;} 0
+prometheus_tsdb_compaction_chunk_samples_bucket{le=&#34;45.5625&#34;} 0
+prometheus_tsdb_compaction_chunk_samples_bucket{le=&#34;68.34375&#34;} 1206
+prometheus_tsdb_compaction_chunk_samples_bucket{le=&#34;102.515625&#34;} 1807
+prometheus_tsdb_compaction_chunk_samples_bucket{le=&#34;153.7734375&#34;} 6022
+prometheus_tsdb_compaction_chunk_samples_bucket{le=&#34;230.66015625&#34;} 6022
+prometheus_tsdb_compaction_chunk_samples_bucket{le=&#34;345.990234375&#34;} 6022
+prometheus_tsdb_compaction_chunk_samples_bucket{le=&#34;+Inf&#34;} 6022
 prometheus_tsdb_compaction_chunk_samples_sum 667104
 prometheus_tsdb_compaction_chunk_samples_count 6022
 # HELP prometheus_tsdb_compaction_chunk_size Final size of chunks on their first compaction
 # TYPE prometheus_tsdb_compaction_chunk_size histogram
-prometheus_tsdb_compaction_chunk_size_bucket{le=&quot;32&quot;} 0
-prometheus_tsdb_compaction_chunk_size_bucket{le=&quot;48&quot;} 436
-prometheus_tsdb_compaction_chunk_size_bucket{le=&quot;72&quot;} 1104
-prometheus_tsdb_compaction_chunk_size_bucket{le=&quot;108&quot;} 5016
-prometheus_tsdb_compaction_chunk_size_bucket{le=&quot;162&quot;} 5672
-prometheus_tsdb_compaction_chunk_size_bucket{le=&quot;243&quot;} 5786
-prometheus_tsdb_compaction_chunk_size_bucket{le=&quot;364.5&quot;} 5866
-prometheus_tsdb_compaction_chunk_size_bucket{le=&quot;546.75&quot;} 5978
-prometheus_tsdb_compaction_chunk_size_bucket{le=&quot;820.125&quot;} 5992
-prometheus_tsdb_compaction_chunk_size_bucket{le=&quot;1230.1875&quot;} 6022
-prometheus_tsdb_compaction_chunk_size_bucket{le=&quot;1845.28125&quot;} 6022
-prometheus_tsdb_compaction_chunk_size_bucket{le=&quot;2767.921875&quot;} 6022
-prometheus_tsdb_compaction_chunk_size_bucket{le=&quot;+Inf&quot;} 6022
+prometheus_tsdb_compaction_chunk_size_bucket{le=&#34;32&#34;} 0
+prometheus_tsdb_compaction_chunk_size_bucket{le=&#34;48&#34;} 436
+prometheus_tsdb_compaction_chunk_size_bucket{le=&#34;72&#34;} 1104
+prometheus_tsdb_compaction_chunk_size_bucket{le=&#34;108&#34;} 5016
+prometheus_tsdb_compaction_chunk_size_bucket{le=&#34;162&#34;} 5672
+prometheus_tsdb_compaction_chunk_size_bucket{le=&#34;243&#34;} 5786
+prometheus_tsdb_compaction_chunk_size_bucket{le=&#34;364.5&#34;} 5866
+prometheus_tsdb_compaction_chunk_size_bucket{le=&#34;546.75&#34;} 5978
+prometheus_tsdb_compaction_chunk_size_bucket{le=&#34;820.125&#34;} 5992
+prometheus_tsdb_compaction_chunk_size_bucket{le=&#34;1230.1875&#34;} 6022
+prometheus_tsdb_compaction_chunk_size_bucket{le=&#34;1845.28125&#34;} 6022
+prometheus_tsdb_compaction_chunk_size_bucket{le=&#34;2767.921875&#34;} 6022
+prometheus_tsdb_compaction_chunk_size_bucket{le=&#34;+Inf&#34;} 6022
 prometheus_tsdb_compaction_chunk_size_sum 589118
 prometheus_tsdb_compaction_chunk_size_count 6022
 # HELP prometheus_tsdb_compaction_duration Duration of compaction runs.
 # TYPE prometheus_tsdb_compaction_duration histogram
-prometheus_tsdb_compaction_duration_bucket{le=&quot;1&quot;} 9
-prometheus_tsdb_compaction_duration_bucket{le=&quot;2&quot;} 9
-prometheus_tsdb_compaction_duration_bucket{le=&quot;4&quot;} 9
-prometheus_tsdb_compaction_duration_bucket{le=&quot;8&quot;} 9
-prometheus_tsdb_compaction_duration_bucket{le=&quot;16&quot;} 9
-prometheus_tsdb_compaction_duration_bucket{le=&quot;32&quot;} 9
-prometheus_tsdb_compaction_duration_bucket{le=&quot;64&quot;} 9
-prometheus_tsdb_compaction_duration_bucket{le=&quot;128&quot;} 9
-prometheus_tsdb_compaction_duration_bucket{le=&quot;256&quot;} 10
-prometheus_tsdb_compaction_duration_bucket{le=&quot;512&quot;} 10
-prometheus_tsdb_compaction_duration_bucket{le=&quot;+Inf&quot;} 10
+prometheus_tsdb_compaction_duration_bucket{le=&#34;1&#34;} 9
+prometheus_tsdb_compaction_duration_bucket{le=&#34;2&#34;} 9
+prometheus_tsdb_compaction_duration_bucket{le=&#34;4&#34;} 9
+prometheus_tsdb_compaction_duration_bucket{le=&#34;8&#34;} 9
+prometheus_tsdb_compaction_duration_bucket{le=&#34;16&#34;} 9
+prometheus_tsdb_compaction_duration_bucket{le=&#34;32&#34;} 9
+prometheus_tsdb_compaction_duration_bucket{le=&#34;64&#34;} 9
+prometheus_tsdb_compaction_duration_bucket{le=&#34;128&#34;} 9
+prometheus_tsdb_compaction_duration_bucket{le=&#34;256&#34;} 10
+prometheus_tsdb_compaction_duration_bucket{le=&#34;512&#34;} 10
+prometheus_tsdb_compaction_duration_bucket{le=&#34;+Inf&#34;} 10
 prometheus_tsdb_compaction_duration_sum 244.85386494199997
 prometheus_tsdb_compaction_duration_count 10
 # HELP prometheus_tsdb_compactions_failed_total Total number of compactions that failed for the partition.
@@ -218,9 +204,9 @@ prometheus_tsdb_head_chunks_created_total 7825
 prometheus_tsdb_head_chunks_removed_total 6022
 # HELP prometheus_tsdb_head_gc_duration_seconds Runtime of garbage collection in the head block.
 # TYPE prometheus_tsdb_head_gc_duration_seconds summary
-prometheus_tsdb_head_gc_duration_seconds{quantile=&quot;0.5&quot;} NaN
-prometheus_tsdb_head_gc_duration_seconds{quantile=&quot;0.9&quot;} NaN
-prometheus_tsdb_head_gc_duration_seconds{quantile=&quot;0.99&quot;} NaN
+prometheus_tsdb_head_gc_duration_seconds{quantile=&#34;0.5&#34;} NaN
+prometheus_tsdb_head_gc_duration_seconds{quantile=&#34;0.9&#34;} NaN
+prometheus_tsdb_head_gc_duration_seconds{quantile=&#34;0.99&#34;} NaN
 prometheus_tsdb_head_gc_duration_seconds_sum 0.010158025000000001
 prometheus_tsdb_head_gc_duration_seconds_count 7
 # HELP prometheus_tsdb_head_max_time Maximum timestamp of the head block.
@@ -252,9 +238,9 @@ prometheus_tsdb_reloads_failures_total 0
 prometheus_tsdb_reloads_total 11
 # HELP prometheus_tsdb_wal_truncate_duration_seconds Duration of WAL truncation.
 # TYPE prometheus_tsdb_wal_truncate_duration_seconds summary
-prometheus_tsdb_wal_truncate_duration_seconds{quantile=&quot;0.5&quot;} NaN
-prometheus_tsdb_wal_truncate_duration_seconds{quantile=&quot;0.9&quot;} NaN
-prometheus_tsdb_wal_truncate_duration_seconds{quantile=&quot;0.99&quot;} NaN
+prometheus_tsdb_wal_truncate_duration_seconds{quantile=&#34;0.5&#34;} NaN
+prometheus_tsdb_wal_truncate_duration_seconds{quantile=&#34;0.9&#34;} NaN
+prometheus_tsdb_wal_truncate_duration_seconds{quantile=&#34;0.99&#34;} NaN
 prometheus_tsdb_wal_truncate_duration_seconds_sum 0.074209495
 prometheus_tsdb_wal_truncate_duration_seconds_count 7
 # HELP tsdb_wal_corruptions_total Total number of WAL corruptions.
@@ -262,25 +248,44 @@ prometheus_tsdb_wal_truncate_duration_seconds_count 7
 tsdb_wal_corruptions_total 0
 # HELP tsdb_wal_fsync_duration_seconds Duration of WAL fsync.
 # TYPE tsdb_wal_fsync_duration_seconds summary
-tsdb_wal_fsync_duration_seconds{quantile=&quot;0.5&quot;} 0.002065444
-tsdb_wal_fsync_duration_seconds{quantile=&quot;0.9&quot;} 0.003979255
-tsdb_wal_fsync_duration_seconds{quantile=&quot;0.99&quot;} 0.004194255
+tsdb_wal_fsync_duration_seconds{quantile=&#34;0.5&#34;} 0.002065444
+tsdb_wal_fsync_duration_seconds{quantile=&#34;0.9&#34;} 0.003979255
+tsdb_wal_fsync_duration_seconds{quantile=&#34;0.99&#34;} 0.004194255
 tsdb_wal_fsync_duration_seconds_sum 32.165841198999935
 tsdb_wal_fsync_duration_seconds_count 1712
-</code></pre>
-
-<h2 id="benchmarks">Benchmarks</h2>
-
+</code></pre><h2 id="benchmarks">Benchmarks</h2>
 <ul>
 <li>CPU usage reduced to 20% - 40% compared to Prometheus 1.8</li>
 <li>Disk space usage reduced to 33% - 50% compared to Prometheus 1.8</li>
 <li>Disk I/O without much query load is usually &lt;1% on average</li>
 </ul>
-
-<p><img src="https://prometheus.io/assets/blog/2017-11-08/resource-comparison-cb3363e2f4f.png" alt="" /></p>
+<p><img src="https://prometheus.io/assets/blog/2017-11-08/resource-comparison-cb3363e2f4f.png" alt=""></p>
     </article>
 
     
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2017-07-08-prometheus/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=prometheus%20v2.0%20storage%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2017-07-08-prometheus/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
 
 
     <ul class="pager article-pager">
@@ -295,7 +300,7 @@ tsdb_wal_fsync_duration_seconds_count 1712
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>

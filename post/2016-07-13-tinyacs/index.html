@@ -14,22 +14,23 @@
   <meta property="og:url" content="https://yrong.github.io/blog/post/2016-07-13-tinyacs/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
-
+  <meta name="generator" content="Hugo 0.159.1">
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -49,36 +50,31 @@
       <ul class="article-meta">
         <li class="article-meta-date"><time>July 13, 2016</time></li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/java/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/java/">
+            <i class="fa-solid fa-tag"></i>
             java
           </a>&nbsp;
         </li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/vertx/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/vertx/">
+            <i class="fa-solid fa-tag"></i>
             vertx
           </a>&nbsp;
         </li>
       </ul>
       
       <p>A blazing fast TR-069 auto configuration server (ACS) built with Vertx,Redis, and MongoDB</p>
-
-<h1 id="acs-cwmp-https-www-broadband-forum-org-cwmp-php"><a href="https://www.broadband-forum.org/cwmp.php">ACS CWMP</a></h1>
-
+<h1 id="acs-cwmp"><a href="https://www.broadband-forum.org/cwmp.php">ACS CWMP</a></h1>
 <p>A blazing fast TR-069 auto configuration server (ACS) built with <a href="http://vertx.io/vertx2/">Vertx</a>, Redis, and MongoDB. I&rsquo;ve added the source code in <a href="https://github.com/yrong/tinyacs">github</a> and welcome comments.</p>
-
 <h2 id="infrastructure-and-message-flow-for-nbi-request">Infrastructure and message flow for nbi request</h2>
-
-<p><img src="/blog/img/cwmp.png" alt="" /></p>
-
+<p><img src="/blog/img/cwmp.png" alt=""></p>
 <ol>
 <li>meteor stack send nbi request to acs nbi server by standard restful api and nbi server forward it to one cpe server by vertx eventbus api(eventbus send will choose one cpe server with round-robin algrithom)</li>
 <li>cpe server will send connection request to the target cpe</li>
 <li>cpe server will also store the nbi request into redis server</li>
 <li>the cpe will send inform to the cpe server load balance to start the cwmp session</li>
-<li>the cpe server load balance will send the inform to one cpe server by eventbus send api<br />
-5.1 the cpe server here may not be the cpe server in step 2<br />
+<li>the cpe server load balance will send the inform to one cpe server by eventbus send api<br>
+5.1 the cpe server here may not be the cpe server in step 2<br>
 5.2 the cpe server will store it&rsquo;s identifier and the cpe&rsquo;s identifier into http cookie so that next time　load balance will sticky forward cwmp message from cpe to the same cpe server and cpe server will find cwmp session with that cpe</li>
 <li>the cpe server will retrieve the nbi request from redis and translate it into cwmp request(s)</li>
 <li>cpe server will send cwmp request to load balance</li>
@@ -87,29 +83,53 @@
 <li>load balance send cwmp response to cpe server</li>
 <li>cpe server translate cwmp response to nbi response and send it back to nbi server</li>
 </ol>
-
 <h2 id="tech-stacks">Tech Stacks</h2>
-
 <ul>
-<li><p><a href="http://vertx.io">vertx</a>
-事件驱动异步开源框架(nodejs on jvm)</p></li>
-
-<li><p><a href="https://www.mongodb.com/">mongodb</a>
-开源文档数据库</p></li>
-
-<li><p><a href="http://redis.io">redis</a>
-缓存数据结构服务器(small and fast)</p></li>
-
-<li><p><a href="https://www.meteor.com">meteor</a>
-全栈javascript开发框架(最快方式构建javascript app,including web,mobile,desktop)</p></li>
+<li>
+<p><a href="http://vertx.io">vertx</a>
+事件驱动异步开源框架(nodejs on jvm)</p>
+</li>
+<li>
+<p><a href="https://www.mongodb.com/">mongodb</a>
+开源文档数据库</p>
+</li>
+<li>
+<p><a href="http://redis.io">redis</a>
+缓存数据结构服务器(small and fast)</p>
+</li>
+<li>
+<p><a href="https://www.meteor.com">meteor</a>
+全栈javascript开发框架(最快方式构建javascript app,including web,mobile,desktop)</p>
+</li>
 </ul>
-
-<h2 id="front-end-https-github-com-yrong-tinyacs-ui"><a href="https://github.com/yrong/tinyacs-ui">Front end</a></h2>
-
+<h2 id="front-end"><a href="https://github.com/yrong/tinyacs-ui">Front end</a></h2>
 <p>This is the Front end based on <a href="https://www.meteor.com">meteor</a> of tinyacs and will communicate with Acs-Nbi Server</p>
     </article>
 
     
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2016-07-13-tinyacs/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=ACS%20CWMP%e5%8d%8f%e8%ae%ae%e5%9f%ba%e4%ba%8e%e5%bc%82%e6%ad%a5%e5%bc%80%e6%ba%90%e6%a1%86%e6%9e%b6vertx%e7%9a%84%e5%ae%9e%e7%8e%b0%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2016-07-13-tinyacs/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
 
 
     <ul class="pager article-pager">
@@ -122,7 +142,7 @@
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>

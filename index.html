@@ -11,24 +11,25 @@
   <meta property="og:url" content="https://yrong.github.io/blog/" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
+  <meta name="generator" content="Hugo 0.159.1">
   <link href="/blog/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
   <link href="/blog/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
-
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -41,6 +42,43 @@
   <div class="main" role="main">
     <section class="list home-list">
       <article class="article">
+        <a href="/blog/post/2021-10-09-polkadot/" class="article-titles">
+          <h2 class="article-title">Terminology in Polkadot</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>October 9, 2021</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <h1 id="terminology">Terminology</h1>
+<h2 id="pov-proof-of-validity">PoV (Proof of Validity)</h2>
+<p>The PoV is the data package produced by parachain collators and sent to Relay Chain validators.</p>
+<ul>
+<li>
+<p>Purpose: It acts as the &ldquo;argument&rdquo; or evidence that a parachain has transitioned its state correctly</p>
+</li>
+<li>
+<p>Contents: It typically includes the L2&rsquo;s state proof and the witness data (extra data needed for verification)</p>
+</li>
+<li>
+<p>Size: A PoV block is often around 5MB of untrusted data provided to the validator group</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2021-10-09-polkadot/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/post/2021-07-10-bridge/" class="article-titles">
           <h2 class="article-title">Light client bridge</h2>
           
@@ -48,15 +86,18 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>July 10, 2021</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/blockchain/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
               BlockChain
             </a>&nbsp;
           </li>
         </ul>
         <div class="article-content">
-          Light client bridge Light client bridge will relay every block from source chain to target chain, normally for asset transfer just need to lock asset in some backing module or smart contract in source chain and mint the mapping asset in target chain
-Components Since the chain cannot directly access each other, the cross-chain data submission needs to be completed by a third party. This third party is the bridge relayers.
+          <h1 id="light-client-bridge">Light client bridge</h1>
+<p>Light client bridge will relay every block from source chain to target chain, normally for asset transfer just need to lock asset in some backing module or smart contract in source chain and mint the mapping asset in target chain</p>
+<h2 id="components">Components</h2>
+<p>Since the chain cannot directly access each other, the cross-chain data submission needs to be completed by a third party. This third party is the bridge relayers.
+Anyone can become a bridge relayer, and the bridge relayer obtains income by completing the relay task between the bridges. This incentive can promote the stable existence of bridge relayers to ensure the bridge’s regular operation.</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2021-07-10-bridge/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -69,14 +110,126 @@ Components Since the chain cannot directly access each other, the cross-chain da
         <ul class="article-meta">
           <li class="article-meta-date"><time>May 10, 2021</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/blockchain/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
               BlockChain
             </a>&nbsp;
           </li>
         </ul>
         <div class="article-content">
-          XCMP Research  xcm format implementation examples  workflow xcm types transact call data(pallet &amp; call index required) #[derive(Encode, Decode)] pub enum RelayTemplatePalletCall { #[codec(index = 100)] // the index should match the position of the module in `construct_runtime!` DoSomething(DoSomethingCall), } #[derive(Encode, Decode)] pub enum DoSomethingCall { #[codec(index = 0)] // the index should match the position of the dispatchable in the target pallet Something(u32), } #[derive(Encode, Decode)] pub enum CrowdloanPalletCall { #[codec(index = 27)] // the index should match the position of the module in `construct_runtime!
+          <h1 id="xcmp-research">XCMP Research</h1>
+<ul>
+<li><a href="https://github.com/paritytech/xcm-format">xcm format</a></li>
+<li><a href="https://w3f.github.io/parachain-implementers-guide">implementation</a></li>
+<li><a href="https://p-adek.tower.im/p/io5i?">examples</a></li>
+</ul>
+<h1 id="workflow">workflow</h1>
+<p><img src="https://i.imgur.com/QQNMbah.png" alt=""></p>
+<h1 id="xcm-types">xcm types</h1>
+<h2 id="transact">transact</h2>
+<h3 id="call-datapallet--call-index-required">call data(pallet &amp; call index required)</h3>
+<pre tabindex="0"><code>#[derive(Encode, Decode)]
+pub enum RelayTemplatePalletCall {
+	#[codec(index = 100)] // the index should match the position of the module in `construct_runtime!`
+	DoSomething(DoSomethingCall),
+}
+
+#[derive(Encode, Decode)]
+pub enum DoSomethingCall {
+	#[codec(index = 0)] // the index should match the position of the dispatchable in the target pallet
+	Something(u32),
+}
+
+#[derive(Encode, Decode)]
+pub enum CrowdloanPalletCall {
+	#[codec(index = 27)] // the index should match the position of the module in `construct_runtime!`
+	CrowdloanContribute(ContributeCall),
+}
+
+#[derive(Debug, PartialEq, Encode, Decode)]
+pub struct Contribution {
+	#[codec(compact)]
+	index: ParaId,
+	#[codec(compact)]
+	value: BalanceOf,
+	signature: Option&lt;MultiSignature&gt;,
+}
+
+#[derive(Encode, Decode)]
+pub enum ContributeCall {
+	#[codec(index = 1)] // the index should match the position of the dispatchable in the target pallet
+	Contribute(Contribution),
+}
+</code></pre><h3 id="format">format</h3>
+<pre tabindex="0"><code>let call = RelayTemplatePalletCall::DoSomething(DoSomethingCall::Something(some_value)).encode();
+
+let msg = Xcm::Transact {
+    origin_type: OriginKind::SovereignAccount,
+    require_weight_at_most: u64::MAX,
+    call: call.into(),
+};
+</code></pre><h2 id="asset-transfer">asset transfer</h2>
+<h3 id="depositreserveasset">DepositReserveAsset</h3>
+<pre tabindex="0"><code> Xcm::WithdrawAsset {
+ assets: vec![MultiAsset::ConcreteFungible {
+     id: location,
+     amount: amount.into(),
+ }],
+ effects: vec![
+     Order::BuyExecution {
+        fees: MultiAsset::All,
+        weight: 0,
+        debt,
+        halt_on_error: false,
+        xcm: vec![]
+    },
+     Order::DepositReserveAsset {
+         assets: vec![MultiAsset::All],
+         dest: MultiLocation::X1(
+             Junction::Parent,
+         ),
+         effects: vec![
+              Order::DepositAsset {
+              assets: vec![MultiAsset::All],
+              dest: MultiLocation::X1(Junction::AccountId32 {
+                    network: NetworkId::Any,
+                    id: T::AccountId32Converter::convert(account),
+              }),
+          }],
+     }],
+}
+</code></pre><h2 id="teleport">Teleport</h2>
+<pre tabindex="0"><code>let msg = Xcm::WithdrawAsset {
+    assets:vec![MultiAsset::ConcreteFungible { id: MultiLocation::Null, amount: some_value }],
+    effects: vec![
+        Order::BuyExecution {
+            fees: MultiAsset::All,
+            weight: 0,
+            debt,
+            halt_on_error: false,
+            xcm: vec![]
+        },
+        Order::InitiateTeleport {
+            assets: vec![MultiAsset::All],
+            dest: MultiLocation::X1(Junction::Parachain(para_id)),
+            effects: vec![
+                Order::BuyExecution {
+                    fees: MultiAsset::All,
+                    weight: 0,
+                    debt,
+                    halt_on_error: false,
+                    xcm: vec![]
+                },
+                Order::DepositAsset {
+                    assets: vec![MultiAsset::All],
+                    dest: MultiLocation::X1(account_32.clone()),
+                },
+            ]
+        }
+    ]
+};
+</code></pre><h2 id="test-code">test code</h2>
+<p><a href="https://github.com/bifrost-finance/bifrost/pull/117">relax xcm filter</a></p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2021-05-10-xcmp/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -89,49 +242,37 @@ Components Since the chain cannot directly access each other, the cross-chain da
         <ul class="article-meta">
           <li class="article-meta-date"><time>April 26, 2021</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/blockchain/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
               BlockChain
             </a>&nbsp;
           </li>
         </ul>
         <div class="article-content">
-          
-
-<h1 id="upgrade-to-substrate-3-0">upgrade to substrate 3.0</h1>
-
+          <h1 id="upgrade-to-substrate-30">upgrade to substrate 3.0</h1>
 <p><a href="https://crates.parity.io/frame_support/attr.pallet.html#upgrade-guidelines">guidelines</a></p>
-
 <p><a href="https://crates.parity.io/frame_support/attr.pallet.html#checking-upgrade-guidelines">check</a></p>
-
 <p><a href="https://github.com/paritytech/substrate/pull/7984/">example</a></p>
-
 <p><a href="https://github.com/paritytech/substrate/blob/master/frame/support/src/lib.rs">macros</a></p>
-
 <h1 id="runtime-migration">runtime migration</h1>
-
 <blockquote>
 <p><a href="https://substrate.dev/docs/en/knowledgebase/runtime/upgrades#storage-migrations">kb</a></p>
 </blockquote>
-
 <h2 id="examples">examples</h2>
-
 <blockquote>
 <p><a href="https://github.com/apopiak/substrate-migrations">examples</a></p>
 </blockquote>
-
 <h3 id="tips">tips</h3>
-
 <blockquote>
 <p><a href="https://github.com/hicommonwealth/edgeware-node/blob/7b66f4f0a9ec184fdebcccd41533acc728ebe9dc/node/runtime/src/lib.rs#L845-L866">custom order</a></p>
-
+</blockquote>
+<blockquote>
 <p><a href="https://github.com/hicommonwealth/substrate/blob/5f3933f5735a75d2d438341ec6842f269b886aaa/frame/indices/src/migration.rs#L5-L22">include deprecated types</a></p>
-
+</blockquote>
+<blockquote>
 <p><a href="https://github.com/paritytech/substrate/blob/c79b522a11bbc7b3cf2f4a9c0a6627797993cb79/frame/elections-phragmen/src/lib.rs#L119-L157">check storage version</a></p>
 </blockquote>
-
 <h3 id="weights">weights</h3>
-
 <blockquote>
 <p><a href="https://crates.parity.io/frame_support/weights/index.html">doc</a></p>
 </blockquote>
@@ -148,8 +289,8 @@ Components Since the chain cannot directly access each other, the cross-chain da
         <ul class="article-meta">
           <li class="article-meta-date"><time>April 17, 2021</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/blockchain/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
               BlockChain
             </a>&nbsp;
           </li>
@@ -168,28 +309,39 @@ Components Since the chain cannot directly access each other, the cross-chain da
         <ul class="article-meta">
           <li class="article-meta-date"><time>April 2, 2021</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/blockchain/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
               BlockChain
             </a>&nbsp;
           </li>
         </ul>
         <div class="article-content">
-          Theory White Paper
-Principle
-Darwinia-Ethereum Bridge
-Projects Navigation Darwinia Bridge cross-chain overview
-Background ERC223
-ERC721
-Patricia Merkle Trees
-Mining difficulty calculate
-mmr
-relay game
-Bridger Relayers (aka. Bridgers) in Darwinia Network are offchain worker clients which help relay the headers and messages between source chains and target chains
-Background actix
-deprecated dj
-Shadow Services for bridger which retrieve header data from public chains and generate mmr proof
-Background ffi
+          <h1 id="theory">Theory</h1>
+<p><a href="https://darwinia.network/ChainRelay_Technical_Paper(Preview)_EN.pdf">White Paper</a></p>
+<p><a href="https://docs.darwinia.network/docs/en/rfc-0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains/">Principle</a></p>
+<p><a href="https://docs.google.com/document/d/1NVDSk6KZXV5CjE20cNPA8Swmmd89IYeWyN0T9lRBOEM">Darwinia-Ethereum Bridge</a></p>
+<h1 id="projects-navigation">Projects Navigation</h1>
+<h2 id="darwinia-bridge"><a href="https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge">Darwinia Bridge</a></h2>
+<p><a href="https://miro.medium.com/max/700/0*W_Q1-GWv4JeCCQ7x">cross-chain overview</a></p>
+<h3 id="background">Background</h3>
+<p><a href="https://github.com/Dexaran/ERC223-token-standard">ERC223</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/35019858">ERC721</a></p>
+<p><a href="https://eth.wiki/concepts/light-client-protocol">Patricia Merkle Trees</a></p>
+<p><a href="https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md">Mining difficulty calculate</a></p>
+<p><a href="https://github.com/nervosnetwork/merkle-mountain-range">mmr</a></p>
+<p><a href="https://github.com/darwinia-network/darwinia-common/blob/master/frame/bridge/relayer-game/README.md">relay game</a></p>
+<h2 id="bridger"><a href="https://github.com/darwinia-network/bridger">Bridger</a></h2>
+<p>Relayers (aka. Bridgers) in Darwinia Network are offchain worker clients which help relay the headers and messages between source chains and target chains</p>
+<h3 id="background-1">Background</h3>
+<p><a href="https://github.com/actix/actix">actix</a></p>
+<p>deprecated <a href="https://github.com/darwinia-network/dj">dj</a></p>
+<h2 id="shadow"><a href="https://github.com/darwinia-network/shadow">Shadow</a></h2>
+<p>Services for bridger which retrieve header data from public chains and generate mmr proof</p>
+<h3 id="background-2">Background</h3>
+<p><a href="https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#using-extern-functions-to-call-external-code">ffi</a></p>
+<h2 id="wormhole"><a href="https://github.com/darwinia-network/wormhole">Wormhole</a></h2>
+<h3 id="background-3">Background</h3>
+<p><a href="https://docs.darwinia.network/docs/en/wiki-tut-wormhole-general/">wiki</a></p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2021-04-02-darwinia-bridger/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -202,8 +354,8 @@ Background ffi
         <ul class="article-meta">
           <li class="article-meta-date"><time>March 7, 2021</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/blockchain/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
               BlockChain
             </a>&nbsp;
           </li>
@@ -222,14 +374,15 @@ Background ffi
         <ul class="article-meta">
           <li class="article-meta-date"><time>January 4, 2019</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/typescript/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/typescript/">
+              <i class="fa-solid fa-tag"></i>
               Typescript
             </a>&nbsp;
           </li>
         </ul>
         <div class="article-content">
-          Nest 基础功能 —— Module Nest 主要特性中的模块化开发，就源自与此。Nest 使用 Module 来组织应用程序结构，每个应用程序至少有一个模块，即根模块。根模块是 Nest 开始
+          <h1 id="nest-基础功能--module">Nest 基础功能 —— Module</h1>
+<p>Nest 主要特性中的模块化开发，就源自与此。Nest 使用 <code>Module</code> 来组织应用程序结构，每个应用程序至少有一个模块，即根模块。根模块是 Nest 开始排列应用程序树的地方。事实上，根模块可能是应用程序中唯一的模块，尤其是当应用程序很小时。然而，对于大型应用来说，这是没有意义的。在大多数情况下，您将有很多模块，每个模块都有一组与其密切相关的功能。</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2019-01-04-nest/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -242,14 +395,119 @@ Background ffi
         <ul class="article-meta">
           <li class="article-meta-date"><time>July 8, 2018</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/javascript/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/javascript/">
+              <i class="fa-solid fa-tag"></i>
               javascript
             </a>&nbsp;
           </li>
         </ul>
         <div class="article-content">
-          业务背景 业务流程图在线绘制需求在业务场景中广泛存在，常用业务需求如下： 流程图框架需求列表 需求名称 优先级 批量圈选(图形&amp;连线圈选) P0 拉
+          <h2 id="业务背景">业务背景</h2>
+<p>业务流程图在线绘制需求在业务场景中广泛存在，常用业务需求如下：</p>
+<p>流程图框架需求列表</p>
+<table>
+  <thead>
+      <tr>
+          <th>需求名称</th>
+          <th>优先级</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>批量圈选(图形&amp;连线圈选)</td>
+          <td>P0</td>
+      </tr>
+      <tr>
+          <td>拉伸</td>
+          <td>P0</td>
+      </tr>
+      <tr>
+          <td>元素形状定制</td>
+          <td>P0</td>
+      </tr>
+      <tr>
+          <td>元素样式定制（图形、连线）</td>
+          <td>P0</td>
+      </tr>
+      <tr>
+          <td>批量拖拽</td>
+          <td>P0</td>
+      </tr>
+      <tr>
+          <td>母子节点拖拽</td>
+          <td>P0</td>
+      </tr>
+      <tr>
+          <td>批量圈选添加连线</td>
+          <td>P0</td>
+      </tr>
+      <tr>
+          <td>左侧可拖拽组件在画布中展现可所见不所得</td>
+          <td>P0</td>
+      </tr>
+      <tr>
+          <td>右键功能定制</td>
+          <td>P0</td>
+      </tr>
+      <tr>
+          <td>双击功能定制</td>
+          <td>P0</td>
+      </tr>
+      <tr>
+          <td>每一个vertex一个独立id</td>
+          <td>P0</td>
+      </tr>
+      <tr>
+          <td>某条线或节点或锚点高亮</td>
+          <td>P0</td>
+      </tr>
+      <tr>
+          <td>重命名</td>
+          <td>P0</td>
+      </tr>
+      <tr>
+          <td>自动布局</td>
+          <td>P1</td>
+      </tr>
+      <tr>
+          <td>滚动时始终保持有一部分在可视范围</td>
+          <td>P1</td>
+      </tr>
+      <tr>
+          <td>快捷键批量选择</td>
+          <td>P1</td>
+      </tr>
+      <tr>
+          <td>动画（连线数据流动画）</td>
+          <td>P1</td>
+      </tr>
+      <tr>
+          <td>双击编辑</td>
+          <td>P1</td>
+      </tr>
+      <tr>
+          <td>100%自适应</td>
+          <td>P1</td>
+      </tr>
+      <tr>
+          <td>文字缩小极值（保证文字可识别）</td>
+          <td>P1</td>
+      </tr>
+      <tr>
+          <td>锚点定制</td>
+          <td>P1</td>
+      </tr>
+      <tr>
+          <td>ctrl+z 回退</td>
+          <td>P1</td>
+      </tr>
+      <tr>
+          <td>连线自动对齐</td>
+          <td>P1</td>
+      </tr>
+  </tbody>
+</table>
+<p>目前市面上比较流行的流程图绘图框架大致有 jointjs、jsplumb、mxgraph、bpmnjs、antv g6 等。对以上框架进行技术调研，从商业版权、易用性、功能完善性、可定制性、浏览器兼容性、社区支持方面进行评估，大致得出如下结果：</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2018-07-08-mxgraph/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -262,145 +520,98 @@ Background ffi
         <ul class="article-meta">
           <li class="article-meta-date"><time>June 9, 2018</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/typescript/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/typescript/">
+              <i class="fa-solid fa-tag"></i>
               typescript
             </a>&nbsp;
           </li>
         </ul>
         <div class="article-content">
-          代码分析 入口main.ts import { NestFactory } from '@nestjs/core'; import { ApplicationModule } from './app.module'; async function bootstrap() { const app = await NestFactory.create(ApplicationModule); await app.listen(3000); } bootstrap(); NestFactory构造 public async create( module: any, serverOrOptions?: any, options?: NestApplicationOptions, ): Promise&lt; INestApplication &amp; (INestExpressApplication | INestFastifyApplication) &gt; { const
+          <h2 id="代码分析">代码分析</h2>
+<p>入口main.ts</p>
+<pre tabindex="0"><code>import { NestFactory } from &#39;@nestjs/core&#39;;
+import { ApplicationModule } from &#39;./app.module&#39;;
+
+async function bootstrap() {
+  const app = await NestFactory.create(ApplicationModule);
+  await app.listen(3000);
+}
+bootstrap();
+</code></pre><p>NestFactory构造</p>
+<pre tabindex="0"><code>public async create(
+    module: any,
+    serverOrOptions?: any,
+    options?: NestApplicationOptions,
+  ): Promise&lt;
+    INestApplication &amp; (INestExpressApplication | INestFastifyApplication)
+  &gt; {
+    const isHttpServer = serverOrOptions &amp;&amp; serverOrOptions.patch;
+    // tslint:disable-next-line:prefer-const
+    let [httpServer, appOptions] = isHttpServer
+      ? [serverOrOptions, options]
+      : [ExpressFactory.create()/* 默认使用Express*/, serverOrOptions];
+
+    const applicationConfig = new ApplicationConfig();
+    const container = new NestContainer(applicationConfig);//生成容器container;传入了配置对象
+    httpServer = this.applyExpressAdapter(httpServer);//初始化http服务
+
+    this.applyLogger(appOptions);//日志输出对象
+    await this.initialize(module, container, applicationConfig, httpServer);
+    return this.createNestInstance&lt;NestApplication&gt;(
+      new NestApplication(container, httpServer, applicationConfig, appOptions),
+    );
+  }
+</code></pre><ul>
+<li>第一个参数是使用是传入的类似angularmodule的对象</li>
+<li>第二个参数可以是设置参数，也可以是类似express的MVC，如官网提到的fastify，覆盖默认使用的express</li>
+<li>第三个参数就是设置参数</li>
+</ul>
+<p>初始化模块</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2018-06-09-nestjs/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
-      <article class="article">
-        <a href="/blog/post/2018-04-09-skynet/" class="article-titles">
-          <h2 class="article-title">Introduction to Skynet</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>April 9, 2018</time></li>
-          <li class="article-meta-tags">
-            <a href="/blog/tags/lua/">
-              <i class="fas fa-tag"></i>
-              lua
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          代码结构 首先要关注一下config.path文件。 skynet/example/config.path root = &quot;./&quot; luaservice = root..&quot;service/?.lua;&quot;..root..&quot;test/?.lua;&quot;..root..&quot;examples/?.lua;&quot;..root..&quot;test/?/init.lua&quot; lualoader = root .. &quot;lualib/loader.lua&quot; lua_path = root..&quot;lualib/?.lua;&quot;..root..&quot;lualib/?/init.lua&quot; lua_cpath = root .. &quot;luaclib/?.so&quot; snax = root..&quot;examples/?.lua;&quot;..root..&quot;test/?.lua&quot; root代表的是skynet所在的目录。 lu
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2018-04-09-skynet/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
     </section>
     
-
-<ul class="pagination">
-    
-    <li class="page-item">
-        <a href="/blog/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
-    </li>
-    
-    <li class="page-item disabled">
-    <a href="" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
-    </li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item active"><a class="page-link" href="/blog/">1</a></li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item"><a class="page-link" href="/blog/page/2/">2</a></li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item"><a class="page-link" href="/blog/page/3/">3</a></li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item disabled"><span aria-hidden="true">&nbsp;&hellip;&nbsp;</span></li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item"><a class="page-link" href="/blog/page/7/">7</a></li>
-    
-    
-    <li class="page-item">
-    <a href="/blog/page/2/" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
-    </li>
-    
-    <li class="page-item">
-        <a href="/blog/page/7/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
-    </li>
-    
-</ul>
-
+    <ul class="pagination pagination-default">
+      <li class="page-item disabled">
+        <a aria-disabled="true" aria-label="First" class="page-link" role="button" tabindex="-1"><span aria-hidden="true">&laquo;&laquo;</span></a>
+      </li>
+      <li class="page-item disabled">
+        <a aria-disabled="true" aria-label="Previous" class="page-link" role="button" tabindex="-1"><span aria-hidden="true">&laquo;</span></a>
+      </li>
+      <li class="page-item active">
+        <a aria-current="page" aria-label="Page 1" class="page-link" role="button">1</a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/page/2/" aria-label="Page 2" class="page-link" role="button">2</a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/page/3/" aria-label="Page 3" class="page-link" role="button">3</a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/page/4/" aria-label="Page 4" class="page-link" role="button">4</a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/page/5/" aria-label="Page 5" class="page-link" role="button">5</a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/page/2/" aria-label="Next" class="page-link" role="button"><span aria-hidden="true">&raquo;</span></a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/page/7/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
+      </li>
+    </ul>
   </div>
 
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-rsslink">
       <a href="/blog/index.xml" type="application/rss+xml" target="_blank" title="RSS">
-        <i class="fas fa-rss"></i>
+        <i class="fa-solid fa-rss"></i>
       </a>
     </li>
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>

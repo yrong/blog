@@ -14,22 +14,23 @@
   <meta property="og:url" content="https://yrong.github.io/blog/post/2017-05-12-websocketd/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
-
+  <meta name="generator" content="Hugo 0.159.1">
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -49,8 +50,8 @@
       <ul class="article-meta">
         <li class="article-meta-date"><time>May 12, 2017</time></li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/golang/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/golang/">
+            <i class="fa-solid fa-tag"></i>
             golang
           </a>&nbsp;
         </li>
@@ -58,61 +59,45 @@
       
 <aside class="toc">
   <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#understanding-the-basics">Understanding the basics</a></li>
-<li><a href="#building-a-web-page-that-connects-to-the-websocket">Building a web-page that connects to the WebSocket</a></li>
-<li><a href="#corelogic">CoreLogic</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#understanding-the-basics">Understanding the basics</a></li>
+    <li><a href="#building-a-web-page-that-connects-to-the-websocket">Building a web-page that connects to the WebSocket</a></li>
+    <li><a href="#corelogic">CoreLogic</a></li>
+  </ul>
 </nav>
 </aside>
       <p>websocketd is a small command-line tool that will wrap an existing command-line interface program, and allow it to be accessed via a WebSocket.</p>
-
 <p>WebSocket-capable applications can now be built very easily. As long as you can write an executable program that reads STDIN and writes to STDOUT, you can build a WebSocket server. Do it in Python, Ruby, Perl, Bash, .NET, C, Go, PHP, Java, Clojure, Scala, Groovy, Expect, Awk, VBScript, Haskell, Lua, R, whatever! No networking libraries necessary.</p>
-
 <h2 id="understanding-the-basics">Understanding the basics</h2>
-
 <p>A WebSocket endpoint is a program that you expose over a WebSocket URL (e.g. ws://someserver/my-program). Everytime a browser connects to that URL, the websocketd server will start a new instance of your process. When the browser disconnects, the process will be stopped.</p>
-
 <p>If there are 10 browser connected to your server, there will be 10 independent instances of your program running. websocketd takes care of listening for WebSocket connections and starting/stopping your program processes.</p>
-
 <p>If your process needs to send a WebSocket message it should print the message contents to STDOUT, followed by a new line. websocketd will then send the message to the browser.</p>
-
 <p>As you&rsquo;d expect, if the browser sends a WebSocket message, websocketd will send it to STDIN of your process, followed by a new line.</p>
-
 <h2 id="building-a-web-page-that-connects-to-the-websocket">Building a web-page that connects to the WebSocket</h2>
-
-<pre><code>var ws = new WebSocket('ws://localhost:8080/');
+<pre tabindex="0"><code>var ws = new WebSocket(&#39;ws://localhost:8080/&#39;);
 ws.onopen    = function() { ... do something on connect ... };
 ws.onclose   = function() { ... do something on disconnect ... };
 ws.onmessage = function(event) { ... do something with event.data ... };
-</code></pre>
-
-<h2 id="corelogic">CoreLogic</h2>
-
-<pre><code>//main.go
+</code></pre><h2 id="corelogic">CoreLogic</h2>
+<pre tabindex="0"><code>//main.go
 //add http handler
 handler := libwebsocketd.NewWebsocketdServer(config.Config, log, config.MaxForks)
-http.Handle(&quot;/&quot;, handler)
-</code></pre>
-
-<pre><code>//http.go
+http.Handle(&#34;/&#34;, handler)
+</code></pre><pre tabindex="0"><code>//http.go
 //implement ServerHTTP method and server websocket upgrade
 func (h *WebsocketdServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	if strings.ToLower(hdrs.Get(&quot;Upgrade&quot;)) == &quot;websocket&quot; &amp;&amp; upgradeRe.MatchString(hdrs.Get(&quot;Connection&quot;)) {
+	if strings.ToLower(hdrs.Get(&#34;Upgrade&#34;)) == &#34;websocket&#34; &amp;&amp; upgradeRe.MatchString(hdrs.Get(&#34;Connection&#34;)) {
     			if h.noteForkCreated() == nil {
     				defer h.noteForkCompled()
 
     				handler, err := NewWebsocketdHandler(h, req, log)
     				if err != nil {
     					if err == ScriptNotFoundError {
-    						log.Access(&quot;session&quot;, &quot;NOT FOUND: %s&quot;, err)
-    						http.Error(w, &quot;404 Not Found&quot;, 404)
+    						log.Access(&#34;session&#34;, &#34;NOT FOUND: %s&#34;, err)
+    						http.Error(w, &#34;404 Not Found&#34;, 404)
     					} else {
-    						log.Access(&quot;session&quot;, &quot;INTERNAL ERROR: %s&quot;, err)
-    						http.Error(w, &quot;500 Internal Server Error&quot;, 500)
+    						log.Access(&#34;session&#34;, &#34;INTERNAL ERROR: %s&#34;, err)
+    						http.Error(w, &#34;500 Internal Server Error&#34;, 500)
     					}
     					return
     				}
@@ -124,30 +109,28 @@ func (h *WebsocketdServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
     				}
     				wsServer.ServeHTTP(w, req)//server websocket
     			} else {
-    				log.Error(&quot;http&quot;, &quot;Max of possible forks already active, upgrade rejected&quot;)
-    				http.Error(w, &quot;429 Too Many Requests&quot;, 429)
+    				log.Error(&#34;http&#34;, &#34;Max of possible forks already active, upgrade rejected&#34;)
+    				http.Error(w, &#34;429 Too Many Requests&#34;, 429)
     			}
     			return
     		}
 }
-</code></pre>
-
-<pre><code>//handler.go
+</code></pre><pre tabindex="0"><code>//handler.go
 //pipeline stream between processEndpoint and wsEndpoint
 func (wsh *WebsocketdHandler) accept(ws *websocket.Conn, log *LogScope) {
 defer ws.Close()
 
-	log.Access(&quot;session&quot;, &quot;CONNECT&quot;)
-	defer log.Access(&quot;session&quot;, &quot;DISCONNECT&quot;)
+	log.Access(&#34;session&#34;, &#34;CONNECT&#34;)
+	defer log.Access(&#34;session&#34;, &#34;DISCONNECT&#34;)
 
 	launched, err := launchCmd(wsh.command, wsh.server.Config.CommandArgs, wsh.Env)
 	if err != nil {
-		log.Error(&quot;process&quot;, &quot;Could not launch process %s %s (%s)&quot;, wsh.command, strings.Join(wsh.server.Config.CommandArgs, &quot; &quot;), err)
+		log.Error(&#34;process&#34;, &#34;Could not launch process %s %s (%s)&#34;, wsh.command, strings.Join(wsh.server.Config.CommandArgs, &#34; &#34;), err)
 		return
 	}
 
-	log.Associate(&quot;pid&quot;, strconv.Itoa(launched.cmd.Process.Pid))
-	log.Info(&quot;session&quot;,strconv.Itoa(launched.cmd.Process.Pid))
+	log.Associate(&#34;pid&#34;, strconv.Itoa(launched.cmd.Process.Pid))
+	log.Info(&#34;session&#34;,strconv.Itoa(launched.cmd.Process.Pid))
 
 	binary := wsh.server.Config.Binary
 	process := NewProcessEndpoint(launched, binary, log)
@@ -158,9 +141,7 @@ defer ws.Close()
 
 	PipeEndpoints(process, wsEndpoint)
 }
-</code></pre>
-
-<pre><code>//endpoint.go
+</code></pre><pre tabindex="0"><code>//endpoint.go
 //read message from channel of one endpoint and pipe to the other endpoint stream
 func PipeEndpoints(e1, e2 Endpoint) {
 	e1.StartReading()
@@ -183,9 +164,7 @@ func PipeEndpoints(e1, e2 Endpoint) {
 		}
 	}
 }
-</code></pre>
-
-<pre><code>//process_endpoint.go
+</code></pre><pre tabindex="0"><code>//process_endpoint.go
 //read output from process and add to channel in goroutine
 func (pe *ProcessEndpoint) StartReading() {
 	go pe.log_stderr()
@@ -199,13 +178,13 @@ func (pe *ProcessEndpoint) StartReading() {
 func (pe *ProcessEndpoint) process_txtout() {
 	bufin := bufio.NewReader(pe.process.stdout)
 	for {
-	    //ReadBytes reads until the first occurrence of delim in the input,so process should use '\n' as splitter
-		buf, err := bufin.ReadBytes('\n')
+	    //ReadBytes reads until the first occurrence of delim in the input,so process should use &#39;\n&#39; as splitter
+		buf, err := bufin.ReadBytes(&#39;\n&#39;)
 		if err != nil {
 			if err != io.EOF {
-				pe.log.Error(&quot;process&quot;, &quot;Unexpected error while reading STDOUT from process: %s&quot;, err)
+				pe.log.Error(&#34;process&#34;, &#34;Unexpected error while reading STDOUT from process: %s&#34;, err)
 			} else {
-				pe.log.Debug(&quot;process&quot;, &quot;Process STDOUT closed&quot;)
+				pe.log.Debug(&#34;process&#34;, &#34;Process STDOUT closed&#34;)
 			}
 			break
 		}
@@ -213,9 +192,7 @@ func (pe *ProcessEndpoint) process_txtout() {
 	}
 	close(pe.output)
 }
-</code></pre>
-
-<pre><code>//websocket_endpoint.go
+</code></pre><pre tabindex="0"><code>//websocket_endpoint.go
 //read output from websocket and add to channel in goroutine
 func (we *WebSocketEndpoint) StartReading() {
 	if we.bin {
@@ -231,11 +208,11 @@ func (we *WebSocketEndpoint) read_text_frames() {
 		err := websocket.Message.Receive(we.ws, &amp;msg)
 		if err != nil {
 			if err != io.EOF {
-				we.log.Debug(&quot;websocket&quot;, &quot;Cannot receive: %s&quot;, err)
+				we.log.Debug(&#34;websocket&#34;, &#34;Cannot receive: %s&#34;, err)
 			}
 			break
 		}
-		we.output &lt;- append([]byte(msg), '\n')
+		we.output &lt;- append([]byte(msg), &#39;\n&#39;)
 	}
 	close(we.output)
 }
@@ -243,6 +220,29 @@ func (we *WebSocketEndpoint) read_text_frames() {
     </article>
 
     
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2017-05-12-websocketd/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=websocketd%20code%20analysis%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2017-05-12-websocketd/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
 
 
     <ul class="pager article-pager">
@@ -257,7 +257,7 @@ func (we *WebSocketEndpoint) read_text_frames() {
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>

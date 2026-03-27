@@ -14,22 +14,23 @@
   <meta property="og:url" content="https://yrong.github.io/blog/post/2016-11-17-es6-top10-features/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
-
+  <meta name="generator" content="Hugo 0.159.1">
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -49,8 +50,8 @@
       <ul class="article-meta">
         <li class="article-meta-date"><time>November 17, 2016</time></li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/javascript/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/javascript/">
+            <i class="fa-solid fa-tag"></i>
             javascript
           </a>&nbsp;
         </li>
@@ -58,84 +59,83 @@
       
 <aside class="toc">
   <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#default-parameters-in-es6">Default Parameters in ES6</a></li>
-<li><a href="#variable-parameters">Variable Parameters</a></li>
-<li><a href="#template-literals-in-es6">Template Literals in ES6</a></li>
-<li><a href="#multi-line-strings-in-es6">Multi-line Strings in ES6</a></li>
-<li><a href="#destructuring-assignment-in-es6">Destructuring Assignment in ES6</a></li>
-<li><a href="#enhanced-object-literals-in-es6">Enhanced Object Literals in ES6</a></li>
-<li><a href="#arrow-functions-in-es6">Arrow Functions in ES6</a></li>
-<li><a href="#promises-in-es6">Promises in ES6</a></li>
-<li><a href="#block-scoped-constructs-let-and-const">Block-Scoped Constructs Let and Const</a></li>
-<li><a href="#classes-in-es6">Classes in ES6</a></li>
-<li><a href="#modules-in-es6">Modules in ES6</a></li>
-<li><a href="#proxy-and-reflect">Proxy and Reflect</a></li>
-<li><a href="#generators-in-es6">Generators in ES6</a></li>
-<li><a href="#generator-and-promise-together-to-avoid-callback-hell">Generator and Promise together to avoid callback hell</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#default-parameters-in-es6">Default Parameters in ES6</a></li>
+        <li><a href="#variable-parameters">Variable Parameters</a></li>
+        <li><a href="#template-literals-in-es6">Template Literals in ES6</a></li>
+        <li><a href="#multi-line-strings-in-es6">Multi-line Strings in ES6</a></li>
+        <li><a href="#destructuring-assignment-in-es6">Destructuring Assignment in ES6</a></li>
+        <li><a href="#enhanced-object-literals-in-es6">Enhanced Object Literals in ES6</a></li>
+        <li><a href="#arrow-functions-in-es6">Arrow Functions in ES6</a></li>
+        <li><a href="#promises-in-es6">Promises in ES6</a></li>
+        <li><a href="#block-scoped-constructs-let-and-const">Block-Scoped Constructs Let and Const</a></li>
+        <li><a href="#classes-in-es6">Classes in ES6</a></li>
+        <li><a href="#modules-in-es6">Modules in ES6</a></li>
+        <li><a href="#proxy-and-reflect">Proxy and Reflect</a></li>
+        <li><a href="#generators-in-es6">Generators in ES6</a></li>
+        <li><a href="#generator-and-promise-together-to-avoid-callback-hell">Generator and Promise together to avoid callback hell</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
 </aside>
       <p>es6 top10 features</p>
-
 <p>Here’s the list of the top 10 best ES6 features for a busy software engineer (in no particular order):</p>
-
 <ol>
-<li>Default Parameters in ES6　<br />
-　</li>
-<li>Template Literals in ES6<br />
-　　</li>
-<li>Multi-line Strings in ES6　<br />
-　</li>
-<li>Destructuring Assignment in ES6　
-　</li>
-
-<li><p>Enhanced Object Literals in ES6　　</p></li>
-
-<li><p>Arrow Functions in ES6　　</p></li>
-
-<li><p>Promises in ES6　　</p></li>
-
-<li><p>Block-Scoped Constructs Let and Const　
-　</p></li>
-
-<li><p>Classes in ES6　　</p></li>
-
-<li><p>Modules in ES6　　</p></li>
+<li>
+<p>Default Parameters in ES6　
+　</p>
+</li>
+<li>
+<p>Template Literals in ES6	
+　　</p>
+</li>
+<li>
+<p>Multi-line Strings in ES6　	
+　</p>
+</li>
+<li>
+<p>Destructuring Assignment in ES6　
+　</p>
+</li>
+<li>
+<p>Enhanced Object Literals in ES6　　</p>
+</li>
+<li>
+<p>Arrow Functions in ES6　　</p>
+</li>
+<li>
+<p>Promises in ES6　　</p>
+</li>
+<li>
+<p>Block-Scoped Constructs Let and Const　
+　</p>
+</li>
+<li>
+<p>Classes in ES6　　</p>
+</li>
+<li>
+<p>Modules in ES6　　</p>
+</li>
 </ol>
-
 <h3 id="default-parameters-in-es6">Default Parameters in ES6</h3>
-
 <p>before:</p>
-
-<pre><code>var link = function (height, color, url) {
+<pre tabindex="0"><code>var link = function (height, color, url) {
     var height = height || 50
-    var color = color || 'red'
-    var url = url || 'http://azat.co'
+    var color = color || &#39;red&#39;
+    var url = url || &#39;http://azat.co&#39;
     ...
 }
-</code></pre>
-
-<p>after:</p>
-
-<pre><code>var link = function(height = 501, color = 'red', url = 'http://azat.co') {
+</code></pre><p>after:</p>
+<pre tabindex="0"><code>var link = function(height = 501, color = &#39;red&#39;, url = &#39;http://azat.co&#39;) {
   ...
 }
-</code></pre>
-
-<h3 id="variable-parameters">Variable Parameters</h3>
-
+</code></pre><h3 id="variable-parameters">Variable Parameters</h3>
 <p>函数containsAll可以检查一个字符串中是否包含若干个子串，例如：containsAll(&ldquo;banana&rdquo;, &ldquo;b&rdquo;, &ldquo;nan&rdquo;)返回true，containsAll(&ldquo;banana&rdquo;, &ldquo;c&rdquo;, &ldquo;nan&rdquo;)返回false。</p>
-
 <p>before:</p>
-
-<pre><code>function containsAll(haystack) {
+<pre tabindex="0"><code>function containsAll(haystack) {
   for (var i = 1; i &lt; arguments.length; i++) {
     var needle = arguments[i];
     if (haystack.indexOf(needle) === -1) {
@@ -144,11 +144,8 @@
   }
   return true;
 }
-</code></pre>
-
-<p>after:</p>
-
-<pre><code>function containsAll(haystack, ...needles) {
+</code></pre><p>after:</p>
+<pre tabindex="0"><code>function containsAll(haystack, ...needles) {
   for (var needle of needles) {
     if (haystack.indexOf(needle) === -1) {
       return false;
@@ -156,39 +153,25 @@
   }
   return true;
 }
-</code></pre>
-
-<h3 id="template-literals-in-es6">Template Literals in ES6</h3>
-
+</code></pre><h3 id="template-literals-in-es6">Template Literals in ES6</h3>
 <p>before:</p>
-
-<pre><code>var name = 'Your name is ' + first + ' ' + last + '.'
-var url = 'http://localhost:3000/api/messages/' + id
-</code></pre>
-
-<p>after:</p>
-
-<pre><code>var name = `Your name is ${first} ${last}.`
+<pre tabindex="0"><code>var name = &#39;Your name is &#39; + first + &#39; &#39; + last + &#39;.&#39;
+var url = &#39;http://localhost:3000/api/messages/&#39; + id
+</code></pre><p>after:</p>
+<pre tabindex="0"><code>var name = `Your name is ${first} ${last}.`
 var url = `http://localhost:3000/api/messages/${id}`
-</code></pre>
-
-<h3 id="multi-line-strings-in-es6">Multi-line Strings in ES6</h3>
-
+</code></pre><h3 id="multi-line-strings-in-es6">Multi-line Strings in ES6</h3>
 <p>before:</p>
+<pre tabindex="0"><code>var roadPoem = &#39;Then took the other, as just as fair,\n\t&#39;
+    + &#39;And having perhaps the better claim\n\t&#39;
+    + &#39;Because it was grassy and wanted wear,\n\t&#39;
+    + &#39;Though as for that the passing there\n\t&#39;
+    + &#39;Had worn them really about the same,\n\t&#39;
 
-<pre><code>var roadPoem = 'Then took the other, as just as fair,\n\t'
-    + 'And having perhaps the better claim\n\t'
-    + 'Because it was grassy and wanted wear,\n\t'
-    + 'Though as for that the passing there\n\t'
-    + 'Had worn them really about the same,\n\t'
-
-var fourAgreements = 'You have the right to be you.\n\
-    You can only be you when you do your best.'
-</code></pre>
-
-<p>after:</p>
-
-<pre><code>var roadPoem = `Then took the other, as just as fair,
+var fourAgreements = &#39;You have the right to be you.\n\
+    You can only be you when you do your best.&#39;
+</code></pre><p>after:</p>
+<pre tabindex="0"><code>var roadPoem = `Then took the other, as just as fair,
     And having perhaps the better claim
     Because it was grassy and wanted wear,
     Though as for that the passing there
@@ -196,41 +179,30 @@ var fourAgreements = 'You have the right to be you.\n\
 
 var fourAgreements = `You have the right to be you.
     You can only be you when you do your best.`
-</code></pre>
-
-<h3 id="destructuring-assignment-in-es6">Destructuring Assignment in ES6</h3>
-
+</code></pre><h3 id="destructuring-assignment-in-es6">Destructuring Assignment in ES6</h3>
 <p>before:</p>
-
-<pre><code>var data = $('body').data(), // data has properties house and mouse
+<pre tabindex="0"><code>var data = $(&#39;body&#39;).data(), // data has properties house and mouse
   house = data.house,
   mouse = data.mouse
 
-var jsonMiddleware = require('body-parser').json
+var jsonMiddleware = require(&#39;body-parser&#39;).json
 
 var body = req.body, // body has username and password
   username = body.username,
   password = body.password  
-</code></pre>
+</code></pre><p>after:</p>
+<pre tabindex="0"><code>var { house, mouse} = $(&#39;body&#39;).data() // we&#39;ll get house and mouse variables
 
-<p>after:</p>
-
-<pre><code>var { house, mouse} = $('body').data() // we'll get house and mouse variables
-
-var {jsonMiddleware} = require('body-parser')
+var {jsonMiddleware} = require(&#39;body-parser&#39;)
 
 var {username, password} = req.body
 
 //also works with arrays
-var [col1, col2]  = $('.column'),
-[line1, line2, line3, , line5] = file.split('\n')
-</code></pre>
-
-<h3 id="enhanced-object-literals-in-es6">Enhanced Object Literals in ES6</h3>
-
+var [col1, col2]  = $(&#39;.column&#39;),
+[line1, line2, line3, , line5] = file.split(&#39;\n&#39;)
+</code></pre><h3 id="enhanced-object-literals-in-es6">Enhanced Object Literals in ES6</h3>
 <p>before:</p>
-
-<pre><code>var serviceBase = {port: 3000, url: 'azat.co'},
+<pre tabindex="0"><code>var serviceBase = {port: 3000, url: &#39;azat.co&#39;},
     getAccounts = function(){return [1,2,3]}
 
 var accountServiceES5 = {
@@ -240,14 +212,11 @@ var accountServiceES5 = {
   toString: function() {
     return JSON.stringify(this.valueOf())
   },
-  getUrl: function() {return &quot;http://&quot; + this.url + ':' + this.port},
+  getUrl: function() {return &#34;http://&#34; + this.url + &#39;:&#39; + this.port},
   valueOf_1_2_3: getAccounts()
 }
-</code></pre>
-
-<p>after:</p>
-
-<pre><code>var serviceBase = {port: 3000, url: 'azat.co'},
+</code></pre><p>after:</p>
+<pre tabindex="0"><code>var serviceBase = {port: 3000, url: &#39;azat.co&#39;},
     getAccounts = function(){return [1,2,3]}
 var accountService = {
     __proto__: serviceBase,
@@ -255,19 +224,14 @@ var accountService = {
     toString() {
      return JSON.stringify((super.valueOf()))
     },
-    getUrl() {return &quot;http://&quot; + this.url + ':' + this.port},
-    [ 'valueOf_' + getAccounts().join('_') ]: getAccounts()
+    getUrl() {return &#34;http://&#34; + this.url + &#39;:&#39; + this.port},
+    [ &#39;valueOf_&#39; + getAccounts().join(&#39;_&#39;) ]: getAccounts()
 };
 console.log(accountService)
-
-</code></pre>
-
-<h3 id="arrow-functions-in-es6">Arrow Functions in ES6</h3>
-
+</code></pre><h3 id="arrow-functions-in-es6">Arrow Functions in ES6</h3>
 <p>before:</p>
-
-<pre><code>var _this = this
-$('.btn').click(function(event){
+<pre tabindex="0"><code>var _this = this
+$(&#39;.btn&#39;).click(function(event){
   _this.sendData()
 })
 
@@ -280,22 +244,19 @@ var logUpperCase = function() {
   }
 }
 
-logUpperCase.call({ string: 'es6 rocks' })()
+logUpperCase.call({ string: &#39;es6 rocks&#39; })()
 
-var ids = ['5632953c4e345e145fdf2df8','563295464e345e145fdf2df9']
+var ids = [&#39;5632953c4e345e145fdf2df8&#39;,&#39;563295464e345e145fdf2df9&#39;]
 var messages = ids.map(function (value) {
-  return &quot;ID is &quot; + value // explicit return
+  return &#34;ID is &#34; + value // explicit return
 });
 
-var ids = ['5632953c4e345e145fdf2df8', '563295464e345e145fdf2df9'];
+var ids = [&#39;5632953c4e345e145fdf2df8&#39;, &#39;563295464e345e145fdf2df9&#39;];
 var messages = ids.map(function (value, index, list) {
-  return 'ID of ' + index + ' element is ' + value + ' ' // explicit return
+  return &#39;ID of &#39; + index + &#39; element is &#39; + value + &#39; &#39; // explicit return
 });
-</code></pre>
-
-<p>after:</p>
-
-<pre><code>$('.btn').click((event) =&gt;{
+</code></pre><p>after:</p>
+<pre tabindex="0"><code>$(&#39;.btn&#39;).click((event) =&gt;{
   this.sendData()
 })
 
@@ -304,47 +265,36 @@ var logUpperCase = function() {
   return () =&gt; console.log(this.string)
 }
 
-logUpperCase.call({ string: 'es6 rocks' })()
+logUpperCase.call({ string: &#39;es6 rocks&#39; })()
 
-var ids = ['5632953c4e345e145fdf2df8','563295464e345e145fdf2df9']
+var ids = [&#39;5632953c4e345e145fdf2df8&#39;,&#39;563295464e345e145fdf2df9&#39;]
 var messages = ids.map(value =&gt; `ID is ${value}`) // implicit return
 
-var ids = ['5632953c4e345e145fdf2df8','563295464e345e145fdf2df9']
+var ids = [&#39;5632953c4e345e145fdf2df8&#39;,&#39;563295464e345e145fdf2df9&#39;]
 var messages = ids.map((value, index, list) =&gt; `ID of ${index} element is ${value} `) // implicit return
-</code></pre>
-
-<h3 id="promises-in-es6">Promises in ES6</h3>
-
+</code></pre><h3 id="promises-in-es6">Promises in ES6</h3>
 <p>before:</p>
-
-<pre><code>setTimeout(function(){
-  console.log('Yay!')
+<pre tabindex="0"><code>setTimeout(function(){
+  console.log(&#39;Yay!&#39;)
   setTimeout(function(){
-    console.log('Wheeyee!')
+    console.log(&#39;Wheeyee!&#39;)
   }, 1000)
 }, 1000)
-</code></pre>
-
-<p>after:</p>
-
-<pre><code>var wait1000 =  ()=&gt; new Promise((resolve, reject)=&gt; {setTimeout(resolve, 1000)})
+</code></pre><p>after:</p>
+<pre tabindex="0"><code>var wait1000 =  ()=&gt; new Promise((resolve, reject)=&gt; {setTimeout(resolve, 1000)})
 
 wait1000()
     .then(function() {
-        console.log('Yay!')
+        console.log(&#39;Yay!&#39;)
         return wait1000()
     })
     .then(function() {
-        console.log('Wheeyee!')
+        console.log(&#39;Wheeyee!&#39;)
     });
 }
-</code></pre>
-
-<h3 id="block-scoped-constructs-let-and-const">Block-Scoped Constructs Let and Const</h3>
-
+</code></pre><h3 id="block-scoped-constructs-let-and-const">Block-Scoped Constructs Let and Const</h3>
 <p>before:</p>
-
-<pre><code>function calculateTotalAmount (vip) {
+<pre tabindex="0"><code>function calculateTotalAmount (vip) {
   var amount = 0
   if (vip) {
     var amount = 1
@@ -359,11 +309,8 @@ wait1000()
 }
 
 console.log(calculateTotalAmount(true))//return 1000
-</code></pre>
-
-<p>after:</p>
-
-<pre><code>function calculateTotalAmount (vip) {
+</code></pre><p>after:</p>
+<pre tabindex="0"><code>function calculateTotalAmount (vip) {
   var amount = 0 // probably should also be let, but you can mix var and let
   if (vip) {
     let amount = 1 // first amount is still 0
@@ -394,14 +341,11 @@ function calculateTotalAmount (vip) {
 }
 
 console.log(calculateTotalAmount(true))//return 0
-</code></pre>
-
-<h3 id="classes-in-es6">Classes in ES6</h3>
-
-<pre><code>class baseModel {
+</code></pre><h3 id="classes-in-es6">Classes in ES6</h3>
+<pre tabindex="0"><code>class baseModel {
   constructor(options = {}, data = []) { // class constructor
-        this.name = 'Base'
-    this.url = 'http://azat.co/api'
+        this.name = &#39;Base&#39;
+    this.url = &#39;http://azat.co/api&#39;
         this.data = data
     this.options = options
     }
@@ -413,9 +357,9 @@ console.log(calculateTotalAmount(true))//return 0
 
 class AccountModel extends baseModel {
     constructor(options, data) {
-	    super({private: true}, ['32113123123', '524214691']) //call the parent method with super
-	    this.name = 'Account Model'
-	    this.url +='/accounts/'
+	    super({private: true}, [&#39;32113123123&#39;, &#39;524214691&#39;]) //call the parent method with super
+	    this.name = &#39;Account Model&#39;
+	    this.url +=&#39;/accounts/&#39;
     }
     get accountsData() { //calculated attribute getter
     // ... make XHR
@@ -424,41 +368,31 @@ class AccountModel extends baseModel {
 
 let accounts = new AccountModel(5)
 accounts.getName()
-console.log('Data is %s', accounts.accountsData)   
-</code></pre>
-
-<h3 id="modules-in-es6">Modules in ES6</h3>
-
+console.log(&#39;Data is %s&#39;, accounts.accountsData)   
+</code></pre><h3 id="modules-in-es6">Modules in ES6</h3>
 <p>before:</p>
-
-<pre><code>module.exports = {
+<pre tabindex="0"><code>module.exports = {
   port: 3000,
   getAccounts: function() {
     ...
   }
 }
 
-var service = require('module.js')
+var service = require(&#39;module.js&#39;)
 console.log(service.port) // 3000
-</code></pre>
-
-<p>after:</p>
-
-<pre><code>export var port = 3000
+</code></pre><p>after:</p>
+<pre tabindex="0"><code>export var port = 3000
 export function getAccounts(url) {
   ...
 }
 
-import {port, getAccounts} from 'module'
+import {port, getAccounts} from &#39;module&#39;
 console.log(port) // 3000
 
-import * as service from 'module'
+import * as service from &#39;module&#39;
 console.log(service.port) // 3000
-</code></pre>
-
-<h3 id="proxy-and-reflect">Proxy and Reflect</h3>
-
-<pre><code>function Tree() {
+</code></pre><h3 id="proxy-and-reflect">Proxy and Reflect</h3>
+<pre tabindex="0"><code>function Tree() {
       return new Proxy({}, handler);
     }
     var handler = {
@@ -474,17 +408,14 @@ console.log(service.port) // 3000
  var tree = Tree();
     &gt; tree
         { }
-    &gt; tree.branch1.branch2.twig = &quot;green&quot;;
+    &gt; tree.branch1.branch2.twig = &#34;green&#34;;
     &gt; tree
-        { branch1: { branch2: { twig: &quot;green&quot; } } }
-    &gt; tree.branch1.branch3.twig = &quot;yellow&quot;;
-        { branch1: { branch2: { twig: &quot;green&quot; },
-                     branch3: { twig: &quot;yellow&quot; }}}
-</code></pre>
-
-<h3 id="generators-in-es6">Generators in ES6</h3>
-
-<pre><code>function *foo() {
+        { branch1: { branch2: { twig: &#34;green&#34; } } }
+    &gt; tree.branch1.branch3.twig = &#34;yellow&#34;;
+        { branch1: { branch2: { twig: &#34;green&#34; },
+                     branch3: { twig: &#34;yellow&#34; }}}
+</code></pre><h3 id="generators-in-es6">Generators in ES6</h3>
+<pre tabindex="0"><code>function *foo() {
     yield 1;
     return 2;
 }
@@ -526,7 +457,7 @@ console.log( v ); // still `5`, not `6`
 
 
 function* outer() {
-    yield 'begin';
+    yield &#39;begin&#39;;
 
     /*
      * yield* 一般用来在一个 generator 函数里“执行”另一个 generator 函数，并可以取得其返回值
@@ -534,12 +465,12 @@ function* outer() {
     var rt = yield* inner();
     console.log(rt);  // -&gt; 输出：return from inner
 
-    yield 'end';
+    yield &#39;end&#39;;
 }
 
 function* inner() {
-    yield 'inner';
-    return 'return from inner';
+    yield &#39;inner&#39;;
+    return &#39;return from inner&#39;;
 }
 
 var it = outer(), v;
@@ -552,11 +483,8 @@ console.log(v);            // -&gt; 输出：inner
 
 v = it.next().value;
 console.log(v);            // -&gt; 输出：end
-</code></pre>
-
-<h3 id="generator-and-promise-together-to-avoid-callback-hell">Generator and Promise together to avoid callback hell</h3>
-
-<pre><code>function request(url) {
+</code></pre><h3 id="generator-and-promise-together-to-avoid-callback-hell">Generator and Promise together to avoid callback hell</h3>
+<pre tabindex="0"><code>function request(url) {
     return new Promise( function(resolve,reject){
         // pass an error-first style callback
         makeAjaxCall( url, function(err,text){
@@ -576,8 +504,8 @@ function runGenerator(g) {
         ret = it.next( val );
 
         if (!ret.done) {
-            // poor man's &quot;is it a promise?&quot; test
-            if (&quot;then&quot; in ret.value) {
+            // poor man&#39;s &#34;is it a promise?&#34; test
+            if (&#34;then&#34; in ret.value) {
                 // wait on the promise
                 ret.value.then( iterate );
             }
@@ -594,27 +522,50 @@ function runGenerator(g) {
 
 runGenerator( function *main(){
     try {
-        var result1 = yield request( &quot;http://some.url.1&quot; );
+        var result1 = yield request( &#34;http://some.url.1&#34; );
     }
     catch (err) {
-        console.log( &quot;Error: &quot; + err );
+        console.log( &#34;Error: &#34; + err );
         return;
     }
     var data = JSON.parse( result1 );
 
     try {
-        var result2 = yield request( &quot;http://some.url.2?id=&quot; + data.id );
+        var result2 = yield request( &#34;http://some.url.2?id=&#34; + data.id );
     } catch (err) {
-        console.log( &quot;Error: &quot; + err );
+        console.log( &#34;Error: &#34; + err );
         return;
     }
     var resp = JSON.parse( result2 );
-    console.log( &quot;The value you asked for: &quot; + resp.value );
+    console.log( &#34;The value you asked for: &#34; + resp.value );
 } );
 </code></pre>
     </article>
 
     
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2016-11-17-es6-top10-features/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=es6%20top10%20features%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2016-11-17-es6-top10-features/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
 
 
     <ul class="pager article-pager">
@@ -629,7 +580,7 @@ runGenerator( function *main(){
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>

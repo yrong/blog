@@ -14,22 +14,23 @@
   <meta property="og:url" content="https://yrong.github.io/blog/post/2016-10-17-machine-learning-on-spark/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
-
+  <meta name="generator" content="Hugo 0.159.1">
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -49,8 +50,8 @@
       <ul class="article-meta">
         <li class="article-meta-date"><time>October 17, 2016</time></li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/spark/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/spark/">
+            <i class="fa-solid fa-tag"></i>
             spark
           </a>&nbsp;
         </li>
@@ -58,162 +59,114 @@
       
 <aside class="toc">
   <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#pagerank">PageRank</a>
-<ul>
-<li><a href="#算法">算法</a></li>
-<li><a href="#实例">实例</a></li>
-</ul></li>
-<li><a href="#decision-tree">Decision Tree</a>
-<ul>
-<li><a href="#概率统计理论">概率统计理论</a></li>
-<li><a href="#id3">ID3</a></li>
-<li><a href="#spark实例">Spark实例 ###</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#pagerank">PageRank</a>
+      <ul>
+        <li><a href="#算法">算法</a></li>
+        <li><a href="#实例">实例</a></li>
+      </ul>
+    </li>
+    <li><a href="#decision-tree">Decision Tree</a>
+      <ul>
+        <li><a href="#概率统计理论">概率统计理论</a></li>
+        <li><a href="#id3">ID3</a></li>
+        <li><a href="#spark实例">Spark实例</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
 </aside>
       <p>page rank and decision tree on spark</p>
-
 <h2 id="pagerank">PageRank</h2>
-
 <h3 id="算法">算法</h3>
-
 <p>The PageRank algorithm outputs a probability distribution used to represent the likelihood that a person randomly clicking on links will arrive at any particular page.</p>
-
 <ol>
 <li>Initialize each page’s rank to 1.0.</li>
 <li>On each iteration, have page p send a contribution of rank(p)/numNeighbors(p) to its neighbors (the pages it has links to).</li>
 <li>Set each page’s rank to 0.15 + 0.85 * contributionsReceived.</li>
 </ol>
-
 <p>The last two steps repeat for several iterations, during which the algorithm will con‐ verge to the correct PageRank value for each page. In practice, it’s typical to run about 10 iterations.</p>
-
 <h3 id="实例">实例</h3>
-
-<p><img src="/blog/img/Screen-Shot-1.png" alt="" /></p>
-
+<p><img src="/blog/img/Screen-Shot-1.png" alt=""></p>
 <p>Above diagram shows there are 4 web pages with theirs outboundlinks.</p>
-
-<pre><code>(&quot;MapR&quot;,List(&quot;Baidu&quot;,&quot;Blogger&quot;)),
-(&quot;Baidu&quot;, List(&quot;MapR&quot;)),
-(&quot;Blogger&quot;,List(&quot;Google&quot;,&quot;Baidu&quot;)),
-(&quot;Google&quot;, List(&quot;MapR&quot;))
-</code></pre>
-
-<p>Solution:</p>
-
+<pre tabindex="0"><code>(&#34;MapR&#34;,List(&#34;Baidu&#34;,&#34;Blogger&#34;)),
+(&#34;Baidu&#34;, List(&#34;MapR&#34;)),
+(&#34;Blogger&#34;,List(&#34;Google&#34;,&#34;Baidu&#34;)),
+(&#34;Google&#34;, List(&#34;MapR&#34;))
+</code></pre><p>Solution:</p>
 <blockquote>
 <p>Initialize each page’s rank to 1.0.</p>
 </blockquote>
-
-<pre><code>val links = sc.parallelize(List((&quot;MapR&quot;,List(&quot;Baidu&quot;,&quot;Blogger&quot;)),(&quot;Baidu&quot;, List(&quot;MapR&quot;)),(&quot;Blogger&quot;,List(&quot;Google&quot;,&quot;Baidu&quot;)),(&quot;Google&quot;, List(&quot;MapR&quot;)))).partitionBy(new HashPartitioner(4)).persist()
+<pre tabindex="0"><code>val links = sc.parallelize(List((&#34;MapR&#34;,List(&#34;Baidu&#34;,&#34;Blogger&#34;)),(&#34;Baidu&#34;, List(&#34;MapR&#34;)),(&#34;Blogger&#34;,List(&#34;Google&#34;,&#34;Baidu&#34;)),(&#34;Google&#34;, List(&#34;MapR&#34;)))).partitionBy(new HashPartitioner(4)).persist()
 var ranks = links.mapValues(v =&gt; 1.0)
-</code></pre>
-
-<p><img src="/blog/img/Screen Shot 2016-03-02 at 1.28.40 PM.png" alt="" /></p>
-
+</code></pre><p>![](/blog/img/Screen Shot 2016-03-02 at 1.28.40 PM.png)</p>
 <blockquote>
 <p>On each iteration, have page p send a contribution of rank(p)/numNeighbors(p) to its neighbors (the pages it has links to).</p>
 </blockquote>
-
-<pre><code>val contributions = links.join(ranks).flatMap { case (url, (links, rank)) =&gt; links.map(dest =&gt; (dest, rank / links.size)) }
-</code></pre>
-
-<p><img src="/blog/img/Screen Shot 2016-03-02 at 1.33.56 PM.png" alt="" /></p>
-
+<pre tabindex="0"><code>val contributions = links.join(ranks).flatMap { case (url, (links, rank)) =&gt; links.map(dest =&gt; (dest, rank / links.size)) }
+</code></pre><p>![](/blog/img/Screen Shot 2016-03-02 at 1.33.56 PM.png)</p>
 <p>See above contributions in red, and it matches the calculations using scala:</p>
-
-<pre><code>scala&gt; contributions.collect
+<pre tabindex="0"><code>scala&gt; contributions.collect
 res26: Array[(String, Double)] = Array((MapR,1.0), (Baidu,0.5), (Blogger,0.5), (Google,0.5), (Baidu,0.5), (MapR,1.0))
-</code></pre>
-
-<blockquote>
+</code></pre><blockquote>
 <p>Set each page’s rank to 0.15 + 0.85 * contributionsReceived.</p>
 </blockquote>
-
-<pre><code>val ranks = contributions.reduceByKey((x, y) =&gt; x + y).mapValues(v =&gt; 0.15 + 0.85*v)
-</code></pre>
-
-<p><img src="/blog/img/Screen Shot 2016-03-02 at 1.41.26 PM.png" alt="" /></p>
-
+<pre tabindex="0"><code>val ranks = contributions.reduceByKey((x, y) =&gt; x + y).mapValues(v =&gt; 0.15 + 0.85*v)
+</code></pre><p>![](/blog/img/Screen Shot 2016-03-02 at 1.41.26 PM.png)</p>
 <p>After 1st iteration, current pagerank value for each page is:</p>
-
-<pre><code>scala&gt; ranks.collect
+<pre tabindex="0"><code>scala&gt; ranks.collect
 res27: Array[(String, Double)] = Array((Google,0.575), (MapR,1.8499999999999999), (Blogger,0.575), (Baidu,1.0))
-</code></pre>
-
-<p>Then the last two steps repeat for several iterations.</p>
-
+</code></pre><p>Then the last two steps repeat for several iterations.</p>
 <h2 id="decision-tree">Decision Tree</h2>
-
 <h3 id="概率统计理论">概率统计理论</h3>
-
 <p>信息量的数学定义为：
 $$ I(u_i)=-log_2P(u_i) $$
 其中 $$P(u_i)$$ 为信息 $$ui$$ 发生的概率。信息熵是信息量的数学期望，是信源发出信息前的平均不确定性，也成为先验熵，信息熵的数学定义为：</p>
-
 <p>$$Ent(U)=-\sum_iP(u_i)log_2P(u_i)$$</p>
-
 <p>当已知信号U的概率分布P(U)且收到信号$$V=v_i$$后，发出信号的概率分布变为\(P(U|v_j)\),于是信源的平均不确定性变为（也称为条件熵）：</p>
-
 <p>$$Ent(U|v_i)=-\sum_iP(u_i|v_i)log_2P(u_i|v_i)$$</p>
-
 <p>信息增益为：</p>
-
 <p>$$Gains(U,V)=Ent(U)-Ent(U|V)$$</p>
-
 <h3 id="id3">ID3</h3>
-
 <p>ID3算法的主要思想就是每次计算出各个属性的信息增益，选择最大者为分裂属性。下面举例说明，为简单起见，随机杜撰了10条数据，分为2个维度：</p>
-
-<p>性别(T1)  |1  |0  |1  |0  |1  |0  |1  |0  |1  |1
-套餐类别(T2)    |A  |B  |A  |A  |C  |C  |B  |A  |A  |C
-是否购买    |true   |false  |true   |false  |true   |true   |false  |true   |true   |true</p>
-
+<p>性别(T1)	|1	|0	|1	|0	|1	|0	|1	|0	|1	|1
+套餐类别(T2)	|A	|B	|A	|A	|C	|C	|B	|A	|A	|C
+是否购买	|true	|false	|true	|false	|true	|true	|false	|true	|true	|true</p>
 <p>信息熵：
 $$ Ent(U)=-\sum_iP(u_i)log_2P(u_i)=-{7\over 10}log_2({7\over 10})-{3\over 10}log_2({3\over 10})=0.881 $$</p>
-
 <p>条件熵
 $$ Ent(U|T_1)={6\over 10}(-{5\over 6}log_2({5\over 6})-{1\over 6}log_2({1\over 6}))+{4\over 10}(-{2\over 4}log_2({2\over 4})-{2\over 4}log_2({2\over 4}))=0.790 $$</p>
-
 <p>$$ Ent(U|T_2)={5\over 10}(-{4\over 5}log_2({4\over 5})-{1\over 5}log_2({1\over 5}))+{2\over 10}(-{2\over 2}log_2({2\over 2})-{0\over 2}log_2({0\over 2}))+{3\over 10}(-{3\over 3}log_2({3\over 3})-{0\over 3}log_2({0\over 3}))=0.361 $$</p>
-
 <p>信息增益
 $$ Gains(U,T_1)=Ent(U)-Ent(U|T_1)=0.091 $$</p>
-
 <p>$$ Gains(U,T_2)=Ent(U)-Ent(U|T_2)=0.520 $$</p>
-
 <p>根据ID3的算法，目前来说这种情况下将会选择T2作为最佳分组变量，因为它消除信宿对信源的平均不确定性的能力最强，由此得到T2-&gt;T1的树结构</p>
-
-<h3 id="spark实例">Spark实例 ###</h3>
-
+<h3 id="spark实例">Spark实例</h3>
 <p><a href="/blog/data/rita2014jan.csv">测试数据</a></p>
-
 <ul>
-<li><p><code>categoricalFeaturesInfo</code> specifies which features are categorical and how many categorical values each of those features can take. This is given as a map from feature index to the number of categories for that feature. Any features not in this map are treated as continuous.</p>
-
+<li>
+<p><code>categoricalFeaturesInfo</code> specifies which features are categorical and how many categorical values each of those features can take. This is given as a map from feature index to the number of categories for that feature. Any features not in this map are treated as continuous.</p>
 <ul>
 <li>e.g:For the test data,the first categorical feature, categoricalFeaturesInfo = (0 -&gt; 31) specifies that feature index 0 (which represents the day of the month) has 31 categories (values {0, &hellip;, 31}). The second , categoricalFeaturesInfo = (1 -&gt; 7), represents days of the week, and specifies that feature index 1 has 7 categories. The carrier categorial feature is index 4 and the value can go from 0 to the number of distinct carriers , and so on.</li>
-</ul></li>
-
-<li><p><code>maxDepth</code> Maximum depth of a tree.</p></li>
-
-<li><p><code>maxBins</code> Number of bins used when discretizing continuous features.</p>
-
+</ul>
+</li>
+<li>
+<p><code>maxDepth</code> Maximum depth of a tree.</p>
+</li>
+<li>
+<p><code>maxBins</code> Number of bins used when discretizing continuous features.</p>
 <ul>
 <li>Note that the maxBins parameter must be at least the maximum number of categories MM for any categorical feature</li>
-</ul></li>
-
-<li><p><code>numClasses</code> Number of classes (for Classification only).</p></li>
-
-<li><p><code>impurity</code> Impurity measure of the homogeneity of the labels at the node</p></li>
 </ul>
-
-<pre><code>import org.apache.spark._
+</li>
+<li>
+<p><code>numClasses</code> Number of classes (for Classification only).</p>
+</li>
+<li>
+<p><code>impurity</code> Impurity measure of the homogeneity of the labels at the node</p>
+</li>
+</ul>
+<pre tabindex="0"><code>import org.apache.spark._
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.util.IntParam
@@ -230,13 +183,13 @@ case class Flight(dofM: String, dofW: String, carrier: String, tailnum: String, 
 
 // function to parse input into Movie class  
 def parseFlight(str: String): Flight = {
-  val line = str.split(&quot;,&quot;)
+  val line = str.split(&#34;,&#34;)
   Flight(line(0), line(1), line(2), line(3), line(4).toInt, line(5), line(6), line(7), line(8), line(9).toDouble, line(10).toDouble, line(11).toDouble, line(12).toDouble, line(13).toDouble, line(14).toDouble, line(15).toDouble, line(16).toInt)
 }
 
 
 //Creating and RDD with the January 2014 data to be used for training the model
-val textRDD = sc.textFile(&quot;/user/user01/data/rita2014jan.csv&quot;)
+val textRDD = sc.textFile(&#34;/user/user01/data/rita2014jan.csv&#34;)
 
 val flightsRDD = textRDD.map(parseFlight).cache()
 flightsRDD.take(2)
@@ -305,7 +258,7 @@ categoricalFeaturesInfo += (7 -&gt; destMap.size)
 
 val numClasses = 2
 // Defning values for the other parameters
-val impurity = &quot;gini&quot;
+val impurity = &#34;gini&#34;
 val maxDepth = 9
 val maxBins = 7000
 
@@ -361,15 +314,34 @@ val fpRatio=falsePositives.count.toDouble/ testData.count()
 fpRatio: Double = 0.156985556985557  
 val fnRatio=falseNegatives.count.toDouble/ testData.count()
 fnRatio: Double = 0.15875875875875875 
-
-</code></pre>
-
-<p>Model.toDebugString prints out the decision tree, which asks the following questions to determine if the flight was delayed or not:</p>
-
-<p><img src="/blog/img/spark-machine-tutorial-blog-img13.png" alt="" /></p>
+</code></pre><p>Model.toDebugString prints out the decision tree, which asks the following questions to determine if the flight was delayed or not:</p>
+<p><img src="/blog/img/spark-machine-tutorial-blog-img13.png" alt=""></p>
     </article>
 
     
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2016-10-17-machine-learning-on-spark/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Machine%20Learning%20algorithm%20on%20Spark%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2016-10-17-machine-learning-on-spark/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
 
 
     <ul class="pager article-pager">
@@ -384,7 +356,7 @@ fnRatio: Double = 0.15875875875875875
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>

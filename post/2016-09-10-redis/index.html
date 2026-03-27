@@ -14,22 +14,23 @@
   <meta property="og:url" content="https://yrong.github.io/blog/post/2016-09-10-redis/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
-
+  <meta name="generator" content="Hugo 0.159.1">
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -49,8 +50,8 @@
       <ul class="article-meta">
         <li class="article-meta-date"><time>September 10, 2016</time></li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/redis/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/redis/">
+            <i class="fa-solid fa-tag"></i>
             redis
           </a>&nbsp;
         </li>
@@ -58,45 +59,34 @@
       
 <aside class="toc">
   <nav id="TableOfContents">
-<ul>
-<li><a href="#object-types">Object Types</a>
-<ul>
-<li><a href="#strings-hashes-set">strings&amp;Hashes&amp;Set</a></li>
-<li><a href="#lists">Lists</a></li>
-<li><a href="#zsets">ZSets</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#stringshashesset">strings&amp;Hashes&amp;Set</a></li>
+    <li><a href="#lists">Lists</a></li>
+    <li><a href="#zsets">ZSets</a></li>
+  </ul>
 </nav>
 </aside>
       <p>redis数据结构类型及实现</p>
-
 <h1 id="object-types">Object Types</h1>
-
-<pre><code>/* Object types */
+<pre tabindex="0"><code>/* Object types */
 #define OBJ_STRING 0
 #define OBJ_LIST 1
 #define OBJ_SET 2
 #define OBJ_ZSET 3
 #define OBJ_HASH 4
-</code></pre>
-
-<h2 id="strings-hashes-set">strings&amp;Hashes&amp;Set</h2>
-
+</code></pre><h2 id="stringshashesset">strings&amp;Hashes&amp;Set</h2>
 <blockquote>
 <p>HSET myhash field1 &ldquo;Hello&rdquo;</p>
 </blockquote>
-
 <p>Hash对象是用zipmap存储的，查找、删除均为O(n)，但一般来说对象的field对象不会大多，所以说操作评价还是近似O(1)。如果field/value的大小超过一定限制后，Redis会在内部自动将zipmap替换成正常的Hash实现</p>
-
 <blockquote>
 <p>SADD myset1 &ldquo;Hello&rdquo;</p>
-
+</blockquote>
+<blockquote>
 <p>SINTER myset1 myset2</p>
 </blockquote>
-
 <p>Set没有重复的值，对其有添加删除操作，可对都个结合求交、并等操作，key理解为集合的名字。新浪微博中的：“我和她都关注了”只需要一个SINTER命令就可以实现。</p>
-
-<pre><code>struct sdshdr{
+<pre tabindex="0"><code>struct sdshdr{
     long len;
     long free;
     char buf[];
@@ -133,40 +123,41 @@ typedef struct intset {
     uint32_t length;
     int8_t contents[];
 } intset;
-
-</code></pre>
-
-<ul>
-<li><p>APPEND、GET、GETBIT、GETRANGE、GETSET、STRLEN</p></li>
-
-<li><p>MGET、MSET、MSETNX、SET、SETBIT、SETEX、SETNX、SETRANGE</p></li>
-
-<li><p>INCR、INCRBY、DECR、DECRBY</p></li>
+</code></pre><ul>
+<li>
+<p>APPEND、GET、GETBIT、GETRANGE、GETSET、STRLEN</p>
+</li>
+<li>
+<p>MGET、MSET、MSETNX、SET、SETBIT、SETEX、SETNX、SETRANGE</p>
+</li>
+<li>
+<p>INCR、INCRBY、DECR、DECRBY</p>
+</li>
 </ul>
-
-<hr />
-
+<hr>
 <ul>
-<li><p>HDEL、HEXISTS、HGET、HGETALL、HINCRBY、HKEYS、HLEN</p></li>
-
-<li><p>HMGET、HMSET、HSET、HSETNX、HVALS</p></li>
+<li>
+<p>HDEL、HEXISTS、HGET、HGETALL、HINCRBY、HKEYS、HLEN</p>
+</li>
+<li>
+<p>HMGET、HMSET、HSET、HSETNX、HVALS</p>
+</li>
 </ul>
-
-<hr />
-
+<hr>
 <ul>
-<li><p>SADD、SCAR、SDIFF、SDIFFSTORE、SINTER、SISMEMBER</p></li>
-
-<li><p>SMEMBERS、SMOVE、SPOP、SRANDMEMBER、SREM</p></li>
-
-<li><p>SUNION、SUNIONSTORE</p></li>
+<li>
+<p>SADD、SCAR、SDIFF、SDIFFSTORE、SINTER、SISMEMBER</p>
+</li>
+<li>
+<p>SMEMBERS、SMOVE、SPOP、SRANDMEMBER、SREM</p>
+</li>
+<li>
+<p>SUNION、SUNIONSTORE</p>
+</li>
 </ul>
-
 <h2 id="lists">Lists</h2>
-
 <p>Lists是一个简单的strings类型的双向链表，按照插入顺序排序。可以通过命令从头部或者尾部添加删除元素，即可很方便的实现栈与队列操作。List还可以阻塞，很容易就实现了一个工作队列，而不用轮询。</p>
-
-<pre><code>typedef struct listNode {
+<pre tabindex="0"><code>typedef struct listNode {
     struct listNode *prev;
     struct listNode *next;
     void *value;
@@ -185,23 +176,21 @@ typedef struct list {
     int (*match)(void *ptr, void *key);
     unsigned long len;
 } list;
-</code></pre>
-
-<ul>
-<li><p>BLPOP 、BRPOP 、BRPOPLPUSH、LINDEX、LINSERT、LLEN</p></li>
-
-<li><p>LPOP、LPUSH、LPUSHX、LRANGE、LREM、LSET、LTRIM</p></li>
-
-<li><p>RPOP、RPOPLPUSH、RPUSH、RPUSHX</p></li>
+</code></pre><ul>
+<li>
+<p>BLPOP 、BRPOP 、BRPOPLPUSH、LINDEX、LINSERT、LLEN</p>
+</li>
+<li>
+<p>LPOP、LPUSH、LPUSHX、LRANGE、LREM、LSET、LTRIM</p>
+</li>
+<li>
+<p>RPOP、RPOPLPUSH、RPUSH、RPUSHX</p>
+</li>
 </ul>
-
 <h2 id="zsets">ZSets</h2>
-
 <p>ZSets为Set的升级版本，即排序的Sets，在Set的基础之上增加了顺序（Score）属性，每次插入均需要指定，且会自动重新调整值的顺序。Score为double类型，ZSets实现为SkipList与HashTable的混合体。</p>
-
 <p>元素到Score的映射是添加在HashTable中的，所以给定一个元素获取Score开销为O(1)，Score到元素的映射则为SkipList。</p>
-
-<pre><code>/* ZSETs use a specialized version of Skiplists */
+<pre tabindex="0"><code>/* ZSETs use a specialized version of Skiplists */
 typedef struct zskiplistNode {
     robj *obj;
     double score;
@@ -222,20 +211,46 @@ typedef struct zset {
     dict *dict;
     zskiplist *zsl;
 } zset;
-</code></pre>
-
-<ul>
-<li><p>ZADD、ZCARD、ZCOUNT、ZINCRBY、ZINTERSTORE</p></li>
-
-<li><p>ZRANGE、ZRANGEBYSCORE、ZRANK、ZREM</p></li>
-
-<li><p>ZREMRANGEBYRANK、ZREMRANGEBYSCORE、ZREVRANGE</p></li>
-
-<li><p>ZREVRANGEBYSCORE、ZREVRANK、ZSCORE、ZUNIONSTORE</p></li>
+</code></pre><ul>
+<li>
+<p>ZADD、ZCARD、ZCOUNT、ZINCRBY、ZINTERSTORE</p>
+</li>
+<li>
+<p>ZRANGE、ZRANGEBYSCORE、ZRANK、ZREM</p>
+</li>
+<li>
+<p>ZREMRANGEBYRANK、ZREMRANGEBYSCORE、ZREVRANGE</p>
+</li>
+<li>
+<p>ZREVRANGEBYSCORE、ZREVRANK、ZSCORE、ZUNIONSTORE</p>
+</li>
 </ul>
     </article>
 
     
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2016-09-10-redis/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=redis%20object%20types%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2016-09-10-redis/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
 
 
     <ul class="pager article-pager">
@@ -250,7 +265,7 @@ typedef struct zset {
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>

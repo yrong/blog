@@ -14,22 +14,23 @@
   <meta property="og:url" content="https://yrong.github.io/blog/post/2016-10-11-vertx-internal/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
-
+  <meta name="generator" content="Hugo 0.159.1">
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -49,8 +50,8 @@
       <ul class="article-meta">
         <li class="article-meta-date"><time>October 11, 2016</time></li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/vertx/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/vertx/">
+            <i class="fa-solid fa-tag"></i>
             vertx
           </a>&nbsp;
         </li>
@@ -58,717 +59,623 @@
       
 <aside class="toc">
   <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#cluster初始化">Cluster初始化</a></li>
-<li><a href="#eventbus初始化及消息收发流程">EventBus初始化及消息收发流程</a>
-<ul>
-<li><a href="#初始化eventbus">初始化eventbus ###</a></li>
-<li><a href="#注册监听">注册监听</a></li>
-<li><a href="#消息的send-publish">消息的send/publish</a></li>
-<li><a href="#消息的接收">消息的接收</a></li>
-</ul></li>
-<li><a href="#线程模型">线程模型</a>
-<ul>
-<li><a href="#event-loop线程">Event Loop线程</a></li>
-<li><a href="#vert-x-thread">Vert.x Thread</a></li>
-<li><a href="#vert-x-context">Vert.x Context</a></li>
-<li><a href="#worker-context">Worker context</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#cluster初始化">Cluster初始化</a></li>
+    <li><a href="#eventbus初始化及消息收发流程">EventBus初始化及消息收发流程</a>
+      <ul>
+        <li><a href="#初始化eventbus">初始化eventbus</a></li>
+        <li><a href="#注册监听">注册监听</a></li>
+        <li><a href="#消息的sendpublish">消息的send/publish</a></li>
+        <li><a href="#消息的接收">消息的接收</a></li>
+      </ul>
+    </li>
+    <li><a href="#线程模型">线程模型</a>
+      <ul>
+        <li><a href="#event-loop线程">Event Loop线程</a></li>
+        <li><a href="#vertx-thread">Vert.x Thread</a></li>
+        <li><a href="#vertx-context">Vert.x Context</a></li>
+        <li><a href="#worker-context">Worker context</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
 </aside>
       <p>vertx源码分析</p>
-
 <h2 id="cluster初始化">Cluster初始化</h2>
-
 <p>调用Vertx.clusteredVertx静态方法后，Vert.x会利用Vertx工厂方法创建Vertx实例。</p>
-
-<pre><code class="language-java">@Override
-public void clusteredVertx(VertxOptions options, final Handler&lt;AsyncResult&lt;Vertx&gt;&gt; resultHandler) {
-  // We don't require the user to set clustered to true if they use this method
-  options.setClustered(true);
-  new VertxImpl(options, resultHandler);
-}
-</code></pre>
-
-<p>在VertxImpl的构造方法中，若需要创建集群，则执行：</p>
-
-<pre><code class="language-java">...
-if (options.isClustered()) {
-  this.clusterManager = getClusterManager(options);
-  this.clusterManager.setVertx(this);
-  this.clusterManager.join(ar -&gt; {
-    if (ar.failed()) {
-      log.error(&quot;Failed to join cluster&quot;, ar.cause());
-    } else {
-      // Provide a memory barrier as we are setting from a different thread
-      synchronized (VertxImpl.this) {
-        haManager = new HAManager(this, deploymentManager, clusterManager, options.getQuorumSize(),
-                                  options.getHAGroup(), haEnabled);
-        createAndStartEventBus(options, resultHandler);
-      }
-    }
-  });
-}
-</code></pre>
-
-<p>获取集群的配置管理实例</p>
-
-<pre><code class="language-java">private ClusterManager getClusterManager(VertxOptions options) {
-    if (options.isClustered()) {
-      if (options.getClusterManager() != null) {
-        return options.getClusterManager();
-      } else {
-        ClusterManager mgr;
-        String clusterManagerClassName = System.getProperty(&quot;vertx.cluster.managerClass&quot;);
-        if (clusterManagerClassName != null) {
-          // We allow specify a sys prop for the cluster manager factory which overrides ServiceLoader
-          try {
-            Class&lt;?&gt; clazz = Class.forName(clusterManagerClassName);
-            mgr = (ClusterManager) clazz.newInstance();
-          } catch (Exception e) {
-            throw new IllegalStateException(&quot;Failed to instantiate &quot; + clusterManagerClassName, e);
-          }
-        } else {
-          mgr = ServiceHelper.loadFactoryOrNull(ClusterManager.class);
-          if (mgr == null) {
-            throw new IllegalStateException(&quot;No ClusterManagerFactory instances found on classpath&quot;);
-          }
-        }
-        return mgr;
-      }
-    } else {
-      return null;
-    }
-  }
-</code></pre>
-
-<p>因为缺省没有指定managerClass，则使用默认集群加载类启动集群</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">clusteredVertx</span>(VertxOptions options, <span style="color:#66d9ef">final</span> Handler<span style="color:#f92672">&lt;</span>AsyncResult<span style="color:#f92672">&lt;</span>Vertx<span style="color:#f92672">&gt;&gt;</span> resultHandler) {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// We don&#39;t require the user to set clustered to true if they use this method</span>
+</span></span><span style="display:flex;"><span>  options.<span style="color:#a6e22e">setClustered</span>(<span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">new</span> VertxImpl(options, resultHandler);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>在VertxImpl的构造方法中，若需要创建集群，则执行：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (options.<span style="color:#a6e22e">isClustered</span>()) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">clusterManager</span> <span style="color:#f92672">=</span> getClusterManager(options);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">clusterManager</span>.<span style="color:#a6e22e">setVertx</span>(<span style="color:#66d9ef">this</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">clusterManager</span>.<span style="color:#a6e22e">join</span>(ar <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (ar.<span style="color:#a6e22e">failed</span>()) {
+</span></span><span style="display:flex;"><span>      log.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#34;Failed to join cluster&#34;</span>, ar.<span style="color:#a6e22e">cause</span>());
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Provide a memory barrier as we are setting from a different thread</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">synchronized</span> (VertxImpl.<span style="color:#a6e22e">this</span>) {
+</span></span><span style="display:flex;"><span>        haManager <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HAManager(<span style="color:#66d9ef">this</span>, deploymentManager, clusterManager, options.<span style="color:#a6e22e">getQuorumSize</span>(),
+</span></span><span style="display:flex;"><span>                                  options.<span style="color:#a6e22e">getHAGroup</span>(), haEnabled);
+</span></span><span style="display:flex;"><span>        createAndStartEventBus(options, resultHandler);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>获取集群的配置管理实例</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">private</span> ClusterManager <span style="color:#a6e22e">getClusterManager</span>(VertxOptions options) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (options.<span style="color:#a6e22e">isClustered</span>()) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (options.<span style="color:#a6e22e">getClusterManager</span>() <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> options.<span style="color:#a6e22e">getClusterManager</span>();
+</span></span><span style="display:flex;"><span>      } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>        ClusterManager mgr;
+</span></span><span style="display:flex;"><span>        String clusterManagerClassName <span style="color:#f92672">=</span> System.<span style="color:#a6e22e">getProperty</span>(<span style="color:#e6db74">&#34;vertx.cluster.managerClass&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (clusterManagerClassName <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>          <span style="color:#75715e">// We allow specify a sys prop for the cluster manager factory which overrides ServiceLoader</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>            Class<span style="color:#f92672">&lt;?&gt;</span> clazz <span style="color:#f92672">=</span> Class.<span style="color:#a6e22e">forName</span>(clusterManagerClassName);
+</span></span><span style="display:flex;"><span>            mgr <span style="color:#f92672">=</span> (ClusterManager) clazz.<span style="color:#a6e22e">newInstance</span>();
+</span></span><span style="display:flex;"><span>          } <span style="color:#66d9ef">catch</span> (Exception e) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalStateException(<span style="color:#e6db74">&#34;Failed to instantiate &#34;</span> <span style="color:#f92672">+</span> clusterManagerClassName, e);
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>          mgr <span style="color:#f92672">=</span> ServiceHelper.<span style="color:#a6e22e">loadFactoryOrNull</span>(ClusterManager.<span style="color:#a6e22e">class</span>);
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">if</span> (mgr <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalStateException(<span style="color:#e6db74">&#34;No ClusterManagerFactory instances found on classpath&#34;</span>);
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> mgr;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><p>因为缺省没有指定managerClass，则使用默认集群加载类启动集群</p>
 <blockquote>
 <p>ServiceLoader<ClusterManager> mgrs = ServiceLoader.load(ClusterManager.class);</p>
 </blockquote>
-
 <p>hazelcast cluster代码在单独的<a href="https://github.com/vert-x3/vertx-hazelcast">repo</a></p>
-
 <blockquote>
 <p>META-INF/services/io.vertx.core.spi.cluster.ClusterManager</p>
 </blockquote>
-
 <p>指定了ClusterManager加载io.vertx.spi.cluster.hazelcast.HazelcastClusterManager,加入HazelcastCluster</p>
-
-<pre><code class="language-java">public synchronized void join(Handler&lt;AsyncResult&lt;Void&gt;&gt; resultHandler) {
-    vertx.executeBlocking(fut -&gt; {
-      if (!active) {
-        active = true;
-
-        // The hazelcast instance has been passed using the constructor.
-        if (customHazelcastCluster) {
-          nodeID = hazelcast.getLocalEndpoint().getUuid();
-          membershipListenerId = hazelcast.getCluster().addMembershipListener(this);
-          fut.complete();
-          return;
-        }
-
-        if (conf == null) {
-          conf = loadConfig();
-          if (conf == null) {
-            log.warn(&quot;Cannot find cluster configuration on 'vertx.hazelcast.config' system property, on the classpath, &quot; +
-                &quot;or specified programmatically. Using default hazelcast configuration&quot;);
-          }
-        }
-        hazelcast = Hazelcast.newHazelcastInstance(conf);
-        nodeID = hazelcast.getLocalEndpoint().getUuid();
-        membershipListenerId = hazelcast.getCluster().addMembershipListener(this);
-        fut.complete();
-      }
-    }, resultHandler);
-  }
-</code></pre>
-
-<h2 id="eventbus初始化及消息收发流程">EventBus初始化及消息收发流程</h2>
-
-<h3 id="初始化eventbus">初始化eventbus ###</h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">join</span>(Handler<span style="color:#f92672">&lt;</span>AsyncResult<span style="color:#f92672">&lt;</span>Void<span style="color:#f92672">&gt;&gt;</span> resultHandler) {
+</span></span><span style="display:flex;"><span>    vertx.<span style="color:#a6e22e">executeBlocking</span>(fut <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>active) {
+</span></span><span style="display:flex;"><span>        active <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// The hazelcast instance has been passed using the constructor.</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (customHazelcastCluster) {
+</span></span><span style="display:flex;"><span>          nodeID <span style="color:#f92672">=</span> hazelcast.<span style="color:#a6e22e">getLocalEndpoint</span>().<span style="color:#a6e22e">getUuid</span>();
+</span></span><span style="display:flex;"><span>          membershipListenerId <span style="color:#f92672">=</span> hazelcast.<span style="color:#a6e22e">getCluster</span>().<span style="color:#a6e22e">addMembershipListener</span>(<span style="color:#66d9ef">this</span>);
+</span></span><span style="display:flex;"><span>          fut.<span style="color:#a6e22e">complete</span>();
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (conf <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>          conf <span style="color:#f92672">=</span> loadConfig();
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">if</span> (conf <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>            log.<span style="color:#a6e22e">warn</span>(<span style="color:#e6db74">&#34;Cannot find cluster configuration on &#39;vertx.hazelcast.config&#39; system property, on the classpath, &#34;</span> <span style="color:#f92672">+</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;or specified programmatically. Using default hazelcast configuration&#34;</span>);
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        hazelcast <span style="color:#f92672">=</span> Hazelcast.<span style="color:#a6e22e">newHazelcastInstance</span>(conf);
+</span></span><span style="display:flex;"><span>        nodeID <span style="color:#f92672">=</span> hazelcast.<span style="color:#a6e22e">getLocalEndpoint</span>().<span style="color:#a6e22e">getUuid</span>();
+</span></span><span style="display:flex;"><span>        membershipListenerId <span style="color:#f92672">=</span> hazelcast.<span style="color:#a6e22e">getCluster</span>().<span style="color:#a6e22e">addMembershipListener</span>(<span style="color:#66d9ef">this</span>);
+</span></span><span style="display:flex;"><span>        fut.<span style="color:#a6e22e">complete</span>();
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }, resultHandler);
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><h2 id="eventbus初始化及消息收发流程">EventBus初始化及消息收发流程</h2>
+<h3 id="初始化eventbus">初始化eventbus</h3>
 <p>VertxImpl在加入集群后初始化并启动eventbus</p>
-
-<pre><code class="language-java">  private void createAndStartEventBus(VertxOptions options, Handler&lt;AsyncResult&lt;Vertx&gt;&gt; resultHandler) {
-    if (options.isClustered()) {
-      eventBus = new ClusteredEventBus(this, options, clusterManager, haManager);
-    } else {
-      eventBus = new EventBusImpl(this);
-    }
-    eventBus.start(ar2 -&gt; {
-      if (ar2.succeeded()) {
-        // If the metric provider wants to use the event bus, it cannot use it in its constructor as the event bus
-        // may not be initialized yet. We invokes the eventBusInitialized so it can starts using the event bus.
-        metrics.eventBusInitialized(eventBus);
-
-        if (resultHandler != null) {
-          resultHandler.handle(Future.succeededFuture(this));
-        }
-      } else {
-        log.error(&quot;Failed to start event bus&quot;, ar2.cause());
-      }
-    });
-  }
-
-  @Override
-  public void start(Handler&lt;AsyncResult&lt;Void&gt;&gt; resultHandler) {
-    clusterManager.&lt;String, ServerID&gt;getAsyncMultiMap(SUBS_MAP_NAME, ar2 -&gt; {
-      if (ar2.succeeded()) {
-        subs = ar2.result();
-        server = vertx.createNetServer(getServerOptions());//建立一个NetServer接收数据
-
-        server.connectHandler(getServerHandler());
-        server.listen(asyncResult -&gt; {
-          if (asyncResult.succeeded()) {
-            int serverPort = getClusterPublicPort(options, server.actualPort());
-            String serverHost = getClusterPublicHost(options);
-            serverID = new ServerID(serverPort, serverHost);
-            haManager.addDataToAHAInfo(SERVER_ID_HA_KEY, new JsonObject().put(&quot;host&quot;, serverID.host).put(&quot;port&quot;, serverID.port));
-            if (resultHandler != null) {
-              started = true;
-              resultHandler.handle(Future.succeededFuture());
-            }
-          } else {
-            if (resultHandler != null) {
-              resultHandler.handle(Future.failedFuture(asyncResult.cause()));
-            } else {
-              log.error(asyncResult.cause());
-            }
-          }
-        });
-      } else {
-        if (resultHandler != null) {
-          resultHandler.handle(Future.failedFuture(ar2.cause()));
-        } else {
-          log.error(ar2.cause());
-        }
-      }
-    });
-  }
-</code></pre>
-
-<h3 id="注册监听">注册监听</h3>
-
-<pre><code class="language-java">EventBus eb = vertx.eventBus();
-
-eb.consumer(&quot;news.uk.sport&quot;, message -&gt; {
-  System.out.println(&quot;I have received a message: &quot; + message.body());
-});
-</code></pre>
-
-<p>包含本地和远程注册</p>
-
-<pre><code class="language-java">protected &lt;T&gt; void addRegistration(String address, HandlerRegistration&lt;T&gt; registration,
-                                     boolean replyHandler, boolean localOnly) {
-    Objects.requireNonNull(registration.getHandler(), &quot;handler&quot;);
-    boolean newAddress = addLocalRegistration(address, registration, replyHandler, localOnly);
-    addRegistration(newAddress, address, replyHandler, localOnly, registration::setResult);
-  }
-</code></pre>
-
-<p>本地注册</p>
-
-<pre><code class="language-java">protected &lt;T&gt; boolean addLocalRegistration(String address, HandlerRegistration&lt;T&gt; registration,
-                                             boolean replyHandler, boolean localOnly) {
-    Objects.requireNonNull(address, &quot;address&quot;);
-
-    Context context = Vertx.currentContext();
-    boolean hasContext = context != null;
-    if (!hasContext) {
-      // Embedded
-      context = vertx.getOrCreateContext();
-    }
-    registration.setHandlerContext(context);
-
-    boolean newAddress = false;
-
-    HandlerHolder holder = new HandlerHolder&lt;&gt;(metrics, registration, replyHandler, localOnly, context);
-
-    Handlers handlers = handlerMap.get(address);
-    if (handlers == null) {
-      handlers = new Handlers();
-      Handlers prevHandlers = handlerMap.putIfAbsent(address, handlers);
-      if (prevHandlers != null) {
-        handlers = prevHandlers;
-      }
-      newAddress = true;
-    }
-    handlers.list.add(holder);
-
-    if (hasContext) {
-      HandlerEntry entry = new HandlerEntry&lt;&gt;(address, registration);
-      context.addCloseHook(entry);
-    }
-
-    return newAddress;
-  }
-</code></pre>
-
-<p>远程Registering Handlers实质是在某个节点A给集群模式的Event Bus绑定一个对应地址address的consumer,绑定MessageConsumer</p>
-
-<pre><code class="language-java">@Override
-protected &lt;T&gt; void addRegistration(boolean newAddress, String address,
-                                   boolean replyHandler, boolean localOnly,
-                                   Handler&lt;AsyncResult&lt;Void&gt;&gt; completionHandler) {
-  if (newAddress &amp;&amp; subs != null &amp;&amp; !replyHandler &amp;&amp; !localOnly) {
-    //Event会将此节点的ServerID（包含host和port信息）存储至集群管理器(HazelcastClusterManager)的共享Map中，key为绑定的地址address，value为绑定了此地址address的所有结点的ServerID集合
-    subs.add(address, serverID, completionHandler); 
-  } else {
-    completionHandler.handle(Future.succeededFuture());
-  }
-}
-</code></pre>
-
-<h3 id="消息的send-publish">消息的send/publish</h3>
-
-<pre><code class="language-java">eventBus.publish(&quot;news.uk.sport&quot;, &quot;Yay! Someone kicked a ball&quot;);
-eventBus.send(&quot;news.uk.sport&quot;, &quot;Yay! Someone kicked a ball&quot;);
-</code></pre>
-
-<p>集群模式下的消息实体类型为ClusteredMessage，它继承了MessageImpl消息实体类，并且根据远程传输的特性实现了一种Wire Protocol用于远程传输消息，并负责消息的编码和解码。
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">createAndStartEventBus</span>(VertxOptions options, Handler<span style="color:#f92672">&lt;</span>AsyncResult<span style="color:#f92672">&lt;</span>Vertx<span style="color:#f92672">&gt;&gt;</span> resultHandler) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (options.<span style="color:#a6e22e">isClustered</span>()) {
+</span></span><span style="display:flex;"><span>      eventBus <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ClusteredEventBus(<span style="color:#66d9ef">this</span>, options, clusterManager, haManager);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      eventBus <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> EventBusImpl(<span style="color:#66d9ef">this</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    eventBus.<span style="color:#a6e22e">start</span>(ar2 <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (ar2.<span style="color:#a6e22e">succeeded</span>()) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// If the metric provider wants to use the event bus, it cannot use it in its constructor as the event bus</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// may not be initialized yet. We invokes the eventBusInitialized so it can starts using the event bus.</span>
+</span></span><span style="display:flex;"><span>        metrics.<span style="color:#a6e22e">eventBusInitialized</span>(eventBus);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (resultHandler <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>          resultHandler.<span style="color:#a6e22e">handle</span>(Future.<span style="color:#a6e22e">succeededFuture</span>(<span style="color:#66d9ef">this</span>));
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>        log.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#34;Failed to start event bus&#34;</span>, ar2.<span style="color:#a6e22e">cause</span>());
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">start</span>(Handler<span style="color:#f92672">&lt;</span>AsyncResult<span style="color:#f92672">&lt;</span>Void<span style="color:#f92672">&gt;&gt;</span> resultHandler) {
+</span></span><span style="display:flex;"><span>    clusterManager.<span style="color:#f92672">&lt;</span>String, ServerID<span style="color:#f92672">&gt;</span>getAsyncMultiMap(SUBS_MAP_NAME, ar2 <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (ar2.<span style="color:#a6e22e">succeeded</span>()) {
+</span></span><span style="display:flex;"><span>        subs <span style="color:#f92672">=</span> ar2.<span style="color:#a6e22e">result</span>();
+</span></span><span style="display:flex;"><span>        server <span style="color:#f92672">=</span> vertx.<span style="color:#a6e22e">createNetServer</span>(getServerOptions());<span style="color:#75715e">//建立一个NetServer接收数据</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        server.<span style="color:#a6e22e">connectHandler</span>(getServerHandler());
+</span></span><span style="display:flex;"><span>        server.<span style="color:#a6e22e">listen</span>(asyncResult <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">if</span> (asyncResult.<span style="color:#a6e22e">succeeded</span>()) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int</span> serverPort <span style="color:#f92672">=</span> getClusterPublicPort(options, server.<span style="color:#a6e22e">actualPort</span>());
+</span></span><span style="display:flex;"><span>            String serverHost <span style="color:#f92672">=</span> getClusterPublicHost(options);
+</span></span><span style="display:flex;"><span>            serverID <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ServerID(serverPort, serverHost);
+</span></span><span style="display:flex;"><span>            haManager.<span style="color:#a6e22e">addDataToAHAInfo</span>(SERVER_ID_HA_KEY, <span style="color:#66d9ef">new</span> JsonObject().<span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#34;host&#34;</span>, serverID.<span style="color:#a6e22e">host</span>).<span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#34;port&#34;</span>, serverID.<span style="color:#a6e22e">port</span>));
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (resultHandler <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>              started <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>              resultHandler.<span style="color:#a6e22e">handle</span>(Future.<span style="color:#a6e22e">succeededFuture</span>());
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>          } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (resultHandler <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>              resultHandler.<span style="color:#a6e22e">handle</span>(Future.<span style="color:#a6e22e">failedFuture</span>(asyncResult.<span style="color:#a6e22e">cause</span>()));
+</span></span><span style="display:flex;"><span>            } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>              log.<span style="color:#a6e22e">error</span>(asyncResult.<span style="color:#a6e22e">cause</span>());
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        });
+</span></span><span style="display:flex;"><span>      } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (resultHandler <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>          resultHandler.<span style="color:#a6e22e">handle</span>(Future.<span style="color:#a6e22e">failedFuture</span>(ar2.<span style="color:#a6e22e">cause</span>()));
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>          log.<span style="color:#a6e22e">error</span>(ar2.<span style="color:#a6e22e">cause</span>());
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><h3 id="注册监听">注册监听</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>EventBus eb <span style="color:#f92672">=</span> vertx.<span style="color:#a6e22e">eventBus</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>eb.<span style="color:#a6e22e">consumer</span>(<span style="color:#e6db74">&#34;news.uk.sport&#34;</span>, message <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>  System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;I have received a message: &#34;</span> <span style="color:#f92672">+</span> message.<span style="color:#a6e22e">body</span>());
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><p>包含本地和远程注册</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">protected</span> <span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">addRegistration</span>(String address, HandlerRegistration<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> registration,
+</span></span><span style="display:flex;"><span>                                     <span style="color:#66d9ef">boolean</span> replyHandler, <span style="color:#66d9ef">boolean</span> localOnly) {
+</span></span><span style="display:flex;"><span>    Objects.<span style="color:#a6e22e">requireNonNull</span>(registration.<span style="color:#a6e22e">getHandler</span>(), <span style="color:#e6db74">&#34;handler&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">boolean</span> newAddress <span style="color:#f92672">=</span> addLocalRegistration(address, registration, replyHandler, localOnly);
+</span></span><span style="display:flex;"><span>    addRegistration(newAddress, address, replyHandler, localOnly, registration::setResult);
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><p>本地注册</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">protected</span> <span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">addLocalRegistration</span>(String address, HandlerRegistration<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> registration,
+</span></span><span style="display:flex;"><span>                                             <span style="color:#66d9ef">boolean</span> replyHandler, <span style="color:#66d9ef">boolean</span> localOnly) {
+</span></span><span style="display:flex;"><span>    Objects.<span style="color:#a6e22e">requireNonNull</span>(address, <span style="color:#e6db74">&#34;address&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Context context <span style="color:#f92672">=</span> Vertx.<span style="color:#a6e22e">currentContext</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">boolean</span> hasContext <span style="color:#f92672">=</span> context <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>hasContext) {
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Embedded</span>
+</span></span><span style="display:flex;"><span>      context <span style="color:#f92672">=</span> vertx.<span style="color:#a6e22e">getOrCreateContext</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    registration.<span style="color:#a6e22e">setHandlerContext</span>(context);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">boolean</span> newAddress <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    HandlerHolder holder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HandlerHolder<span style="color:#f92672">&lt;&gt;</span>(metrics, registration, replyHandler, localOnly, context);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Handlers handlers <span style="color:#f92672">=</span> handlerMap.<span style="color:#a6e22e">get</span>(address);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (handlers <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>      handlers <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Handlers();
+</span></span><span style="display:flex;"><span>      Handlers prevHandlers <span style="color:#f92672">=</span> handlerMap.<span style="color:#a6e22e">putIfAbsent</span>(address, handlers);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (prevHandlers <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>        handlers <span style="color:#f92672">=</span> prevHandlers;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      newAddress <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    handlers.<span style="color:#a6e22e">list</span>.<span style="color:#a6e22e">add</span>(holder);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (hasContext) {
+</span></span><span style="display:flex;"><span>      HandlerEntry entry <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HandlerEntry<span style="color:#f92672">&lt;&gt;</span>(address, registration);
+</span></span><span style="display:flex;"><span>      context.<span style="color:#a6e22e">addCloseHook</span>(entry);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> newAddress;
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><p>远程Registering Handlers实质是在某个节点A给集群模式的Event Bus绑定一个对应地址address的consumer,绑定MessageConsumer</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">protected</span> <span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">addRegistration</span>(<span style="color:#66d9ef">boolean</span> newAddress, String address,
+</span></span><span style="display:flex;"><span>                                   <span style="color:#66d9ef">boolean</span> replyHandler, <span style="color:#66d9ef">boolean</span> localOnly,
+</span></span><span style="display:flex;"><span>                                   Handler<span style="color:#f92672">&lt;</span>AsyncResult<span style="color:#f92672">&lt;</span>Void<span style="color:#f92672">&gt;&gt;</span> completionHandler) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (newAddress <span style="color:#f92672">&amp;&amp;</span> subs <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>replyHandler <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>localOnly) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//Event会将此节点的ServerID（包含host和port信息）存储至集群管理器(HazelcastClusterManager)的共享Map中，key为绑定的地址address，value为绑定了此地址address的所有结点的ServerID集合</span>
+</span></span><span style="display:flex;"><span>    subs.<span style="color:#a6e22e">add</span>(address, serverID, completionHandler); 
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    completionHandler.<span style="color:#a6e22e">handle</span>(Future.<span style="color:#a6e22e">succeededFuture</span>());
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="消息的sendpublish">消息的send/publish</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>eventBus.<span style="color:#a6e22e">publish</span>(<span style="color:#e6db74">&#34;news.uk.sport&#34;</span>, <span style="color:#e6db74">&#34;Yay! Someone kicked a ball&#34;</span>);
+</span></span><span style="display:flex;"><span>eventBus.<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#34;news.uk.sport&#34;</span>, <span style="color:#e6db74">&#34;Yay! Someone kicked a ball&#34;</span>);
+</span></span></code></pre></div><p>集群模式下的消息实体类型为ClusteredMessage，它继承了MessageImpl消息实体类，并且根据远程传输的特性实现了一种Wire Protocol用于远程传输消息，并负责消息的编码和解码。
 ClusteredEventBus里通过createMessage方法创建消息</p>
-
-<pre><code class="language-java">@Override
-protected MessageImpl createMessage(boolean send, String address, MultiMap headers, Object body, String codecName) {
-  Objects.requireNonNull(address, &quot;no null address accepted&quot;);
-  MessageCodec codec = codecManager.lookupCodec(body, codecName);
-  @SuppressWarnings(&quot;unchecked&quot;)
-  ClusteredMessage msg = new ClusteredMessage(serverID, address, null, headers, body, codec, send, this);
-  return msg;
-}
-</code></pre>
-
-<p>接下来就是消息的发送逻辑了。ClusteredEventBus重写了sendOrPub方法，此方法存在于SendContextImpl类中的next方法:</p>
-
-<pre><code class="language-java">private &lt;T&gt; void sendOrPubInternal(MessageImpl message, DeliveryOptions options,
-                                     Handler&lt;AsyncResult&lt;Message&lt;T&gt;&gt;&gt; replyHandler) {
-    checkStarted();
-    HandlerRegistration&lt;T&gt; replyHandlerRegistration = createReplyHandlerRegistration(message, options, replyHandler);
-    SendContextImpl&lt;T&gt; sendContext = new SendContextImpl&lt;&gt;(message, options, replyHandlerRegistration);
-    sendContext.next();
-  }
-
-@Override
-public void next() {
-  if (iter.hasNext()) {
-    Handler&lt;SendContext&gt; handler = iter.next();
-    try {
-      handler.handle(this);
-    } catch (Throwable t) {
-      log.error(&quot;Failure in interceptor&quot;, t);
-    }
-  } else {
-    sendOrPub(this);
-  }
-}
-</code></pre>
-
-<p>我们来看一下ClusteredEventBus是如何进行集群内消息的分发的：</p>
-
-<pre><code class="language-java">@Override
-protected &lt;T&gt; void sendOrPub(SendContextImpl&lt;T&gt; sendContext) {
-  String address = sendContext.message.address();
-  Handler&lt;AsyncResult&lt;ChoosableIterable&lt;ServerID&gt;&gt;&gt; resultHandler = asyncResult -&gt; {
-    if (asyncResult.succeeded()) {
-      ChoosableIterable&lt;ServerID&gt; serverIDs = asyncResult.result();
-      if (serverIDs != null &amp;&amp; !serverIDs.isEmpty()) {
-        sendToSubs(serverIDs, sendContext);
-      } else {
-        metrics.messageSent(address, !sendContext.message.send(), true, false);
-        deliverMessageLocally(sendContext);
-      }
-    } else {
-      log.error(&quot;Failed to send message&quot;, asyncResult.cause());
-    }
-  };
-  if (Vertx.currentContext() == null) {
-    // Guarantees the order when there is no current context
-    sendNoContext.runOnContext(v -&gt; {
-      subs.get(address, resultHandler);
-    });
-  } else {
-    subs.get(address, resultHandler);
-  }
-}
-</code></pre>
-
-<p>首先Event Bus需要从传入的sendContext中获取要发送至的地址。接着Event Bus需要从集群管理器中获取在此地址上绑定consumer的所有ServerID，这个过程是异步的，并且需要在Vert.x Context中执行。如果获取记录成功，我们会得到一个可通过轮询算法获取ServerID的集合(类型为ChoosableIterable<ServerID>)。如果集合为空，则代表集群内其它节点没有在此地址绑定consumer（或者由于一致性问题没有同步），Event Bus就将消息通过deliverMessageLocally方法在本地进行相应的分发。如果集合不为空，Event Bus就调用sendToSubs方法进行下一步操作：</p>
-
-<pre><code class="language-java">private &lt;T&gt; void sendToSubs(ChoosableIterable&lt;ServerID&gt; subs, SendContextImpl&lt;T&gt; sendContext) {
-  String address = sendContext.message.address();
-  if (sendContext.message.send()) {
-    // Choose one
-    ServerID sid = subs.choose();
-    if (!sid.equals(serverID)) {  //We don't send to this node
-      metrics.messageSent(address, false, false, true);
-      sendRemote(sid, sendContext.message);
-    } else {
-      metrics.messageSent(address, false, true, false);
-      deliverMessageLocally(sendContext);
-    }
-  } else {
-    // Publish
-    boolean local = false;
-    boolean remote = false;
-    for (ServerID sid : subs) {
-      if (!sid.equals(serverID)) {  //We don't send to this node
-        remote = true;
-        sendRemote(sid, sendContext.message);
-      } else {
-        local = true;
-      }
-    }
-    metrics.messageSent(address, true, local, remote);
-    if (local) {
-      deliverMessageLocally(sendContext);
-    }
-  }
-}
-</code></pre>
-
-<p>这里就到了分send和publish的时候了。如果发送消息的模式为点对点模式(send)，Event Bus会从给的的集合中通过轮询算法获取一个ServerID。然后Event Bus会检查获取到的ServerID是否与本机ServerID相同，如果相同则代表在一个机子上，直接记录metrics信息并且调用deliverMessageLocally方法往本地发送消息即可；如果不相同，Event Bus就会调用sendRemote方法执行真正的远程消息发送逻辑。发布订阅模式的逻辑与其大同小异，只不过需要遍历一下ChoosableIterable<ServerID>集合，然后依次执行之前讲过的逻辑。注意如果要在本地发布消息只需要发一次。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">protected</span> MessageImpl <span style="color:#a6e22e">createMessage</span>(<span style="color:#66d9ef">boolean</span> send, String address, MultiMap headers, Object body, String codecName) {
+</span></span><span style="display:flex;"><span>  Objects.<span style="color:#a6e22e">requireNonNull</span>(address, <span style="color:#e6db74">&#34;no null address accepted&#34;</span>);
+</span></span><span style="display:flex;"><span>  MessageCodec codec <span style="color:#f92672">=</span> codecManager.<span style="color:#a6e22e">lookupCodec</span>(body, codecName);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">@SuppressWarnings</span>(<span style="color:#e6db74">&#34;unchecked&#34;</span>)
+</span></span><span style="display:flex;"><span>  ClusteredMessage msg <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ClusteredMessage(serverID, address, <span style="color:#66d9ef">null</span>, headers, body, codec, send, <span style="color:#66d9ef">this</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> msg;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>接下来就是消息的发送逻辑了。ClusteredEventBus重写了sendOrPub方法，此方法存在于SendContextImpl类中的next方法:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">private</span> <span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sendOrPubInternal</span>(MessageImpl message, DeliveryOptions options,
+</span></span><span style="display:flex;"><span>                                     Handler<span style="color:#f92672">&lt;</span>AsyncResult<span style="color:#f92672">&lt;</span>Message<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;&gt;&gt;</span> replyHandler) {
+</span></span><span style="display:flex;"><span>    checkStarted();
+</span></span><span style="display:flex;"><span>    HandlerRegistration<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> replyHandlerRegistration <span style="color:#f92672">=</span> createReplyHandlerRegistration(message, options, replyHandler);
+</span></span><span style="display:flex;"><span>    SendContextImpl<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> sendContext <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SendContextImpl<span style="color:#f92672">&lt;&gt;</span>(message, options, replyHandlerRegistration);
+</span></span><span style="display:flex;"><span>    sendContext.<span style="color:#a6e22e">next</span>();
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">next</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (iter.<span style="color:#a6e22e">hasNext</span>()) {
+</span></span><span style="display:flex;"><span>    Handler<span style="color:#f92672">&lt;</span>SendContext<span style="color:#f92672">&gt;</span> handler <span style="color:#f92672">=</span> iter.<span style="color:#a6e22e">next</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>      handler.<span style="color:#a6e22e">handle</span>(<span style="color:#66d9ef">this</span>);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">catch</span> (Throwable t) {
+</span></span><span style="display:flex;"><span>      log.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#34;Failure in interceptor&#34;</span>, t);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    sendOrPub(<span style="color:#66d9ef">this</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>我们来看一下ClusteredEventBus是如何进行集群内消息的分发的：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">protected</span> <span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sendOrPub</span>(SendContextImpl<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> sendContext) {
+</span></span><span style="display:flex;"><span>  String address <span style="color:#f92672">=</span> sendContext.<span style="color:#a6e22e">message</span>.<span style="color:#a6e22e">address</span>();
+</span></span><span style="display:flex;"><span>  Handler<span style="color:#f92672">&lt;</span>AsyncResult<span style="color:#f92672">&lt;</span>ChoosableIterable<span style="color:#f92672">&lt;</span>ServerID<span style="color:#f92672">&gt;&gt;&gt;</span> resultHandler <span style="color:#f92672">=</span> asyncResult <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (asyncResult.<span style="color:#a6e22e">succeeded</span>()) {
+</span></span><span style="display:flex;"><span>      ChoosableIterable<span style="color:#f92672">&lt;</span>ServerID<span style="color:#f92672">&gt;</span> serverIDs <span style="color:#f92672">=</span> asyncResult.<span style="color:#a6e22e">result</span>();
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (serverIDs <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>serverIDs.<span style="color:#a6e22e">isEmpty</span>()) {
+</span></span><span style="display:flex;"><span>        sendToSubs(serverIDs, sendContext);
+</span></span><span style="display:flex;"><span>      } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>        metrics.<span style="color:#a6e22e">messageSent</span>(address, <span style="color:#f92672">!</span>sendContext.<span style="color:#a6e22e">message</span>.<span style="color:#a6e22e">send</span>(), <span style="color:#66d9ef">true</span>, <span style="color:#66d9ef">false</span>);
+</span></span><span style="display:flex;"><span>        deliverMessageLocally(sendContext);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      log.<span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#34;Failed to send message&#34;</span>, asyncResult.<span style="color:#a6e22e">cause</span>());
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (Vertx.<span style="color:#a6e22e">currentContext</span>() <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Guarantees the order when there is no current context</span>
+</span></span><span style="display:flex;"><span>    sendNoContext.<span style="color:#a6e22e">runOnContext</span>(v <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>      subs.<span style="color:#a6e22e">get</span>(address, resultHandler);
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    subs.<span style="color:#a6e22e">get</span>(address, resultHandler);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>首先Event Bus需要从传入的sendContext中获取要发送至的地址。接着Event Bus需要从集群管理器中获取在此地址上绑定consumer的所有ServerID，这个过程是异步的，并且需要在Vert.x Context中执行。如果获取记录成功，我们会得到一个可通过轮询算法获取ServerID的集合(类型为ChoosableIterable<ServerID>)。如果集合为空，则代表集群内其它节点没有在此地址绑定consumer（或者由于一致性问题没有同步），Event Bus就将消息通过deliverMessageLocally方法在本地进行相应的分发。如果集合不为空，Event Bus就调用sendToSubs方法进行下一步操作：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">private</span> <span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sendToSubs</span>(ChoosableIterable<span style="color:#f92672">&lt;</span>ServerID<span style="color:#f92672">&gt;</span> subs, SendContextImpl<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> sendContext) {
+</span></span><span style="display:flex;"><span>  String address <span style="color:#f92672">=</span> sendContext.<span style="color:#a6e22e">message</span>.<span style="color:#a6e22e">address</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (sendContext.<span style="color:#a6e22e">message</span>.<span style="color:#a6e22e">send</span>()) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Choose one</span>
+</span></span><span style="display:flex;"><span>    ServerID sid <span style="color:#f92672">=</span> subs.<span style="color:#a6e22e">choose</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>sid.<span style="color:#a6e22e">equals</span>(serverID)) {  <span style="color:#75715e">//We don&#39;t send to this node</span>
+</span></span><span style="display:flex;"><span>      metrics.<span style="color:#a6e22e">messageSent</span>(address, <span style="color:#66d9ef">false</span>, <span style="color:#66d9ef">false</span>, <span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>      sendRemote(sid, sendContext.<span style="color:#a6e22e">message</span>);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      metrics.<span style="color:#a6e22e">messageSent</span>(address, <span style="color:#66d9ef">false</span>, <span style="color:#66d9ef">true</span>, <span style="color:#66d9ef">false</span>);
+</span></span><span style="display:flex;"><span>      deliverMessageLocally(sendContext);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Publish</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">boolean</span> local <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">boolean</span> remote <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (ServerID sid : subs) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>sid.<span style="color:#a6e22e">equals</span>(serverID)) {  <span style="color:#75715e">//We don&#39;t send to this node</span>
+</span></span><span style="display:flex;"><span>        remote <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>        sendRemote(sid, sendContext.<span style="color:#a6e22e">message</span>);
+</span></span><span style="display:flex;"><span>      } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>        local <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    metrics.<span style="color:#a6e22e">messageSent</span>(address, <span style="color:#66d9ef">true</span>, local, remote);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (local) {
+</span></span><span style="display:flex;"><span>      deliverMessageLocally(sendContext);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>这里就到了分send和publish的时候了。如果发送消息的模式为点对点模式(send)，Event Bus会从给的的集合中通过轮询算法获取一个ServerID。然后Event Bus会检查获取到的ServerID是否与本机ServerID相同，如果相同则代表在一个机子上，直接记录metrics信息并且调用deliverMessageLocally方法往本地发送消息即可；如果不相同，Event Bus就会调用sendRemote方法执行真正的远程消息发送逻辑。发布订阅模式的逻辑与其大同小异，只不过需要遍历一下ChoosableIterable<ServerID>集合，然后依次执行之前讲过的逻辑。注意如果要在本地发布消息只需要发一次。</p>
 <p>真正的远程消息发送逻辑在sendRemote方法中:</p>
-
-<pre><code class="language-java">private void sendRemote(ServerID theServerID, MessageImpl message) {
-  ConnectionHolder holder = connections.get(theServerID);
-  if (holder == null) {
-    holder = new ConnectionHolder(this, theServerID, options);
-    ConnectionHolder prevHolder = connections.putIfAbsent(theServerID, holder);
-    if (prevHolder != null) {
-      // Another one sneaked in
-      holder = prevHolder;
-    } else {
-      holder.connect();
-    }
-  }
-  holder.writeMessage((ClusteredMessage)message);
-}
-</code></pre>
-
-<p>一开始我们就提到过，节点之间通过Event Bus进行通信的本质是TCP，因此这里需要创建一个NetClient作为TCP服务端，连接到之前获取的ServerID对应的节点然后将消息通过TCP协议发送至接收端。这里Vert.x用一个封装类ConnectionHolder对NetClient进行了一些封装。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sendRemote</span>(ServerID theServerID, MessageImpl message) {
+</span></span><span style="display:flex;"><span>  ConnectionHolder holder <span style="color:#f92672">=</span> connections.<span style="color:#a6e22e">get</span>(theServerID);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (holder <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>    holder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConnectionHolder(<span style="color:#66d9ef">this</span>, theServerID, options);
+</span></span><span style="display:flex;"><span>    ConnectionHolder prevHolder <span style="color:#f92672">=</span> connections.<span style="color:#a6e22e">putIfAbsent</span>(theServerID, holder);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (prevHolder <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Another one sneaked in</span>
+</span></span><span style="display:flex;"><span>      holder <span style="color:#f92672">=</span> prevHolder;
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      holder.<span style="color:#a6e22e">connect</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  holder.<span style="color:#a6e22e">writeMessage</span>((ClusteredMessage)message);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>一开始我们就提到过，节点之间通过Event Bus进行通信的本质是TCP，因此这里需要创建一个NetClient作为TCP服务端，连接到之前获取的ServerID对应的节点然后将消息通过TCP协议发送至接收端。这里Vert.x用一个封装类ConnectionHolder对NetClient进行了一些封装。</p>
 <p>ClusteredEventBus中维持着一个connections哈希表对用于保存ServerID对应的连接ConnectionHolder。在sendRemote方法中,Event Bus首先会从connections中获取ServerID对应的连接。如果获取不到就创建连接并将其添加至connections记录中并调用对应ConnectionHolder的connect方法建立连接；最后调用writeMessage方法将消息编码后通过TCP发送至对应的接收端。</p>
-
 <p>那么ConnectionHolder是如何实现的呢？我们来看一下其构造函数：</p>
-
-<pre><code class="language-java">ConnectionHolder(ClusteredEventBus eventBus, ServerID serverID, EventBusOptions options) {
-  this.eventBus = eventBus;
-  this.serverID = serverID;
-  this.vertx = eventBus.vertx();
-  this.metrics = eventBus.getMetrics();
-  NetClientOptions clientOptions = new NetClientOptions(options.toJson());
-  ClusteredEventBus.setCertOptions(clientOptions, options.getKeyCertOptions());
-  ClusteredEventBus.setTrustOptions(clientOptions, options.getTrustOptions());
-  client = new NetClientImpl(eventBus.vertx(), clientOptions, false);
-}
-</code></pre>
-
-<p>可以看到ConnectionHolder初始化的时候会创建一个NetClient作为TCP请求端，而请求的对象就是接收端的NetServer(后边会讲)，客户端配置已经在EventBusOptions中事先配置好了。我们来看看connect方法是如何建立连接的：</p>
-
-<pre><code class="language-java">synchronized void connect() {
-  if (connected) {
-    throw new IllegalStateException(&quot;Already connected&quot;);
-  }
-  client.connect(serverID.port, serverID.host, res -&gt; {
-    if (res.succeeded()) {
-      connected(res.result());
-    } else {
-      close();
-    }
-  });
-}
-</code></pre>
-
-<p>可以看到这里很简单地调用了NetClient#connect方法建立TCP连接，如果建立连接成功的话会得到一个NetSocket对象。Event Bus接着将其传至connected方法中进行处理：</p>
-
-<pre><code class="language-java">private synchronized void connected(NetSocket socket) {
-  this.socket = socket;
-  connected = true;
-  socket.exceptionHandler(t -&gt; close());
-  socket.closeHandler(v -&gt; close());
-  socket.handler(data -&gt; {
-    // Got a pong back
-    vertx.cancelTimer(timeoutID);
-    schedulePing();
-  });
-  // Start a pinger
-  schedulePing();
-  for (ClusteredMessage message : pending) {
-    Buffer data = message.encodeToWire();
-    metrics.messageWritten(message.address(), data.length());
-    socket.write(data);
-  }
-  pending.clear();
-}
-</code></pre>
-
-<p>首先Event Bus通过exceptionHandler和closeHandler方法给连接对应的NetSocket绑定异常回调和连接关闭回调，触发的时候都调用close方法关闭连接；为了保证不丢失连接，消息发送方每隔一段时间就需要对消息接收方发送一次心跳包（PING），如果消息接收方在一定时间内没有回复，那么就认为连接丢失，调用close方法关闭连接。心跳检测的逻辑在schedulePing方法中，比较清晰，这里就不详细说了。大家会发现ConnectionHolder里也有个消息队列（缓冲区）pending，并且这里会将队列中的消息依次通过TCP发送至接收端。为什么需要这样呢？其实，这要从创建TCP客户端说起。创建TCP客户端这个过程应该是异步的，需要消耗一定时间，而ConnectionHolder中封装的connect方法却是同步式的。前面我们刚刚看过，通过connect方法建立连接以后会接着调用writeMessage方法发送消息，而这时候客户端连接可能还没建立，因此需要这么个缓冲区先存着，等着连接建立了再一块发送出去.</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>ConnectionHolder(ClusteredEventBus eventBus, ServerID serverID, EventBusOptions options) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">eventBus</span> <span style="color:#f92672">=</span> eventBus;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">serverID</span> <span style="color:#f92672">=</span> serverID;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">vertx</span> <span style="color:#f92672">=</span> eventBus.<span style="color:#a6e22e">vertx</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">metrics</span> <span style="color:#f92672">=</span> eventBus.<span style="color:#a6e22e">getMetrics</span>();
+</span></span><span style="display:flex;"><span>  NetClientOptions clientOptions <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> NetClientOptions(options.<span style="color:#a6e22e">toJson</span>());
+</span></span><span style="display:flex;"><span>  ClusteredEventBus.<span style="color:#a6e22e">setCertOptions</span>(clientOptions, options.<span style="color:#a6e22e">getKeyCertOptions</span>());
+</span></span><span style="display:flex;"><span>  ClusteredEventBus.<span style="color:#a6e22e">setTrustOptions</span>(clientOptions, options.<span style="color:#a6e22e">getTrustOptions</span>());
+</span></span><span style="display:flex;"><span>  client <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> NetClientImpl(eventBus.<span style="color:#a6e22e">vertx</span>(), clientOptions, <span style="color:#66d9ef">false</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>可以看到ConnectionHolder初始化的时候会创建一个NetClient作为TCP请求端，而请求的对象就是接收端的NetServer(后边会讲)，客户端配置已经在EventBusOptions中事先配置好了。我们来看看connect方法是如何建立连接的：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">connect</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (connected) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalStateException(<span style="color:#e6db74">&#34;Already connected&#34;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  client.<span style="color:#a6e22e">connect</span>(serverID.<span style="color:#a6e22e">port</span>, serverID.<span style="color:#a6e22e">host</span>, res <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (res.<span style="color:#a6e22e">succeeded</span>()) {
+</span></span><span style="display:flex;"><span>      connected(res.<span style="color:#a6e22e">result</span>());
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      close();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>可以看到这里很简单地调用了NetClient#connect方法建立TCP连接，如果建立连接成功的话会得到一个NetSocket对象。Event Bus接着将其传至connected方法中进行处理：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">connected</span>(NetSocket socket) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">socket</span> <span style="color:#f92672">=</span> socket;
+</span></span><span style="display:flex;"><span>  connected <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>  socket.<span style="color:#a6e22e">exceptionHandler</span>(t <span style="color:#f92672">-&gt;</span> close());
+</span></span><span style="display:flex;"><span>  socket.<span style="color:#a6e22e">closeHandler</span>(v <span style="color:#f92672">-&gt;</span> close());
+</span></span><span style="display:flex;"><span>  socket.<span style="color:#a6e22e">handler</span>(data <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Got a pong back</span>
+</span></span><span style="display:flex;"><span>    vertx.<span style="color:#a6e22e">cancelTimer</span>(timeoutID);
+</span></span><span style="display:flex;"><span>    schedulePing();
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Start a pinger</span>
+</span></span><span style="display:flex;"><span>  schedulePing();
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (ClusteredMessage message : pending) {
+</span></span><span style="display:flex;"><span>    Buffer data <span style="color:#f92672">=</span> message.<span style="color:#a6e22e">encodeToWire</span>();
+</span></span><span style="display:flex;"><span>    metrics.<span style="color:#a6e22e">messageWritten</span>(message.<span style="color:#a6e22e">address</span>(), data.<span style="color:#a6e22e">length</span>());
+</span></span><span style="display:flex;"><span>    socket.<span style="color:#a6e22e">write</span>(data);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  pending.<span style="color:#a6e22e">clear</span>();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>首先Event Bus通过exceptionHandler和closeHandler方法给连接对应的NetSocket绑定异常回调和连接关闭回调，触发的时候都调用close方法关闭连接；为了保证不丢失连接，消息发送方每隔一段时间就需要对消息接收方发送一次心跳包（PING），如果消息接收方在一定时间内没有回复，那么就认为连接丢失，调用close方法关闭连接。心跳检测的逻辑在schedulePing方法中，比较清晰，这里就不详细说了。大家会发现ConnectionHolder里也有个消息队列（缓冲区）pending，并且这里会将队列中的消息依次通过TCP发送至接收端。为什么需要这样呢？其实，这要从创建TCP客户端说起。创建TCP客户端这个过程应该是异步的，需要消耗一定时间，而ConnectionHolder中封装的connect方法却是同步式的。前面我们刚刚看过，通过connect方法建立连接以后会接着调用writeMessage方法发送消息，而这时候客户端连接可能还没建立，因此需要这么个缓冲区先存着，等着连接建立了再一块发送出去.</p>
 <p>至于发送消息的writeMessage方法，其逻辑一目了然：</p>
-
-<pre><code class="language-java">synchronized void writeMessage(ClusteredMessage message) {
-  if (connected) {
-    Buffer data = message.encodeToWire();
-    metrics.messageWritten(message.address(), data.length());
-    socket.write(data);
-  } else {
-    if (pending == null) {
-      pending = new ArrayDeque&lt;&gt;();
-    }
-    pending.add(message);
-  }
-}
-</code></pre>
-
-<p>如果连接已建立，Event Bus就会调用对应ClusteredMessage的encodeToWire方法将其转化为字节流Buffer，然后记录metrics信息，最后通过socket的write方法将消息写入到Socket中，这样消息就从发送端通过TCP发送到了接收端。如果连接未建立，就如之前讲的那样，先把消息存到消息队列中，等连接建立了再一块发出去。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">writeMessage</span>(ClusteredMessage message) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (connected) {
+</span></span><span style="display:flex;"><span>    Buffer data <span style="color:#f92672">=</span> message.<span style="color:#a6e22e">encodeToWire</span>();
+</span></span><span style="display:flex;"><span>    metrics.<span style="color:#a6e22e">messageWritten</span>(message.<span style="color:#a6e22e">address</span>(), data.<span style="color:#a6e22e">length</span>());
+</span></span><span style="display:flex;"><span>    socket.<span style="color:#a6e22e">write</span>(data);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (pending <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>      pending <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayDeque<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    pending.<span style="color:#a6e22e">add</span>(message);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>如果连接已建立，Event Bus就会调用对应ClusteredMessage的encodeToWire方法将其转化为字节流Buffer，然后记录metrics信息，最后通过socket的write方法将消息写入到Socket中，这样消息就从发送端通过TCP发送到了接收端。如果连接未建立，就如之前讲的那样，先把消息存到消息队列中，等连接建立了再一块发出去。</p>
 <p>这样，Clustered Event Bus下消息的发送逻辑就理清楚了。下面我们看一下接收端是如何接收消息并在本地进行消息的处理的。</p>
-
 <h3 id="消息的接收">消息的接收</h3>
-
 <p>一开始我们提到过，每个节点的Clustered Event Bus在启动时都会创建一个NetServer作为接收消息的TCP服务端。TCP Server的port和host可以在EventBusOptions中指定，如果不指定的话默认随机分配port，然后Event Bus会根据NetServer的配置来生成当前节点的ServerID。</p>
-
 <p>创建TCP Server的逻辑在start方法中，与接受消息有关的逻辑就是这一句：</p>
-
 <blockquote>
 <p>server.connectHandler(getServerHandler());</p>
 </blockquote>
-
 <p>我们知道，NetServer的connectHandler方法用于绑定对服务端Socket的处理函数，而这里绑定的处理函数是由getServerHandler方法生成的：</p>
-
-<pre><code class="language-java">private Handler&lt;NetSocket&gt; getServerHandler() {
-  return socket -&gt; {
-    RecordParser parser = RecordParser.newFixed(4, null);
-    Handler&lt;Buffer&gt; handler = new Handler&lt;Buffer&gt;() {
-      int size = -1;
-      public void handle(Buffer buff) {
-        if (size == -1) {
-          size = buff.getInt(0);
-          parser.fixedSizeMode(size);
-        } else {
-          ClusteredMessage received = new ClusteredMessage();
-          received.readFromWire(buff, codecManager);
-          metrics.messageRead(received.address(), buff.length());
-          parser.fixedSizeMode(4);
-          size = -1;
-          if (received.codec() == CodecManager.PING_MESSAGE_CODEC) {
-            // Just send back pong directly on connection
-            socket.write(PONG);
-          } else {
-            deliverMessageLocally(received);
-          }
-        }
-      }
-    };
-    parser.setOutput(handler);
-    socket.handler(parser);
-  };
-}
-</code></pre>
-
-<p>逻辑非常清晰。这里Event Bus使用了RecordParser来获取发送过来的对应长度的Buffer，并将其绑定在NetServer的Socket上。真正的解析Buffer并处理的逻辑在内部的handler中。之前ClusteredMessage中的Wire Protocol规定Buffer的首部第一个int值为要发送Buffer的长度（逻辑见ClusteredMessage#encodeToWire方法），因此这里首先获取长度，然后给parser设定正确的fixed size，这样parser就可以截取正确长度的Buffer流了。下面Event Bus会创建一个空的ClusteredMessage，然后调用其readFromWire方法从Buffer中重建消息。当然这里还要记录消息已经读取的metrics信息。接着检测收到的消息实体类型是否为心跳检测包(PING)，如果是的话就发送回ACK消息(PONG)；如果不是心跳包，则代表是正常的消息，Event Bus就调用我们熟悉的deliverMessageLocally函数在本地进行分发处理，接下来的过程就和Local模式一样了。</p>
-
-<pre><code class="language-java">protected &lt;T&gt; boolean deliverMessageLocally(MessageImpl msg) {
-    msg.setBus(this);
-    Handlers handlers = handlerMap.get(msg.address());
-    if (handlers != null) {
-      if (msg.send()) {
-        //Choose one
-        HandlerHolder holder = handlers.choose();
-        metrics.messageReceived(msg.address(), !msg.send(), isMessageLocal(msg), holder != null ? 1 : 0);
-        if (holder != null) {
-          deliverToHandler(msg, holder);
-        }
-      } else {
-        // Publish
-        metrics.messageReceived(msg.address(), !msg.send(), isMessageLocal(msg), handlers.list.size());
-        for (HandlerHolder holder: handlers.list) {
-          deliverToHandler(msg, holder);
-        }
-      }
-      return true;
-    } else {
-      metrics.messageReceived(msg.address(), !msg.send(), isMessageLocal(msg), 0);
-      return false;
-    }
-  }
-</code></pre>
-
-<h2 id="线程模型">线程模型</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">private</span> Handler<span style="color:#f92672">&lt;</span>NetSocket<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getServerHandler</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> socket <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>    RecordParser parser <span style="color:#f92672">=</span> RecordParser.<span style="color:#a6e22e">newFixed</span>(4, <span style="color:#66d9ef">null</span>);
+</span></span><span style="display:flex;"><span>    Handler<span style="color:#f92672">&lt;</span>Buffer<span style="color:#f92672">&gt;</span> handler <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Handler<span style="color:#f92672">&lt;</span>Buffer<span style="color:#f92672">&gt;</span>() {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">int</span> size <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>1;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">handle</span>(Buffer buff) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (size <span style="color:#f92672">==</span> <span style="color:#f92672">-</span>1) {
+</span></span><span style="display:flex;"><span>          size <span style="color:#f92672">=</span> buff.<span style="color:#a6e22e">getInt</span>(0);
+</span></span><span style="display:flex;"><span>          parser.<span style="color:#a6e22e">fixedSizeMode</span>(size);
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>          ClusteredMessage received <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ClusteredMessage();
+</span></span><span style="display:flex;"><span>          received.<span style="color:#a6e22e">readFromWire</span>(buff, codecManager);
+</span></span><span style="display:flex;"><span>          metrics.<span style="color:#a6e22e">messageRead</span>(received.<span style="color:#a6e22e">address</span>(), buff.<span style="color:#a6e22e">length</span>());
+</span></span><span style="display:flex;"><span>          parser.<span style="color:#a6e22e">fixedSizeMode</span>(4);
+</span></span><span style="display:flex;"><span>          size <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>1;
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">if</span> (received.<span style="color:#a6e22e">codec</span>() <span style="color:#f92672">==</span> CodecManager.<span style="color:#a6e22e">PING_MESSAGE_CODEC</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Just send back pong directly on connection</span>
+</span></span><span style="display:flex;"><span>            socket.<span style="color:#a6e22e">write</span>(PONG);
+</span></span><span style="display:flex;"><span>          } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            deliverMessageLocally(received);
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>    parser.<span style="color:#a6e22e">setOutput</span>(handler);
+</span></span><span style="display:flex;"><span>    socket.<span style="color:#a6e22e">handler</span>(parser);
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>逻辑非常清晰。这里Event Bus使用了RecordParser来获取发送过来的对应长度的Buffer，并将其绑定在NetServer的Socket上。真正的解析Buffer并处理的逻辑在内部的handler中。之前ClusteredMessage中的Wire Protocol规定Buffer的首部第一个int值为要发送Buffer的长度（逻辑见ClusteredMessage#encodeToWire方法），因此这里首先获取长度，然后给parser设定正确的fixed size，这样parser就可以截取正确长度的Buffer流了。下面Event Bus会创建一个空的ClusteredMessage，然后调用其readFromWire方法从Buffer中重建消息。当然这里还要记录消息已经读取的metrics信息。接着检测收到的消息实体类型是否为心跳检测包(PING)，如果是的话就发送回ACK消息(PONG)；如果不是心跳包，则代表是正常的消息，Event Bus就调用我们熟悉的deliverMessageLocally函数在本地进行分发处理，接下来的过程就和Local模式一样了。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">protected</span> <span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">deliverMessageLocally</span>(MessageImpl msg) {
+</span></span><span style="display:flex;"><span>    msg.<span style="color:#a6e22e">setBus</span>(<span style="color:#66d9ef">this</span>);
+</span></span><span style="display:flex;"><span>    Handlers handlers <span style="color:#f92672">=</span> handlerMap.<span style="color:#a6e22e">get</span>(msg.<span style="color:#a6e22e">address</span>());
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (handlers <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (msg.<span style="color:#a6e22e">send</span>()) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">//Choose one</span>
+</span></span><span style="display:flex;"><span>        HandlerHolder holder <span style="color:#f92672">=</span> handlers.<span style="color:#a6e22e">choose</span>();
+</span></span><span style="display:flex;"><span>        metrics.<span style="color:#a6e22e">messageReceived</span>(msg.<span style="color:#a6e22e">address</span>(), <span style="color:#f92672">!</span>msg.<span style="color:#a6e22e">send</span>(), isMessageLocal(msg), holder <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">?</span> 1 : 0);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (holder <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>          deliverToHandler(msg, holder);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Publish</span>
+</span></span><span style="display:flex;"><span>        metrics.<span style="color:#a6e22e">messageReceived</span>(msg.<span style="color:#a6e22e">address</span>(), <span style="color:#f92672">!</span>msg.<span style="color:#a6e22e">send</span>(), isMessageLocal(msg), handlers.<span style="color:#a6e22e">list</span>.<span style="color:#a6e22e">size</span>());
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (HandlerHolder holder: handlers.<span style="color:#a6e22e">list</span>) {
+</span></span><span style="display:flex;"><span>          deliverToHandler(msg, holder);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      metrics.<span style="color:#a6e22e">messageReceived</span>(msg.<span style="color:#a6e22e">address</span>(), <span style="color:#f92672">!</span>msg.<span style="color:#a6e22e">send</span>(), isMessageLocal(msg), 0);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><h2 id="线程模型">线程模型</h2>
 <h3 id="event-loop线程">Event Loop线程</h3>
-
 <p>首先回顾一下Event Loop线程，它会不断地轮询获取事件，并将获取到的事件分发到对应的事件处理器中进行处理：</p>
-
 <p>Vert.x Event Loop</p>
-
 <p>Vert.x线程模型中最重要的一点就是：永远不要阻塞Event Loop线程。因为一旦处理事件的线程被阻塞了，事件就会一直积压着不能被处理，整个应用也就不能正常工作了。</p>
-
 <p>Vert.x中内置一种用于检测Event Loop是否阻塞的线程：vertx-blocked-thread-checker。一旦Event Loop处理某个事件的时间超过一定阈值（默认为2000ms）就会警告，如果阻塞的时间过长就会抛出异常。Block Checker的实现原理比较简单，底层借助了JUC的TimerTask，定时计算每个Event Loop线程的处理事件消耗的时间，如果超时就进行相应的警告。</p>
-
-<h3 id="vert-x-thread">Vert.x Thread</h3>
-
+<h3 id="vertx-thread">Vert.x Thread</h3>
 <p>Vert.x中的Event Loop线程及Worker线程都用VertxThread类表示，并通过VertxThreadFactory线程工厂来创建。其实就是在普通线程的基础上存储了额外的数据（如对应的Vert.x Context，最大执行时长，当前执行时间，是否为Worker线程等）,VertxThreadFactory创建Vert.x线程的过程也非常简单：</p>
-
-<pre><code class="language-java">@Override
-public Thread newThread(Runnable runnable) {
-  VertxThread t = new VertxThread(runnable, prefix + threadCount.getAndIncrement(), worker, maxExecTime);
-
-  if (checker != null) {
-    checker.registerThread(t);
-  }
-  addToMap(t);
-
-  t.setDaemon(false);
-  return t;
-}
-</code></pre>
-
-<p>除了创建VertxThread线程之外，VertxThreadFactory还会将此线程注册至Block Checker线程中以监视线程的阻塞情况，并且将此线程添加至内部的weakMap中。这个weakMap作用只有一个，就是在注销对应的Verticle的时候可以将每个VertxThread中的Context实例清除(unset)。为了保证资源不被一直占用，这里使用了WeakHashMap来存储每一个VertxThread。当里面的VertxThread的引用不被其他实例持有的时候，它就会被标记为可清除的对象，等待GC。</p>
-
-<pre><code class="language-java">BlockedThreadChecker(long interval, long warningExceptionTime) {
-    timer = new Timer(&quot;vertx-blocked-thread-checker&quot;, true);
-    timer.schedule(new TimerTask() {
-      @Override
-      public void run() {
-        synchronized (BlockedThreadChecker.this) {
-          long now = System.nanoTime();
-          for (VertxThread thread : threads.keySet()) {
-            long execStart = thread.startTime();
-            long dur = now - execStart;
-            final long timeLimit = thread.getMaxExecTime();
-            if (execStart != 0 &amp;&amp; dur &gt; timeLimit) {
-              final String message = &quot;Thread &quot; + thread + &quot; has been blocked for &quot; + (dur / 1000000) + &quot; ms, time limit is &quot; + (timeLimit / 1000000);
-              if (dur &lt;= warningExceptionTime) {
-                log.warn(message);
-              } else {
-                VertxException stackTrace = new VertxException(&quot;Thread blocked&quot;);
-                stackTrace.setStackTrace(thread.getStackTrace());
-                log.warn(message, stackTrace);
-              }
-            }
-          }
-        }
-      }
-    }, interval, interval);
-  }
-</code></pre>
-
-<h3 id="vert-x-context">Vert.x Context</h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> Thread <span style="color:#a6e22e">newThread</span>(Runnable runnable) {
+</span></span><span style="display:flex;"><span>  VertxThread t <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> VertxThread(runnable, prefix <span style="color:#f92672">+</span> threadCount.<span style="color:#a6e22e">getAndIncrement</span>(), worker, maxExecTime);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (checker <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>    checker.<span style="color:#a6e22e">registerThread</span>(t);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  addToMap(t);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  t.<span style="color:#a6e22e">setDaemon</span>(<span style="color:#66d9ef">false</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> t;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>除了创建VertxThread线程之外，VertxThreadFactory还会将此线程注册至Block Checker线程中以监视线程的阻塞情况，并且将此线程添加至内部的weakMap中。这个weakMap作用只有一个，就是在注销对应的Verticle的时候可以将每个VertxThread中的Context实例清除(unset)。为了保证资源不被一直占用，这里使用了WeakHashMap来存储每一个VertxThread。当里面的VertxThread的引用不被其他实例持有的时候，它就会被标记为可清除的对象，等待GC。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>BlockedThreadChecker(<span style="color:#66d9ef">long</span> interval, <span style="color:#66d9ef">long</span> warningExceptionTime) {
+</span></span><span style="display:flex;"><span>    timer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Timer(<span style="color:#e6db74">&#34;vertx-blocked-thread-checker&#34;</span>, <span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>    timer.<span style="color:#a6e22e">schedule</span>(<span style="color:#66d9ef">new</span> TimerTask() {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">synchronized</span> (BlockedThreadChecker.<span style="color:#a6e22e">this</span>) {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">long</span> now <span style="color:#f92672">=</span> System.<span style="color:#a6e22e">nanoTime</span>();
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">for</span> (VertxThread thread : threads.<span style="color:#a6e22e">keySet</span>()) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">long</span> execStart <span style="color:#f92672">=</span> thread.<span style="color:#a6e22e">startTime</span>();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">long</span> dur <span style="color:#f92672">=</span> now <span style="color:#f92672">-</span> execStart;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> timeLimit <span style="color:#f92672">=</span> thread.<span style="color:#a6e22e">getMaxExecTime</span>();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (execStart <span style="color:#f92672">!=</span> 0 <span style="color:#f92672">&amp;&amp;</span> dur <span style="color:#f92672">&gt;</span> timeLimit) {
+</span></span><span style="display:flex;"><span>              <span style="color:#66d9ef">final</span> String message <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Thread &#34;</span> <span style="color:#f92672">+</span> thread <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; has been blocked for &#34;</span> <span style="color:#f92672">+</span> (dur <span style="color:#f92672">/</span> 1000000) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; ms, time limit is &#34;</span> <span style="color:#f92672">+</span> (timeLimit <span style="color:#f92672">/</span> 1000000);
+</span></span><span style="display:flex;"><span>              <span style="color:#66d9ef">if</span> (dur <span style="color:#f92672">&lt;=</span> warningExceptionTime) {
+</span></span><span style="display:flex;"><span>                log.<span style="color:#a6e22e">warn</span>(message);
+</span></span><span style="display:flex;"><span>              } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                VertxException stackTrace <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> VertxException(<span style="color:#e6db74">&#34;Thread blocked&#34;</span>);
+</span></span><span style="display:flex;"><span>                stackTrace.<span style="color:#a6e22e">setStackTrace</span>(thread.<span style="color:#a6e22e">getStackTrace</span>());
+</span></span><span style="display:flex;"><span>                log.<span style="color:#a6e22e">warn</span>(message, stackTrace);
+</span></span><span style="display:flex;"><span>              }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }, interval, interval);
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><h3 id="vertx-context">Vert.x Context</h3>
 <p>Vert.x底层中一个重要的概念就是Context，每个Context都会绑定着一个Event Loop线程（而一个Event Loop线程可以对应多个Context）。我们可以把Context看作是控制一系列的Handler的执行作用域及顺序的上下文对象。</p>
-
 <p>每当Vert.x底层将事件分发至Handler的时候，Vert.x都会给此Handler钦点一个Context用于处理任务：</p>
-
 <p>如果当前线程是Vert.x线程(VertxThread)，那么Vert.x就会复用此线程上绑定的Context；如果没有对应的Context就创建新的
 如果当前线程是普通线程，就创建新的Context
 Vert.x中存在三种Context，与之前的线程种类相对应：</p>
-
 <ul>
 <li>EventLoopContext</li>
 <li>WorkerContext</li>
 <li>MultiThreadedWorkerContext</li>
 </ul>
-
 <p>Event loop context
 每个Event Loop Context都会对应着唯一的一个EventLoop，即一个Event Loop Context只会在同一个Event Loop线程上执行任务。在创建Context的时候，Vert.x会自动根据轮询策略选择对应的EventLoop:</p>
-
-<pre><code class="language-java">protected ContextImpl(VertxInternal vertx, WorkerPool internalBlockingPool, WorkerPool workerPool, String deploymentID, JsonObject config,
-                        ClassLoader tccl) {
-    // ...
-    EventLoopGroup group = vertx.getEventLoopGroup();
-    if (group != null) {
-      this.eventLoop = group.next();
-    } else {
-      this.eventLoop = null;
-    }
-    // ...
-  }
-</code></pre>
-
-<p>在Netty中，EventLoopGroup代表一组EventLoop，而从中获取EventLoop的方法则是next方法。EventLoopGroup中EventLoop的数量由CPU内核数目所确定。Vert.x这里使用了Netty NIO对应的NioEventLoop：</p>
-
-<pre><code class="language-java">eventLoopGroup = new NioEventLoopGroup(options.getEventLoopPoolSize(), eventLoopThreadFactory);
-eventLoopGroup.setIoRatio(NETTY_IO_RATIO);
-</code></pre>
-
-<p>Event Loop Context会在对应的EventLoop中执行Handler进行事件的处理（IO事件，非阻塞）。Vert.x会保证同一个Handler会一直在同一个Event Loop线程中执行，这样可以简化线程模型，让开发者在写Handler的时候不需要考虑并发的问题，非常方便。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">protected</span> <span style="color:#a6e22e">ContextImpl</span>(VertxInternal vertx, WorkerPool internalBlockingPool, WorkerPool workerPool, String deploymentID, JsonObject config,
+</span></span><span style="display:flex;"><span>                        ClassLoader tccl) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ...</span>
+</span></span><span style="display:flex;"><span>    EventLoopGroup group <span style="color:#f92672">=</span> vertx.<span style="color:#a6e22e">getEventLoopGroup</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (group <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">eventLoop</span> <span style="color:#f92672">=</span> group.<span style="color:#a6e22e">next</span>();
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">eventLoop</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ...</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><p>在Netty中，EventLoopGroup代表一组EventLoop，而从中获取EventLoop的方法则是next方法。EventLoopGroup中EventLoop的数量由CPU内核数目所确定。Vert.x这里使用了Netty NIO对应的NioEventLoop：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>eventLoopGroup <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> NioEventLoopGroup(options.<span style="color:#a6e22e">getEventLoopPoolSize</span>(), eventLoopThreadFactory);
+</span></span><span style="display:flex;"><span>eventLoopGroup.<span style="color:#a6e22e">setIoRatio</span>(NETTY_IO_RATIO);
+</span></span></code></pre></div><p>Event Loop Context会在对应的EventLoop中执行Handler进行事件的处理（IO事件，非阻塞）。Vert.x会保证同一个Handler会一直在同一个Event Loop线程中执行，这样可以简化线程模型，让开发者在写Handler的时候不需要考虑并发的问题，非常方便。</p>
 <p>我们来粗略地看一下Handler是如何在EventLoop上执行的。EventLoopContext中实现了executeAsync方法用于包装Handler中事件处理的逻辑并将其提交至对应的EventLoop中进行执行：</p>
-
-<pre><code class="language-java">public void executeAsync(Handler&lt;Void&gt; task) {
-  // No metrics, we are on the event loop.
-  nettyEventLoop().execute(wrapTask(null, task, true, null));
-}
-</code></pre>
-
-<p>这里Vert.x使用了wrapTask方法将Handler封装成了一个Runnable用于向EventLoop中提交。代码比较直观，大致就是检查当前线程是否为Vert.x线程，然后记录事件处理开始的时间，给当前的Vert.x线程设置Context，并且调用Handler里面的事件处理方法。具体请参考源码，这里就不贴出来了。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">executeAsync</span>(Handler<span style="color:#f92672">&lt;</span>Void<span style="color:#f92672">&gt;</span> task) {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// No metrics, we are on the event loop.</span>
+</span></span><span style="display:flex;"><span>  nettyEventLoop().<span style="color:#a6e22e">execute</span>(wrapTask(<span style="color:#66d9ef">null</span>, task, <span style="color:#66d9ef">true</span>, <span style="color:#66d9ef">null</span>));
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>这里Vert.x使用了wrapTask方法将Handler封装成了一个Runnable用于向EventLoop中提交。代码比较直观，大致就是检查当前线程是否为Vert.x线程，然后记录事件处理开始的时间，给当前的Vert.x线程设置Context，并且调用Handler里面的事件处理方法。具体请参考源码，这里就不贴出来了。</p>
 <p>那么把封装好的task提交到EventLoop以后，EventLoop是怎么处理的呢？这就需要更多的Netty相关的知识了。根据Netty的模型，Event Loop线程需要处理IO事件，普通事件（即我们的Handler）以及定时事件（比如Vert.x的setTimer）。Vert.x会提供一个NETTY_IO_RATIO给Netty代表EventLoop处理IO事件时间占用的百分比（默认为50，即IO事件时间占用:非IO事件时间占用=1:1）。回顾一下netty的EventLoop源码,启动的时候，它会不断轮询IO时间及其它事件并进行处理：</p>
-
-<pre><code class="language-java">@Override
-protected void run() {
-    for (;;) {
-        try {
-            switch (selectStrategy.calculateStrategy(selectNowSupplier, hasTasks())) {
-                case SelectStrategy.CONTINUE:
-                    continue;
-                case SelectStrategy.SELECT:
-                    select(wakenUp.getAndSet(false));
-
-                    if (wakenUp.get()) {
-                        selector.wakeup();
-                    }
-                default:
-                    // fallthrough
-            }
-
-            cancelledKeys = 0;
-            needsToSelectAgain = false;
-            final int ioRatio = this.ioRatio;
-            if (ioRatio == 100) {
-                processSelectedKeys();
-                runAllTasks();
-            } else {
-                final long ioStartTime = System.nanoTime();
-
-                processSelectedKeys();
-
-                final long ioTime = System.nanoTime() - ioStartTime;
-                runAllTasks(ioTime * (100 - ioRatio) / ioRatio);
-            }
-
-            if (isShuttingDown()) {
-                closeAll();
-                if (confirmShutdown()) {
-                    break;
-                }
-            }
-        } catch (Throwable t) {
-            // process the error
-            // ...
-        }
-    }
-}
-</code></pre>
-
-<p>这里面Netty会调用processSelectedKeys方法进行IO事件的处理，并且会计算出处理IO时间所用的事件然后计算出给非IO事件处理分配的时间，然后调用runAllTasks方法执行所有的非IO任务（这里面就有我们的各个Handler）。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (;;) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">switch</span> (selectStrategy.<span style="color:#a6e22e">calculateStrategy</span>(selectNowSupplier, hasTasks())) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">case</span> SelectStrategy.<span style="color:#a6e22e">CONTINUE</span>:
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">case</span> SelectStrategy.<span style="color:#a6e22e">SELECT</span>:
+</span></span><span style="display:flex;"><span>                    select(wakenUp.<span style="color:#a6e22e">getAndSet</span>(<span style="color:#66d9ef">false</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">if</span> (wakenUp.<span style="color:#a6e22e">get</span>()) {
+</span></span><span style="display:flex;"><span>                        selector.<span style="color:#a6e22e">wakeup</span>();
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">default</span>:
+</span></span><span style="display:flex;"><span>                    <span style="color:#75715e">// fallthrough</span>
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            cancelledKeys <span style="color:#f92672">=</span> 0;
+</span></span><span style="display:flex;"><span>            needsToSelectAgain <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> ioRatio <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">ioRatio</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (ioRatio <span style="color:#f92672">==</span> 100) {
+</span></span><span style="display:flex;"><span>                processSelectedKeys();
+</span></span><span style="display:flex;"><span>                runAllTasks();
+</span></span><span style="display:flex;"><span>            } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> ioStartTime <span style="color:#f92672">=</span> System.<span style="color:#a6e22e">nanoTime</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                processSelectedKeys();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> ioTime <span style="color:#f92672">=</span> System.<span style="color:#a6e22e">nanoTime</span>() <span style="color:#f92672">-</span> ioStartTime;
+</span></span><span style="display:flex;"><span>                runAllTasks(ioTime <span style="color:#f92672">*</span> (100 <span style="color:#f92672">-</span> ioRatio) <span style="color:#f92672">/</span> ioRatio);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (isShuttingDown()) {
+</span></span><span style="display:flex;"><span>                closeAll();
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (confirmShutdown()) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">catch</span> (Throwable t) {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// process the error</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// ...</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>这里面Netty会调用processSelectedKeys方法进行IO事件的处理，并且会计算出处理IO时间所用的事件然后计算出给非IO事件处理分配的时间，然后调用runAllTasks方法执行所有的非IO任务（这里面就有我们的各个Handler）。</p>
 <p>runAllTasks会按顺序从内部的任务队列中取出任务(Runnable)然后进行安全执行。而我们刚才调用的executeAsync方法其实就是将包装好的Handler置入NioEventLoop内部的任务队列中等待执行。</p>
-
 <h3 id="worker-context">Worker context</h3>
-
 <p>顾名思义，Worker Context用于跑阻塞任务。与Event Loop Context相似，每一个Handler都只会跑在固定的Worker线程下。</p>
     </article>
 
     
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2016-10-11-vertx-internal/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=vertx%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%90%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2016-10-11-vertx-internal/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
 
 
     <ul class="pager article-pager">
@@ -783,7 +690,7 @@ protected void run() {
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Polkadot on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/polkadot/</link>
+    <description>Recent content in Polkadot on yrong blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
+    <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
+    <lastBuildDate>Sat, 09 Oct 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://yrong.github.io/blog/tags/polkadot/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Terminology in Polkadot</title>
+      <link>https://yrong.github.io/blog/post/2021-10-09-polkadot/</link>
+      <pubDate>Sat, 09 Oct 2021 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2021-10-09-polkadot/</guid>
+      <description>&lt;h1 id=&#34;terminology&#34;&gt;Terminology&lt;/h1&gt;&#xA;&lt;h2 id=&#34;pov-proof-of-validity&#34;&gt;PoV (Proof of Validity)&lt;/h2&gt;&#xA;&lt;p&gt;The PoV is the data package produced by parachain collators and sent to Relay Chain validators.&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;Purpose: It acts as the &amp;ldquo;argument&amp;rdquo; or evidence that a parachain has transitioned its state correctly&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;Contents: It typically includes the L2&amp;rsquo;s state proof and the witness data (extra data needed for verification)&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;Size: A PoV block is often around 5MB of untrusted data provided to the validator group&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

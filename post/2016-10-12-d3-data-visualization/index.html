@@ -14,22 +14,23 @@
   <meta property="og:url" content="https://yrong.github.io/blog/post/2016-10-12-d3-data-visualization/" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
-
+  <meta name="generator" content="Hugo 0.159.1">
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -49,14 +50,14 @@
       <ul class="article-meta">
         <li class="article-meta-date"><time>October 12, 2016</time></li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/d3/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/d3/">
+            <i class="fa-solid fa-tag"></i>
             d3
           </a>&nbsp;
         </li>
         <li class="article-meta-tags">
-          <a href="/blog/tags/javascript/">
-            <i class="fas fa-tag"></i>
+          <a href="/tags/javascript/">
+            <i class="fa-solid fa-tag"></i>
             javascript
           </a>&nbsp;
         </li>
@@ -64,491 +65,369 @@
       
 <aside class="toc">
   <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#柱状图">柱状图</a></li>
-<li><a href="#github-贡献表">GitHub 贡献表</a></li>
-<li><a href="#折线图">折线图</a></li>
-<li><a href="#scales">Scales</a></li>
-<li><a href="#航线数据可视化">航线数据可视化</a></li>
-<li><a href="#渲染循环">渲染循环</a></li>
-<li><a href="#创建-更新和过期">创建、更新和过期</a></li>
-<li><a href="#过渡">过渡</a></li>
-<li><a href="#others">Others</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#柱状图">柱状图</a></li>
+    <li><a href="#github-贡献表">GitHub 贡献表</a></li>
+    <li><a href="#svg">SVG</a></li>
+    <li><a href="#circles">Circles</a></li>
+    <li><a href="#圆形">圆形</a></li>
+    <li><a href="#折线图">折线图</a></li>
+    <li><a href="#scales">Scales</a></li>
+    <li><a href="#航线数据可视化">航线数据可视化</a></li>
+    <li><a href="#渲染循环">渲染循环</a></li>
+    <li><a href="#创建更新和过期">创建、更新和过期</a></li>
+    <li><a href="#过渡">过渡</a></li>
+    <li><a href="#树形图">树形图</a>
+      <ul>
+        <li><a href="#关键代码注解">关键代码注解</a></li>
+      </ul>
+    </li>
+    <li><a href="#地图">地图</a>
+      <ul>
+        <li><a href="#关键代码注解-1">关键代码注解</a></li>
+      </ul>
+    </li>
+    <li><a href="#neo4j-link-graph-render">Neo4j Link Graph Render</a></li>
+    <li><a href="#others">Others</a></li>
+  </ul>
 </nav>
 </aside>
       <p>D3.js数据可视化</p>
-
 <blockquote>
 <p>基于 <a href="https://d3js.org/">D3.js</a> ，编写 HTML、SVG 和 CSS 就能让你的数据变得生动起来，这是一个基于数据操作 DOM 的 JavaScript 库。</p>
 </blockquote>
-
 <p>每一位 Web 开发者最应该学习的三个 JavaScript 库就是 jQuery、Underscore 和 D3。在学习它们的过程中，你将会从新的角度去思考如何写代码：jQuery 让你知道如何用尽量少的代码，尽可能多地操作 DOM；Underscore （或者称之为 lodash）用函数式的工具改变你写程序的方式；而 D3 给了你大量的操作数据的工具，以及图形化编程的思想。如果你还不了解 D3，请花一些时间看看<a href="https://github.com/mbostock/d3/wiki/Gallery">它的例子</a>，体会一下 D3 能做到什么。</p>
-
 <p>D3 有极高的灵活性，它是一个比较基础的可视化 js 库，api 和 jQuery 很像，可以把数据和 HTML 结构或者 SVG 文档对应起来。D3 有丰富的数学函数来处理数据转换和物理计算，它擅长于操作 SVG 中的路径 (path) 和几何图形 (circle, ellipse, rect&hellip;)。</p>
-
 <p>在接下来的例子里，你会看到输入的数据、数据变换和最后的输出文档。我将不会解释逐个函数做了什么，我会把代码展示给你看，希望从中你能知道大致这些代码是怎么工作的。只有在 <a href="https://github.com/d3/d3-3.x-api-reference/blob/master/Scales.md">Scales</a> 和 <a href="https://github.com/d3/d3-3.x-api-reference/blob/master/Selections.md">Selections</a> 的部分我才会重点解释。</p>
-
 <h2 id="柱状图">柱状图</h2>
-
-<p><img src="/images/learn-to-d3/01.png" alt="" />
+<p><img src="/images/learn-to-d3/01.png" alt="">
 （<a href="http://codepen.io/SitePoint/pen/wWJXWa">codepen 中查看代码</a>）</p>
-
 <p>我说过在 D3 中，你能使用到的图表远比 Playfair 先生发明过的要多，但是学跑前先走好路，我们从最简单的柱状图开始，了解一下 D3 是怎么将数据和文档流结合在一起的：</p>
-
-<pre><code class="language-javascript">d3.select('#chart')
-  .selectAll(&quot;div&quot;)
-  .data([4, 8, 15, 16, 23, 42])
-  .enter()
-  .append(&quot;div&quot;)
-  .style(&quot;height&quot;, (d)=&gt; d + &quot;px&quot;)
-</code></pre>
-
-<pre><code class="language-selectAll```">
-上述代码中的输入数据是一组数组：[4, 8, 15, 16, 23, 42]，对应的输出 HTML 结构是：
-
-``` html
-&lt;div id=&quot;chart&quot;&gt;
-  &lt;div style=&quot;height: 4px;&quot;&gt;&lt;/div&gt;
-  &lt;div style=&quot;height: 8px;&quot;&gt;&lt;/div&gt;
-  &lt;div style=&quot;height: 15px;&quot;&gt;&lt;/div&gt;
-  &lt;div style=&quot;height: 16px;&quot;&gt;&lt;/div&gt;
-  &lt;div style=&quot;height: 23px;&quot;&gt;&lt;/div&gt;
-  &lt;div style=&quot;height: 42px;&quot;&gt;&lt;/div&gt;
-&lt;/div&gt;
-</code></pre>
-
-<p>所有不需要通过 JS 控制的视觉层内容都写到 CSS 中：</p>
-
-<pre><code class="language-css">#chart div {
-  display: inline-block;
-  background: #4285F4;
-  width: 20px;
-  margin-right: 3px;
-}
-</code></pre>
-
-<h2 id="github-贡献表">GitHub 贡献表</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;#chart&#39;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">selectAll</span>(<span style="color:#e6db74">&#34;div&#34;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">data</span>([<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">15</span>, <span style="color:#ae81ff">16</span>, <span style="color:#ae81ff">23</span>, <span style="color:#ae81ff">42</span>])
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">enter</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">append</span>(<span style="color:#e6db74">&#34;div&#34;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">style</span>(<span style="color:#e6db74">&#34;height&#34;</span>, (<span style="color:#a6e22e">d</span>)=&gt; <span style="color:#a6e22e">d</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;px&#34;</span>)
+</span></span></code></pre></div><p><code>selectAll</code> 方法返回了一个 D3 selection。D3 selection 是一个数组，当针对一个数据点创建一个 <code>div</code> ，然后通过 <code>enter()</code> 和 <code>append()</code> 调用这个 <code>div</code> 时，selection 中的元素就会被创建出来。</p>
+<p>上述代码中的输入数据是一组数组：[4, 8, 15, 16, 23, 42]，对应的输出 HTML 结构是：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;chart&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">style</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;height: 4px;&#34;</span>&gt;&lt;/<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">style</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;height: 8px;&#34;</span>&gt;&lt;/<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">style</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;height: 15px;&#34;</span>&gt;&lt;/<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">style</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;height: 16px;&#34;</span>&gt;&lt;/<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">style</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;height: 23px;&#34;</span>&gt;&lt;/<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">style</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;height: 42px;&#34;</span>&gt;&lt;/<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">div</span>&gt;
+</span></span></code></pre></div><p>所有不需要通过 JS 控制的视觉层内容都写到 CSS 中：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-css" data-lang="css"><span style="display:flex;"><span>#chart <span style="color:#f92672">div</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">display</span>: <span style="color:#66d9ef">inline-block</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">background</span>: <span style="color:#ae81ff">#4285F4</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">width</span>: <span style="color:#ae81ff">20</span><span style="color:#66d9ef">px</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">margin-right</span>: <span style="color:#ae81ff">3</span><span style="color:#66d9ef">px</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="github-贡献表">GitHub 贡献表</h2>
 <p>只需要更改柱状图代码中的几行，我们就能得到一个 GitHub 贡献表。</p>
-
-<p><img src="/images/learn-to-d3/02.png" alt="" /></p>
-
+<p><img src="/images/learn-to-d3/02.png" alt=""></p>
 <p>（<a href="http://codepen.io/SitePoint/pen/rLyKLG">codepen 中查看代码</a>）</p>
-
 <p>和柱状图不同地方在于，图表中根据数据变化的不再是元素的高度，而是元素的 <code>background-color</code> （背景色）。</p>
-
-<pre><code class="language-javascript">const colorMap = d3.interpolateRgb(
-  d3.rgb('#d6e685'),
-  d3.rgb('#1e6823')
-)
-
-d3.select('#chart')
-  .selectAll(&quot;div&quot;)
-  .data([.2, .4, 0, 0, .13, .92])
-  .enter()
-  .append(&quot;div&quot;)
-  .style(&quot;background-color&quot;, (d)=&gt; {
-    return d == 0 ? '#eee' : colorMap(d)
-  })
-</code></pre>
-
-<pre><code class="language-colorMap```">
-## SVG
-
-D3 最大的魅力大概来自于它能应用在 SVG 上，也就是说平面图形比如圆形、多边形、路径和文本，它都可以交互。
-
-![](/images/learn-to-d3/03.png)
-
-```html
-&lt;svg width=&quot;200&quot; height=&quot;200&quot;&gt;
-  &lt;circle fill=&quot;#3E5693&quot; cx=&quot;50&quot; cy=&quot;120&quot; r=&quot;20&quot; /&gt;
-  &lt;text x=&quot;100&quot; y=&quot;100&quot;&gt;Hello SVG!&lt;/text&gt;
-  &lt;path d=&quot;M100,10L150,70L50,70Z&quot; fill=&quot;#BEDBC3&quot; stroke=&quot;#539E91&quot; stroke-width=&quot;3&quot;&gt;
-&lt;/svg&gt;
-</code></pre>
-
-<p>上述代码实现的是：</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">colorMap</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">interpolateRgb</span>(
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">rgb</span>(<span style="color:#e6db74">&#39;#d6e685&#39;</span>),
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">rgb</span>(<span style="color:#e6db74">&#39;#1e6823&#39;</span>)
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;#chart&#39;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">selectAll</span>(<span style="color:#e6db74">&#34;div&#34;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">data</span>([.<span style="color:#ae81ff">2</span>, .<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>, .<span style="color:#ae81ff">13</span>, .<span style="color:#ae81ff">92</span>])
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">enter</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">append</span>(<span style="color:#e6db74">&#34;div&#34;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">style</span>(<span style="color:#e6db74">&#34;background-color&#34;</span>, (<span style="color:#a6e22e">d</span>)=&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">d</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">?</span> <span style="color:#e6db74">&#39;#eee&#39;</span> <span style="color:#f92672">:</span> <span style="color:#a6e22e">colorMap</span>(<span style="color:#a6e22e">d</span>)
+</span></span><span style="display:flex;"><span>  })
+</span></span></code></pre></div><p><code>colorMap</code> 函数接收的输入值要在0到1之间，返回的是一个颜色值，这个值是在以输入值中两两数据为颜色值之间的渐变色值。插值法是图形编程和动画的关键点。在后面我们将会看到更多这方面的例子。</p>
+<h2 id="svg">SVG</h2>
+<p>D3 最大的魅力大概来自于它能应用在 SVG 上，也就是说平面图形比如圆形、多边形、路径和文本，它都可以交互。</p>
+<p><img src="/images/learn-to-d3/03.png" alt=""></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">svg</span> <span style="color:#a6e22e">width</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;200&#34;</span> <span style="color:#a6e22e">height</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;200&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">circle</span> <span style="color:#a6e22e">fill</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;#3E5693&#34;</span> <span style="color:#a6e22e">cx</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;50&#34;</span> <span style="color:#a6e22e">cy</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;120&#34;</span> <span style="color:#a6e22e">r</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;20&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">text</span> <span style="color:#a6e22e">x</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100&#34;</span> <span style="color:#a6e22e">y</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100&#34;</span>&gt;Hello SVG!&lt;/<span style="color:#f92672">text</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">path</span> <span style="color:#a6e22e">d</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;M100,10L150,70L50,70Z&#34;</span> <span style="color:#a6e22e">fill</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;#BEDBC3&#34;</span> <span style="color:#a6e22e">stroke</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;#539E91&#34;</span> <span style="color:#a6e22e">stroke-width</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;3&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">svg</span>&gt;
+</span></span></code></pre></div><p>上述代码实现的是：</p>
 <ul>
 <li>一个圆心在 (50,120)，半径是 20 的圆形</li>
 <li>一段位于 (100,100) 的文本</li>
 <li>一个 3px 粗边的三角形，<code>d</code> 指的是方向，从点 (100,100) 画线到点 (150,170) 再到点 (50,70) 结束</li>
 </ul>
-
-<pre><code class="language-&lt;path&gt;```">
-## Circles
-
-## 圆形
-
-![](/images/learn-to-d3/04.png)
-
-（[codepen 中查看代码](http://codepen.io/SitePoint/pen/jrBKMM)）
-
-上面的例子中给出的数据结构是很简单的一组数据，D3 的能力远不止于此，它还可以操作更复杂的数据类型。
-
-```javascript
-const data = [{
-  label: &quot;7am&quot;,
-  sales: 20
-},{
-  label: &quot;8am&quot;,
-  sales: 12
-}, {
-  label: &quot;9am&quot;,
-  sales: 8
-}, {
-  label: &quot;10am&quot;,
-  sales: 27
-}]
-</code></pre>
-
-<p>对每一个数据点，我们都将有一个 <code>g</code> （组）元素在 <code>#chart</code> 中，根据对象的属性，每个组里会有一个 <code>&lt;circle&gt;</code> 元素和一个 <code>&lt;text&gt;</code> 元素。</p>
-
+<p><code>&lt;path&gt;</code> 可以算是 SVG 中最好用的元素了。</p>
+<h2 id="circles">Circles</h2>
+<h2 id="圆形">圆形</h2>
+<p><img src="/images/learn-to-d3/04.png" alt=""></p>
+<p>（<a href="http://codepen.io/SitePoint/pen/jrBKMM">codepen 中查看代码</a>）</p>
+<p>上面的例子中给出的数据结构是很简单的一组数据，D3 的能力远不止于此，它还可以操作更复杂的数据类型。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">data</span> <span style="color:#f92672">=</span> [{
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">label</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;7am&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">sales</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">20</span>
+</span></span><span style="display:flex;"><span>},{
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">label</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;8am&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">sales</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">12</span>
+</span></span><span style="display:flex;"><span>}, {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">label</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;9am&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">sales</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>}, {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">label</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;10am&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">sales</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">27</span>
+</span></span><span style="display:flex;"><span>}]
+</span></span></code></pre></div><p>对每一个数据点，我们都将有一个 <code>g</code> （组）元素在 <code>#chart</code> 中，根据对象的属性，每个组里会有一个 <code>&lt;circle&gt;</code> 元素和一个 <code>&lt;text&gt;</code> 元素。</p>
 <p>下面的代码将输入数据和 SVG 文档一一对应起来，你能看出它的原理吗？</p>
-
-<pre><code class="language-html">&lt;svg height=&quot;100&quot; width=&quot;250&quot; id=&quot;chart&quot;&gt;
-  &lt;g&gt;
-    &lt;circle cy=&quot;40&quot; cx=&quot;50&quot; r=&quot;20&quot;/&gt;
-    &lt;text y=&quot;90&quot; x=&quot;50&quot;&gt;7am&lt;/text&gt;
-  &lt;/g&gt;
-  &lt;g&gt;
-    &lt;circle cy=&quot;40&quot; cx=&quot;100&quot; r=&quot;12&quot;/&gt;
-    &lt;text y=&quot;90&quot; x=&quot;100&quot;&gt;8am&lt;/text&gt;
-  &lt;/g&gt;
-  &lt;g&gt;
-    &lt;circle cy=&quot;40&quot; cx=&quot;150&quot; r=&quot;8&quot;/&gt;
-    &lt;text y=&quot;90&quot; x=&quot;150&quot;&gt;9am&lt;/text&gt;
-  &lt;/g&gt;
-  &lt;g&gt;
-    &lt;circle cy=&quot;40&quot; cx=&quot;200&quot; r=&quot;27&quot;/&gt;
-    &lt;text y=&quot;90&quot; x=&quot;200&quot;&gt;10am&lt;/text&gt;
-  &lt;/g&gt;
-&lt;/svg&gt;
-</code></pre>
-
-<h2 id="折线图">折线图</h2>
-
-<p><img src="/images/learn-to-d3/05.png" alt="" /></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">svg</span> <span style="color:#a6e22e">height</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100&#34;</span> <span style="color:#a6e22e">width</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;250&#34;</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;chart&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">g</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">circle</span> <span style="color:#a6e22e">cy</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;40&#34;</span> <span style="color:#a6e22e">cx</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;50&#34;</span> <span style="color:#a6e22e">r</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;20&#34;</span>/&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">text</span> <span style="color:#a6e22e">y</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;90&#34;</span> <span style="color:#a6e22e">x</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;50&#34;</span>&gt;7am&lt;/<span style="color:#f92672">text</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#f92672">g</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">g</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">circle</span> <span style="color:#a6e22e">cy</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;40&#34;</span> <span style="color:#a6e22e">cx</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100&#34;</span> <span style="color:#a6e22e">r</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;12&#34;</span>/&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">text</span> <span style="color:#a6e22e">y</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;90&#34;</span> <span style="color:#a6e22e">x</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100&#34;</span>&gt;8am&lt;/<span style="color:#f92672">text</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#f92672">g</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">g</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">circle</span> <span style="color:#a6e22e">cy</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;40&#34;</span> <span style="color:#a6e22e">cx</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;150&#34;</span> <span style="color:#a6e22e">r</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;8&#34;</span>/&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">text</span> <span style="color:#a6e22e">y</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;90&#34;</span> <span style="color:#a6e22e">x</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;150&#34;</span>&gt;9am&lt;/<span style="color:#f92672">text</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#f92672">g</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">g</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">circle</span> <span style="color:#a6e22e">cy</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;40&#34;</span> <span style="color:#a6e22e">cx</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;200&#34;</span> <span style="color:#a6e22e">r</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;27&#34;</span>/&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">text</span> <span style="color:#a6e22e">y</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;90&#34;</span> <span style="color:#a6e22e">x</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;200&#34;</span>&gt;10am&lt;/<span style="color:#f92672">text</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#f92672">g</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">svg</span>&gt;
+</span></span></code></pre></div><h2 id="折线图">折线图</h2>
+<p><img src="/images/learn-to-d3/05.png" alt=""></p>
 <p>（<a href="http://codepen.io/SitePoint/pen/pbeKER">codepen 中查看代码</a>）</p>
-
 <p>用 SVG 实现折线图再简单不过，我们将下面这些数据：</p>
-
-<pre><code class="language-javascript">const data = [
-  { x: 0, y: 30 },
-  { x: 50, y: 20 },
-  { x: 100, y: 40 },
-  { x: 150, y: 80 },
-  { x: 200, y: 95 }
-]
-</code></pre>
-
-<p>转换成以下的 SVG 文档：</p>
-
-<pre><code class="language-html">&lt;svg id=&quot;chart&quot; height=&quot;100&quot; width=&quot;200&quot;&gt;
-  &lt;path stroke-width=&quot;2&quot; d=&quot;M0,70L50,80L100,60L150,20L200,5&quot;&gt;
-&lt;/svg&gt;
-</code></pre>
-
-<p><strong>注意：</strong> SVG 代码中的  <code>y</code> 值和输入值的 <code>y</code> 值不同，是用 100 减去给定的 <code>y</code> 值，因为在 SVG 中屏幕的左上角是 (0,0)，所以在纵坐标最大值是 100 的坐标系中，需要这么处理。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">data</span> <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>  { <span style="color:#a6e22e">x</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">0</span>, <span style="color:#a6e22e">y</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">30</span> },
+</span></span><span style="display:flex;"><span>  { <span style="color:#a6e22e">x</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">50</span>, <span style="color:#a6e22e">y</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">20</span> },
+</span></span><span style="display:flex;"><span>  { <span style="color:#a6e22e">x</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">100</span>, <span style="color:#a6e22e">y</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">40</span> },
+</span></span><span style="display:flex;"><span>  { <span style="color:#a6e22e">x</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">150</span>, <span style="color:#a6e22e">y</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">80</span> },
+</span></span><span style="display:flex;"><span>  { <span style="color:#a6e22e">x</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">200</span>, <span style="color:#a6e22e">y</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">95</span> }
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p>转换成以下的 SVG 文档：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">svg</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;chart&#34;</span> <span style="color:#a6e22e">height</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100&#34;</span> <span style="color:#a6e22e">width</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;200&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">path</span> <span style="color:#a6e22e">stroke-width</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;2&#34;</span> <span style="color:#a6e22e">d</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;M0,70L50,80L100,60L150,20L200,5&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">svg</span>&gt;
+</span></span></code></pre></div><p><strong>注意：</strong> SVG 代码中的  <code>y</code> 值和输入值的 <code>y</code> 值不同，是用 100 减去给定的 <code>y</code> 值，因为在 SVG 中屏幕的左上角是 (0,0)，所以在纵坐标最大值是 100 的坐标系中，需要这么处理。</p>
 <p>可以这么实现只由一条 <code>path</code> 构成的图形：</p>
-
-<pre><code class="language-javascript">const path = &quot;M&quot; + data.map((d)=&gt; {
-  return d.x + ',' + (100 - d.y);
-}).join('L');
-const line = `&lt;path stroke-width=&quot;2&quot; d=&quot;${ path }&quot;/&gt;`;
-document.querySelector('#chart').innerHTML = line;
-</code></pre>
-
-<p>上面的代码看着可麻烦了，D3 其实提供了路径生成函数来简化这个步骤：</p>
-
-<pre><code class="language-javascript">const line = d3.svg.line()
-  .x((d)=&gt; d.x)
-  .y((d)=&gt; 100 - d.y)
-  .interpolate(&quot;linear&quot;)
-
-d3.select('#chart')
-  .append(&quot;path&quot;)
-  .attr('stroke-width', 2)
-  .attr('d', line(data))
-</code></pre>
-
-<p>清爽多了！<code>interpolate</code> 函数可接受不同的参数，画出不一样的图形，除了 &lsquo;linear&rsquo;，还可以试试看 &lsquo;basis&rsquo;、&rsquo;cardinal&rsquo;&hellip;</p>
-
-<p><img src="/images/learn-to-d3/06.png" alt="" /></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">path</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;M&#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">map</span>((<span style="color:#a6e22e">d</span>)=&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">x</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;,&#39;</span> <span style="color:#f92672">+</span> (<span style="color:#ae81ff">100</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">y</span>);
+</span></span><span style="display:flex;"><span>}).<span style="color:#a6e22e">join</span>(<span style="color:#e6db74">&#39;L&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">line</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">`&lt;path stroke-width=&#34;2&#34; d=&#34;</span><span style="color:#e6db74">${</span> <span style="color:#a6e22e">path</span> <span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;/&gt;`</span>;
+</span></span><span style="display:flex;"><span>document.<span style="color:#a6e22e">querySelector</span>(<span style="color:#e6db74">&#39;#chart&#39;</span>).<span style="color:#a6e22e">innerHTML</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">line</span>;
+</span></span></code></pre></div><p>上面的代码看着可麻烦了，D3 其实提供了路径生成函数来简化这个步骤：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">line</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">svg</span>.<span style="color:#a6e22e">line</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">x</span>((<span style="color:#a6e22e">d</span>)=&gt; <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">x</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">y</span>((<span style="color:#a6e22e">d</span>)=&gt; <span style="color:#ae81ff">100</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">y</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">interpolate</span>(<span style="color:#e6db74">&#34;linear&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;#chart&#39;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">append</span>(<span style="color:#e6db74">&#34;path&#34;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;stroke-width&#39;</span>, <span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;d&#39;</span>, <span style="color:#a6e22e">line</span>(<span style="color:#a6e22e">data</span>))
+</span></span></code></pre></div><p>清爽多了！<code>interpolate</code> 函数可接受不同的参数，画出不一样的图形，除了 &rsquo;linear&rsquo;，还可以试试看 &lsquo;basis&rsquo;、&lsquo;cardinal&rsquo;&hellip;</p>
+<p><img src="/images/learn-to-d3/06.png" alt=""></p>
 <h2 id="scales">Scales</h2>
-
 <blockquote>
 <p>Scales 函数可以将一个输入集映射到一个输出集中。</p>
 </blockquote>
-
 <p><a href="http://codepen.io/SitePoint/pen/aZJKmG">codepen 中查看代码</a></p>
-
 <p>上述例子所用的数据都是假数据，不会超过坐标轴所设定的范围。当数据是动态变化的时候，事情可就没有这么简单了，你需要将输入映射到固定范围的输出中，也就是我们的坐标轴。</p>
-
 <p>假设我们有一个 500px X 200px 大小的折线图区域，输入数据是：</p>
-
-<pre><code class="language-javascript">const data = [
-  { x: 0, y: 30 },
-  { x: 25, y: 15 },
-  { x: 50, y: 20 }
-]
-</code></pre>
-
-<p>如果 y 轴的范围在 [0,30]，x 轴的范围在 [0,50]，那数据就能被漂亮地呈现在屏幕上。不过现实是，y 轴范围在0到200，x 轴范围在0到500间。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">data</span> <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>  { <span style="color:#a6e22e">x</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">0</span>, <span style="color:#a6e22e">y</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">30</span> },
+</span></span><span style="display:flex;"><span>  { <span style="color:#a6e22e">x</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">25</span>, <span style="color:#a6e22e">y</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">15</span> },
+</span></span><span style="display:flex;"><span>  { <span style="color:#a6e22e">x</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">50</span>, <span style="color:#a6e22e">y</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">20</span> }
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p>如果 y 轴的范围在 [0,30]，x 轴的范围在 [0,50]，那数据就能被漂亮地呈现在屏幕上。不过现实是，y 轴范围在0到200，x 轴范围在0到500间。</p>
 <p>我们可以用 <code>d3.max</code> 获取到输入数据中的最大的 x 值和 y 值，然后创建出对应的 scales。</p>
-
 <p>scale 和上面用到的颜色差值函数类似，都是将输入值对应到固定的输出范围中。</p>
-
-<pre><code class="language-javascript">xScale(0) -&gt; 0
-xScale(10) -&gt; 100
-xScale(50) -&gt; 500
-</code></pre>
-
-<p>对于超出输出值范围的输入值，同样适用：</p>
-
-<pre><code class="language-javascript">xScale(-10) -&gt; -100
-xScale(60) -&gt; 600
-</code></pre>
-
-<p>在生成折线图的代码中 scale 可以这么使用：</p>
-
-<pre><code class="language-javascript">const line = d3.svg.line()
-  .x((d)=&gt; xScale(d.x))
-  .y((d)=&gt; yScale(d.y))
-  .interpolate(&quot;linear&quot;)
-</code></pre>
-
-<p>scales 还能让图形更优雅地显示出来，比如加上一点间距：</p>
-
-<pre><code class="language-javascript">const padding = 20;
-const xScale = d3.scale.linear()
-  .domain([0, xMax])
-  .range([padding, width - padding])
-
-const yScale = d3.scale.linear()
-  .domain([0, yMax])
-  .range([height - padding, padding])
-</code></pre>
-
-<p>现在可以在有动态数据集的前提下生成该集的折线图，这条折线图保证会在 500px X 200px 的范围内，并且距离该区域的四边都有 20px 的间距。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">xScale</span>(<span style="color:#ae81ff">0</span>) <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">xScale</span>(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">100</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">xScale</span>(<span style="color:#ae81ff">50</span>) <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">500</span>
+</span></span></code></pre></div><p>对于超出输出值范围的输入值，同样适用：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">xScale</span>(<span style="color:#f92672">-</span><span style="color:#ae81ff">10</span>) <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">100</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">xScale</span>(<span style="color:#ae81ff">60</span>) <span style="color:#f92672">-&gt;</span> <span style="color:#ae81ff">600</span>
+</span></span></code></pre></div><p>在生成折线图的代码中 scale 可以这么使用：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">line</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">svg</span>.<span style="color:#a6e22e">line</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">x</span>((<span style="color:#a6e22e">d</span>)=&gt; <span style="color:#a6e22e">xScale</span>(<span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">x</span>))
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">y</span>((<span style="color:#a6e22e">d</span>)=&gt; <span style="color:#a6e22e">yScale</span>(<span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">y</span>))
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">interpolate</span>(<span style="color:#e6db74">&#34;linear&#34;</span>)
+</span></span></code></pre></div><p>scales 还能让图形更优雅地显示出来，比如加上一点间距：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">padding</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">20</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">xScale</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">scale</span>.<span style="color:#a6e22e">linear</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">domain</span>([<span style="color:#ae81ff">0</span>, <span style="color:#a6e22e">xMax</span>])
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">range</span>([<span style="color:#a6e22e">padding</span>, <span style="color:#a6e22e">width</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">padding</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">yScale</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">scale</span>.<span style="color:#a6e22e">linear</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">domain</span>([<span style="color:#ae81ff">0</span>, <span style="color:#a6e22e">yMax</span>])
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">range</span>([<span style="color:#a6e22e">height</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">padding</span>, <span style="color:#a6e22e">padding</span>])
+</span></span></code></pre></div><p>现在可以在有动态数据集的前提下生成该集的折线图，这条折线图保证会在 500px X 200px 的范围内，并且距离该区域的四边都有 20px 的间距。</p>
 <p>线性的 scale 最常见，不过还有处理指数的 pow、处理非数值数据（比如分类、命名等）的 ordinal scales，除此之外还有 <a href="https://github.com/mbostock/d3/wiki/Quantitative-Scales">quantitative scales</a>、<a href="https://github.com/mbostock/d3/wiki/Ordinal-Scales">ordinal scales</a> 和 <a href="https://github.com/mbostock/d3/wiki/Time-Scales">time scales</a>。</p>
-
 <p>比如把我的寿命当做输入值，映射到 [0,500] 的区域内：</p>
-
-<pre><code class="language-javascript">const life = d3.time.scale()
-  .domain([new Date(1986, 1, 18), new Date()])
-  .range([0, 500])
-
-// 0 到 500 之间的哪个点才是我的 18 岁生日呢？
-life(new Date(2004, 1, 18))
-</code></pre>
-
-<h2 id="航线数据可视化">航线数据可视化</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">life</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">scale</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">domain</span>([<span style="color:#66d9ef">new</span> Date(<span style="color:#ae81ff">1986</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">18</span>), <span style="color:#66d9ef">new</span> Date()])
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">range</span>([<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">500</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 0 到 500 之间的哪个点才是我的 18 岁生日呢？
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">life</span>(<span style="color:#66d9ef">new</span> Date(<span style="color:#ae81ff">2004</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">18</span>))
+</span></span></code></pre></div><h2 id="航线数据可视化">航线数据可视化</h2>
 <p>到目前为止，我们看到的都是静止的图像。接下来，以墨尔本到悉尼的航线为例，试试动态图像吧。</p>
-
 <p><a href="http://codepen.io/SitePoint/pen/wWJXoK">codepen 中查看效果</a></p>
-
 <p>上面的效果是基于 SVG 的文本 (text)、线条 (line) 和圆形 (circle)。</p>
-
-<pre><code class="language-html">&lt;svg id=&quot;chart&quot; width=&quot;600&quot; height=&quot;500&quot;&gt;
-  &lt;text class=&quot;time&quot; x=&quot;300&quot; y=&quot;50&quot; text-anchor=&quot;middle&quot;&gt;6:00&lt;/text&gt;
-  &lt;text class=&quot;origin-text&quot; x=&quot;90&quot; y=&quot;75&quot; text-anchor=&quot;end&quot;&gt;MEL&lt;/text&gt;
-  &lt;text class=&quot;dest-text&quot; x=&quot;510&quot; y=&quot;75&quot; text-anchor=&quot;start&quot;&gt;SYD&lt;/text&gt;
-  &lt;circle class=&quot;origin-dot&quot; r=&quot;5&quot; cx=&quot;100&quot; cy=&quot;75&quot; /&gt;
-  &lt;circle class=&quot;dest-dot&quot; r=&quot;5&quot; cx=&quot;500&quot; cy=&quot;75&quot; /&gt;
-  &lt;line class=&quot;origin-dest-line&quot; x1=&quot;110&quot; y1=&quot;75&quot; x2=&quot;490&quot; y2=&quot;75&quot; /&gt;
-
-  &lt;!-- for each flight in the current time --&gt;
-  &lt;g class=&quot;flight&quot;&gt;
-    &lt;text class=&quot;flight-id&quot; x=&quot;160&quot; y=&quot;100&quot;&gt;JQ 500&lt;/text&gt;
-    &lt;line class=&quot;flight-line&quot; x1=&quot;100&quot; y1=&quot;100&quot; x2=&quot;150&quot; y2=&quot;100&quot; /&gt;
-    &lt;circle class=&quot;flight-dot&quot; cx=&quot;150&quot; cy=&quot;100&quot; r=&quot;5&quot; /&gt;
-  &lt;/g&gt;
-&lt;/svg&gt;
-</code></pre>
-
-<p>动态变化的部分是时间和不同的航班，数据源大概长这样：</p>
-
-<pre><code class="language-javascript">let data = [
-  { departs: '06:00 am', arrives: '07:25 am', id: 'Jetstar 500' },
-  { departs: '06:00 am', arrives: '07:25 am', id: 'Qantas 400' },
-  { departs: '06:00 am', arrives: '07:25 am', id: 'Virgin 803' }
-]
-</code></pre>
-
-<p>我们需要将每条航线的出发和到达时间用 scale 映射到 x 轴上，这些数据将会动态地变化。在代码开始的位置，就将这些数据依次设定为 <code>Date</code> 对象，并 scale 它们，后面方便使用。对日期的处理我用的是 Moment.js。</p>
-
-<pre><code class="language-javascript">data.forEach((d)=&gt; {
-  d.departureDate = moment(d.departs, &quot;hh-mm a&quot;).toDate();
-  d.arrivalDate = moment(d.arrives, &quot;hh-mm a&quot;).toDate();
-  d.xScale = d3.time.scale()
-    .domain([departureDate, arrivalDate])
-    .range([100, 500])
-});
-</code></pre>
-
-<p>现在可以把数据传入 <code>xScale()</code> 获取到每条航线的 x 坐标。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">svg</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;chart&#34;</span> <span style="color:#a6e22e">width</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;600&#34;</span> <span style="color:#a6e22e">height</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;500&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">text</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;time&#34;</span> <span style="color:#a6e22e">x</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;300&#34;</span> <span style="color:#a6e22e">y</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;50&#34;</span> <span style="color:#a6e22e">text-anchor</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;middle&#34;</span>&gt;6:00&lt;/<span style="color:#f92672">text</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">text</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;origin-text&#34;</span> <span style="color:#a6e22e">x</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;90&#34;</span> <span style="color:#a6e22e">y</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;75&#34;</span> <span style="color:#a6e22e">text-anchor</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;end&#34;</span>&gt;MEL&lt;/<span style="color:#f92672">text</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">text</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;dest-text&#34;</span> <span style="color:#a6e22e">x</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;510&#34;</span> <span style="color:#a6e22e">y</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;75&#34;</span> <span style="color:#a6e22e">text-anchor</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;start&#34;</span>&gt;SYD&lt;/<span style="color:#f92672">text</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">circle</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;origin-dot&#34;</span> <span style="color:#a6e22e">r</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;5&#34;</span> <span style="color:#a6e22e">cx</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100&#34;</span> <span style="color:#a6e22e">cy</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;75&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">circle</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;dest-dot&#34;</span> <span style="color:#a6e22e">r</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;5&#34;</span> <span style="color:#a6e22e">cx</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;500&#34;</span> <span style="color:#a6e22e">cy</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;75&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">line</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;origin-dest-line&#34;</span> <span style="color:#a6e22e">x1</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;110&#34;</span> <span style="color:#a6e22e">y1</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;75&#34;</span> <span style="color:#a6e22e">x2</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;490&#34;</span> <span style="color:#a6e22e">y2</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;75&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">&lt;!-- for each flight in the current time --&gt;</span>
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">g</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;flight&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">text</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;flight-id&#34;</span> <span style="color:#a6e22e">x</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;160&#34;</span> <span style="color:#a6e22e">y</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100&#34;</span>&gt;JQ 500&lt;/<span style="color:#f92672">text</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">line</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;flight-line&#34;</span> <span style="color:#a6e22e">x1</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100&#34;</span> <span style="color:#a6e22e">y1</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100&#34;</span> <span style="color:#a6e22e">x2</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;150&#34;</span> <span style="color:#a6e22e">y2</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">circle</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;flight-dot&#34;</span> <span style="color:#a6e22e">cx</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;150&#34;</span> <span style="color:#a6e22e">cy</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100&#34;</span> <span style="color:#a6e22e">r</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;5&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#f92672">g</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">svg</span>&gt;
+</span></span></code></pre></div><p>动态变化的部分是时间和不同的航班，数据源大概长这样：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">data</span> <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>  { <span style="color:#a6e22e">departs</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;06:00 am&#39;</span>, <span style="color:#a6e22e">arrives</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;07:25 am&#39;</span>, <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Jetstar 500&#39;</span> },
+</span></span><span style="display:flex;"><span>  { <span style="color:#a6e22e">departs</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;06:00 am&#39;</span>, <span style="color:#a6e22e">arrives</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;07:25 am&#39;</span>, <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Qantas 400&#39;</span> },
+</span></span><span style="display:flex;"><span>  { <span style="color:#a6e22e">departs</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;06:00 am&#39;</span>, <span style="color:#a6e22e">arrives</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;07:25 am&#39;</span>, <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Virgin 803&#39;</span> }
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p>我们需要将每条航线的出发和到达时间用 scale 映射到 x 轴上，这些数据将会动态地变化。在代码开始的位置，就将这些数据依次设定为 <code>Date</code> 对象，并 scale 它们，后面方便使用。对日期的处理我用的是 Moment.js。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">forEach</span>((<span style="color:#a6e22e">d</span>)=&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">departureDate</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">moment</span>(<span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">departs</span>, <span style="color:#e6db74">&#34;hh-mm a&#34;</span>).<span style="color:#a6e22e">toDate</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">arrivalDate</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">moment</span>(<span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">arrives</span>, <span style="color:#e6db74">&#34;hh-mm a&#34;</span>).<span style="color:#a6e22e">toDate</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">xScale</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">scale</span>()
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">domain</span>([<span style="color:#a6e22e">departureDate</span>, <span style="color:#a6e22e">arrivalDate</span>])
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">range</span>([<span style="color:#ae81ff">100</span>, <span style="color:#ae81ff">500</span>])
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><p>现在可以把数据传入 <code>xScale()</code> 获取到每条航线的 x 坐标。</p>
 <h2 id="渲染循环">渲染循环</h2>
-
 <p>出发和到达时间都四舍五入到 5 分钟，所以在第一个航班起飞时间和最后一个航班到达时间之间以 5分钟为单位递增。</p>
-
-<pre><code class="language-javascript">let now = moment(data[0].departs, &quot;hh:mm a&quot;);
-const end = moment(data[data.length - 1].arrives, &quot;hh:mm a&quot;);
-
-const loop = function() {
-  const time = now.toDate();
-
-  // 选出当前的航班
-  const currentData = data.filter((d)=&gt; {
-    return d.departureDate &lt;= time &amp;&amp; time &lt;= d.arrivalDate
-  });
-
-  render(currentData, time);
-
-  if (now &lt;= end) {
-    // Increment 5m and call loop again in 500ms
-    // 5分钟为增量，500ms 轮询依次
-    now = now.add(5, 'minutes');
-    setTimeout(loop, 500);
-  }
-}
-</code></pre>
-
-<h2 id="创建-更新和过期">创建、更新和过期</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">now</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">moment</span>(<span style="color:#a6e22e">data</span>[<span style="color:#ae81ff">0</span>].<span style="color:#a6e22e">departs</span>, <span style="color:#e6db74">&#34;hh:mm a&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">end</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">moment</span>(<span style="color:#a6e22e">data</span>[<span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>].<span style="color:#a6e22e">arrives</span>, <span style="color:#e6db74">&#34;hh:mm a&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">loop</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">time</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">now</span>.<span style="color:#a6e22e">toDate</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 选出当前的航班
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">currentData</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">filter</span>((<span style="color:#a6e22e">d</span>)=&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">departureDate</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">time</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">time</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">arrivalDate</span>
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">render</span>(<span style="color:#a6e22e">currentData</span>, <span style="color:#a6e22e">time</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">now</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">end</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Increment 5m and call loop again in 500ms
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 5分钟为增量，500ms 轮询依次
+</span></span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">now</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">now</span>.<span style="color:#a6e22e">add</span>(<span style="color:#ae81ff">5</span>, <span style="color:#e6db74">&#39;minutes&#39;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">setTimeout</span>(<span style="color:#a6e22e">loop</span>, <span style="color:#ae81ff">500</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="创建更新和过期">创建、更新和过期</h2>
 <p>在以下场景下，开发者可以指定要使用的数据变换和元素过渡方式：</p>
-
 <ul>
 <li>新数据点出现的时候（创建时）</li>
 <li>现有的数据发生变化（更新时）</li>
 <li>数据不再使用时（过期时）</li>
 </ul>
-
-<pre><code class="language-javascript">const render = function(data, time) {
-  // 渲染 'time'
-  d3.select('.time')
-    .text(moment(time).format(&quot;hh:mm a&quot;))
-
-  // 创建 selection，传入数据集
-  const flight = d3.select('#chart')
-    .selectAll('g.flight')
-    .data(data, (d)=&gt; d.id)
-
-  // 为新的数据创建节点
-  const newFlight = flight.enter()
-    .append(&quot;g&quot;)
-    .attr('class', 'flight')
-
-  const xPoint = (d)=&gt; d.xScale(time);
-  const yPoint = (d, i)=&gt; 100 + i * 25;
-
-  newFlight.append(&quot;circle&quot;)
-    .attr('class',&quot;flight-dot&quot;)
-    .attr('cx', xPoint)
-    .attr('cy', yPoint)
-    .attr('r', &quot;5&quot;)
-
-  // 通过 select 更新现有的数据
-  flight.select('.flight-dot')
-    .attr('cx', xPoint)
-    .attr('cy', yPoint)
-
-  // 移除不需要的数据
-  const oldFlight = flight.exit()
-    .remove()
-}
-</code></pre>
-
-<h2 id="过渡">过渡</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">render</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">data</span>, <span style="color:#a6e22e">time</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 渲染 &#39;time&#39;
+</span></span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;.time&#39;</span>)
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">text</span>(<span style="color:#a6e22e">moment</span>(<span style="color:#a6e22e">time</span>).<span style="color:#a6e22e">format</span>(<span style="color:#e6db74">&#34;hh:mm a&#34;</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 创建 selection，传入数据集
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">flight</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;#chart&#39;</span>)
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">selectAll</span>(<span style="color:#e6db74">&#39;g.flight&#39;</span>)
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">data</span>(<span style="color:#a6e22e">data</span>, (<span style="color:#a6e22e">d</span>)=&gt; <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">id</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 为新的数据创建节点
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">newFlight</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">flight</span>.<span style="color:#a6e22e">enter</span>()
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">append</span>(<span style="color:#e6db74">&#34;g&#34;</span>)
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;class&#39;</span>, <span style="color:#e6db74">&#39;flight&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">xPoint</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">d</span>)=&gt; <span style="color:#a6e22e">d</span>.<span style="color:#a6e22e">xScale</span>(<span style="color:#a6e22e">time</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">yPoint</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">d</span>, <span style="color:#a6e22e">i</span>)=&gt; <span style="color:#ae81ff">100</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">25</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">newFlight</span>.<span style="color:#a6e22e">append</span>(<span style="color:#e6db74">&#34;circle&#34;</span>)
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;class&#39;</span>,<span style="color:#e6db74">&#34;flight-dot&#34;</span>)
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;cx&#39;</span>, <span style="color:#a6e22e">xPoint</span>)
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;cy&#39;</span>, <span style="color:#a6e22e">yPoint</span>)
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;r&#39;</span>, <span style="color:#e6db74">&#34;5&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 通过 select 更新现有的数据
+</span></span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">flight</span>.<span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;.flight-dot&#39;</span>)
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;cx&#39;</span>, <span style="color:#a6e22e">xPoint</span>)
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;cy&#39;</span>, <span style="color:#a6e22e">yPoint</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 移除不需要的数据
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">oldFlight</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">flight</span>.<span style="color:#a6e22e">exit</span>()
+</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">remove</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="过渡">过渡</h2>
 <p>上述的代码实现了每 500ms 以 5 分钟为增量渲染画面：</p>
-
 <ul>
 <li>更新了时间</li>
 <li>每当有新的航班图时，以圆为标识创建</li>
 <li>更新当前航班的 x/y 坐标轴</li>
 <li>当飞机到达目的地时，移除数据</li>
 </ul>
-
 <p>可以说已经实现了我们开始时的目标，但是每次新数据的出现和旧数据的销毁都太粗暴。通过在 D3 selection 上添加过渡，就能把这个过程变得平滑。</p>
-
 <p>比如，为新数据添加到 DOM 结构中，通过改变透明度 (opacity)，加一个渐现动画：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">newFlight</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">flight</span>.<span style="color:#a6e22e">enter</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">append</span>(<span style="color:#e6db74">&#34;g&#34;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;class&#39;</span>, <span style="color:#e6db74">&#39;flight&#39;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;opacity&#39;</span>, <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">newFlight</span>.<span style="color:#a6e22e">transition</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">duration</span>(<span style="color:#ae81ff">500</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;opacity&#39;</span>, <span style="color:#ae81ff">1</span>)
+</span></span></code></pre></div><p>数据移除可以加上渐隐动画：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">flight</span>.<span style="color:#a6e22e">exit</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">transition</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">duration</span>(<span style="color:#ae81ff">500</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;opacity&#39;</span>, <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">remove</span>()
+</span></span></code></pre></div><p>在横纵坐标点上也可以加上：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">flight</span>.<span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;.flight-dot&#39;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">transition</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">duration</span>(<span style="color:#ae81ff">500</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">ease</span>(<span style="color:#e6db74">&#39;linear&#39;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;cx&#39;</span>, <span style="color:#a6e22e">xPoint</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;cy&#39;</span>, <span style="color:#a6e22e">yPoint</span>)
+</span></span></code></pre></div><p>我们也能对这 5 分钟的增量做过渡，用 <code>tween</code> 函数实现每分钟时间都将出现，而不是每 5 分钟才会出现。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">inFiveMinutes</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">moment</span>(<span style="color:#a6e22e">time</span>).<span style="color:#a6e22e">add</span>(<span style="color:#ae81ff">5</span>, <span style="color:#e6db74">&#39;minutes&#39;</span>).<span style="color:#a6e22e">toDate</span>();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">interpolate</span>(<span style="color:#a6e22e">time</span>, <span style="color:#a6e22e">inFiveMinutes</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">d3</span>.<span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;.time&#39;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">transition</span>()
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">duration</span>(<span style="color:#ae81ff">500</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">ease</span>(<span style="color:#e6db74">&#39;linear&#39;</span>)
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">tween</span>(<span style="color:#e6db74">&#34;text&#34;</span>, ()=&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">t</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">textContent</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">moment</span>(<span style="color:#a6e22e">i</span>(<span style="color:#a6e22e">t</span>)).<span style="color:#a6e22e">format</span>(<span style="color:#e6db74">&#34;hh:mm a&#34;</span>);
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>  });
+</span></span></code></pre></div><p><code>t</code> 是用于变换的一个介于 0 到 1 的增长值。</p>
+<h2 id="树形图">树形图</h2>
+<p><img src="/blog/images/learn-to-d3/tree-02.png" alt=""></p>
+<pre tabindex="0"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&#34;en&#34;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&#34;utf-8&#34;&gt;
 
-<pre><code class="language-javascript">const newFlight = flight.enter()
-  .append(&quot;g&quot;)
-  .attr('class', 'flight')
-  .attr('opacity', 0)
+    &lt;title&gt;Tree Example&lt;/title&gt;
 
-newFlight.transition()
-  .duration(500)
-  .attr('opacity', 1)
-</code></pre>
-
-<p>数据移除可以加上渐隐动画：</p>
-
-<pre><code class="language-javascript">flight.exit()
-  .transition()
-  .duration(500)
-  .attr('opacity', 0)
-  .remove()
-</code></pre>
-
-<p>在横纵坐标点上也可以加上：</p>
-
-<pre><code class="language-javascript">flight.select('.flight-dot')
-  .transition()
-  .duration(500)
-  .ease('linear')
-  .attr('cx', xPoint)
-  .attr('cy', yPoint)
-</code></pre>
-
-<p>我们也能对这 5 分钟的增量做过渡，用 <code>tween</code> 函数实现每分钟时间都将出现，而不是每 5 分钟才会出现。</p>
-
-<pre><code class="language-javascript">const inFiveMinutes = moment(time).add(5, 'minutes').toDate();
-const i = d3.interpolate(time, inFiveMinutes);
-d3.select('.time')
-  .transition()
-  .duration(500)
-  .ease('linear')
-  .tween(&quot;text&quot;, ()=&gt; {
-    return function(t) {
-      this.textContent = moment(i(t)).format(&quot;hh:mm a&quot;);
-    };
-  });
-</code></pre>
-
-<pre><code class="language-t```">
-## 树形图
-
-
-
-![](/blog/images/learn-to-d3/tree-02.png)
-
-</code></pre>
-
-<p>&lt;!DOCTYPE html&gt;
-<html lang="en">
-  <head>
-    <meta charset="utf-8"></p>
-
-<pre><code>&lt;title&gt;Tree Example&lt;/title&gt;
-
-&lt;style&gt;
-</code></pre>
-
-<p>.node {
+    &lt;style&gt;
+  
+  .node {
     cursor: pointer;
   }
   .node circle {
@@ -563,43 +442,40 @@ d3.select('.time')
     fill: none;
     stroke: #ccc;
     stroke-width: 2px;
-  }</p>
-
-<pre><code>&lt;/style&gt;
-</code></pre>
-
-<p></head></p>
-
-<p><body></p>
-
-<!-- load the d3.js library --> 
-
-<script src="http://d3js.org/d3.v3.min.js"></script>
+  }
   
+    &lt;/style&gt;
 
-<script>
+  &lt;/head&gt;
+
+  &lt;body&gt;
+
+&lt;!-- load the d3.js library --&gt; 
+&lt;script src=&#34;http://d3js.org/d3.v3.min.js&#34;&gt;&lt;/script&gt;
+  
+&lt;script&gt;
 var treeData = [
   {
-    "name": "Top Level",
-    "parent": "null",
-    "children": [
+    &#34;name&#34;: &#34;Top Level&#34;,
+    &#34;parent&#34;: &#34;null&#34;,
+    &#34;children&#34;: [
       {
-        "name": "Level 2: A",
-        "parent": "Top Level",
-        "children": [
+        &#34;name&#34;: &#34;Level 2: A&#34;,
+        &#34;parent&#34;: &#34;Top Level&#34;,
+        &#34;children&#34;: [
           {
-            "name": "Son of A",
-            "parent": "Level 2: A"
+            &#34;name&#34;: &#34;Son of A&#34;,
+            &#34;parent&#34;: &#34;Level 2: A&#34;
           },
           {
-            "name": "Daughter of A",
-            "parent": "Level 2: A"
+            &#34;name&#34;: &#34;Daughter of A&#34;,
+            &#34;parent&#34;: &#34;Level 2: A&#34;
           }
         ]
       },
       {
-        "name": "Level 2: B",
-        "parent": "Top Level"
+        &#34;name&#34;: &#34;Level 2: B&#34;,
+        &#34;parent&#34;: &#34;Top Level&#34;
       }
     ]
   }
@@ -616,17 +492,17 @@ var tree = d3.layout.tree()
   .size([height, width]);
 var diagonal = d3.svg.diagonal()
   .projection(function(d) { return [d.y, d.x]; });
-var svg = d3.select("body").append("svg")
-  .attr("width", width + margin.right + margin.left)
-  .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+var svg = d3.select(&#34;body&#34;).append(&#34;svg&#34;)
+  .attr(&#34;width&#34;, width + margin.right + margin.left)
+  .attr(&#34;height&#34;, height + margin.top + margin.bottom)
+  .append(&#34;g&#34;)
+  .attr(&#34;transform&#34;, &#34;translate(&#34; + margin.left + &#34;,&#34; + margin.top + &#34;)&#34;);
 root = treeData[0];
 root.x0 = height / 2;
 root.y0 = 0;
   
 update(root);
-d3.select(self.frameElement).style("height", "500px");
+d3.select(self.frameElement).style(&#34;height&#34;, &#34;500px&#34;);
 function update(source) {
   // Compute the new tree layout.
   var nodes = tree.nodes(root).reverse(),
@@ -634,58 +510,58 @@ function update(source) {
   // Normalize for fixed-depth.
   nodes.forEach(function(d) { d.y = d.depth * 180; });
   // Update the nodes…
-  var node = svg.selectAll("g.node")
+  var node = svg.selectAll(&#34;g.node&#34;)
     .data(nodes, function(d) { return d.id || (d.id = ++i); });
-  // Enter any new nodes at the parent's previous position.
-  var nodeEnter = node.enter().append("g")
-    .attr("class", "node")
-    .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-    .on("click", click);
-  nodeEnter.append("circle")
-    .attr("r", 1e-6)
-    .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
-  nodeEnter.append("text")
-    .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
-    .attr("dy", ".35em")
-    .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+  // Enter any new nodes at the parent&#39;s previous position.
+  var nodeEnter = node.enter().append(&#34;g&#34;)
+    .attr(&#34;class&#34;, &#34;node&#34;)
+    .attr(&#34;transform&#34;, function(d) { return &#34;translate(&#34; + source.y0 + &#34;,&#34; + source.x0 + &#34;)&#34;; })
+    .on(&#34;click&#34;, click);
+  nodeEnter.append(&#34;circle&#34;)
+    .attr(&#34;r&#34;, 1e-6)
+    .style(&#34;fill&#34;, function(d) { return d._children ? &#34;lightsteelblue&#34; : &#34;#fff&#34;; });
+  nodeEnter.append(&#34;text&#34;)
+    .attr(&#34;x&#34;, function(d) { return d.children || d._children ? -13 : 13; })
+    .attr(&#34;dy&#34;, &#34;.35em&#34;)
+    .attr(&#34;text-anchor&#34;, function(d) { return d.children || d._children ? &#34;end&#34; : &#34;start&#34;; })
     .text(function(d) { return d.name; })
-    .style("fill-opacity", 1e-6);
+    .style(&#34;fill-opacity&#34;, 1e-6);
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
     .duration(duration)
-    .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
-  nodeUpdate.select("circle")
-    .attr("r", 10)
-    .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
-  nodeUpdate.select("text")
-    .style("fill-opacity", 1);
-  // Transition exiting nodes to the parent's new position.
+    .attr(&#34;transform&#34;, function(d) { return &#34;translate(&#34; + d.y + &#34;,&#34; + d.x + &#34;)&#34;; });
+  nodeUpdate.select(&#34;circle&#34;)
+    .attr(&#34;r&#34;, 10)
+    .style(&#34;fill&#34;, function(d) { return d._children ? &#34;lightsteelblue&#34; : &#34;#fff&#34;; });
+  nodeUpdate.select(&#34;text&#34;)
+    .style(&#34;fill-opacity&#34;, 1);
+  // Transition exiting nodes to the parent&#39;s new position.
   var nodeExit = node.exit().transition()
     .duration(duration)
-    .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+    .attr(&#34;transform&#34;, function(d) { return &#34;translate(&#34; + source.y + &#34;,&#34; + source.x + &#34;)&#34;; })
     .remove();
-  nodeExit.select("circle")
-    .attr("r", 1e-6);
-  nodeExit.select("text")
-    .style("fill-opacity", 1e-6);
+  nodeExit.select(&#34;circle&#34;)
+    .attr(&#34;r&#34;, 1e-6);
+  nodeExit.select(&#34;text&#34;)
+    .style(&#34;fill-opacity&#34;, 1e-6);
   // Update the links…
-  var link = svg.selectAll("path.link")
+  var link = svg.selectAll(&#34;path.link&#34;)
     .data(links, function(d) { return d.target.id; });
-  // Enter any new links at the parent's previous position.
-  link.enter().insert("path", "g")
-    .attr("class", "link")
-    .attr("d", function(d) {
+  // Enter any new links at the parent&#39;s previous position.
+  link.enter().insert(&#34;path&#34;, &#34;g&#34;)
+    .attr(&#34;class&#34;, &#34;link&#34;)
+    .attr(&#34;d&#34;, function(d) {
     var o = {x: source.x0, y: source.y0};
     return diagonal({source: o, target: o});
     });
   // Transition links to their new position.
   link.transition()
     .duration(duration)
-    .attr("d", diagonal);
-  // Transition exiting nodes to the parent's new position.
+    .attr(&#34;d&#34;, diagonal);
+  // Transition exiting nodes to the parent&#39;s new position.
   link.exit().transition()
     .duration(duration)
-    .attr("d", function(d) {
+    .attr(&#34;d&#34;, function(d) {
     var o = {x: source.x, y: source.y};
     return diagonal({source: o, target: o});
     })
@@ -707,68 +583,42 @@ function click(d) {
   }
   update(d);
 }
-</script>
+&lt;/script&gt;
   
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h3 id="关键代码注解">关键代码注解</h3>
+<pre tabindex="0"><code>var diagonal = d3.svg.diagonal()
+ .projection(function(d) { return [d.y, d.x]; });
+</code></pre><p>声明<a href="https://github.com/d3/d3-3.x-api-reference/blob/master/SVG-Shapes.md">d3.js diagonal</a>连接线发生器,注意这里x,y坐标系互换</p>
+<pre tabindex="0"><code>var nodes = tree.nodes(root),
+   links = tree.links(nodes);
+</code></pre><p>treenode和links的初始化,参见<a href="https://github.com/d3/d3/wiki/%E6%A0%91%E5%B8%83%E5%B1%80">树布局</a>,每个节点中包含以下属性：</p>
+<ul>
+<li>parent - 父节点引用，根节点为 null;</li>
+<li>children - 所有子节点，叶子节点为 null;</li>
+<li>depth - 当前节点所处层级（也叫深度）；根节点为 0;</li>
+<li>x - 计算得到的当前节点的计 x 坐标;</li>
+<li>y - 计算得到的当前节点的计 y 坐标;</li>
+</ul>
+<pre tabindex="0"><code>  nodes.forEach(function(d) { d.y = d.depth * 180; });
+</code></pre><p>定义节点深度(level)和水平(x,y坐标系已互换)位置的关系.</p>
+<p><img src="/blog/images/learn-to-d3/tree-05.png" alt=""></p>
+<pre tabindex="0"><code>var node = svg.selectAll(&#34;g.node&#34;)
+   .data(nodes, function(d) { return d.id || (d.id = ++i); });
 
-<p></body>
-</html></p>
-
-<pre><code>
-### 关键代码注解 ###
-
-</code></pre>
-
-<p>var diagonal = d3.svg.diagonal()
- .projection(function(d) { return [d.y, d.x]; });</p>
-
-<pre><code>声明[d3.js diagonal](https://github.com/d3/d3-3.x-api-reference/blob/master/SVG-Shapes.md)连接线发生器,注意这里x,y坐标系互换
-
-
-</code></pre>
-
-<p>var nodes = tree.nodes(root),
-   links = tree.links(nodes);</p>
-
-<pre><code>treenode和links的初始化,参见[树布局](https://github.com/d3/d3/wiki/%E6%A0%91%E5%B8%83%E5%B1%80),每个节点中包含以下属性：
-
-- parent - 父节点引用，根节点为 null;
-- children - 所有子节点，叶子节点为 null;
-- depth - 当前节点所处层级（也叫深度）；根节点为 0;
-- x - 计算得到的当前节点的计 x 坐标;
-- y - 计算得到的当前节点的计 y 坐标;
-
-
-</code></pre>
-
-<p>nodes.forEach(function(d) { d.y = d.depth * 180; });</p>
-
-<pre><code>
-定义节点深度(level)和水平(x,y坐标系已互换)位置的关系.
-
-![](/blog/images/learn-to-d3/tree-05.png)
-
-
-</code></pre>
-
-<p>var node = svg.selectAll(&ldquo;g.node&rdquo;)
-   .data(nodes, function(d) { return d.id || (d.id = ++i); });</p>
-
-<p>var link = svg.selectAll(&ldquo;path.link&rdquo;)
+var link = svg.selectAll(&#34;path.link&#34;)
    .data(links, function(d) { return d.target.id; });
-   .enter().insert(&ldquo;path&rdquo;, &ldquo;g&rdquo;)
-   .attr(&ldquo;class&rdquo;, &ldquo;link&rdquo;)
-   .attr(&ldquo;d&rdquo;, diagonal);</p>
-
-<pre><code>根据生成的节点id关联链路,用diagonal产生连接曲线
-
-
-</code></pre>
-
-<p>.node {
+   .enter().insert(&#34;path&#34;, &#34;g&#34;)
+   .attr(&#34;class&#34;, &#34;link&#34;)
+   .attr(&#34;d&#34;, diagonal);
+</code></pre><p>根据生成的节点id关联链路,用diagonal产生连接曲线</p>
+<pre tabindex="0"><code>.node {
   cursor: pointer;
- }</p>
+ }
 
-<p>function click(d) {
+
+function click(d) {
   if (d.children) {
  d._children = d.children;
  d.children = null;
@@ -777,310 +627,260 @@ function click(d) {
  d._children = null;
   }
   update(d);
-}</p>
+}
+</code></pre><p>根据children属性添加交互式collapse效果(点击根节点隐藏子节点,再点展开)</p>
+<h2 id="地图">地图</h2>
+<p>用不同颜色标注你所去过的地方</p>
+<pre tabindex="0"><code>&lt;!DOCTYPE html&gt;
+&lt;meta charset=&#34;utf-8&#34;&gt;
+&lt;style&gt;
 
-<pre><code>根据children属性添加交互式collapse效果(点击根节点隐藏子节点,再点展开)
+/* CSS goes here. */
 
-
-
-## 地图
-
-用不同颜色标注你所去过的地方
-
-</code></pre>
-
-<p>&lt;!DOCTYPE html&gt;
-<meta charset="utf-8">
-<style></p>
-
-<p>/* CSS goes here. */</p>
-
-<p></style>
-<body>
-<div id="chart" style="max-width: 47.5em; margin: 10px auto; position: relative;">
-<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
-<script src="//d3js.org/topojson.v1.min.js"></script>
-<script>
+&lt;/style&gt;
+&lt;body&gt;
+&lt;div id=&#34;chart&#34; style=&#34;max-width: 47.5em; margin: 10px auto; position: relative;&#34;&gt;
+&lt;script src=&#34;//d3js.org/d3.v3.min.js&#34; charset=&#34;utf-8&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;//d3js.org/topojson.v1.min.js&#34;&gt;&lt;/script&gt;
+&lt;script&gt;
   var width  = 700;
-  var height = 400;</p>
+  var height = 400;
 
-<p>var myMap = new Map();
-      myMap.set(&ldquo;甘肃&rdquo;, &ldquo;#F5A9A9&rdquo;);
-      myMap.set(&ldquo;青海&rdquo;, &ldquo;#F5A9A9&rdquo;);
-      myMap.set(&ldquo;广西&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;贵州&rdquo;, &ldquo;#F5A9A9&rdquo;);
-      myMap.set(&ldquo;重庆&rdquo;, &ldquo;#F5A9A9&rdquo;);
-      myMap.set(&ldquo;北京&rdquo;, &ldquo;#FA5858&rdquo;);
-      myMap.set(&ldquo;福建&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;安徽&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;广东&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;西藏&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;新疆&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;海南&rdquo;, &ldquo;#F5A9A9&rdquo;);
-      myMap.set(&ldquo;宁夏&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;陕西&rdquo;, &ldquo;#F5A9A9&rdquo;);
-      myMap.set(&ldquo;山西&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;湖北&rdquo;, &ldquo;#FA5858&rdquo;);
-      myMap.set(&ldquo;湖南&rdquo;, &ldquo;#F5A9A9&rdquo;);
-      myMap.set(&ldquo;四川&rdquo;, &ldquo;#FE2E2E&rdquo;);
-      myMap.set(&ldquo;云南&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;河北&rdquo;, &ldquo;#F5A9A9&rdquo;);
-      myMap.set(&ldquo;河南&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;辽宁&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;山东&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;天津&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;江西&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;江苏&rdquo;, &ldquo;#FA5858&rdquo;);
-      myMap.set(&ldquo;上海&rdquo;, &ldquo;#FA5858&rdquo;);
-      myMap.set(&ldquo;浙江&rdquo;, &ldquo;#F5A9A9&rdquo;);
-      myMap.set(&ldquo;吉林&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;内蒙古&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;黑龙江&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;香港&rdquo;, &ldquo;#F5A9A9&rdquo;);
-      myMap.set(&ldquo;澳门&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;台湾&rdquo;, &ldquo;#A4A4A4&rdquo;);
-      myMap.set(&ldquo;background&rdquo;, &ldquo;#2A0A0A&rdquo;);</p>
-
-<p>var svg = d3.select(&ldquo;#chart&rdquo;).append(&ldquo;svg&rdquo;)
-    .attr(&ldquo;width&rdquo;, &lsquo;100%&rsquo;)
-    .attr(&ldquo;height&rdquo;, &lsquo;100%&rsquo;)
-    .attr(&lsquo;viewBox&rsquo;,&lsquo;0 0 &lsquo;+(Math.min(width,height))+&rsquo; &lsquo;+Math.min(width,height))
-    .attr(&lsquo;preserveAspectRatio&rsquo;,&lsquo;xMinYMin&rsquo;)
-      .append(&ldquo;g&rdquo;)
-      .attr(&ldquo;transform&rdquo;, &ldquo;translate(0,0)&rdquo;);</p>
-
-<p>var projection = d3.geo.mercator()
+  var myMap = new Map();
+      myMap.set(&#34;甘肃&#34;, &#34;#F5A9A9&#34;);
+      myMap.set(&#34;青海&#34;, &#34;#F5A9A9&#34;);
+      myMap.set(&#34;广西&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;贵州&#34;, &#34;#F5A9A9&#34;);
+      myMap.set(&#34;重庆&#34;, &#34;#F5A9A9&#34;);
+      myMap.set(&#34;北京&#34;, &#34;#FA5858&#34;);
+      myMap.set(&#34;福建&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;安徽&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;广东&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;西藏&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;新疆&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;海南&#34;, &#34;#F5A9A9&#34;);
+      myMap.set(&#34;宁夏&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;陕西&#34;, &#34;#F5A9A9&#34;);
+      myMap.set(&#34;山西&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;湖北&#34;, &#34;#FA5858&#34;);
+      myMap.set(&#34;湖南&#34;, &#34;#F5A9A9&#34;);
+      myMap.set(&#34;四川&#34;, &#34;#FE2E2E&#34;);
+      myMap.set(&#34;云南&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;河北&#34;, &#34;#F5A9A9&#34;);
+      myMap.set(&#34;河南&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;辽宁&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;山东&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;天津&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;江西&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;江苏&#34;, &#34;#FA5858&#34;);
+      myMap.set(&#34;上海&#34;, &#34;#FA5858&#34;);
+      myMap.set(&#34;浙江&#34;, &#34;#F5A9A9&#34;);
+      myMap.set(&#34;吉林&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;内蒙古&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;黑龙江&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;香港&#34;, &#34;#F5A9A9&#34;);
+      myMap.set(&#34;澳门&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;台湾&#34;, &#34;#A4A4A4&#34;);
+      myMap.set(&#34;background&#34;, &#34;#2A0A0A&#34;);
+  
+  var svg = d3.select(&#34;#chart&#34;).append(&#34;svg&#34;)
+    .attr(&#34;width&#34;, &#39;100%&#39;)
+    .attr(&#34;height&#34;, &#39;100%&#39;)
+    .attr(&#39;viewBox&#39;,&#39;0 0 &#39;+(Math.min(width,height))+&#39; &#39;+Math.min(width,height))
+    .attr(&#39;preserveAspectRatio&#39;,&#39;xMinYMin&#39;)
+      .append(&#34;g&#34;)
+      .attr(&#34;transform&#34;, &#34;translate(0,0)&#34;);
+  
+  var projection = d3.geo.mercator()
             .center([107, 31])
             .scale(350)
-              .translate([width/2-130, height/2+30]);</p>
+              .translate([width/2-130, height/2+30]);
+  
+  var path = d3.geo.path()
+          .projection(projection);
+  
+  d3.json(&#34;china_simplify.json&#34;, function(error, root) {
+    
+    if (error) 
+      return console.error(error);
+    console.log(root.features);
+    
+    svg.selectAll(&#34;path&#34;)
+      .data( root.features )
+      .enter()
+      .append(&#34;path&#34;)
+      .attr(&#34;stroke&#34;,&#34;#000&#34;)
+      .attr(&#34;stroke-width&#34;,1)
+      .attr(&#34;fill&#34;, function(d,i){
+        return myMap.get(&#34;background&#34;);
+      })
+      .attr(&#34;d&#34;, path )
+      .on(&#34;mouseover&#34;,function(d,i){
+                d3.select(this)
+                    .attr(&#34;fill&#34;,&#34;#ACB1E6&#34;);
+            })
+            .on(&#34;mouseout&#34;,function(d,i){
+                d3.select(this)
+                    .attr(&#34;fill&#34;,myMap.get(d.properties.name));
+            });
+    
+  });
 
-<p>var path = d3.geo.path()
-          .projection(projection);</p>
-
-<p>d3.json(&ldquo;china_simplify.json&rdquo;, function(error, root) {</p>
-
-<pre><code>if (error) 
-  return console.error(error);
-console.log(root.features);
-
-svg.selectAll(&quot;path&quot;)
-  .data( root.features )
-  .enter()
-  .append(&quot;path&quot;)
-  .attr(&quot;stroke&quot;,&quot;#000&quot;)
-  .attr(&quot;stroke-width&quot;,1)
-  .attr(&quot;fill&quot;, function(d,i){
-    return myMap.get(&quot;background&quot;);
-  })
-  .attr(&quot;d&quot;, path )
-  .on(&quot;mouseover&quot;,function(d,i){
-            d3.select(this)
-                .attr(&quot;fill&quot;,&quot;#ACB1E6&quot;);
-        })
-        .on(&quot;mouseout&quot;,function(d,i){
-            d3.select(this)
-                .attr(&quot;fill&quot;,myMap.get(d.properties.name));
-        });
-</code></pre>
-
-<p>});</p>
-
-<p></script>
-</div>
-</body></p>
-
-<pre><code>
-### 关键代码注解 ###
-
-Define your projection
-
-</code></pre>
-
-<pre><code>var projection = d3.geo.mercator()
-        .center([107, 31]) //(107,31) as center
-        .scale(350)
-          .translate([width/2-130, height/2+30]);// centers in SVG
-</code></pre>
-
-<pre><code>
-When you define a projection, you tell D3 how to transform your data from spherical to Cartesian coordinates. Take a look at the projection docs to get a sense of how you can project your data with D3.
-
-Translate to screen coordinates
-
-</code></pre>
-
-<pre><code>var path = d3.geo.path()
-      .projection(projection);
-</code></pre>
-
-<pre><code>
-When D3 renders your SVG, it has to translate geo coordinates to pixel coordinates on your screen. This functionality is called a path generator. In this block, we store our path generator in the variable path so we can access it through out our code.
-
-Load geo json data
-
-</code></pre>
-
-<p>d3.json(&ldquo;china_simplify.json&rdquo;, function(error, root) { // loads JSON file</p>
-
-<pre><code>if (error) 
-  return console.error(error);
-console.log(root.features);
-
-svg.selectAll(&quot;path&quot;) // selects path elements, will make them if they don't exist
-  .data( root.features ) // iterates over geo feature
-  .enter() // adds feature if it doesn't exist as an element
-  .append(&quot;path&quot;) // defines element as a path
-  .attr(&quot;stroke&quot;,&quot;#000&quot;)
-  .attr(&quot;stroke-width&quot;,1)
-  .attr(&quot;fill&quot;, function(d,i){
-    return myMap.get(&quot;background&quot;);
-  })
-  .attr(&quot;d&quot;, path )  // path generator translates geo data to SVG
-  .on(&quot;mouseover&quot;,function(d,i){
-            d3.select(this)
-                .attr(&quot;fill&quot;,&quot;#ACB1E6&quot;);
-        })
-        .on(&quot;mouseout&quot;,function(d,i){
-            d3.select(this)
-                .attr(&quot;fill&quot;,myMap.get(d.properties.name));
-        });
-</code></pre>
-
-<p>});</p>
-
-<pre><code>
-## Neo4j Link Graph Render ##
-
-visualization toolkits usually expect a JSON structure of node objects (their id, label(s) and properties) and a list of relationships (their properties, start- and end-node-id (or node-array-index for d3) and optionally relationship-id) like this. Here we see 3 nodes (2 people, one database) and 3 relationships in that datastructure.
-
-&gt; Target JSON DataStructure
-
-</code></pre>
-
-<p>{&ldquo;nodes&rdquo;:[{name:&ldquo;Peter&rdquo;,label:&ldquo;Person&rdquo;,id:1},{name:&ldquo;Michael&rdquo;,label:&ldquo;Person&rdquo;,id:2},
-          {name:&ldquo;Neo4j&rdquo;,label:&ldquo;Database&rdquo;,id:3}],
- &ldquo;links&rdquo;:[{source:0, target:1, type:&ldquo;KNOWS&rdquo;, since:2010},{source:0, target:2, type:&ldquo;FOUNDED&rdquo;},
-          {source:1, target:2, type:&ldquo;WORKS_ON&rdquo;}]}</p>
-
-<pre><code>
-&gt; neo4j Query Result DataStructure
-
-</code></pre>
-
-<p>{ &ldquo;results&rdquo;: [
+&lt;/script&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+</code></pre><h3 id="关键代码注解-1">关键代码注解</h3>
+<p>Define your projection</p>
+<pre tabindex="0"><code>    var projection = d3.geo.mercator()
+            .center([107, 31]) //(107,31) as center
+            .scale(350)
+              .translate([width/2-130, height/2+30]);// centers in SVG
+</code></pre><p>When you define a projection, you tell D3 how to transform your data from spherical to Cartesian coordinates. Take a look at the projection docs to get a sense of how you can project your data with D3.</p>
+<p>Translate to screen coordinates</p>
+<pre tabindex="0"><code>    var path = d3.geo.path()
+          .projection(projection);
+</code></pre><p>When D3 renders your SVG, it has to translate geo coordinates to pixel coordinates on your screen. This functionality is called a path generator. In this block, we store our path generator in the variable path so we can access it through out our code.</p>
+<p>Load geo json data</p>
+<pre tabindex="0"><code>d3.json(&#34;china_simplify.json&#34;, function(error, root) { // loads JSON file
+    
+    if (error) 
+      return console.error(error);
+    console.log(root.features);
+    
+    svg.selectAll(&#34;path&#34;) // selects path elements, will make them if they don&#39;t exist
+      .data( root.features ) // iterates over geo feature
+      .enter() // adds feature if it doesn&#39;t exist as an element
+      .append(&#34;path&#34;) // defines element as a path
+      .attr(&#34;stroke&#34;,&#34;#000&#34;)
+      .attr(&#34;stroke-width&#34;,1)
+      .attr(&#34;fill&#34;, function(d,i){
+        return myMap.get(&#34;background&#34;);
+      })
+      .attr(&#34;d&#34;, path )  // path generator translates geo data to SVG
+      .on(&#34;mouseover&#34;,function(d,i){
+                d3.select(this)
+                    .attr(&#34;fill&#34;,&#34;#ACB1E6&#34;);
+            })
+            .on(&#34;mouseout&#34;,function(d,i){
+                d3.select(this)
+                    .attr(&#34;fill&#34;,myMap.get(d.properties.name));
+            });
+    
+  });
+</code></pre><h2 id="neo4j-link-graph-render">Neo4j Link Graph Render</h2>
+<p>visualization toolkits usually expect a JSON structure of node objects (their id, label(s) and properties) and a list of relationships (their properties, start- and end-node-id (or node-array-index for d3) and optionally relationship-id) like this. Here we see 3 nodes (2 people, one database) and 3 relationships in that datastructure.</p>
+<blockquote>
+<p>Target JSON DataStructure</p>
+</blockquote>
+<pre tabindex="0"><code>{&#34;nodes&#34;:[{name:&#34;Peter&#34;,label:&#34;Person&#34;,id:1},{name:&#34;Michael&#34;,label:&#34;Person&#34;,id:2},
+          {name:&#34;Neo4j&#34;,label:&#34;Database&#34;,id:3}],
+ &#34;links&#34;:[{source:0, target:1, type:&#34;KNOWS&#34;, since:2010},{source:0, target:2, type:&#34;FOUNDED&#34;},
+          {source:1, target:2, type:&#34;WORKS_ON&#34;}]}
+</code></pre><blockquote>
+<p>neo4j Query Result DataStructure</p>
+</blockquote>
+<pre tabindex="0"><code>{ &#34;results&#34;: [
     {
-      &ldquo;columns&rdquo;: [&ldquo;path&rdquo;],
-      &ldquo;data&rdquo;   : [{
-          &ldquo;graph&rdquo;: {
-            &ldquo;nodes&rdquo;: [
-              {&ldquo;id&rdquo;: &ldquo;1&rdquo;, &ldquo;labels&rdquo;: [&ldquo;Person&rdquo;], &ldquo;properties&rdquo;: {&ldquo;name&rdquo;: &ldquo;Peter&rdquo;}},
-              {&ldquo;id&rdquo;: &ldquo;2&rdquo;, &ldquo;labels&rdquo;: [&ldquo;Person&rdquo;], &ldquo;properties&rdquo;: {&ldquo;name&rdquo;: &ldquo;Michael&rdquo;}}
+      &#34;columns&#34;: [&#34;path&#34;],
+      &#34;data&#34;   : [{
+          &#34;graph&#34;: {
+            &#34;nodes&#34;: [
+              {&#34;id&#34;: &#34;1&#34;, &#34;labels&#34;: [&#34;Person&#34;], &#34;properties&#34;: {&#34;name&#34;: &#34;Peter&#34;}},
+              {&#34;id&#34;: &#34;2&#34;, &#34;labels&#34;: [&#34;Person&#34;], &#34;properties&#34;: {&#34;name&#34;: &#34;Michael&#34;}}
              ],
-            &ldquo;relationships&rdquo;: [
-              {&ldquo;id&rdquo;: &ldquo;0&rdquo;, &ldquo;type&rdquo;: &ldquo;KNOWS&rdquo;, &ldquo;startNode&rdquo;: &ldquo;1&rdquo;, &ldquo;endNode&rdquo;: &ldquo;2&rdquo;, &ldquo;properties&rdquo;: {}}
+            &#34;relationships&#34;: [
+              {&#34;id&#34;: &#34;0&#34;, &#34;type&#34;: &#34;KNOWS&#34;, &#34;startNode&#34;: &#34;1&#34;, &#34;endNode&#34;: &#34;2&#34;, &#34;properties&#34;: {}}
              ]
-          } // , {&ldquo;graph&rdquo;: &hellip;}, &hellip;
+          } // , {&#34;graph&#34;: ...}, ...
       }]}
-  ], &ldquo;errors&rdquo;: []
-}</p>
-
-<pre><code>
-&gt; conversion logic
-
-``` js
-function idIndex(a,id) {
-  for (var i=0;i&lt;a.length;i++) {
-    if (a[i].id == id) return i;}
-  return null;
+  ], &#34;errors&#34;: []
 }
-var nodes=[], links=[];
-res.results[0].data.forEach(function (row) {
-   row.graph.nodes.forEach(function (n) {
-     if (idIndex(nodes,n.id) == null)
-       nodes.push({id:n.id,label:n.labels[0],title:n.properties.name});
-   });
-   links = links.concat( row.graph.relationships.map(function(r) {
-     return {source:idIndex(nodes,r.startNode),target:idIndex(nodes,r.endNode),type:r.type};
-   }));
-});
-viz = {nodes:nodes, links:links};
-</code></pre>
-
-<pre><code class="language-python">results = db.run(&quot;MATCH (m:Movie)&lt;-[:ACTED_IN]-(a:Person) &quot;
-         &quot;RETURN m.title as movie, collect(a.name) as cast &quot;
-         &quot;LIMIT {limit}&quot;, {&quot;limit&quot;: request.args.get(&quot;limit&quot;, 100)})
-nodes = []
-rels = []
-i = 0
-for record in results:
-    nodes.append({&quot;title&quot;: record[&quot;movie&quot;], &quot;label&quot;: &quot;movie&quot;})
-    target = i
-    i += 1
-    for name in record['cast']:
-        actor = {&quot;title&quot;: name, &quot;label&quot;: &quot;actor&quot;}
-        try:
-            source = nodes.index(actor)
-        except ValueError:
-            nodes.append(actor)
-            source = i
-            i += 1
-        rels.append({&quot;source&quot;: source, &quot;target&quot;: target})
-</code></pre>
-
-<p>To render this list with D3, you just need the d3.js library dependency and a few lines of javascript.</p>
-
-<pre><code>var width = 800, height = 800;
+</code></pre><blockquote>
+<p>conversion logic</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">idIndex</span>(<span style="color:#a6e22e">a</span>,<span style="color:#a6e22e">id</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">i</span><span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;<span style="color:#a6e22e">i</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">length</span>;<span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">a</span>[<span style="color:#a6e22e">i</span>].<span style="color:#a6e22e">id</span> <span style="color:#f92672">==</span> <span style="color:#a6e22e">id</span>) <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">i</span>;}
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">nodes</span><span style="color:#f92672">=</span>[], <span style="color:#a6e22e">links</span><span style="color:#f92672">=</span>[];
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">results</span>[<span style="color:#ae81ff">0</span>].<span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">forEach</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">row</span>) {
+</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">row</span>.<span style="color:#a6e22e">graph</span>.<span style="color:#a6e22e">nodes</span>.<span style="color:#a6e22e">forEach</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">n</span>) {
+</span></span><span style="display:flex;"><span>     <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">idIndex</span>(<span style="color:#a6e22e">nodes</span>,<span style="color:#a6e22e">n</span>.<span style="color:#a6e22e">id</span>) <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>)
+</span></span><span style="display:flex;"><span>       <span style="color:#a6e22e">nodes</span>.<span style="color:#a6e22e">push</span>({<span style="color:#a6e22e">id</span><span style="color:#f92672">:</span><span style="color:#a6e22e">n</span>.<span style="color:#a6e22e">id</span>,<span style="color:#a6e22e">label</span><span style="color:#f92672">:</span><span style="color:#a6e22e">n</span>.<span style="color:#a6e22e">labels</span>[<span style="color:#ae81ff">0</span>],<span style="color:#a6e22e">title</span><span style="color:#f92672">:</span><span style="color:#a6e22e">n</span>.<span style="color:#a6e22e">properties</span>.<span style="color:#a6e22e">name</span>});
+</span></span><span style="display:flex;"><span>   });
+</span></span><span style="display:flex;"><span>   <span style="color:#a6e22e">links</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">links</span>.<span style="color:#a6e22e">concat</span>( <span style="color:#a6e22e">row</span>.<span style="color:#a6e22e">graph</span>.<span style="color:#a6e22e">relationships</span>.<span style="color:#a6e22e">map</span>(<span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">r</span>) {
+</span></span><span style="display:flex;"><span>     <span style="color:#66d9ef">return</span> {<span style="color:#a6e22e">source</span><span style="color:#f92672">:</span><span style="color:#a6e22e">idIndex</span>(<span style="color:#a6e22e">nodes</span>,<span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">startNode</span>),<span style="color:#a6e22e">target</span><span style="color:#f92672">:</span><span style="color:#a6e22e">idIndex</span>(<span style="color:#a6e22e">nodes</span>,<span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">endNode</span>),<span style="color:#a6e22e">type</span><span style="color:#f92672">:</span><span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">type</span>};
+</span></span><span style="display:flex;"><span>   }));
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">viz</span> <span style="color:#f92672">=</span> {<span style="color:#a6e22e">nodes</span><span style="color:#f92672">:</span><span style="color:#a6e22e">nodes</span>, <span style="color:#a6e22e">links</span><span style="color:#f92672">:</span><span style="color:#a6e22e">links</span>};
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>results <span style="color:#f92672">=</span> db<span style="color:#f92672">.</span>run(<span style="color:#e6db74">&#34;MATCH (m:Movie)&lt;-[:ACTED_IN]-(a:Person) &#34;</span>
+</span></span><span style="display:flex;"><span>         <span style="color:#e6db74">&#34;RETURN m.title as movie, collect(a.name) as cast &#34;</span>
+</span></span><span style="display:flex;"><span>         <span style="color:#e6db74">&#34;LIMIT </span><span style="color:#e6db74">{limit}</span><span style="color:#e6db74">&#34;</span>, {<span style="color:#e6db74">&#34;limit&#34;</span>: request<span style="color:#f92672">.</span>args<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;limit&#34;</span>, <span style="color:#ae81ff">100</span>)})
+</span></span><span style="display:flex;"><span>nodes <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>rels <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> record <span style="color:#f92672">in</span> results:
+</span></span><span style="display:flex;"><span>    nodes<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;title&#34;</span>: record[<span style="color:#e6db74">&#34;movie&#34;</span>], <span style="color:#e6db74">&#34;label&#34;</span>: <span style="color:#e6db74">&#34;movie&#34;</span>})
+</span></span><span style="display:flex;"><span>    target <span style="color:#f92672">=</span> i
+</span></span><span style="display:flex;"><span>    i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> name <span style="color:#f92672">in</span> record[<span style="color:#e6db74">&#39;cast&#39;</span>]:
+</span></span><span style="display:flex;"><span>        actor <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;title&#34;</span>: name, <span style="color:#e6db74">&#34;label&#34;</span>: <span style="color:#e6db74">&#34;actor&#34;</span>}
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>            source <span style="color:#f92672">=</span> nodes<span style="color:#f92672">.</span>index(actor)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">ValueError</span>:
+</span></span><span style="display:flex;"><span>            nodes<span style="color:#f92672">.</span>append(actor)
+</span></span><span style="display:flex;"><span>            source <span style="color:#f92672">=</span> i
+</span></span><span style="display:flex;"><span>            i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>        rels<span style="color:#f92672">.</span>append({<span style="color:#e6db74">&#34;source&#34;</span>: source, <span style="color:#e6db74">&#34;target&#34;</span>: target})
+</span></span></code></pre></div><p>To render this list with D3, you just need the d3.js library dependency and a few lines of javascript.</p>
+<pre tabindex="0"><code>var width = 800, height = 800;
   // force layout setup
   var force = d3.layout.force()
           .charge(-200).linkDistance(30).size([width, height]);
 
   // setup svg div
-  var svg = d3.select(&quot;#graph&quot;).append(&quot;svg&quot;)
-          .attr(&quot;width&quot;, &quot;100%&quot;).attr(&quot;height&quot;, &quot;100%&quot;)
-          .attr(&quot;pointer-events&quot;, &quot;all&quot;);
+  var svg = d3.select(&#34;#graph&#34;).append(&#34;svg&#34;)
+          .attr(&#34;width&#34;, &#34;100%&#34;).attr(&#34;height&#34;, &#34;100%&#34;)
+          .attr(&#34;pointer-events&#34;, &#34;all&#34;);
 
   // load graph (nodes,links) json from /graph endpoint
-  d3.json(&quot;/graph&quot;, function(error, graph) {
+  d3.json(&#34;/graph&#34;, function(error, graph) {
 if (error) return;
 
       force.nodes(graph.nodes).links(graph.links).start();
 
       // render relationships as lines
-      var link = svg.selectAll(&quot;.link&quot;)
+      var link = svg.selectAll(&#34;.link&#34;)
               .data(graph.links).enter()
-              .append(&quot;line&quot;).attr(&quot;class&quot;, &quot;link&quot;);
+              .append(&#34;line&#34;).attr(&#34;class&#34;, &#34;link&#34;);
 
       // render nodes as circles, css-class from label
-      var node = svg.selectAll(&quot;.node&quot;)
+      var node = svg.selectAll(&#34;.node&#34;)
               .data(graph.nodes).enter()
-              .append(&quot;circle&quot;)
-              .attr(&quot;class&quot;, function (d) { return &quot;node &quot;+d.label })
-              .attr(&quot;r&quot;, 10)
+              .append(&#34;circle&#34;)
+              .attr(&#34;class&#34;, function (d) { return &#34;node &#34;+d.label })
+              .attr(&#34;r&#34;, 10)
               .call(force.drag);
 
       // html title attribute for title node-attribute
-      node.append(&quot;title&quot;)
+      node.append(&#34;title&#34;)
               .text(function (d) { return d.title; })
 
       // force feed algo ticks for coordinate computation
-      force.on(&quot;tick&quot;, function() {
-          link.attr(&quot;x1&quot;, function(d) { return d.source.x; })
-                  .attr(&quot;y1&quot;, function(d) { return d.source.y; })
-                  .attr(&quot;x2&quot;, function(d) { return d.target.x; })
-                  .attr(&quot;y2&quot;, function(d) { return d.target.y; });
+      force.on(&#34;tick&#34;, function() {
+          link.attr(&#34;x1&#34;, function(d) { return d.source.x; })
+                  .attr(&#34;y1&#34;, function(d) { return d.source.y; })
+                  .attr(&#34;x2&#34;, function(d) { return d.target.x; })
+                  .attr(&#34;y2&#34;, function(d) { return d.target.y; });
 
-          node.attr(&quot;cx&quot;, function(d) { return d.x; })
-                  .attr(&quot;cy&quot;, function(d) { return d.y; });
+          node.attr(&#34;cx&#34;, function(d) { return d.x; })
+                  .attr(&#34;cy&#34;, function(d) { return d.y; });
       });
   });
-</code></pre>
-
-<p><a href="https://github.com/yrong/movies-python-bolt">my example project</a></p>
-
+</code></pre><p><a href="https://github.com/yrong/movies-python-bolt">my example project</a></p>
 <h2 id="others">Others</h2>
-
 <p>D3 能做的事太多，不一一讲解了。</p>
-
 <ul>
 <li><a href="http://bl.ocks.org/mbostock/1096355">极地时钟</a></li>
 <li><a href="http://bl.ocks.org/mbostock/4062045">Force Layouts</a></li>
@@ -1089,11 +889,33 @@ if (error) return;
 <li><a href="http://bl.ocks.org/mbostock/aa7edeac67253ea5de7f">Prim’s Algorithm V</a></li>
 <li><a href="http://bl.ocks.org/mbostock/9539958">OMG Particles II</a></li>
 </ul>
-
 <p>在 <a href="https://github.com/d3/d3/wiki/Gallery">D3 Gallery</a> 中能找到更多例子。推荐 <a href="http://alignedleft.com/tutorials/d3/">Scott Murray 的 D3 教程</a>和 <a href="https://github.com/d3/d3-3.x-api-reference/blob/master/API-Reference.md">D3 的官方文档</a>。</p>
     </article>
 
     
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2016-10-12-d3-data-visualization/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=D3.js%e6%95%b0%e6%8d%ae%e5%8f%af%e8%a7%86%e5%8c%96%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2016-10-12-d3-data-visualization/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
 
 
     <ul class="pager article-pager">
@@ -1108,7 +930,7 @@ if (error) return;
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
   </ul>

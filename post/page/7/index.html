@@ -11,24 +11,25 @@
   <meta property="og:url" content="https://yrong.github.io/blog/post/" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.54.0" />
+  <meta name="generator" content="Hugo 0.159.1">
   <link href="/blog/post/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
   <link href="/blog/post/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
-
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
   <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
   <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
 
   <script src="/blog/js/script.js"></script>
   <script src="/blog/js/custom.js"></script>
-  <script defer src="/blog/js/fontawesome.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
 </head>
 
 <body>
 
 <header class="site-header">
   <nav class="site-navi">
-    <h1 class="site-title"><a href="/blog/">yrong blog</a></h1>
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
     <ul class="site-navi-items">
       <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
       <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
@@ -44,6 +45,26 @@
   <div class="main" role="main">
     <section class="list section-list">
       <article class="article">
+        <a href="/blog/post/2016-09-10-redis/" class="article-titles">
+          <h2 class="article-title">redis object types</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>September 10, 2016</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/redis/">
+              <i class="fa-solid fa-tag"></i>
+              redis
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>redis数据结构类型及实现</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2016-09-10-redis/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/post/2016-09-05-neo4j-internal/" class="article-titles">
           <h2 class="article-title">Neo4j Internal</h2>
           
@@ -51,8 +72,8 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>September 5, 2016</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/neo4j/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/neo4j/">
+              <i class="fa-solid fa-tag"></i>
               neo4j
             </a>&nbsp;
           </li>
@@ -71,14 +92,15 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>August 6, 2016</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/java/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/java/">
+              <i class="fa-solid fa-tag"></i>
               java
             </a>&nbsp;
           </li>
         </ul>
         <div class="article-content">
-          基于栈的虚拟机 JVM是一种基于栈的虚拟机，绝大部分字节码操作都涉及到操作数栈中操作数的入栈和出栈。例如，在执行求和操作时，会将两个操作数入栈
+          <h2 id="基于栈的虚拟机">基于栈的虚拟机</h2>
+<p>JVM是一种基于栈的虚拟机，绝大部分字节码操作都涉及到操作数栈中操作数的入栈和出栈。例如，在执行求和操作时，会将两个操作数入栈，将两个数做加法后再将结果入栈，使用结果的时候再将操作结果出栈。除了栈之外，字节码的格式还规定了有多达65536个寄存器可以使用，也称之为 <strong>局部变量</strong>。</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2016-08-06-java-bytecode/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -91,8 +113,8 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>July 21, 2016</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/nginx/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/nginx/">
+              <i class="fa-solid fa-tag"></i>
               nginx
             </a>&nbsp;
           </li>
@@ -111,14 +133,14 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>July 16, 2016</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/elasticsearch/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/elasticsearch/">
+              <i class="fa-solid fa-tag"></i>
               elasticsearch
             </a>&nbsp;
           </li>
         </ul>
         <div class="article-content">
-          es5.0版本主要改进应该是lucene版本升级到6.0,利用插件机制把netty从core中剥离出来接入NetworkModule,代码在
+          <p>es5.0版本主要改进应该是lucene版本升级到6.0,利用插件机制把netty从core中剥离出来接入NetworkModule,代码在Netty3Plugin.</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2016-07-16-elasticsearch-analysis/">Read more...</a></div>
         <div class="article-floatclear"></div>
@@ -131,14 +153,14 @@
         <ul class="article-meta">
           <li class="article-meta-date"><time>July 13, 2016</time></li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/java/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/java/">
+              <i class="fa-solid fa-tag"></i>
               java
             </a>&nbsp;
           </li>
           <li class="article-meta-tags">
-            <a href="/blog/tags/vertx/">
-              <i class="fas fa-tag"></i>
+            <a href="/tags/vertx/">
+              <i class="fa-solid fa-tag"></i>
               vertx
             </a>&nbsp;
           </li>
@@ -151,113 +173,45 @@
       </article>
     </section>
     
-
-<ul class="pagination">
-    
-    <li class="page-item">
-        <a href="/blog/post/" class="page-link" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
-    </li>
-    
-    <li class="page-item">
-    <a href="/blog/post/page/6/" class="page-link" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
-    </li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item"><a class="page-link" href="/blog/post/">1</a></li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item"><a class="page-link" href="/blog/post/page/2/">2</a></li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item"><a class="page-link" href="/blog/post/page/3/">3</a></li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item disabled"><span aria-hidden="true">&nbsp;&hellip;&nbsp;</span></li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item"><a class="page-link" href="/blog/post/page/6/">6</a></li>
-    
-    
-    
-    
-    
-    
-        
-        
-    
-    
-    <li class="page-item active"><a class="page-link" href="/blog/post/page/7/">7</a></li>
-    
-    
-    <li class="page-item disabled">
-    <a href="" class="page-link" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
-    </li>
-    
-    <li class="page-item">
-        <a href="/blog/post/page/7/" class="page-link" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
-    </li>
-    
-</ul>
-
+    <ul class="pagination pagination-default">
+      <li class="page-item">
+        <a href="/blog/post/" aria-label="First" class="page-link" role="button"><span aria-hidden="true">&laquo;&laquo;</span></a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/post/page/6/" aria-label="Previous" class="page-link" role="button"><span aria-hidden="true">&laquo;</span></a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/post/page/3/" aria-label="Page 3" class="page-link" role="button">3</a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/post/page/4/" aria-label="Page 4" class="page-link" role="button">4</a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/post/page/5/" aria-label="Page 5" class="page-link" role="button">5</a>
+      </li>
+      <li class="page-item">
+        <a href="/blog/post/page/6/" aria-label="Page 6" class="page-link" role="button">6</a>
+      </li>
+      <li class="page-item active">
+        <a aria-current="page" aria-label="Page 7" class="page-link" role="button">7</a>
+      </li>
+      <li class="page-item disabled">
+        <a aria-disabled="true" aria-label="Next" class="page-link" role="button" tabindex="-1"><span aria-hidden="true">&raquo;</span></a>
+      </li>
+      <li class="page-item disabled">
+        <a aria-disabled="true" aria-label="Last" class="page-link" role="button" tabindex="-1"><span aria-hidden="true">&raquo;&raquo;</span></a>
+      </li>
+    </ul>
   </div>
 
 
 
 <div class="site-footer">
-  <div class="copyright">&copy; Copyright 2017 Ronyang</div>
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-rsslink">
       <a href="/blog/post/index.xml" type="application/rss+xml" target="_blank" title="RSS">
-        <i class="fas fa-rss"></i>
+        <i class="fa-solid fa-rss"></i>
       </a>
     </li>
     <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
