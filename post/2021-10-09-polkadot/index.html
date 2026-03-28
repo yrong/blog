@@ -294,9 +294,8 @@ struct BackedCandidates(Vec&lt;BackedCandidate&gt;); // sorted by para-id.
 <p>Reconstruction: The original large message can be reconstructed by collecting only a fraction of these chunks. In Polkadot, this fraction is 1/3</p>
 </li>
 </ul>
-<p>Steps: parachain block → relay chain inclusion</p>
-<p>The protocol separates <strong>backing</strong> (candidate accepted with enough validator votes on-chain) from <strong>inclusion / enactment</strong> (candidate commitments applied: para head, UMP/HRMP, etc., after <strong>availability</strong>).</p>
 <h1 id="steps-parachain-block--relay-chain-inclusion">Steps: parachain block → relay chain inclusion</h1>
+<p>The protocol separates <strong>backing</strong> (candidate accepted with enough validator votes on-chain) from <strong>inclusion / enactment</strong> (candidate commitments applied: para head, UMP/HRMP, etc., after <strong>availability</strong>).</p>
 <h3 id="1-off-chain-collator-produces-a-candidate">1. Off-chain: collator produces a candidate</h3>
 <ol>
 <li>The <strong>collator</strong> builds a parachain block and the <strong>PoV</strong> (proof-of-validity bundle validators execute).</li>
