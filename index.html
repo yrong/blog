@@ -42,6 +42,48 @@
   <div class="main" role="main">
     <section class="list home-list">
       <article class="article">
+        <a href="/blog/post/2022-02-01-solidity-pattern/" class="article-titles">
+          <h2 class="article-title">solidity patterns</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>February 1, 2022</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/ethereum/">
+              <i class="fa-solid fa-tag"></i>
+              Ethereum
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/solidity/">
+              <i class="fa-solid fa-tag"></i>
+              Solidity
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <h2 id="solidity-设计模式汇总笔记">Solidity 设计模式汇总笔记</h2>
+<p>本笔记总结了用于优化 Gas 消耗、增强安全性以及改善开发体验的核心 Solidity 编程模式。</p>
+<ol>
+<li>
+<p>重入保护模式 (Reentrancy Protection)
+问题： 当合约发起外部调用时，执行控制权会转移给另一方。攻击者可以利用此机会在原始操作完成前再次调用合约函数，从而导致资产被超额提取。
+检查-效果-交互 (CEI) 模式：
+Checks：验证输入参数和初始状态。
+Effects：在进行任何外部调用之前，更新所有的状态变量。
+Interactions：最后再执行外部调用或资产转移。
+重入卫兵 (Reentrancy Guards/Mutex)： 使用一个布尔标志（如 nonReentrant 修饰符）在函数进入时加锁，结束后解锁。如果函数在锁定状态下再次被调用，则交易回滚。</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2022-02-01-solidity-pattern/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/post/2021-10-09-polkadot/" class="article-titles">
           <h2 class="article-title">Terminology in Polkadot</h2>
           
@@ -510,65 +552,6 @@ let msg = Xcm::Transact {
 <p>目前市面上比较流行的流程图绘图框架大致有 jointjs、jsplumb、mxgraph、bpmnjs、antv g6 等。对以上框架进行技术调研，从商业版权、易用性、功能完善性、可定制性、浏览器兼容性、社区支持方面进行评估，大致得出如下结果：</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2018-07-08-mxgraph/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
-      <article class="article">
-        <a href="/blog/post/2018-06-09-nestjs/" class="article-titles">
-          <h2 class="article-title">Introduction to nestjs</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>June 9, 2018</time></li>
-          <li class="article-meta-tags">
-            <a href="/tags/typescript/">
-              <i class="fa-solid fa-tag"></i>
-              typescript
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <h2 id="代码分析">代码分析</h2>
-<p>入口main.ts</p>
-<pre tabindex="0"><code>import { NestFactory } from &#39;@nestjs/core&#39;;
-import { ApplicationModule } from &#39;./app.module&#39;;
-
-async function bootstrap() {
-  const app = await NestFactory.create(ApplicationModule);
-  await app.listen(3000);
-}
-bootstrap();
-</code></pre><p>NestFactory构造</p>
-<pre tabindex="0"><code>public async create(
-    module: any,
-    serverOrOptions?: any,
-    options?: NestApplicationOptions,
-  ): Promise&lt;
-    INestApplication &amp; (INestExpressApplication | INestFastifyApplication)
-  &gt; {
-    const isHttpServer = serverOrOptions &amp;&amp; serverOrOptions.patch;
-    // tslint:disable-next-line:prefer-const
-    let [httpServer, appOptions] = isHttpServer
-      ? [serverOrOptions, options]
-      : [ExpressFactory.create()/* 默认使用Express*/, serverOrOptions];
-
-    const applicationConfig = new ApplicationConfig();
-    const container = new NestContainer(applicationConfig);//生成容器container;传入了配置对象
-    httpServer = this.applyExpressAdapter(httpServer);//初始化http服务
-
-    this.applyLogger(appOptions);//日志输出对象
-    await this.initialize(module, container, applicationConfig, httpServer);
-    return this.createNestInstance&lt;NestApplication&gt;(
-      new NestApplication(container, httpServer, applicationConfig, appOptions),
-    );
-  }
-</code></pre><ul>
-<li>第一个参数是使用是传入的类似angularmodule的对象</li>
-<li>第二个参数可以是设置参数，也可以是类似express的MVC，如官网提到的fastify，覆盖默认使用的express</li>
-<li>第三个参数就是设置参数</li>
-</ul>
-<p>初始化模块</p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2018-06-09-nestjs/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
     </section>

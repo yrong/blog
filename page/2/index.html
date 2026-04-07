@@ -42,6 +42,65 @@
   <div class="main" role="main">
     <section class="list home-list">
       <article class="article">
+        <a href="/blog/post/2018-06-09-nestjs/" class="article-titles">
+          <h2 class="article-title">Introduction to nestjs</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>June 9, 2018</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/typescript/">
+              <i class="fa-solid fa-tag"></i>
+              typescript
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <h2 id="代码分析">代码分析</h2>
+<p>入口main.ts</p>
+<pre tabindex="0"><code>import { NestFactory } from &#39;@nestjs/core&#39;;
+import { ApplicationModule } from &#39;./app.module&#39;;
+
+async function bootstrap() {
+  const app = await NestFactory.create(ApplicationModule);
+  await app.listen(3000);
+}
+bootstrap();
+</code></pre><p>NestFactory构造</p>
+<pre tabindex="0"><code>public async create(
+    module: any,
+    serverOrOptions?: any,
+    options?: NestApplicationOptions,
+  ): Promise&lt;
+    INestApplication &amp; (INestExpressApplication | INestFastifyApplication)
+  &gt; {
+    const isHttpServer = serverOrOptions &amp;&amp; serverOrOptions.patch;
+    // tslint:disable-next-line:prefer-const
+    let [httpServer, appOptions] = isHttpServer
+      ? [serverOrOptions, options]
+      : [ExpressFactory.create()/* 默认使用Express*/, serverOrOptions];
+
+    const applicationConfig = new ApplicationConfig();
+    const container = new NestContainer(applicationConfig);//生成容器container;传入了配置对象
+    httpServer = this.applyExpressAdapter(httpServer);//初始化http服务
+
+    this.applyLogger(appOptions);//日志输出对象
+    await this.initialize(module, container, applicationConfig, httpServer);
+    return this.createNestInstance&lt;NestApplication&gt;(
+      new NestApplication(container, httpServer, applicationConfig, appOptions),
+    );
+  }
+</code></pre><ul>
+<li>第一个参数是使用是传入的类似angularmodule的对象</li>
+<li>第二个参数可以是设置参数，也可以是类似express的MVC，如官网提到的fastify，覆盖默认使用的express</li>
+<li>第三个参数就是设置参数</li>
+</ul>
+<p>初始化模块</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2018-06-09-nestjs/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/post/2018-04-09-skynet/" class="article-titles">
           <h2 class="article-title">Introduction to Skynet</h2>
           
@@ -250,32 +309,6 @@ snax代表使用snax框架写的服务所在的目录。</p>
           <p>wordpress code analysis</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2017-05-01-wordpress/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
-      <article class="article">
-        <a href="/blog/post/2017-04-25-go-micro/" class="article-titles">
-          <h2 class="article-title">go micro code analysis</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>April 25, 2017</time></li>
-          <li class="article-meta-tags">
-            <a href="/tags/microservice/">
-              <i class="fa-solid fa-tag"></i>
-              microservice
-            </a>&nbsp;
-          </li>
-          <li class="article-meta-tags">
-            <a href="/tags/golang/">
-              <i class="fa-solid fa-tag"></i>
-              golang
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <p>go micro code analysis</p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2017-04-25-go-micro/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
     </section>
