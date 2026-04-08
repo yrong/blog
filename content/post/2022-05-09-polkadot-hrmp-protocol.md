@@ -8,7 +8,7 @@ tags:
 title: Polkadot HRMP protocol (implementation guide)
 ---
 
-Implementation-oriented notes from the Polkadot SDK: relay pallet `polkadot/runtime/parachains/src/hrmp.rs`, inclusion wiring, and Cumulus `parachain-system`. See also [validate_block and PVF]({{< relref "2026-04-08-polkadot-validate-block-pvf.md" >}}).
+Implementation-oriented notes from the Polkadot SDK: relay pallet `polkadot/runtime/parachains/src/hrmp.rs`, inclusion wiring, and Cumulus `parachain-system`. See also [validate_block and PVF]({{< relref "2022-05-10-polkadot-validate-block-pvf.md" >}}).
 
 ## What HRMP is
 
