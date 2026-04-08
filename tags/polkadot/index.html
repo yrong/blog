@@ -42,6 +42,63 @@
   <div class="main" role="main">
     <section class="list term-list">
       <article class="article">
+        <a href="/blog/post/2022-05-10-polkadot-validate-block-pvf/" class="article-titles">
+          <h2 class="article-title">Polkadot validate_block, PVF, and relay validators</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>May 10, 2022</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>Companion to <a href="/blog/post/2022-05-09-polkadot-hrmp-protocol/">Polkadot HRMP protocol (implementation guide)</a>.</p>
+<h2 id="what-implementationrs-is">What <code>implementation.rs</code> is</h2>
+<p><strong><code>cumulus/pallets/parachain-system/src/validate_block/implementation.rs</code></strong> implements <strong><code>validate_block</code></strong>: take the PoV’s <strong>storage proof</strong>, build a sparse in-memory trie, <strong>override</strong> <code>sp_io::storage</code> (and related) host functions so validation runs <strong>inside the Wasm</strong> instead of calling the node’s DB, <strong>execute the parachain block</strong>, then return <strong><code>ValidationResult</code></strong> — head data, <code>horizontal_messages</code>, <code>hrmp_watermark</code>, upward messages, processed downward message count, optional new validation code.</p>
+<p>The helper <strong><code>run_with_externalities_and_recorder</code></strong> wraps Substrate <strong><code>Externalities</code></strong> (<code>Ext</code> over proof + <strong><code>OverlayedChanges</code></strong>) so pallet storage reads/writes during <code>execute_verified_block</code> and the follow-up reads for the result see consistent state. That is <strong>production PVF</strong> behavior, not limited to tests.</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2022-05-10-polkadot-validate-block-pvf/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/post/2022-05-09-polkadot-hrmp-protocol/" class="article-titles">
+          <h2 class="article-title">Polkadot HRMP protocol (implementation guide)</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>May 9, 2022</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>Implementation-oriented notes from the Polkadot SDK: relay pallet <code>polkadot/runtime/parachains/src/hrmp.rs</code>, inclusion wiring, and Cumulus <code>parachain-system</code>. See also <a href="/blog/post/2022-05-10-polkadot-validate-block-pvf/">validate_block and PVF</a>.</p>
+<h2 id="what-hrmp-is">What HRMP is</h2>
+<p><strong>HRMP (Horizontally Relay-routed Message Passing)</strong> lets parachains send bytes to each other using the <strong>same conceptual model as XCMP</strong> (channels, queues), but <strong>full message payloads live in relay-chain storage</strong>. That keeps semantics simpler and makes relay resource use higher. It is described as an interim mechanism until XCMP is fully available.</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2022-05-09-polkadot-hrmp-protocol/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/post/2021-10-09-polkadot/" class="article-titles">
           <h2 class="article-title">Terminology in Polkadot</h2>
           

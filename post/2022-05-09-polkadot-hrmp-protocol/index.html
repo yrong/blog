@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Polkadot HRMP protocol (implementation guide) - yrong blog</title>
+  <meta property="og:title" content="Polkadot HRMP protocol (implementation guide) - yrong blog" />
+  <meta name="twitter:title" content="Polkadot HRMP protocol (implementation guide) - yrong blog" />
+  <meta name="description" content="Implementation-oriented notes from the Polkadot SDK: relay pallet polkadot/runtime/parachains/src/hrmp.rs, inclusion wiring, and Cumulus parachain-system. See also validate_block and PVF.
+What HRMP is
+HRMP (Horizontally Relay-routed Message Passing) lets parachains send bytes to each other using the same conceptual model as XCMP (channels, queues), but full message payloads live in relay-chain storage. That keeps semantics simpler and makes relay resource use higher. It is described as an interim mechanism until XCMP is fully available.">
+  <meta property="og:description" content="Implementation-oriented notes from the Polkadot SDK: relay pallet polkadot/runtime/parachains/src/hrmp.rs, inclusion wiring, and Cumulus parachain-system. See also validate_block and PVF.
+What HRMP is
+HRMP (Horizontally Relay-routed Message Passing) lets parachains send bytes to each other using the same conceptual model as XCMP (channels, queues), but full message payloads live in relay-chain storage. That keeps semantics simpler and makes relay resource use higher. It is described as an interim mechanism until XCMP is fully available.">
+  <meta name="twitter:description" content="Implementation-oriented notes from the Polkadot SDK: relay pallet polkadot/runtime/parachains/src/hrmp.rs, inclusion wiring, and Cumulus parachain-system. See also validate_block and PVF.
+What HRMP is …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2022-05-09-polkadot-hrmp-protocol/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Polkadot HRMP protocol (implementation guide)</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>May 9, 2022</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/blockchain/">
+            <i class="fa-solid fa-tag"></i>
+            BlockChain
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/polkadot/">
+            <i class="fa-solid fa-tag"></i>
+            Polkadot
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#what-hrmp-is">What HRMP is</a></li>
+    <li><a href="#data-model-relay-chain">Data model (relay chain)</a></li>
+    <li><a href="#channel-lifecycle">Channel lifecycle</a></li>
+    <li><a href="#per-block-flow-candidate--relay-state">Per-block flow: candidate → relay state</a></li>
+    <li><a href="#acceptance-checks-invalid-candidates-fail-before-enact">Acceptance checks (invalid candidates fail before enact)</a></li>
+    <li><a href="#parachain-side-cumulus">Parachain side (Cumulus)</a></li>
+    <li><a href="#relay-inclusion-both-roles-per-included-para">Relay <code>inclusion</code>: both roles per included para</a></li>
+    <li><a href="#sending-out--horizontal_messages--relay-storage">Sending OUT → <code>horizontal_messages</code> → relay storage</a>
+      <ul>
+        <li><a href="#1-source-of-payloads-on-the-parachain">1. Source of payloads on the parachain</a></li>
+        <li><a href="#2-parachain-system-on_finalize-xcmp-queue--hrmpoutboundmessages">2. <code>parachain-system</code> <code>on_finalize</code>: XCMP queue → <code>HrmpOutboundMessages</code></a></li>
+        <li><a href="#3-validate_block-storage--validationresulthorizontal_messages">3. <code>validate_block</code>: storage → <code>ValidationResult.horizontal_messages</code></a></li>
+        <li><a href="#4-relay-inclusion">4. Relay inclusion</a></li>
+        <li><a href="#one-liner">One-liner</a></li>
+      </ul>
+    </li>
+    <li><a href="#end-to-end-sequence">End-to-end sequence</a></li>
+    <li><a href="#files-to-read">Files to read</a></li>
+    <li><a href="#validate_block--pvf--relay-validators-vs-relay-runtime"><code>validate_block</code> / PVF — relay validators vs relay runtime</a>
+      <ul>
+        <li><a href="#relationship-to-the-pvf">Relationship to the PVF</a></li>
+        <li><a href="#run-on-validators--precise-wording">“Run on validators” — precise wording</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+</aside>
+      <p>Implementation-oriented notes from the Polkadot SDK: relay pallet <code>polkadot/runtime/parachains/src/hrmp.rs</code>, inclusion wiring, and Cumulus <code>parachain-system</code>. See also <a href="/blog/post/2022-05-10-polkadot-validate-block-pvf/">validate_block and PVF</a>.</p>
+<h2 id="what-hrmp-is">What HRMP is</h2>
+<p><strong>HRMP (Horizontally Relay-routed Message Passing)</strong> lets parachains send bytes to each other using the <strong>same conceptual model as XCMP</strong> (channels, queues), but <strong>full message payloads live in relay-chain storage</strong>. That keeps semantics simpler and makes relay resource use higher. It is described as an interim mechanism until XCMP is fully available.</p>
+<p>From the implementers guide (<code>polkadot/roadmap/implementers-guide/src/messaging.md</code>):</p>
+<ul>
+<li>Semantically mimics XCMP’s interface.</li>
+<li><strong>Difference:</strong> all messages are stored on the relay chain.</li>
+<li>Expected to be retired once XCMP is available.</li>
+</ul>
+<h2 id="data-model-relay-chain">Data model (relay chain)</h2>
+<p><strong>Main implementation:</strong> <code>polkadot/runtime/parachains/src/hrmp.rs</code></p>
+<ul>
+<li><strong><code>HrmpChannelId</code></strong>: <code>(sender, recipient)</code> — <strong>unidirectional</strong>; <code>(A,B)</code> and <code>(B,A)</code> are different channels.</li>
+<li><strong><code>HrmpChannel</code></strong>: negotiated <code>max_capacity</code>, <code>max_total_size</code>, <code>max_message_size</code>; current <code>msg_count</code>, <code>total_size</code>; <strong><code>mqc_head</code></strong> (message-queue chain hash for light-client / para verification).</li>
+</ul>
+<p><strong>Important storage:</strong></p>
+<table>
+  <thead>
+      <tr>
+          <th>Storage</th>
+          <th>Role</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>HrmpChannels</code></td>
+          <td>Per-channel metadata + MQC head</td>
+      </tr>
+      <tr>
+          <td><code>HrmpChannelContents</code></td>
+          <td>Queued <code>InboundHrmpMessage</code> per channel</td>
+      </tr>
+      <tr>
+          <td><code>HrmpChannelDigests</code></td>
+          <td>Per recipient: relay block numbers where inbound HRMP arrived (watermark rules)</td>
+      </tr>
+      <tr>
+          <td><code>HrmpWatermarks</code></td>
+          <td>Last relay block the recipient committed to having processed up to</td>
+      </tr>
+      <tr>
+          <td><code>HrmpOpenChannelRequests*</code> / <code>HrmpCloseChannelRequests*</code></td>
+          <td>Handshake + teardown</td>
+      </tr>
+      <tr>
+          <td><code>HrmpIngressChannelsIndex</code> / <code>HrmpEgressChannelsIndex</code></td>
+          <td>Neighbor index per para</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Message types</strong> (from <code>types/messages.md</code>):</p>
+<ul>
+<li><strong><code>OutboundHrmpMessage</code></strong>: <code>recipient</code>, <code>data</code> — in a <strong>sender</strong> candidate’s commitments.</li>
+<li><strong><code>InboundHrmpMessage</code></strong>: <code>sent_at</code> (relay block when the sending candidate was enacted), <code>data</code> — what gets <strong>stored</strong> on the relay chain for the recipient.</li>
+</ul>
+<h2 id="channel-lifecycle">Channel lifecycle</h2>
+<ol>
+<li><strong>Open:</strong> sender <code>hrmp_init_open_channel</code>, recipient <code>hrmp_accept_open_channel</code> (parachain origin).</li>
+<li><strong>Activate / close on session change:</strong> <code>initializer_on_new_session</code> runs <code>process_hrmp_open_channel_requests</code>, <code>process_hrmp_close_channel_requests</code>, and cleanup for outgoing paras (<code>polkadot/runtime/parachains/src/initializer.rs</code> → HRMP).</li>
+</ol>
+<h2 id="per-block-flow-candidate--relay-state">Per-block flow: candidate → relay state</h2>
+<p>In <code>inclusion::enact_candidate</code> (<code>polkadot/runtime/parachains/src/inclusion/mod.rs</code>):</p>
+<ol>
+<li><strong><code>prune_hrmp(recipient_para, hrmp_watermark)</code></strong> — recipient candidate says it processed inbound HRMP up to that relay block; relay drops stored messages with <code>sent_at</code> ≤ watermark and updates digests / watermark.</li>
+<li><strong><code>queue_outbound_hrmp(sender_para, horizontal_messages)</code></strong> — appends <code>InboundHrmpMessage { sent_at: current_block, data }</code> to <code>HrmpChannelContents</code>, updates channel counts, <strong>MQC head</strong>, and recipient <strong>digest</strong> for that block.</li>
+</ol>
+<h2 id="acceptance-checks-invalid-candidates-fail-before-enact">Acceptance checks (invalid candidates fail before enact)</h2>
+<p><code>check_validation_outputs</code> calls:</p>
+<ul>
+<li><strong><code>check_hrmp_watermark</code></strong> — watermark not ahead of relay parent; monotonic vs last stored watermark (with exception when watermark equals relay parent); if moving backward in relay history, target block must appear in <strong><code>HrmpChannelDigests</code></strong> (“lands on a block with messages”).</li>
+<li><strong><code>check_outbound_hrmp</code></strong> — global per-candidate limit; messages <strong>strictly sorted by recipient</strong>; channel must exist; per-message size and cumulative <strong>capacity / total size</strong> vs. channel state at relay parent.</li>
+</ul>
+<h2 id="parachain-side-cumulus">Parachain side (Cumulus)</h2>
+<p><code>cumulus/pallets/parachain-system</code>: <strong><code>enqueue_inbound_horizontal_messages</code></strong></p>
+<ul>
+<li>Validates ordering and open channels.</li>
+<li>Rebuilds local <strong>MQC</strong> and <strong><code>check_hrmp_mcq_heads</code></strong> against abridged channel data from the relay proof.</li>
+<li>Dispatches XCM via <code>XcmpMessageHandler</code>.</li>
+<li>Updates para-local <strong><code>HrmpWatermark</code></strong>.</li>
+</ul>
+<h2 id="relay-inclusion-both-roles-per-included-para">Relay <code>inclusion</code>: both roles per included para</h2>
+<p>For <strong>each</strong> enacted candidate, the relay runs <strong>both</strong>:</p>
+<ul>
+<li><strong><code>prune_hrmp</code></strong> — this para as <strong>receiver</strong> (watermark / inbound processed).</li>
+<li><strong><code>queue_outbound_hrmp</code></strong> — this para as <strong>sender</strong> (<code>horizontal_messages</code>).</li>
+</ul>
+<p>So inclusion is <strong>not</strong> “sender-only” or “receiver-only”; it applies <strong>both</strong> effects for the <strong>same</strong> <code>para_id</code> in one inclusion.</p>
+<h2 id="sending-out--horizontal_messages--relay-storage">Sending OUT → <code>horizontal_messages</code> → relay storage</h2>
+<p>How outbound bytes become <strong><code>CandidateCommitments.horizontal_messages</code></strong> and then HRMP queues on the relay.</p>
+<h3 id="1-source-of-payloads-on-the-parachain">1. Source of payloads on the parachain</h3>
+<p>Outbound HRMP is <strong>opaque bytes</strong> to the relay. In typical runtimes they come from <strong>XCMP / XCM egress</strong> buffered in <strong><code>pallet-xcmp-queue</code></strong>, wired as <strong><code>type OutboundXcmpMessageSource = XcmpQueue</code></strong>.</p>
+<p>Trait (<code>cumulus/primitives/core/src/lib.rs</code>): <strong><code>XcmpMessageSource::take_outbound_messages(maximum_channels) -&gt; Vec&lt;(ParaId, Vec&lt;u8&gt;)&gt;</code></strong> — up to <code>N</code> messages as <strong>(recipient para, payload)</strong>.</p>
+<p><code>XcmpQueue::take_outbound_messages</code> drains <strong><code>OutboundXcmpMessages</code></strong> per recipient and respects <strong><code>ChannelInfo</code></strong> (channel closed / full / ready).</p>
+<h3 id="2-parachain-system-on_finalize-xcmp-queue--hrmpoutboundmessages">2. <code>parachain-system</code> <code>on_finalize</code>: XCMP queue → <code>HrmpOutboundMessages</code></h3>
+<p>At <strong><code>on_finalize</code></strong>, after the block body has executed (XCM may have enqueued outbound messages):</p>
+<ul>
+<li>Compute how many outbound HRMP messages are still allowed this <strong>PoV</strong>: relay <strong><code>hrmp_max_message_num_per_candidate</code></strong>, <strong><code>AnnouncedHrmpMessagesPerCandidate</code></strong>, and <strong><code>PoVMessagesTracker</code></strong> (multi-block / async-backing segment budgets).</li>
+<li>Call <strong><code>T::OutboundXcmpMessageSource::take_outbound_messages(...)</code></strong>.</li>
+<li>Map <strong><code>(recipient, data)</code> → <code>OutboundHrmpMessage { recipient, data }</code></strong>.</li>
+<li><strong><code>HrmpOutboundMessages::put(outbound_messages)</code></strong>.</li>
+</ul>
+<p>Constraints enforced in code comments: channel must exist; <strong>at most one message per channel</strong> in that send batch; <strong>strictly ascending <code>recipient</code> <code>ParaId</code></strong>; capacity / size limits via <strong><code>RelevantMessagingState</code></strong> / <strong><code>GetChannelInfo</code></strong>.</p>
+<p><strong><code>collect_collation_info</code></strong> (runtime API used when building collations) exposes the same <strong><code>horizontal_messages: HrmpOutboundMessages::get()</code></strong> plus <strong><code>hrmp_watermark</code></strong>, UMP, DMP counts, etc.</p>
+<h3 id="3-validate_block-storage--validationresulthorizontal_messages">3. <code>validate_block</code>: storage → <code>ValidationResult.horizontal_messages</code></h3>
+<p>Validators <strong>re-execute</strong> the block; they do not trust the collator’s commitments blindly.</p>
+<p>After <strong><code>execute_verified_block</code></strong>, <code>validate_block/implementation.rs</code> reads parachain-system storage and builds <strong><code>ValidationResult</code></strong>, including:</p>
+<ul>
+<li><strong><code>horizontal_messages</code></strong> ← <strong><code>HrmpOutboundMessages::get()</code></strong> (accumulated if multiple blocks in one PoV).</li>
+<li><strong><code>hrmp_watermark</code></strong>, <strong><code>processed_downward_messages</code></strong>, <strong><code>upward_messages</code></strong>, head data, optional code upgrade.</li>
+</ul>
+<p>That result is what becomes <strong><code>CandidateCommitments</code></strong> (hashed with the rest). Backing validators run the same PVF / <code>validate_block</code>; mismatched <strong><code>horizontal_messages</code></strong> ⇒ invalid candidate.</p>
+<p>The reads run under <strong><code>run_with_externalities_and_recorder</code></strong>: production PVF code sets Substrate externalities over the PoV-backed trie + overlay so pallet storage reads see the state after block execution — not test-only.</p>
+<h3 id="4-relay-inclusion">4. Relay inclusion</h3>
+<ul>
+<li><strong><code>check_validation_outputs</code> → <code>check_outbound_hrmp</code></strong>: second line of defense vs relay-parent state (count limit, sorted recipients, channel exists, per-msg size, channel capacity / total bytes).</li>
+<li><strong><code>enact_candidate</code> → <code>queue_outbound_hrmp</code></strong>: append <strong><code>InboundHrmpMessage { sent_at: enactment block, data }</code></strong> into <strong><code>HrmpChannelContents</code></strong>, update <strong>MQC head</strong>, <strong>digests</strong>, channel <strong><code>msg_count</code> / <code>total_size</code></strong>.</li>
+</ul>
+<h3 id="one-liner">One-liner</h3>
+<p><strong>App logic enqueues XCMP egress → <code>on_finalize</code> drains into <code>HrmpOutboundMessages</code> → <code>validate_block</code> copies that into commitments’ <code>horizontal_messages</code> → relay checks and <code>queue_outbound_hrmp</code> writes relay HRMP storage for recipients.</strong></p>
+<p><strong>Deeper follow-up:</strong> <code>cumulus/pallets/xcmp-queue/src/lib.rs</code> — <strong><code>take_outbound_messages</code></strong> (signals vs data pages, closed channels swallowing pages).</p>
+<h2 id="end-to-end-sequence">End-to-end sequence</h2>
+<pre tabindex="0"><code class="language-mermaid" data-lang="mermaid">sequenceDiagram
+	participant A as Para A (sender)
+	participant RC as Relay chain HRMP pallet
+	participant B as Para B (recipient)
+
+	A-&gt;&gt;RC: Candidate: horizontal_messages to B
+	RC-&gt;&gt;RC: check_outbound_hrmp
+	RC-&gt;&gt;RC: queue_outbound_hrmp: append messages, update mqc_head + digests
+	B-&gt;&gt;RC: Candidate: hrmp_watermark
+	RC-&gt;&gt;RC: check_hrmp_watermark
+	RC-&gt;&gt;RC: prune_hrmp
+	B-&gt;&gt;B: parachain-system: apply messages, verify MQC vs relay proof
+</code></pre><h2 id="files-to-read">Files to read</h2>
+<table>
+  <thead>
+      <tr>
+          <th>Topic</th>
+          <th>Path</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Relay pallet</td>
+          <td><code>polkadot/runtime/parachains/src/hrmp.rs</code></td>
+      </tr>
+      <tr>
+          <td>Inclusion</td>
+          <td><code>polkadot/runtime/parachains/src/inclusion/mod.rs</code></td>
+      </tr>
+      <tr>
+          <td>Session hooks</td>
+          <td><code>polkadot/runtime/parachains/src/initializer.rs</code></td>
+      </tr>
+      <tr>
+          <td>Para ingest + outbound finalize</td>
+          <td><code>cumulus/pallets/parachain-system/src/lib.rs</code> (<code>on_finalize</code>, <code>collect_collation_info</code>)</td>
+      </tr>
+      <tr>
+          <td><code>validate_block</code> / commitments</td>
+          <td><code>cumulus/pallets/parachain-system/src/validate_block/implementation.rs</code></td>
+      </tr>
+      <tr>
+          <td>XCMP egress queue</td>
+          <td><code>cumulus/pallets/xcmp-queue/src/lib.rs</code> (<code>take_outbound_messages</code>)</td>
+      </tr>
+      <tr>
+          <td><code>XcmpMessageSource</code> trait</td>
+          <td><code>cumulus/primitives/core/src/lib.rs</code></td>
+      </tr>
+      <tr>
+          <td>Concepts</td>
+          <td><code>polkadot/roadmap/implementers-guide/src/messaging.md</code>, <code>types/messages.md</code></td>
+      </tr>
+      <tr>
+          <td><code>register_validate_block!</code> macro</td>
+          <td><code>cumulus/pallets/parachain-system/proc-macro/src/lib.rs</code></td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="validate_block--pvf--relay-validators-vs-relay-runtime"><code>validate_block</code> / PVF — relay validators vs relay runtime</h2>
+<p><strong><code>cumulus/pallets/parachain-system/src/validate_block/implementation.rs</code></strong> is the main body of <strong>parachain block validation</strong> for Cumulus: build a trie from the PoV <strong>storage proof</strong>, replace storage <strong>host calls</strong> so execution stays inside the validation artifact, <strong>execute the block</strong>, return <strong><code>ValidationResult</code></strong>. <code>run_with_externalities_and_recorder</code> is <strong>not</strong> test-only — it is how executed state is read back after <code>execute_verified_block</code>.</p>
+<h3 id="relationship-to-the-pvf">Relationship to the PVF</h3>
+<ul>
+<li>Each parachain runtime uses <strong><code>register_validate_block!</code></strong>, which in <code>no_std</code> emits a <strong><code>#[no_mangle] fn validate_block(...)</code></strong> export — the entry point of the parachain <strong>validation function</strong> (PVF) the relay chain stores.</li>
+<li><strong><code>implementation.rs</code></strong> is compiled <strong>into that parachain runtime Wasm</strong> (PVF), not into the Polkadot relay <strong><code>frame_executive</code></strong> runtime.</li>
+</ul>
+<h3 id="run-on-validators--precise-wording">“Run on validators” — precise wording</h3>
+<table>
+  <thead>
+      <tr>
+          <th>Correct</th>
+          <th>Misleading</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Relay validators</strong> (Polkadot node, PVF / candidate-validation worker) <strong>execute</strong> this Wasm in an <strong>isolated VM</strong> (e.g. Wasmtime; PolkaVM where applicable).</td>
+          <td>It runs as <strong>on-chain relay-chain logic</strong> (relay pallets executing inside a relay block).</td>
+      </tr>
+  </tbody>
+</table>
+<p>So: <strong>same network and security model as the relay chain</strong>, but PVF execution is <strong>off-chain validation work</strong> on the node, not a relay extrinsic.</p>
+<p><strong>One-liner:</strong> <code>implementation.rs</code> <strong>is</strong> the validate-block logic inside the <strong>PVF</strong>; validators <strong>run it</strong> when checking parachain candidates; it is <strong>not</strong> part of relay-chain state transitions, <strong>is</strong> part of <strong>parachain candidate validation</strong>.</p>
+
+    </article>
+
+    
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2022-05-09-polkadot-hrmp-protocol/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Polkadot%20HRMP%20protocol%20%28implementation%20guide%29%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2022-05-09-polkadot-hrmp-protocol/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/post/2022-05-10-polkadot-validate-block-pvf/" data-toggle="tooltip" data-placement="top" title="Polkadot validate_block, PVF, and relay validators">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/post/2022-02-01-solidity-pattern/" data-toggle="tooltip" data-placement="top" title="solidity patterns">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

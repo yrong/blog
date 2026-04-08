@@ -9,8 +9,22 @@
     <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
     <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
-    <lastBuildDate>Sat, 09 Oct 2021 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 10 May 2022 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://yrong.github.io/blog/tags/polkadot/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Polkadot validate_block, PVF, and relay validators</title>
+      <link>https://yrong.github.io/blog/post/2022-05-10-polkadot-validate-block-pvf/</link>
+      <pubDate>Tue, 10 May 2022 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2022-05-10-polkadot-validate-block-pvf/</guid>
+      <description>&lt;p&gt;Companion to &lt;a href=&#34;https://yrong.github.io/blog/post/2022-05-09-polkadot-hrmp-protocol/&#34;&gt;Polkadot HRMP protocol (implementation guide)&lt;/a&gt;.&lt;/p&gt;&#xA;&lt;h2 id=&#34;what-implementationrs-is&#34;&gt;What &lt;code&gt;implementation.rs&lt;/code&gt; is&lt;/h2&gt;&#xA;&lt;p&gt;&lt;strong&gt;&lt;code&gt;cumulus/pallets/parachain-system/src/validate_block/implementation.rs&lt;/code&gt;&lt;/strong&gt; implements &lt;strong&gt;&lt;code&gt;validate_block&lt;/code&gt;&lt;/strong&gt;: take the PoV’s &lt;strong&gt;storage proof&lt;/strong&gt;, build a sparse in-memory trie, &lt;strong&gt;override&lt;/strong&gt; &lt;code&gt;sp_io::storage&lt;/code&gt; (and related) host functions so validation runs &lt;strong&gt;inside the Wasm&lt;/strong&gt; instead of calling the node’s DB, &lt;strong&gt;execute the parachain block&lt;/strong&gt;, then return &lt;strong&gt;&lt;code&gt;ValidationResult&lt;/code&gt;&lt;/strong&gt; — head data, &lt;code&gt;horizontal_messages&lt;/code&gt;, &lt;code&gt;hrmp_watermark&lt;/code&gt;, upward messages, processed downward message count, optional new validation code.&lt;/p&gt;&#xA;&lt;p&gt;The helper &lt;strong&gt;&lt;code&gt;run_with_externalities_and_recorder&lt;/code&gt;&lt;/strong&gt; wraps Substrate &lt;strong&gt;&lt;code&gt;Externalities&lt;/code&gt;&lt;/strong&gt; (&lt;code&gt;Ext&lt;/code&gt; over proof + &lt;strong&gt;&lt;code&gt;OverlayedChanges&lt;/code&gt;&lt;/strong&gt;) so pallet storage reads/writes during &lt;code&gt;execute_verified_block&lt;/code&gt; and the follow-up reads for the result see consistent state. That is &lt;strong&gt;production PVF&lt;/strong&gt; behavior, not limited to tests.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Polkadot HRMP protocol (implementation guide)</title>
+      <link>https://yrong.github.io/blog/post/2022-05-09-polkadot-hrmp-protocol/</link>
+      <pubDate>Mon, 09 May 2022 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2022-05-09-polkadot-hrmp-protocol/</guid>
+      <description>&lt;p&gt;Implementation-oriented notes from the Polkadot SDK: relay pallet &lt;code&gt;polkadot/runtime/parachains/src/hrmp.rs&lt;/code&gt;, inclusion wiring, and Cumulus &lt;code&gt;parachain-system&lt;/code&gt;. See also &lt;a href=&#34;https://yrong.github.io/blog/post/2022-05-10-polkadot-validate-block-pvf/&#34;&gt;validate_block and PVF&lt;/a&gt;.&lt;/p&gt;&#xA;&lt;h2 id=&#34;what-hrmp-is&#34;&gt;What HRMP is&lt;/h2&gt;&#xA;&lt;p&gt;&lt;strong&gt;HRMP (Horizontally Relay-routed Message Passing)&lt;/strong&gt; lets parachains send bytes to each other using the &lt;strong&gt;same conceptual model as XCMP&lt;/strong&gt; (channels, queues), but &lt;strong&gt;full message payloads live in relay-chain storage&lt;/strong&gt;. That keeps semantics simpler and makes relay resource use higher. It is described as an interim mechanism until XCMP is fully available.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Terminology in Polkadot</title>
       <link>https://yrong.github.io/blog/post/2021-10-09-polkadot/</link>
