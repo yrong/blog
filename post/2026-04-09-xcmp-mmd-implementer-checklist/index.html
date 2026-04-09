@@ -167,7 +167,6 @@ on_finalize drains …">
         <li><a href="#3-pvf-output-make-the-root-visible-to-relay-inclusion">3) PVF output: make the root visible to relay inclusion</a></li>
         <li><a href="#4-relay-runtime-store-anchor-root-per-para">4) Relay runtime: store anchor root per para</a></li>
         <li><a href="#5-destination-para-verifier--execution">5) Destination para: verifier + execution</a></li>
-        <li><a href="#6-collator-as-relayer-build-proofs-and-include-in-inherent">6) Collator-as-relayer: build proofs and include in inherent</a></li>
         <li><a href="#7-demo--tests">7) Demo / tests</a></li>
       </ul>
     </li>
@@ -221,7 +220,7 @@ on_finalize drains …">
 <li>Source commits outbound messages into a compact root.</li>
 <li>Relay stores/anchors that root (or it’s anchored via BEEFY/MMR later).</li>
 <li>Destination verifies message payloads against the root using membership proofs.</li>
-<li>Collator includes payload+proof in destination’s authored block (collator-as-relayer).</li>
+<li><strong>Permissionless relayers</strong> submit payload+proof bundles to the destination via extrinsic (minimal POC).</li>
 </ul>
 <h2 id="poc1-recommended-relay-storage-proof-anchor-fastest-real-proof-path">POC1 (recommended): relay storage proof anchor (fastest “real proof” path)</h2>
 <h3 id="1-define-new-commitment--proof-types-primitives">1) Define new commitment + proof types (primitives)</h3>
@@ -287,7 +286,7 @@ on_finalize drains …">
 <h3 id="5-destination-para-verifier--execution">5) Destination para: verifier + execution</h3>
 <p>Implement a pallet that:</p>
 <ul>
-<li>accepts <code>MessageWithProof</code> via inherent or call</li>
+<li>accepts <code>MessageWithProof</code> via a <strong>permissionless extrinsic</strong></li>
 <li>verifies:
 <ul>
 <li>message ∈ per-channel commitment (MMR proof)</li>
@@ -301,20 +300,8 @@ on_finalize drains …">
 <p>Touchpoints:</p>
 <ul>
 <li>destination runtime pallet</li>
-<li>parachain inherent types (<code>cumulus_primitives_parachain_inherent</code>)</li>
-</ul>
-<h3 id="6-collator-as-relayer-build-proofs-and-include-in-inherent">6) Collator-as-relayer: build proofs and include in inherent</h3>
-<p>Implement collator-side logic that:</p>
-<ul>
-<li>watches relay anchor roots and source commitments</li>
-<li>retrieves message payloads (source message store)</li>
-<li>builds <code>MessageWithProof</code></li>
-<li>injects into destination block inherent data</li>
-</ul>
-<p>Touchpoints:</p>
-<ul>
-<li>collator inherent construction code under <code>cumulus/client/*</code> (depends on stack)</li>
-<li><code>cumulus_primitives_parachain_inherent</code> data format</li>
+<li></li>
+<li>For minimal POC: no inherent/collator plumbing required. A relayer constructs proofs off-chain and submits them via extrinsic.</li>
 </ul>
 <h3 id="7-demo--tests">7) Demo / tests</h3>
 <p>Add an end-to-end demo:</p>
@@ -370,7 +357,7 @@ on_finalize drains …">
           <a href="/blog/post/2026-04-09-xcmp-mmd-1-pager/" data-toggle="tooltip" data-placement="top" title="XCMP Merkle Matryoshka Dolls (1‑pager)">&lt; Newer</a>
       </li>
       <li class="pager-older">
-        <a href="/blog/post/2022-05-10-polkadot-validate-block-pvf/" data-toggle="tooltip" data-placement="top" title="Polkadot validate_block, PVF, and relay validators">Older &gt;</a>
+        <a href="/blog/post/2026-04-09-xcmp-mmd-poc2-option1-spec/" data-toggle="tooltip" data-placement="top" title="XCMP MMD POC2 (Option 1) spec">Older &gt;</a>
       </li>
     </ul>
   </div>

@@ -139,6 +139,48 @@
         <div class="article-floatclear"></div>
       </article>
       <article class="article">
+        <a href="/blog/post/2026-04-09-xcmp-mmd-poc2-option1-spec/" class="article-titles">
+          <h2 class="article-title">XCMP MMD POC2 (Option 1) spec</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 9, 2026</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>POC goal: implement XCMP “Merkle Matryoshka Dolls” (MMD) anchored by the relay’s <strong>MMR root</strong>, obtained directly via the parachain’s <strong>relay-chain state proof</strong> (from <code>set_validation_data</code>), and then using an <strong>MMR leaf proof</strong> to obtain <code>leaf_extra</code> that commits to a <strong>binary Merkle root of parachain heads</strong>.</p>
+<p>Scope choices:</p>
+<ul>
+<li><strong>A1</strong>: relay MMR leaf extra anchors a “ParaHeaderTree-like” root (here: <em>para heads merkle root</em>).</li>
+<li><strong>C1</strong>: source commits <code>XcmpChannelTree_root</code> in the <strong>real parachain header digest</strong>.</li>
+<li><strong>Option 1</strong>: accept relay’s <code>MAX_PARA_HEADS = 1024</code> truncation for POC.</li>
+</ul>
+<hr>
+<h2 id="definitions">Definitions</h2>
+<h3 id="identifiers">Identifiers</h3>
+<ul>
+<li><code>SourceParaId</code>: <code>u32</code> (SCALE encoded)</li>
+<li><code>DestParaId</code>: <code>u32</code></li>
+<li><code>ChannelId</code>: <code>(SourceParaId, DestParaId)</code> (unidirectional)</li>
+</ul>
+<h3 id="hashing-para-heads-merkle-root">Hashing (para-heads merkle root)</h3>
+<p>Must match relay runtime exactly:</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2026-04-09-xcmp-mmd-poc2-option1-spec/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/post/2022-05-10-polkadot-validate-block-pvf/" class="article-titles">
           <h2 class="article-title">Polkadot validate_block, PVF, and relay validators</h2>
           
