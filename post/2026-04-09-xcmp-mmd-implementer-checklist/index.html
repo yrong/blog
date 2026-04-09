@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>XCMP MMD POC implementer checklist (Polkadot SDK) - yrong blog</title>
+  <meta property="og:title" content="XCMP MMD POC implementer checklist (Polkadot SDK) - yrong blog" />
+  <meta name="twitter:title" content="XCMP MMD POC implementer checklist (Polkadot SDK) - yrong blog" />
+  <meta name="description" content="Companion note to XCMP Merkle Matryoshka Dolls (1‑pager).
+Baseline: where HRMP flows today
+Parachain (Cumulus) outbound → commitments
+
+cumulus/pallets/parachain-system/src/lib.rs
+
+on_finalize drains T::OutboundXcmpMessageSource::take_outbound_messages(...)
+stores HrmpOutboundMessages (later becomes ValidationResult.horizontal_messages)
+
+
+
+PVF / validate_block
+
+cumulus/pallets/parachain-system/src/validate_block/implementation.rs
+
+Executes the block under externalities and then reads:
+
+HrmpOutboundMessages → ValidationResult.horizontal_messages
+HrmpWatermark → ValidationResult.hrmp_watermark
+
+
+This code is compiled into the parachain PVF and executed by relay validators.
+
+
+
+Relay inclusion
+
+polkadot/runtime/parachains/src/inclusion/mod.rs
+
+checks acceptance criteria (check_validation_outputs)
+enacts candidate messaging:
+
+hrmp::Pallet::prune_hrmp(para, hrmp_watermark)
+hrmp::Pallet::queue_outbound_hrmp(para, horizontal_messages)
+
+
+
+
+
+POC target (what changes)
+Goal: stop storing payloads in relay HRMP queues. Instead:">
+  <meta property="og:description" content="Companion note to XCMP Merkle Matryoshka Dolls (1‑pager).
+Baseline: where HRMP flows today
+Parachain (Cumulus) outbound → commitments
+
+cumulus/pallets/parachain-system/src/lib.rs
+
+on_finalize drains T::OutboundXcmpMessageSource::take_outbound_messages(...)
+stores HrmpOutboundMessages (later becomes ValidationResult.horizontal_messages)
+
+
+
+PVF / validate_block
+
+cumulus/pallets/parachain-system/src/validate_block/implementation.rs
+
+Executes the block under externalities and then reads:
+
+HrmpOutboundMessages → ValidationResult.horizontal_messages
+HrmpWatermark → ValidationResult.hrmp_watermark
+
+
+This code is compiled into the parachain PVF and executed by relay validators.
+
+
+
+Relay inclusion
+
+polkadot/runtime/parachains/src/inclusion/mod.rs
+
+checks acceptance criteria (check_validation_outputs)
+enacts candidate messaging:
+
+hrmp::Pallet::prune_hrmp(para, hrmp_watermark)
+hrmp::Pallet::queue_outbound_hrmp(para, horizontal_messages)
+
+
+
+
+
+POC target (what changes)
+Goal: stop storing payloads in relay HRMP queues. Instead:">
+  <meta name="twitter:description" content="Companion note to XCMP Merkle Matryoshka Dolls (1‑pager).
+Baseline: where HRMP flows today
+Parachain (Cumulus) outbound → commitments
+
+cumulus/pallets/parachain-system/src/lib.rs
+
+on_finalize drains …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2026-04-09-xcmp-mmd-implementer-checklist/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">XCMP MMD POC implementer checklist (Polkadot SDK)</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>April 9, 2026</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/blockchain/">
+            <i class="fa-solid fa-tag"></i>
+            BlockChain
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/polkadot/">
+            <i class="fa-solid fa-tag"></i>
+            Polkadot
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#baseline-where-hrmp-flows-today">Baseline: where HRMP flows today</a>
+      <ul>
+        <li><a href="#parachain-cumulus-outbound--commitments">Parachain (Cumulus) outbound → commitments</a></li>
+        <li><a href="#pvf--validate_block">PVF / validate_block</a></li>
+        <li><a href="#relay-inclusion">Relay inclusion</a></li>
+      </ul>
+    </li>
+    <li><a href="#poc-target-what-changes">POC target (what changes)</a></li>
+    <li><a href="#poc1-recommended-relay-storage-proof-anchor-fastest-real-proof-path">POC1 (recommended): relay storage proof anchor (fastest “real proof” path)</a>
+      <ul>
+        <li><a href="#1-define-new-commitment--proof-types-primitives">1) Define new commitment + proof types (primitives)</a></li>
+        <li><a href="#2-source-para-outbox-pallet-to-build-commitments">2) Source para: outbox pallet to build commitments</a></li>
+        <li><a href="#3-pvf-output-make-the-root-visible-to-relay-inclusion">3) PVF output: make the root visible to relay inclusion</a></li>
+        <li><a href="#4-relay-runtime-store-anchor-root-per-para">4) Relay runtime: store anchor root per para</a></li>
+        <li><a href="#5-destination-para-verifier--execution">5) Destination para: verifier + execution</a></li>
+        <li><a href="#6-collator-as-relayer-build-proofs-and-include-in-inherent">6) Collator-as-relayer: build proofs and include in inherent</a></li>
+        <li><a href="#7-demo--tests">7) Demo / tests</a></li>
+      </ul>
+    </li>
+    <li><a href="#poc2-optional-anchor-via-beefymmr-closer-to-forum-mmd">POC2 (optional): anchor via BEEFY/MMR (closer to forum MMD)</a></li>
+    <li><a href="#team-review-checklist">Team review checklist</a></li>
+  </ul>
+</nav>
+</aside>
+      <p>Companion note to <a href="/blog/post/2026-04-09-xcmp-mmd-1-pager/">XCMP Merkle Matryoshka Dolls (1‑pager)</a>.</p>
+<h2 id="baseline-where-hrmp-flows-today">Baseline: where HRMP flows today</h2>
+<h3 id="parachain-cumulus-outbound--commitments">Parachain (Cumulus) outbound → commitments</h3>
+<ul>
+<li><code>cumulus/pallets/parachain-system/src/lib.rs</code>
+<ul>
+<li><code>on_finalize</code> drains <code>T::OutboundXcmpMessageSource::take_outbound_messages(...)</code></li>
+<li>stores <code>HrmpOutboundMessages</code> (later becomes <code>ValidationResult.horizontal_messages</code>)</li>
+</ul>
+</li>
+</ul>
+<h3 id="pvf--validate_block">PVF / validate_block</h3>
+<ul>
+<li><code>cumulus/pallets/parachain-system/src/validate_block/implementation.rs</code>
+<ul>
+<li>Executes the block under externalities and then <strong>reads</strong>:
+<ul>
+<li><code>HrmpOutboundMessages</code> → <code>ValidationResult.horizontal_messages</code></li>
+<li><code>HrmpWatermark</code> → <code>ValidationResult.hrmp_watermark</code></li>
+</ul>
+</li>
+<li>This code is compiled into the parachain <strong>PVF</strong> and executed by relay validators.</li>
+</ul>
+</li>
+</ul>
+<h3 id="relay-inclusion">Relay inclusion</h3>
+<ul>
+<li><code>polkadot/runtime/parachains/src/inclusion/mod.rs</code>
+<ul>
+<li>checks acceptance criteria (<code>check_validation_outputs</code>)</li>
+<li>enacts candidate messaging:
+<ul>
+<li><code>hrmp::Pallet::prune_hrmp(para, hrmp_watermark)</code></li>
+<li><code>hrmp::Pallet::queue_outbound_hrmp(para, horizontal_messages)</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="poc-target-what-changes">POC target (what changes)</h2>
+<p>Goal: stop storing payloads in relay HRMP queues. Instead:</p>
+<ul>
+<li>Source commits outbound messages into a compact root.</li>
+<li>Relay stores/anchors that root (or it’s anchored via BEEFY/MMR later).</li>
+<li>Destination verifies message payloads against the root using membership proofs.</li>
+<li>Collator includes payload+proof in destination’s authored block (collator-as-relayer).</li>
+</ul>
+<h2 id="poc1-recommended-relay-storage-proof-anchor-fastest-real-proof-path">POC1 (recommended): relay storage proof anchor (fastest “real proof” path)</h2>
+<h3 id="1-define-new-commitment--proof-types-primitives">1) Define new commitment + proof types (primitives)</h3>
+<p>Define SCALE-encoded types and bounds:</p>
+<ul>
+<li><code>ChannelId { sender: ParaId, recipient: ParaId }</code></li>
+<li><code>MessageLeaf { index/nonce, payload_hash, maybe_sent_at }</code></li>
+<li><code>MessageWithProof { source, dest, payload, proofs... }</code></li>
+</ul>
+<p>Hard bounds:</p>
+<ul>
+<li>max messages per block</li>
+<li>max proof nodes per message</li>
+<li>max payload size</li>
+</ul>
+<h3 id="2-source-para-outbox-pallet-to-build-commitments">2) Source para: outbox pallet to build commitments</h3>
+<p>Implement a pallet that:</p>
+<ul>
+<li>maintains per-channel append-only structure (MMR or hash-chain for POC)</li>
+<li>produces a <code>channel_tree_root</code> that commits to all channel MMR roots</li>
+</ul>
+<p>Wire into outbound path:</p>
+<ul>
+<li><code>cumulus/pallets/parachain-system/src/lib.rs</code> <code>on_finalize</code>
+<ul>
+<li>feature-gate replacing <code>HrmpOutboundMessages::put(...)</code></li>
+<li>drain <code>T::OutboundXcmpMessageSource::take_outbound_messages(...)</code></li>
+<li>append to outbox commitment structure instead</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-pvf-output-make-the-root-visible-to-relay-inclusion">3) PVF output: make the root visible to relay inclusion</h3>
+<p>You need the root to be part of what validators agree the block produced.</p>
+<p>Options:</p>
+<ul>
+<li>Preferred: extend the validation result/commitments plumbing to carry <code>xcmp_channel_root</code>.</li>
+<li>POC fallback: encode <code>xcmp_channel_root</code> into an agreed <code>head_data</code> format (format invasive).</li>
+</ul>
+<p>Touchpoint:</p>
+<ul>
+<li><code>cumulus/pallets/parachain-system/src/validate_block/implementation.rs</code>
+<ul>
+<li>after <code>execute_verified_block</code>, read the outbox root and include it in the returned result</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-relay-runtime-store-anchor-root-per-para">4) Relay runtime: store anchor root per para</h3>
+<p>Add relay storage:</p>
+<ul>
+<li><code>XcmpChannelRoots[ParaId] -&gt; Hash</code></li>
+<li>optional: small history window for replay/out-of-order demos</li>
+</ul>
+<p>Touchpoints:</p>
+<ul>
+<li>new relay module/pallet under <code>polkadot/runtime/parachains/</code></li>
+<li><code>polkadot/runtime/parachains/src/inclusion/mod.rs</code>
+<ul>
+<li>acceptance checks for the new root field</li>
+<li>enactment writes <code>XcmpChannelRoots[para_id] = root</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="5-destination-para-verifier--execution">5) Destination para: verifier + execution</h3>
+<p>Implement a pallet that:</p>
+<ul>
+<li>accepts <code>MessageWithProof</code> via inherent or call</li>
+<li>verifies:
+<ul>
+<li>message ∈ per-channel commitment (MMR proof)</li>
+<li>commitment ∈ channel tree (channel tree proof)</li>
+<li>channel tree root matches relay anchor for source para (relay state proof)</li>
+</ul>
+</li>
+<li>tracks replay protection (e.g., last seen index per <code>(source, channel)</code>)</li>
+<li>dispatches verified payloads into XCM execution path</li>
+</ul>
+<p>Touchpoints:</p>
+<ul>
+<li>destination runtime pallet</li>
+<li>parachain inherent types (<code>cumulus_primitives_parachain_inherent</code>)</li>
+</ul>
+<h3 id="6-collator-as-relayer-build-proofs-and-include-in-inherent">6) Collator-as-relayer: build proofs and include in inherent</h3>
+<p>Implement collator-side logic that:</p>
+<ul>
+<li>watches relay anchor roots and source commitments</li>
+<li>retrieves message payloads (source message store)</li>
+<li>builds <code>MessageWithProof</code></li>
+<li>injects into destination block inherent data</li>
+</ul>
+<p>Touchpoints:</p>
+<ul>
+<li>collator inherent construction code under <code>cumulus/client/*</code> (depends on stack)</li>
+<li><code>cumulus_primitives_parachain_inherent</code> data format</li>
+</ul>
+<h3 id="7-demo--tests">7) Demo / tests</h3>
+<p>Add an end-to-end demo:</p>
+<ul>
+<li><code>cumulus/xcm/xcm-emulator</code> or integration tests</li>
+<li>verify: source commits → relay anchors → dest verifies+executes</li>
+</ul>
+<h2 id="poc2-optional-anchor-via-beefymmr-closer-to-forum-mmd">POC2 (optional): anchor via BEEFY/MMR (closer to forum MMD)</h2>
+<p>Once POC1 works, move anchoring to BEEFY/MMR:</p>
+<ul>
+<li><code>substrate/frame/beefy-mmr/src/lib.rs</code> (leaf extra plumbing)</li>
+<li><code>substrate/primitives/consensus/beefy/src/mmr.rs</code> (<code>MmrLeaf.leaf_extra</code>)</li>
+</ul>
+<h2 id="team-review-checklist">Team review checklist</h2>
+<ul>
+<li>Commitment format (leaf = payload hash vs payload+metadata)</li>
+<li>Protocol ordering requirements</li>
+<li>Replay protection semantics</li>
+<li>Block bounds (messages, proofs) + weight model</li>
+<li>Delivery receipts/acks for pruning &amp; incentives</li>
+</ul>
+
+    </article>
+
+    
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2026-04-09-xcmp-mmd-implementer-checklist/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=XCMP%20MMD%20POC%20implementer%20checklist%20%28Polkadot%20SDK%29%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2026-04-09-xcmp-mmd-implementer-checklist/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/post/2026-04-09-xcmp-mmd-1-pager/" data-toggle="tooltip" data-placement="top" title="XCMP Merkle Matryoshka Dolls (1‑pager)">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/post/2022-05-10-polkadot-validate-block-pvf/" data-toggle="tooltip" data-placement="top" title="Polkadot validate_block, PVF, and relay validators">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

@@ -42,6 +42,103 @@
   <div class="main" role="main">
     <section class="list term-list">
       <article class="article">
+        <a href="/blog/post/2026-04-09-xcmp-mmd-1-pager/" class="article-titles">
+          <h2 class="article-title">XCMP Merkle Matryoshka Dolls (1‑pager)</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 9, 2026</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>Source context: <a href="https://forum.polkadot.network/t/xcmp-design-discussion/7328">XCMP Design Discussion (Polkadot forum)</a></p>
+<h2 id="problem">Problem</h2>
+<p><strong>HRMP</strong> stores <strong>message payloads on the relay chain</strong>, which is expensive in relay-chain storage and execution.</p>
+<p><strong>XCMP (MMD approach)</strong> aims to replace HRMP by moving payload storage and most computation off-chain, keeping only <strong>compact commitments</strong> anchored by relay consensus.</p>
+<h2 id="core-idea-mmd">Core idea (MMD)</h2>
+<p>Instead of proving “message exists in the source state trie”, prove “message was committed by source chain” via <strong>nested Merkle commitments</strong> (“Matryoshka dolls”).</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2026-04-09-xcmp-mmd-1-pager/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/post/2026-04-09-xcmp-mmd-implementer-checklist/" class="article-titles">
+          <h2 class="article-title">XCMP MMD POC implementer checklist (Polkadot SDK)</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 9, 2026</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>Companion note to <a href="/blog/post/2026-04-09-xcmp-mmd-1-pager/">XCMP Merkle Matryoshka Dolls (1‑pager)</a>.</p>
+<h2 id="baseline-where-hrmp-flows-today">Baseline: where HRMP flows today</h2>
+<h3 id="parachain-cumulus-outbound--commitments">Parachain (Cumulus) outbound → commitments</h3>
+<ul>
+<li><code>cumulus/pallets/parachain-system/src/lib.rs</code>
+<ul>
+<li><code>on_finalize</code> drains <code>T::OutboundXcmpMessageSource::take_outbound_messages(...)</code></li>
+<li>stores <code>HrmpOutboundMessages</code> (later becomes <code>ValidationResult.horizontal_messages</code>)</li>
+</ul>
+</li>
+</ul>
+<h3 id="pvf--validate_block">PVF / validate_block</h3>
+<ul>
+<li><code>cumulus/pallets/parachain-system/src/validate_block/implementation.rs</code>
+<ul>
+<li>Executes the block under externalities and then <strong>reads</strong>:
+<ul>
+<li><code>HrmpOutboundMessages</code> → <code>ValidationResult.horizontal_messages</code></li>
+<li><code>HrmpWatermark</code> → <code>ValidationResult.hrmp_watermark</code></li>
+</ul>
+</li>
+<li>This code is compiled into the parachain <strong>PVF</strong> and executed by relay validators.</li>
+</ul>
+</li>
+</ul>
+<h3 id="relay-inclusion">Relay inclusion</h3>
+<ul>
+<li><code>polkadot/runtime/parachains/src/inclusion/mod.rs</code>
+<ul>
+<li>checks acceptance criteria (<code>check_validation_outputs</code>)</li>
+<li>enacts candidate messaging:
+<ul>
+<li><code>hrmp::Pallet::prune_hrmp(para, hrmp_watermark)</code></li>
+<li><code>hrmp::Pallet::queue_outbound_hrmp(para, horizontal_messages)</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="poc-target-what-changes">POC target (what changes)</h2>
+<p>Goal: stop storing payloads in relay HRMP queues. Instead:</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2026-04-09-xcmp-mmd-implementer-checklist/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/post/2022-05-10-polkadot-validate-block-pvf/" class="article-titles">
           <h2 class="article-title">Polkadot validate_block, PVF, and relay validators</h2>
           

@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <title>BlockChain - yrong blog</title>
-  <meta property="og:title" content="BlockChain - yrong blog" />
-  <meta name="twitter:title" content="BlockChain - yrong blog" />
+  <title>Blockchain - yrong blog</title>
+  <meta property="og:title" content="Blockchain - yrong blog" />
+  <meta name="twitter:title" content="Blockchain - yrong blog" />
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="https://yrong.github.io/blog/tags/blockchain/" />
@@ -41,6 +41,103 @@
 
   <div class="main" role="main">
     <section class="list term-list">
+      <article class="article">
+        <a href="/blog/post/2026-04-09-xcmp-mmd-1-pager/" class="article-titles">
+          <h2 class="article-title">XCMP Merkle Matryoshka Dolls (1‑pager)</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 9, 2026</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>Source context: <a href="https://forum.polkadot.network/t/xcmp-design-discussion/7328">XCMP Design Discussion (Polkadot forum)</a></p>
+<h2 id="problem">Problem</h2>
+<p><strong>HRMP</strong> stores <strong>message payloads on the relay chain</strong>, which is expensive in relay-chain storage and execution.</p>
+<p><strong>XCMP (MMD approach)</strong> aims to replace HRMP by moving payload storage and most computation off-chain, keeping only <strong>compact commitments</strong> anchored by relay consensus.</p>
+<h2 id="core-idea-mmd">Core idea (MMD)</h2>
+<p>Instead of proving “message exists in the source state trie”, prove “message was committed by source chain” via <strong>nested Merkle commitments</strong> (“Matryoshka dolls”).</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2026-04-09-xcmp-mmd-1-pager/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/post/2026-04-09-xcmp-mmd-implementer-checklist/" class="article-titles">
+          <h2 class="article-title">XCMP MMD POC implementer checklist (Polkadot SDK)</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 9, 2026</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>Companion note to <a href="/blog/post/2026-04-09-xcmp-mmd-1-pager/">XCMP Merkle Matryoshka Dolls (1‑pager)</a>.</p>
+<h2 id="baseline-where-hrmp-flows-today">Baseline: where HRMP flows today</h2>
+<h3 id="parachain-cumulus-outbound--commitments">Parachain (Cumulus) outbound → commitments</h3>
+<ul>
+<li><code>cumulus/pallets/parachain-system/src/lib.rs</code>
+<ul>
+<li><code>on_finalize</code> drains <code>T::OutboundXcmpMessageSource::take_outbound_messages(...)</code></li>
+<li>stores <code>HrmpOutboundMessages</code> (later becomes <code>ValidationResult.horizontal_messages</code>)</li>
+</ul>
+</li>
+</ul>
+<h3 id="pvf--validate_block">PVF / validate_block</h3>
+<ul>
+<li><code>cumulus/pallets/parachain-system/src/validate_block/implementation.rs</code>
+<ul>
+<li>Executes the block under externalities and then <strong>reads</strong>:
+<ul>
+<li><code>HrmpOutboundMessages</code> → <code>ValidationResult.horizontal_messages</code></li>
+<li><code>HrmpWatermark</code> → <code>ValidationResult.hrmp_watermark</code></li>
+</ul>
+</li>
+<li>This code is compiled into the parachain <strong>PVF</strong> and executed by relay validators.</li>
+</ul>
+</li>
+</ul>
+<h3 id="relay-inclusion">Relay inclusion</h3>
+<ul>
+<li><code>polkadot/runtime/parachains/src/inclusion/mod.rs</code>
+<ul>
+<li>checks acceptance criteria (<code>check_validation_outputs</code>)</li>
+<li>enacts candidate messaging:
+<ul>
+<li><code>hrmp::Pallet::prune_hrmp(para, hrmp_watermark)</code></li>
+<li><code>hrmp::Pallet::queue_outbound_hrmp(para, horizontal_messages)</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="poc-target-what-changes">POC target (what changes)</h2>
+<p>Goal: stop storing payloads in relay HRMP queues. Instead:</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2026-04-09-xcmp-mmd-implementer-checklist/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
       <article class="article">
         <a href="/blog/post/2022-05-10-polkadot-validate-block-pvf/" class="article-titles">
           <h2 class="article-title">Polkadot validate_block, PVF, and relay validators</h2>
@@ -398,71 +495,6 @@ let msg = Xcm::Transact {
           <p>Bifrost is a parachain that allows users to deposit their staking tokens and mint vTokens to get staking liquidity.</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2021-04-17-bifrost/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
-      <article class="article">
-        <a href="/blog/post/2021-04-02-darwinia-bridger/" class="article-titles">
-          <h2 class="article-title">Darwinia Bridge</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>April 2, 2021</time></li>
-          <li class="article-meta-tags">
-            <a href="/tags/blockchain/">
-              <i class="fa-solid fa-tag"></i>
-              BlockChain
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <h1 id="theory">Theory</h1>
-<p><a href="https://darwinia.network/ChainRelay_Technical_Paper(Preview)_EN.pdf">White Paper</a></p>
-<p><a href="https://docs.darwinia.network/docs/en/rfc-0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains/">Principle</a></p>
-<p><a href="https://docs.google.com/document/d/1NVDSk6KZXV5CjE20cNPA8Swmmd89IYeWyN0T9lRBOEM">Darwinia-Ethereum Bridge</a></p>
-<h1 id="projects-navigation">Projects Navigation</h1>
-<h2 id="darwinia-bridge"><a href="https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge">Darwinia Bridge</a></h2>
-<p><a href="https://miro.medium.com/max/700/0*W_Q1-GWv4JeCCQ7x">cross-chain overview</a></p>
-<h3 id="background">Background</h3>
-<p><a href="https://github.com/Dexaran/ERC223-token-standard">ERC223</a></p>
-<p><a href="https://zhuanlan.zhihu.com/p/35019858">ERC721</a></p>
-<p><a href="https://eth.wiki/concepts/light-client-protocol">Patricia Merkle Trees</a></p>
-<p><a href="https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md">Mining difficulty calculate</a></p>
-<p><a href="https://github.com/nervosnetwork/merkle-mountain-range">mmr</a></p>
-<p><a href="https://github.com/darwinia-network/darwinia-common/blob/master/frame/bridge/relayer-game/README.md">relay game</a></p>
-<h2 id="bridger"><a href="https://github.com/darwinia-network/bridger">Bridger</a></h2>
-<p>Relayers (aka. Bridgers) in Darwinia Network are offchain worker clients which help relay the headers and messages between source chains and target chains</p>
-<h3 id="background-1">Background</h3>
-<p><a href="https://github.com/actix/actix">actix</a></p>
-<p>deprecated <a href="https://github.com/darwinia-network/dj">dj</a></p>
-<h2 id="shadow"><a href="https://github.com/darwinia-network/shadow">Shadow</a></h2>
-<p>Services for bridger which retrieve header data from public chains and generate mmr proof</p>
-<h3 id="background-2">Background</h3>
-<p><a href="https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#using-extern-functions-to-call-external-code">ffi</a></p>
-<h2 id="wormhole"><a href="https://github.com/darwinia-network/wormhole">Wormhole</a></h2>
-<h3 id="background-3">Background</h3>
-<p><a href="https://docs.darwinia.network/docs/en/wiki-tut-wormhole-general/">wiki</a></p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2021-04-02-darwinia-bridger/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
-      <article class="article">
-        <a href="/blog/post/2021-03-07-phragmen/" class="article-titles">
-          <h2 class="article-title">Phragmen election</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>March 7, 2021</time></li>
-          <li class="article-meta-tags">
-            <a href="/tags/blockchain/">
-              <i class="fa-solid fa-tag"></i>
-              BlockChain
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <p>The problem that Phragmén’s methods try to solve is that of electing a set of a given numbers of persons from a larger set of candidates. Phragmén discussed this in the context of a parliamentary election in a multi-member constituency; the same problem can, of course, also occur in local elections, but also in many other situations such as electing a board or a committee in an organization.</p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2021-03-07-phragmen/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
     </section>
