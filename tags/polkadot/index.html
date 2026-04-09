@@ -42,8 +42,8 @@
   <div class="main" role="main">
     <section class="list term-list">
       <article class="article">
-        <a href="/blog/post/2026-04-09-xcmp-mmd-1-pager/" class="article-titles">
-          <h2 class="article-title">XCMP Merkle Matryoshka Dolls (1‑pager)</h2>
+        <a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" class="article-titles">
+          <h2 class="article-title">Polkadot XCMP MMD — Minimal POC (merged)</h2>
           
         </a>
         <ul class="article-meta">
@@ -60,124 +60,19 @@
               Polkadot
             </a>&nbsp;
           </li>
-        </ul>
-        <div class="article-content">
-          <p>Source context: <a href="https://forum.polkadot.network/t/xcmp-design-discussion/7328">XCMP Design Discussion (Polkadot forum)</a></p>
-<h2 id="problem">Problem</h2>
-<p><strong>HRMP</strong> stores <strong>message payloads on the relay chain</strong>, which is expensive in relay-chain storage and execution.</p>
-<p><strong>XCMP (MMD approach)</strong> aims to replace HRMP by moving payload storage and most computation off-chain, keeping only <strong>compact commitments</strong> anchored by relay consensus.</p>
-<h2 id="core-idea-mmd">Core idea (MMD)</h2>
-<p>Instead of proving “message exists in the source state trie”, prove “message was committed by source chain” via <strong>nested Merkle commitments</strong> (“Matryoshka dolls”).</p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2026-04-09-xcmp-mmd-1-pager/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
-      <article class="article">
-        <a href="/blog/post/2026-04-09-xcmp-mmd-implementer-checklist/" class="article-titles">
-          <h2 class="article-title">XCMP MMD POC implementer checklist (Polkadot SDK)</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>April 9, 2026</time></li>
           <li class="article-meta-tags">
-            <a href="/tags/blockchain/">
+            <a href="/tags/xcmp/">
               <i class="fa-solid fa-tag"></i>
-              BlockChain
-            </a>&nbsp;
-          </li>
-          <li class="article-meta-tags">
-            <a href="/tags/polkadot/">
-              <i class="fa-solid fa-tag"></i>
-              Polkadot
+              XCMP
             </a>&nbsp;
           </li>
         </ul>
         <div class="article-content">
-          <p>Companion note to <a href="/blog/post/2026-04-09-xcmp-mmd-1-pager/">XCMP Merkle Matryoshka Dolls (1‑pager)</a>.</p>
-<h2 id="baseline-where-hrmp-flows-today">Baseline: where HRMP flows today</h2>
-<h3 id="parachain-cumulus-outbound--commitments">Parachain (Cumulus) outbound → commitments</h3>
-<ul>
-<li><code>cumulus/pallets/parachain-system/src/lib.rs</code>
-<ul>
-<li><code>on_finalize</code> drains <code>T::OutboundXcmpMessageSource::take_outbound_messages(...)</code></li>
-<li>stores <code>HrmpOutboundMessages</code> (later becomes <code>ValidationResult.horizontal_messages</code>)</li>
-</ul>
-</li>
-</ul>
-<h3 id="pvf--validate_block">PVF / validate_block</h3>
-<ul>
-<li><code>cumulus/pallets/parachain-system/src/validate_block/implementation.rs</code>
-<ul>
-<li>Executes the block under externalities and then <strong>reads</strong>:
-<ul>
-<li><code>HrmpOutboundMessages</code> → <code>ValidationResult.horizontal_messages</code></li>
-<li><code>HrmpWatermark</code> → <code>ValidationResult.hrmp_watermark</code></li>
-</ul>
-</li>
-<li>This code is compiled into the parachain <strong>PVF</strong> and executed by relay validators.</li>
-</ul>
-</li>
-</ul>
-<h3 id="relay-inclusion">Relay inclusion</h3>
-<ul>
-<li><code>polkadot/runtime/parachains/src/inclusion/mod.rs</code>
-<ul>
-<li>checks acceptance criteria (<code>check_validation_outputs</code>)</li>
-<li>enacts candidate messaging:
-<ul>
-<li><code>hrmp::Pallet::prune_hrmp(para, hrmp_watermark)</code></li>
-<li><code>hrmp::Pallet::queue_outbound_hrmp(para, horizontal_messages)</code></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="poc-target-what-changes">POC target (what changes)</h2>
-<p>Goal: stop storing payloads in relay HRMP queues. Instead:</p>
+          <p>Consolidated from earlier split posts (<strong>1‑pager</strong>, <strong>POC2 spec</strong>, <strong>implementer checklist</strong>, <strong>source outbox</strong>). Master copy lives in Obsidian: <strong>Polkadot XCMP MMD — Minimal POC</strong> (kept in sync with this article).</p>
+<p>Forum background: <a href="https://forum.polkadot.network/t/xcmp-design-discussion/7328">XCMP Design Discussion (Polkadot)</a>.</p>
+<p><strong>POC design revamp (vs forum MMD):</strong> the forum sketch uses <strong>one <code>XcmpMessageMMR</code> per channel</strong> and an <strong><code>XcmpChannelTree</code></strong> over those MMR roots. For this <strong>minimal POC</strong> we <strong>drop that split</strong>: a <strong>single append-only global <code>XcmpOutboxMmr</code></strong> on the source commits all outbound messages; the header digest carries <strong><code>XcmpOutboxMmrRoot</code></strong> only. Each leaf still names <strong><code>dest</code></strong> (and nonce + <code>payload_hash</code>), so there is no loss of routing identity—only a shorter proof path and less on-chain bookkeeping. A future scale-out version can shard back into per-channel MMRs + channel tree.</p>
         </div>
-        <div class="article-readmore"><a href="/blog/post/2026-04-09-xcmp-mmd-implementer-checklist/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
-      <article class="article">
-        <a href="/blog/post/2026-04-09-xcmp-mmd-poc2-option1-spec/" class="article-titles">
-          <h2 class="article-title">XCMP MMD POC2 (Option 1) spec</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>April 9, 2026</time></li>
-          <li class="article-meta-tags">
-            <a href="/tags/blockchain/">
-              <i class="fa-solid fa-tag"></i>
-              BlockChain
-            </a>&nbsp;
-          </li>
-          <li class="article-meta-tags">
-            <a href="/tags/polkadot/">
-              <i class="fa-solid fa-tag"></i>
-              Polkadot
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <p>POC goal: implement XCMP “Merkle Matryoshka Dolls” (MMD) anchored by the relay’s <strong>MMR root</strong>, obtained directly via the parachain’s <strong>relay-chain state proof</strong> (from <code>set_validation_data</code>), and then using an <strong>MMR leaf proof</strong> to obtain <code>leaf_extra</code> that commits to a <strong>binary Merkle root of parachain heads</strong>.</p>
-<p>Scope choices:</p>
-<ul>
-<li><strong>A1</strong>: relay MMR leaf extra anchors a “ParaHeaderTree-like” root (here: <em>para heads merkle root</em>).</li>
-<li><strong>C1</strong>: source commits <code>XcmpChannelTree_root</code> in the <strong>real parachain header digest</strong>.</li>
-<li><strong>Option 1</strong>: accept relay’s <code>MAX_PARA_HEADS = 1024</code> truncation for POC.</li>
-</ul>
-<hr>
-<h2 id="definitions">Definitions</h2>
-<h3 id="identifiers">Identifiers</h3>
-<ul>
-<li><code>SourceParaId</code>: <code>u32</code> (SCALE encoded)</li>
-<li><code>DestParaId</code>: <code>u32</code></li>
-<li><code>ChannelId</code>: <code>(SourceParaId, DestParaId)</code> (unidirectional)</li>
-</ul>
-<h3 id="hashing-para-heads-merkle-root">Hashing (para-heads merkle root)</h3>
-<p>Must match relay runtime exactly:</p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2026-04-09-xcmp-mmd-poc2-option1-spec/">Read more...</a></div>
+        <div class="article-readmore"><a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
       <article class="article">

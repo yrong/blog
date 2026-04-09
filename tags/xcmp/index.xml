@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>XCMP on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/xcmp/</link>
+    <description>Recent content in XCMP on yrong blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
+    <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
+    <lastBuildDate>Thu, 09 Apr 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://yrong.github.io/blog/tags/xcmp/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Polkadot XCMP MMD — Minimal POC (merged)</title>
+      <link>https://yrong.github.io/blog/post/2026-04-09-xcmp-mmd-minimal-poc/</link>
+      <pubDate>Thu, 09 Apr 2026 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2026-04-09-xcmp-mmd-minimal-poc/</guid>
+      <description>&lt;p&gt;Consolidated from earlier split posts (&lt;strong&gt;1‑pager&lt;/strong&gt;, &lt;strong&gt;POC2 spec&lt;/strong&gt;, &lt;strong&gt;implementer checklist&lt;/strong&gt;, &lt;strong&gt;source outbox&lt;/strong&gt;). Master copy lives in Obsidian: &lt;strong&gt;Polkadot XCMP MMD — Minimal POC&lt;/strong&gt; (kept in sync with this article).&lt;/p&gt;&#xA;&lt;p&gt;Forum background: &lt;a href=&#34;https://forum.polkadot.network/t/xcmp-design-discussion/7328&#34;&gt;XCMP Design Discussion (Polkadot)&lt;/a&gt;.&lt;/p&gt;&#xA;&lt;p&gt;&lt;strong&gt;POC design revamp (vs forum MMD):&lt;/strong&gt; the forum sketch uses &lt;strong&gt;one &lt;code&gt;XcmpMessageMMR&lt;/code&gt; per channel&lt;/strong&gt; and an &lt;strong&gt;&lt;code&gt;XcmpChannelTree&lt;/code&gt;&lt;/strong&gt; over those MMR roots. For this &lt;strong&gt;minimal POC&lt;/strong&gt; we &lt;strong&gt;drop that split&lt;/strong&gt;: a &lt;strong&gt;single append-only global &lt;code&gt;XcmpOutboxMmr&lt;/code&gt;&lt;/strong&gt; on the source commits all outbound messages; the header digest carries &lt;strong&gt;&lt;code&gt;XcmpOutboxMmrRoot&lt;/code&gt;&lt;/strong&gt; only. Each leaf still names &lt;strong&gt;&lt;code&gt;dest&lt;/code&gt;&lt;/strong&gt; (and nonce + &lt;code&gt;payload_hash&lt;/code&gt;), so there is no loss of routing identity—only a shorter proof path and less on-chain bookkeeping. A future scale-out version can shard back into per-channel MMRs + channel tree.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Polkadot XCMP MMD — Minimal POC (merged) - yrong blog</title>
+  <meta property="og:title" content="Polkadot XCMP MMD — Minimal POC (merged) - yrong blog" />
+  <meta name="twitter:title" content="Polkadot XCMP MMD — Minimal POC (merged) - yrong blog" />
+  <meta name="description" content="Consolidated from earlier split posts (1‑pager, POC2 spec, implementer checklist, source outbox). Master copy lives in Obsidian: Polkadot XCMP MMD — Minimal POC (kept in sync with this article).
+Forum background: XCMP Design Discussion (Polkadot).
+POC design revamp (vs forum MMD): the forum sketch uses one XcmpMessageMMR per channel and an XcmpChannelTree over those MMR roots. For this minimal POC we drop that split: a single append-only global XcmpOutboxMmr on the source commits all outbound messages; the header digest carries XcmpOutboxMmrRoot only. Each leaf still names dest (and nonce &#43; payload_hash), so there is no loss of routing identity—only a shorter proof path and less on-chain bookkeeping. A future scale-out version can shard back into per-channel MMRs &#43; channel tree.">
+  <meta property="og:description" content="Consolidated from earlier split posts (1‑pager, POC2 spec, implementer checklist, source outbox). Master copy lives in Obsidian: Polkadot XCMP MMD — Minimal POC (kept in sync with this article).
+Forum background: XCMP Design Discussion (Polkadot).
+POC design revamp (vs forum MMD): the forum sketch uses one XcmpMessageMMR per channel and an XcmpChannelTree over those MMR roots. For this minimal POC we drop that split: a single append-only global XcmpOutboxMmr on the source commits all outbound messages; the header digest carries XcmpOutboxMmrRoot only. Each leaf still names dest (and nonce &#43; payload_hash), so there is no loss of routing identity—only a shorter proof path and less on-chain bookkeeping. A future scale-out version can shard back into per-channel MMRs &#43; channel tree.">
+  <meta name="twitter:description" content="Consolidated from earlier split posts (1‑pager, POC2 spec, implementer checklist, source outbox). Master copy lives in Obsidian: Polkadot XCMP MMD — Minimal POC (kept in sync with this article).
+Forum …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Polkadot XCMP MMD — Minimal POC (merged)</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>April 9, 2026</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/blockchain/">
+            <i class="fa-solid fa-tag"></i>
+            BlockChain
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/polkadot/">
+            <i class="fa-solid fa-tag"></i>
+            Polkadot
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/xcmp/">
+            <i class="fa-solid fa-tag"></i>
+            XCMP
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-problem-and-motivation">1) Problem and motivation</a></li>
+    <li><a href="#2-how-mmd-xcmp-replaces-hrmp-conceptually">2) How MMD XCMP replaces HRMP (conceptually)</a></li>
+    <li><a href="#3-matryoshka-proof-stack-minimal-poc-variant-simplified">3) “Matryoshka” proof stack (minimal POC variant, simplified)</a></li>
+    <li><a href="#4-current-relay-implementation-we-rely-on-already-in-place">4) Current relay implementation we rely on (already in place)</a></li>
+    <li><a href="#5-minimal-poc-submission-model-permissionless-extrinsic">5) Minimal POC submission model: permissionless extrinsic</a>
+      <ul>
+        <li><a href="#what-the-extrinsic-must-carry-per-message">What the extrinsic must carry (per message)</a></li>
+        <li><a href="#definitions-identifiers--hashing">Definitions (identifiers / hashing)</a></li>
+        <li><a href="#destination-verification-algorithm-per-message">Destination verification algorithm (per message)</a></li>
+      </ul>
+    </li>
+    <li><a href="#6-non-goals-explicit-for-poc">6) Non-goals (explicit for POC)</a></li>
+    <li><a href="#7-must-haves-even-for-minimal-poc">7) Must-haves (even for minimal POC)</a></li>
+    <li><a href="#8-implementation-touchpoints-high-level">8) Implementation touchpoints (high level)</a>
+      <ul>
+        <li><a href="#source-parachain">Source parachain</a></li>
+        <li><a href="#destination-parachain">Destination parachain</a></li>
+        <li><a href="#off-chain-relayer-tool">Off-chain relayer tool</a></li>
+      </ul>
+    </li>
+    <li><a href="#9-source-outbox--pallet-xcm-option-a-drain-xcmpqueue-commit-hash--nonce">9) Source outbox ↔ <code>pallet-xcm</code> (Option A): drain <code>XcmpQueue</code>, commit hash + nonce</a>
+      <ul>
+        <li><a href="#how-xcm-already-reaches-the-bytes-you-hash">How XCM already reaches the bytes you hash</a></li>
+        <li><a href="#integration-pattern-no-pallet-xcm-changes">Integration pattern (no <code>pallet-xcm</code> changes)</a></li>
+        <li><a href="#destination-and-relayer">Destination and relayer</a></li>
+        <li><a href="#where-the-relayer-gets-the-full-payload-xcm-bytes">Where the relayer gets the full <code>payload</code> (XCM bytes)</a></li>
+        <li><a href="#dual-run-vs-hrmp-off-later">Dual-run vs HRMP-off (later)</a></li>
+      </ul>
+    </li>
+    <li><a href="#10-outbox-pallet-global-xcmpoutboxmmr-xcmpoutboxmmrroot-header-digest">10) Outbox pallet: global <code>XcmpOutboxMmr</code>, <code>XcmpOutboxMmrRoot</code>, header digest</a>
+      <ul>
+        <li><a href="#101-when-state-updates-hook-ordering">10.1 When state updates (hook ordering)</a></li>
+        <li><a href="#102-global-xcmpoutboxmmr-single-stream">10.2 Global <code>XcmpOutboxMmr</code> (single stream)</a></li>
+        <li><a href="#103-depositing-the-digest-c1">10.3 Depositing the digest (C1)</a></li>
+        <li><a href="#104-one-block-dataflow">10.4 One-block dataflow</a></li>
+        <li><a href="#105-destination-prover-reminder">10.5 Destination prover (reminder)</a></li>
+      </ul>
+    </li>
+    <li><a href="#appendix-a-relay-mmr-root-where-it-lives">Appendix A: relay MMR root (where it lives)</a></li>
+    <li><a href="#appendix-b-polkadot-sdk-touchpoints-implementer">Appendix B: Polkadot SDK touchpoints (implementer)</a>
+      <ul>
+        <li><a href="#baseline--where-hrmp-flows-today">Baseline — where HRMP flows today</a></li>
+        <li><a href="#poc-changes-conceptual">POC changes (conceptual)</a></li>
+        <li><a href="#stretch-beefy-first-light-clients">Stretch: BEEFY-first light clients</a></li>
+        <li><a href="#team-review-checklist">Team review checklist</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+</aside>
+      <p>Consolidated from earlier split posts (<strong>1‑pager</strong>, <strong>POC2 spec</strong>, <strong>implementer checklist</strong>, <strong>source outbox</strong>). Master copy lives in Obsidian: <strong>Polkadot XCMP MMD — Minimal POC</strong> (kept in sync with this article).</p>
+<p>Forum background: <a href="https://forum.polkadot.network/t/xcmp-design-discussion/7328">XCMP Design Discussion (Polkadot)</a>.</p>
+<p><strong>POC design revamp (vs forum MMD):</strong> the forum sketch uses <strong>one <code>XcmpMessageMMR</code> per channel</strong> and an <strong><code>XcmpChannelTree</code></strong> over those MMR roots. For this <strong>minimal POC</strong> we <strong>drop that split</strong>: a <strong>single append-only global <code>XcmpOutboxMmr</code></strong> on the source commits all outbound messages; the header digest carries <strong><code>XcmpOutboxMmrRoot</code></strong> only. Each leaf still names <strong><code>dest</code></strong> (and nonce + <code>payload_hash</code>), so there is no loss of routing identity—only a shorter proof path and less on-chain bookkeeping. A future scale-out version can shard back into per-channel MMRs + channel tree.</p>
+<p><strong>Committed structure:</strong> the outbox is a <strong>global MMR</strong>—<strong>one accumulator across all blocks</strong>, leaves only appended, <strong>monotonic <code>mmr_leaf_index</code></strong> over the lifetime of the chain (until reset / migration). We <strong>do not</strong> use a per-block-only binary Merkle snapshot as the primary commitment; <strong><code>XcmpOutboxMmrRoot</code></strong> in each header is the <strong>current bagged root</strong> after that block’s appends (unchanged if the block appended no leaves, per your empty-block rule).</p>
+<hr>
+<h2 id="1-problem-and-motivation">1) Problem and motivation</h2>
+<p><strong>HRMP</strong> stores message payloads on the relay chain, which is expensive (storage + execution).</p>
+<p><strong>XCMP (MMD approach)</strong> replaces that with:</p>
+<ul>
+<li>payloads kept off the relay chain</li>
+<li>messages proven by <strong>nested Merkle proofs</strong> anchored to relay commitments</li>
+</ul>
+<hr>
+<h2 id="2-how-mmd-xcmp-replaces-hrmp-conceptually">2) How MMD XCMP replaces HRMP (conceptually)</h2>
+<p>HRMP:</p>
+<ul>
+<li>relay is a <strong>payload mailbox</strong> (<code>HrmpChannelContents</code>)</li>
+<li>receiver reads relay state proofs + prunes via watermarks</li>
+</ul>
+<p>MMD XCMP:</p>
+<ul>
+<li>relay is a <strong>commitment anchor</strong> (no payload storage)</li>
+<li>receiver accepts <strong>payload + proof bundle</strong>, verifies it, then executes the XCM.</li>
+</ul>
+<p>Minimal POC semantics:</p>
+<ul>
+<li><strong>unordered</strong>: messages can arrive in any order</li>
+<li><strong>best-effort</strong>: if nobody submits the proof bundle, nothing happens</li>
+<li><strong>no delivery guarantee</strong>: protocol does not ensure eventual delivery</li>
+<li><strong>no pruning</strong>: source/relayers may keep messages indefinitely (POC accepts this)</li>
+<li><strong>replay protection required</strong>: prevent executing the same proven message repeatedly</li>
+</ul>
+<hr>
+<h2 id="3-matryoshka-proof-stack-minimal-poc-variant-simplified">3) “Matryoshka” proof stack (minimal POC variant, simplified)</h2>
+<p>Smallest → largest commitments:</p>
+<ol>
+<li><strong><code>XcmpOutboxMmr</code></strong> (single global, append-only): every drained outbound page becomes one leaf. Leaf body includes <strong><code>dest_para_id</code></strong>, <strong><code>nonce</code></strong>, <strong><code>payload_hash</code></strong> (and a fixed layout/version). <strong>No separate per-channel MMR and no <code>XcmpChannelTree</code>.</strong></li>
+<li><strong>Source parachain header</strong>: digest item commits <strong><code>XcmpOutboxMmrRoot</code></strong> (bagged MMR root after the block’s appends).</li>
+<li><strong>Para-heads merkle root</strong> (<code>ParaHeadsRoot</code>): binary merkle root over <code>SCALE((para_id_u32, head_bytes))</code>, sorted by <code>para_id</code>.</li>
+<li><strong>Relay MMR root</strong>: from relay parent header digest; verify relay <strong>MMR leaf proof</strong> → <code>leaf_extra = ParaHeadsRoot</code>.</li>
+</ol>
+<p><strong>Option 1 (POC):</strong> accept relay’s <strong><code>MAX_PARA_HEADS = 1024</code></strong> truncation when reproducing <code>ParaHeadsRoot</code>.</p>
+<p>Destination verifies nested proofs:</p>
+<ol>
+<li>Get relay <strong>MMR root</strong> from relay parent header digest (Appendix A).</li>
+<li>Verify <strong>MMR leaf proof</strong> → obtain leaf → read <code>leaf_extra = ParaHeadsRoot</code>.</li>
+<li>Verify <strong>para-heads merkle proof</strong> against <code>ParaHeadsRoot</code> → obtain <code>head_bytes</code> for <code>source</code>.</li>
+<li>Decode <strong><code>head_bytes</code></strong> as the source parachain <strong>header</strong>, then read the agreed digest item → <strong><code>XcmpOutboxMmrRoot</code></strong>.</li>
+<li>Verify <strong>outbox MMR leaf proof</strong> for leaf <strong><code>(dest, nonce, payload_hash)</code></strong> against <strong><code>XcmpOutboxMmrRoot</code></strong>.</li>
+<li>Check <strong><code>hash(payload) == payload_hash</code></strong> (relayer supplies bytes).</li>
+<li>Replay protection: reject if already seen.</li>
+<li>POC execution: emit event / queue payload / XCM execution</li>
+</ol>
+<hr>
+<h2 id="4-current-relay-implementation-we-rely-on-already-in-place">4) Current relay implementation we rely on (already in place)</h2>
+<p>Westend/Rococo configure <code>pallet_beefy_mmr::LeafExtra = H256</code> and set:</p>
+<ul>
+<li><code>LeafExtra = ParaHeadsRoot</code></li>
+<li><code>ParaHeadsRootProvider</code> computes merkle root over <code>sorted_para_heads()</code>:
+<ul>
+<li><code>(para_id_u32, head_bytes)</code> sorted by id</li>
+<li>truncated to <code>MAX_PARA_HEADS = 1024</code></li>
+</ul>
+</li>
+</ul>
+<p><strong>Important</strong>: this defines the proof format and hashing. Our verifier must match it exactly.</p>
+<hr>
+<h2 id="5-minimal-poc-submission-model-permissionless-extrinsic">5) Minimal POC submission model: permissionless extrinsic</h2>
+<p>Anyone can be a relayer. The destination chain exposes an extrinsic, e.g.:</p>
+<ul>
+<li><code>submit_xcmp_mmd(messages: Vec&lt;MessageWithProof&gt;)</code></li>
+</ul>
+<p>No collator/inherent pipeline changes are required for the minimal POC.</p>
+<h3 id="what-the-extrinsic-must-carry-per-message">What the extrinsic must carry (per message)</h3>
+<ul>
+<li><strong>Anchor (which source commitment):</strong> enough context to pin one relay snapshot and one source header, e.g. <strong><code>source: u32</code></strong>, relay parent or BEEFY anchor the verifier accepts, and the <strong>para-heads leaf index</strong> for <code>source</code> (or equivalent unambiguous pointer). Without this, the destination cannot know which <code>head_bytes</code> / which <code>XcmpOutboxMmrRoot</code> to verify against.</li>
+<li><code>dest: u32</code>, <code>payload: Vec&lt;u8&gt;</code> (bounded)</li>
+<li><strong>Relay MMR:</strong> proof bundle that yields <code>ParaHeadsRoot</code> for that anchor (bounded; Appendix A)</li>
+<li><strong><code>para_heads_merkle_proof</code></strong> + the <strong><code>head_bytes</code></strong> for <code>(source)</code> that the proof claims (bounded)</li>
+<li><strong><code>outbox_mmr_proof</code></strong>: MMR membership of the committed leaf under <strong><code>XcmpOutboxMmrRoot</code></strong> extracted from that header + <strong><code>mmr_leaf_index</code></strong> (bounded)</li>
+</ul>
+<h3 id="definitions-identifiers--hashing">Definitions (identifiers / hashing)</h3>
+<ul>
+<li><code>SourceParaId</code>, <code>DestParaId</code>: <code>u32</code> (SCALE where needed).</li>
+<li><strong>Routing</strong> is implicit in each outbox leaf <strong><code>(dest, nonce, payload_hash)</code></strong>; no separate channel-tree id.</li>
+<li><strong>Para-heads merkle</strong> must match relay: <code>H = Keccak256</code>, leaf <code>SCALE((para_id_u32, head_bytes))</code>, relay sorts by <code>para_id</code>, odd-count promotion per <code>binary_merkle_tree</code> (<code>substrate/utils/binary-merkle-tree</code>).</li>
+</ul>
+<h3 id="destination-verification-algorithm-per-message">Destination verification algorithm (per message)</h3>
+<ol>
+<li>Obtain relay MMR root; verify MMR leaf proof → <code>ParaHeadsRoot</code>.</li>
+<li>Verify <code>SCALE((source, head_bytes))</code> membership in <code>ParaHeadsRoot</code>.</li>
+<li>Decode header from <code>head_bytes</code> → extract <strong><code>XcmpOutboxMmrRoot</code></strong> digest item.</li>
+<li>Verify <strong><code>outbox_mmr_proof</code></strong> for <strong><code>(dest, nonce, payload_hash)</code></strong> at <strong><code>mmr_leaf_index</code></strong>.</li>
+<li>Check <strong><code>hash(payload) == payload_hash</code></strong>.</li>
+<li>Replay protection per your rules.</li>
+<li>Execute (POC): emit event (full XCM execution later).</li>
+</ol>
+<hr>
+<h2 id="6-non-goals-explicit-for-poc">6) Non-goals (explicit for POC)</h2>
+<ul>
+<li><strong>Ordering</strong> guarantees (protocol-level)</li>
+<li><strong>Delivery</strong> guarantees / forced inclusion</li>
+<li><strong>Receipts/acks</strong></li>
+<li><strong>Pruning</strong> of message stores / MMRs</li>
+<li>Incentive mechanism for relayers/collators</li>
+<li>Full “execute XCM” integration (POC can emit events first)</li>
+</ul>
+<hr>
+<h2 id="7-must-haves-even-for-minimal-poc">7) Must-haves (even for minimal POC)</h2>
+<ul>
+<li><strong>Replay protection</strong> (at least <code>seen(message_hash)</code> or <code>seen((source, dest, mmr_leaf_index))</code> / <code>seen((source, dest, nonce))</code> per your leaf rules)</li>
+<li><strong>Hard bounds</strong>:
+<ul>
+<li>max messages per call</li>
+<li>max payload size</li>
+<li>max proof nodes / bytes per proof layer</li>
+<li>max total bytes per call</li>
+</ul>
+</li>
+<li><strong>Deterministic source commitment (C1):</strong>
+<ul>
+<li>During <strong>source</strong> block execution, the outbox must <strong><code>deposit_log</code></strong> the digest so that <strong><code>XcmpOutboxMmrRoot</code></strong> is part of the <strong>final parachain header</strong> for that block. The relay’s <strong><code>ParaHeadsRoot</code></strong> is computed over <strong><code>SCALE((para_id, head_bytes))</code></strong> where <strong><code>head_bytes</code></strong> is exactly that encoded header—so the commitment is binding once the source block is included on the relay. PVF / validators must agree on the same header bytes (same digest list, same root).</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="8-implementation-touchpoints-high-level">8) Implementation touchpoints (high level)</h2>
+<h3 id="source-parachain">Source parachain</h3>
+<ul>
+<li>Outbox pallet to build:
+<ul>
+<li><strong>one global <code>XcmpOutboxMmr</code></strong> (append-only; <code>mmr_lib</code> / <code>merkle-mountain-range</code> pattern)</li>
+<li><strong><code>XcmpOutboxMmrRoot</code></strong> after each block’s appends</li>
+</ul>
+</li>
+<li>Runtime: header digest item (<strong>C1</strong>) = <strong><code>XcmpOutboxMmrRoot</code></strong> (+ version tag).</li>
+</ul>
+<h3 id="destination-parachain">Destination parachain</h3>
+<ul>
+<li>Verifier pallet with a permissionless extrinsic:
+<ul>
+<li>verifies relay MMR leaf proof → <code>ParaHeadsRoot</code></li>
+<li>verifies para-heads proof → <code>head_bytes</code></li>
+<li>extracts <strong><code>XcmpOutboxMmrRoot</code></strong> from header digest</li>
+<li>verifies <strong>outbox MMR leaf proof</strong> (+ payload hash check)</li>
+<li>replay protection + bounded execution</li>
+</ul>
+</li>
+</ul>
+<h3 id="off-chain-relayer-tool">Off-chain relayer tool</h3>
+<ul>
+<li>Watches:
+<ul>
+<li>source collator / RPC: <strong>MMR leaf data</strong>, <strong><code>mmr_leaf_index</code></strong>, and header bytes (or archive) for blocks that emitted messages</li>
+<li>relay: header(s) / BEEFY data needed for <strong>relay MMR root</strong> and <strong><code>ParaHeadsRoot</code></strong> proofs</li>
+</ul>
+</li>
+<li>Builds proof bundle (anchor + para-heads + outbox MMR) and submits extrinsic to destination.</li>
+</ul>
+<hr>
+<h2 id="9-source-outbox--pallet-xcm-option-a-drain-xcmpqueue-commit-hash--nonce">9) Source outbox ↔ <code>pallet-xcm</code> (Option A): drain <code>XcmpQueue</code>, commit hash + nonce</h2>
+<p><strong>Decision (POC):</strong> integrate the outbox by <strong>draining the existing outbound queue</strong> (no parallel <code>SendXcm</code> sink). Commit <strong><code>payload_hash</code> + <code>nonce/index</code></strong> in the global MMR and header digest (<strong>C1</strong>). A <strong>permissionless relayer</strong> later submits the <strong>full payload bytes</strong> on the destination, together with proofs that bind to the committed hash.</p>
+<h3 id="how-xcm-already-reaches-the-bytes-you-hash">How XCM already reaches the bytes you hash</h3>
+<ol>
+<li><strong><code>pallet-xcm</code></strong> routes sends through the runtime <strong><code>XcmRouter</code></strong>, which ends in <strong><code>XcmpQueue</code>’s <code>SendXcm</code></strong>: messages are encoded and stored as outbound pages (<code>OutboundXcmpMessages</code>).</li>
+<li><strong><code>ParachainSystem</code></strong> <code>on_finalize</code> calls <strong><code>OutboundXcmpMessageSource::take_outbound_messages</code></strong>, which (in typical runtimes) is <strong><code>XcmpQueue::take_outbound_messages</code></strong>, yielding <strong><code>Vec&lt;(ParaId, Vec&lt;u8&gt;)&gt;</code></strong>. Those <strong><code>Vec&lt;u8&gt;</code></strong> values are the HRMP page bytes today — they are the stable object to hash for the commitment.</li>
+</ol>
+<h3 id="integration-pattern-no-pallet-xcm-changes">Integration pattern (no <code>pallet-xcm</code> changes)</h3>
+<ul>
+<li>Add an <strong>outbox / commitment pallet</strong> that maintains:
+<ul>
+<li><strong>global <code>XcmpOutboxMmr</code></strong> and a <strong>nonce</strong> (global per block-stream, or per-<code>dest</code>; document which),</li>
+<li>leaves <strong><code>SCALE(OutboxLeaf { dest, nonce, payload_hash, ... })</code></strong>,</li>
+<li><strong><code>on_finalize</code></strong> (or inline after last append) to deposit <strong><code>XcmpOutboxMmrRoot</code></strong> in the header digest (<strong>C1</strong>).</li>
+</ul>
+</li>
+<li>In the runtime, replace <code>type OutboundXcmpMessageSource = XcmpQueue</code> with a <strong>thin wrapper</strong> that:
+<ol>
+<li>Delegates to <strong><code>XcmpQueue::take_outbound_messages(maximum_channels)</code></strong>.</li>
+<li>For each <strong><code>(recipient, data)</code></strong>: compute <strong><code>payload_hash = H(data)</code></strong> with one fixed hash (e.g. Keccak256 or Blake2-256); bump <strong>nonce</strong>; <strong>push leaf</strong> on <strong><code>XcmpOutboxMmr</code></strong>.</li>
+<li>Returns the <strong>same</strong> message list unchanged so existing <strong><code>ParachainSystem</code></strong> / HRMP bandwidth behavior stays intact for a <strong>dual-run</strong> POC.</li>
+</ol>
+</li>
+</ul>
+<p><strong>Hashing note:</strong> commit the hash of the <strong>exact</strong> page bytes returned by <strong><code>take_outbound_messages</code></strong>. Do not assume equality with the <strong><code>XcmpMessageSent.message_hash</code></strong> from <strong><code>deliver</code></strong> (that is a Blake2 hash over the <strong>versioned XCM</strong> encoding path and may differ from the final page bytes).</p>
+<h3 id="destination-and-relayer">Destination and relayer</h3>
+<ul>
+<li><strong>On-chain commitment:</strong> the outbox leaf binds <strong><code>(dest_para_id, nonce, payload_hash)</code></strong> at <strong><code>mmr_leaf_index</code></strong> under <strong><code>XcmpOutboxMmrRoot</code></strong> for a specific <strong>source header</strong> (via <strong><code>ParaHeadsRoot</code></strong> / relay anchor).</li>
+<li><strong>Relayer submission:</strong> provide <strong><code>payload</code></strong>, <strong><code>outbox_mmr_proof</code></strong>, <strong><code>hash(payload) == payload_hash</code></strong>, plus the relay / para-head proof chain.</li>
+</ul>
+<h3 id="where-the-relayer-gets-the-full-payload-xcm-bytes">Where the relayer gets the full <code>payload</code> (XCM bytes)</h3>
+<p><strong>On-chain you only commit <code>payload_hash</code>.</strong> The <strong>verifier</strong> checks that submitted <strong><code>Vec&lt;u8&gt;</code></strong> matches that hash; it does <strong>not</strong> reconstruct the message from the chain.</p>
+<p>The <strong>relayer</strong> obtains the <strong>original page bytes</strong> from <strong>off-chain / side observability</strong>, for example:</p>
+<ul>
+<li><strong>Dual-run HRMP POC:</strong> the relay still stores the payload in <strong>HRMP</strong> for that window; archival nodes can read <strong><code>HrmpChannelContents</code></strong> and map context to bytes that hash to <strong><code>payload_hash</code></strong>.</li>
+<li><strong>Collator / full node:</strong> can <strong>publish</strong> <code>(mmr_leaf_index, payload)</code> to an <strong>indexer</strong>, <strong>DB</strong>, or <strong>directly</strong> to whoever pays for relaying.</li>
+<li><strong>Block import / tracing:</strong> same deterministic drain order as the outbox to attach bytes to each <strong>MMR leaf index</strong>.</li>
+</ul>
+<p><strong>Cryptographic binding is on-chain; bytes are DA</strong>—HRMP dual-run, off-chain stores, or an explicit DA path when HRMP is off.</p>
+<h3 id="dual-run-vs-hrmp-off-later">Dual-run vs HRMP-off (later)</h3>
+<ul>
+<li><strong>Dual-run POC:</strong> wrapper only adds commitments; full bytes can still ride HRMP as today.</li>
+<li><strong>HRMP-off:</strong> keep the same <strong>drain hook</strong> for hashing; transport policy changes separately.</li>
+</ul>
+<hr>
+<h2 id="10-outbox-pallet-global-xcmpoutboxmmr-xcmpoutboxmmrroot-header-digest">10) Outbox pallet: global <code>XcmpOutboxMmr</code>, <code>XcmpOutboxMmrRoot</code>, header digest</h2>
+<h3 id="101-when-state-updates-hook-ordering">10.1 When state updates (hook ordering)</h3>
+<ol>
+<li><strong>During <code>ParachainSystem::on_finalize</code> → <code>take_outbound_messages</code>:</strong> for each <strong><code>(recipient, data)</code></strong>, <strong><code>note_outbound</code></strong> pushes one leaf onto <strong><code>XcmpOutboxMmr</code></strong> (same order as HRMP drain).</li>
+<li><strong><code>XcmpMmdOutbox::on_finalize</code>:</strong> bagged root → <strong><code>XcmpOutboxMmrRoot</code></strong>, <strong><code>deposit_log</code></strong>.</li>
+</ol>
+<p><strong>Critical:</strong> in <strong><code>construct_runtime!</code></strong>, place <strong><code>XcmpMmdOutbox</code> after <code>ParachainSystem</code></strong>.</p>
+<h3 id="102-global-xcmpoutboxmmr-single-stream">10.2 Global <code>XcmpOutboxMmr</code> (single stream)</h3>
+<p><strong>Leaf (example):</strong> <strong><code>{ dest: ParaId, nonce: u64, payload_hash: H256 }</code></strong> (+ optional <strong><code>leaf_version</code></strong>).</p>
+<p><strong>Nonce:</strong> global <strong><code>OutboundNonce</code></strong> or <strong><code>NextNonce: StorageMap&lt;ParaId, u64&gt;</code></strong>—pick one; destination replay rules must match.</p>
+<p><strong><code>payload_hash</code>:</strong> hash exact <strong><code>Vec&lt;u8&gt;</code></strong> from <strong><code>take_outbound_messages</code></strong> with agreed <strong><code>H</code></strong>.</p>
+<p><strong>MMR:</strong> <strong><code>mmr_lib</code></strong> over <strong>all leaves ever</strong>; <strong><code>mmr_leaf_index</code></strong> is <strong>global</strong>. Digest <strong><code>XcmpOutboxMmrRoot</code></strong> = rolling snapshot after the block.</p>
+<p><strong>Empty blocks:</strong> define behavior when no leaves were pushed (carry forward root, <code>H256::default()</code>, or sentinel); source and verifier must match.</p>
+<h3 id="103-depositing-the-digest-c1">10.3 Depositing the digest (C1)</h3>
+<p><code>frame_system::deposit_log(DigestItem::PreRuntime(engine_id, (digest_version, XcmpOutboxMmrRoot).encode()))</code> with a dedicated <strong>4-byte <code>engine_id</code></strong> (e.g. <code>*b&quot;xmmd&quot;</code>), not colliding with <strong><code>CumulusDigestItem</code></strong>.</p>
+<h3 id="104-one-block-dataflow">10.4 One-block dataflow</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>ParachainSystem::on_finalize
+</span></span><span style="display:flex;"><span>  └─ take_outbound_messages (wrapper)
+</span></span><span style="display:flex;"><span>       ├─ XcmpQueue::take_outbound_messages
+</span></span><span style="display:flex;"><span>       └─ for each (dest, data): note_outbound → push leaf on XcmpOutboxMmr
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>XcmpMmdOutbox::on_finalize   // after ParachainSystem
+</span></span><span style="display:flex;"><span>  └─ XcmpOutboxMmrRoot = bag_peaks (current MMR root)
+</span></span><span style="display:flex;"><span>  └─ deposit_log(PreRuntime, (version, XcmpOutboxMmrRoot))
+</span></span></code></pre></div><h3 id="105-destination-prover-reminder">10.5 Destination prover (reminder)</h3>
+<p>Prove <strong><code>head_bytes</code></strong> in <strong><code>ParaHeadsRoot</code></strong> → decode source header → <strong><code>XcmpOutboxMmrRoot</code></strong> → <strong>outbox MMR proof</strong> + <strong><code>hash(payload) == payload_hash</code></strong>.</p>
+<hr>
+<h2 id="appendix-a-relay-mmr-root-where-it-lives">Appendix A: relay MMR root (where it lives)</h2>
+<p>Relay runtimes set <code>pallet_mmr::Config::OnNewRoot = pallet_beefy_mmr::DepositBeefyDigest</code>, which deposits:</p>
+<p><code>DigestItem::Consensus(BEEFY_ENGINE_ID, ConsensusLog::MmrRoot(root).encode())</code></p>
+<p>Extract with:</p>
+<p><code>sp_consensus_beefy::mmr::find_mmr_root_digest(header) -&gt; Option&lt;MmrRootHash&gt;</code></p>
+<p>Destination (via <code>set_validation_data</code> relay context): decode relay parent header → <code>find_mmr_root_digest</code> → verify supplied MMR leaf proof → <code>leaf_extra = ParaHeadsRoot</code>.</p>
+<hr>
+<h2 id="appendix-b-polkadot-sdk-touchpoints-implementer">Appendix B: Polkadot SDK touchpoints (implementer)</h2>
+<h3 id="baseline--where-hrmp-flows-today">Baseline — where HRMP flows today</h3>
+<ul>
+<li><code>cumulus/pallets/parachain-system/src/lib.rs</code> — <code>on_finalize</code> drains <code>take_outbound_messages</code>, stores <code>HrmpOutboundMessages</code>.</li>
+<li><code>cumulus/pallets/parachain-system/src/validate_block/implementation.rs</code> — PVF reads <code>HrmpOutboundMessages</code> → <code>ValidationResult.horizontal_messages</code>.</li>
+<li><code>polkadot/runtime/parachains/src/inclusion/mod.rs</code> — <code>hrmp::prune_hrmp</code>, <code>queue_outbound_hrmp</code>.</li>
+</ul>
+<h3 id="poc-changes-conceptual">POC changes (conceptual)</h3>
+<ul>
+<li><strong>Types:</strong> <code>OutboxLeaf { dest, nonce, payload_hash }</code>, <code>MessageWithProof { source, dest, payload, anchor, para_heads_proof, outbox_mmr_proof, mmr_leaf_index, ... }</code> with hard bounds.</li>
+<li><strong>Source:</strong> global <strong><code>XcmpOutboxMmr</code></strong> + <strong><code>XcmpOutboxMmrRoot</code></strong> in digest; <strong><code>OutboundXcmpMessageSource</code> wrapper</strong> around <strong><code>XcmpQueue</code></strong> (drain + note leaves, return same HRMP pages for dual-run).</li>
+<li><strong>C1:</strong> root is in <strong>source header</strong> included in <strong><code>ParaHeadsRoot</code></strong>; no mandatory relay map <code>XcmpOutboxMmrRoots[ParaId]</code> (optional indexing only).</li>
+<li><strong>Destination:</strong> permissionless extrinsic; verifies relay MMR → <code>ParaHeadsRoot</code> → header digest → outbox MMR + payload hash; replay protection.</li>
+<li><strong>PVF:</strong> header must match validation; digest is part of agreed header bytes (see §7).</li>
+<li><strong>Tests / demo:</strong> e.g. <code>cumulus/xcm/xcm-emulator</code> or integration tests.</li>
+</ul>
+<h3 id="stretch-beefy-first-light-clients">Stretch: BEEFY-first light clients</h3>
+<p>Code references for leaf-extra plumbing: <code>substrate/frame/beefy-mmr</code>, <code>substrate/primitives/consensus/beefy</code> (<code>MmrLeaf.leaf_extra</code>). The POC above still obtains <strong><code>ParaHeadsRoot</code></strong> via relay parent + MMR leaf proof as in Appendix A.</p>
+<h3 id="team-review-checklist">Team review checklist</h3>
+<ul>
+<li>Leaf = payload hash vs extra metadata</li>
+<li>Ordering / replay semantics</li>
+<li>Bounds + weights</li>
+<li>Pruning / incentives (post-POC)</li>
+</ul>
+<hr>
+<p><em>Older generic XCMP research (2021): see /blog/post/2021-05-10-xcmp/ — not specific to this MMD minimal POC.</em></p>
+
+    </article>
+
+    
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Polkadot%20XCMP%20MMD%20%e2%80%94%20Minimal%20POC%20%28merged%29%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer pager-noitem">&lt; Newer</li>
+      <li class="pager-older">
+        <a href="/blog/post/2022-05-10-polkadot-validate-block-pvf/" data-toggle="tooltip" data-placement="top" title="Polkadot validate_block, PVF, and relay validators">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>XCMP - yrong blog</title>
+  <meta property="og:title" content="XCMP - yrong blog" />
+  <meta name="twitter:title" content="XCMP - yrong blog" />
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/tags/xcmp/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link href="/blog/tags/xcmp/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
+  <link href="/blog/tags/xcmp/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <section class="list term-list">
+      <article class="article">
+        <a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" class="article-titles">
+          <h2 class="article-title">Polkadot XCMP MMD — Minimal POC (merged)</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 9, 2026</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/xcmp/">
+              <i class="fa-solid fa-tag"></i>
+              XCMP
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>Consolidated from earlier split posts (<strong>1‑pager</strong>, <strong>POC2 spec</strong>, <strong>implementer checklist</strong>, <strong>source outbox</strong>). Master copy lives in Obsidian: <strong>Polkadot XCMP MMD — Minimal POC</strong> (kept in sync with this article).</p>
+<p>Forum background: <a href="https://forum.polkadot.network/t/xcmp-design-discussion/7328">XCMP Design Discussion (Polkadot)</a>.</p>
+<p><strong>POC design revamp (vs forum MMD):</strong> the forum sketch uses <strong>one <code>XcmpMessageMMR</code> per channel</strong> and an <strong><code>XcmpChannelTree</code></strong> over those MMR roots. For this <strong>minimal POC</strong> we <strong>drop that split</strong>: a <strong>single append-only global <code>XcmpOutboxMmr</code></strong> on the source commits all outbound messages; the header digest carries <strong><code>XcmpOutboxMmrRoot</code></strong> only. Each leaf still names <strong><code>dest</code></strong> (and nonce + <code>payload_hash</code>), so there is no loss of routing identity—only a shorter proof path and less on-chain bookkeeping. A future scale-out version can shard back into per-channel MMRs + channel tree.</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+    </section>
+    
+  </div>
+
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-rsslink">
+      <a href="/blog/tags/xcmp/index.xml" type="application/rss+xml" target="_blank" title="RSS">
+        <i class="fa-solid fa-rss"></i>
+      </a>
+    </li>
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>
