@@ -40,7 +40,7 @@ Goal: stop storing payloads in relay HRMP queues. Instead:
 - Source commits outbound messages into a compact root.
 - Relay stores/anchors that root (or it’s anchored via BEEFY/MMR later).
 - Destination verifies message payloads against the root using membership proofs.
-- Collator includes payload+proof in destination’s authored block (collator-as-relayer).
+- **Permissionless relayers** submit payload+proof bundles to the destination via extrinsic (minimal POC).
 
 ## POC1 (recommended): relay storage proof anchor (fastest “real proof” path)
 
@@ -95,7 +95,7 @@ Touchpoints:
 ### 5) Destination para: verifier + execution
 
 Implement a pallet that:
-- accepts `MessageWithProof` via inherent or call
+- accepts `MessageWithProof` via a **permissionless extrinsic**
 - verifies:
   - message ∈ per-channel commitment (MMR proof)
   - commitment ∈ channel tree (channel tree proof)
@@ -105,19 +105,8 @@ Implement a pallet that:
 
 Touchpoints:
 - destination runtime pallet
-- parachain inherent types (`cumulus_primitives_parachain_inherent`)
-
-### 6) Collator-as-relayer: build proofs and include in inherent
-
-Implement collator-side logic that:
-- watches relay anchor roots and source commitments
-- retrieves message payloads (source message store)
-- builds `MessageWithProof`
-- injects into destination block inherent data
-
-Touchpoints:
-- collator inherent construction code under `cumulus/client/*` (depends on stack)
-- `cumulus_primitives_parachain_inherent` data format
+-
+- For minimal POC: no inherent/collator plumbing required. A relayer constructs proofs off-chain and submits them via extrinsic.
 
 ### 7) Demo / tests
 
