@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Hyperbridge ISMP — state_root, overlay_root, and mmr_root - yrong blog</title>
+  <meta property="og:title" content="Hyperbridge ISMP — state_root, overlay_root, and mmr_root - yrong blog" />
+  <meta name="twitter:title" content="Hyperbridge ISMP — state_root, overlay_root, and mmr_root - yrong blog" />
+  <meta name="description" content="Notes mirrored from Hyperbridge - ISMP Storage Proofs &amp; Substrate Child Trie (Obsidian). Repo context: polytope-labs/hyperbridge. Protocol docs: docs.hyperbridge.network.
+When reading pallet-ismp and SubstrateStateMachine, three roots show up: the parachain state_root, the optional overlay_root on StateCommitment, and the mmr_root in the per-block ConsensusDigest. They are not interchangeable; each corresponds to a different data structure and proof type.
+
+What each root is
+
+  
+      
+          Name
+          Role
+      
+  
+  
+      
+          state_root
+          Root of the chain’s main Substrate state trie (Header::state_root). It commits to all pallets. Child tries are still included under this trie.
+      
+      
+          mmr_root
+          Root of the ISMP MMR after the MMR pallet finalizes the block: an append-only tree over message leaves (full bodies stored off-chain). It appears in the header as part of ConsensusDigest, not as a separate top-level field on StateCommitment by itself.
+      
+      
+          overlay_root on StateCommitment
+          The ISMP overlay slot carried in consensus proofs. It is not a third independent trie type in the abstract—it is whatever the chain puts in that slot (see packing below).
+      
+  
+
+Each block, on_finalize builds:">
+  <meta property="og:description" content="Notes mirrored from Hyperbridge - ISMP Storage Proofs &amp; Substrate Child Trie (Obsidian). Repo context: polytope-labs/hyperbridge. Protocol docs: docs.hyperbridge.network.
+When reading pallet-ismp and SubstrateStateMachine, three roots show up: the parachain state_root, the optional overlay_root on StateCommitment, and the mmr_root in the per-block ConsensusDigest. They are not interchangeable; each corresponds to a different data structure and proof type.
+
+What each root is
+
+  
+      
+          Name
+          Role
+      
+  
+  
+      
+          state_root
+          Root of the chain’s main Substrate state trie (Header::state_root). It commits to all pallets. Child tries are still included under this trie.
+      
+      
+          mmr_root
+          Root of the ISMP MMR after the MMR pallet finalizes the block: an append-only tree over message leaves (full bodies stored off-chain). It appears in the header as part of ConsensusDigest, not as a separate top-level field on StateCommitment by itself.
+      
+      
+          overlay_root on StateCommitment
+          The ISMP overlay slot carried in consensus proofs. It is not a third independent trie type in the abstract—it is whatever the chain puts in that slot (see packing below).
+      
+  
+
+Each block, on_finalize builds:">
+  <meta name="twitter:description" content="Notes mirrored from Hyperbridge - ISMP Storage Proofs &amp; Substrate Child Trie (Obsidian). Repo context: polytope-labs/hyperbridge. Protocol docs: docs.hyperbridge.network.
+When reading pallet-ismp …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Hyperbridge ISMP — state_root, overlay_root, and mmr_root</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>April 11, 2026</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/blockchain/">
+            <i class="fa-solid fa-tag"></i>
+            BlockChain
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/polkadot/">
+            <i class="fa-solid fa-tag"></i>
+            Polkadot
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/hyperbridge/">
+            <i class="fa-solid fa-tag"></i>
+            Hyperbridge
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/ismp/">
+            <i class="fa-solid fa-tag"></i>
+            ISMP
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#what-each-root-is">What each root is</a></li>
+    <li><a href="#how-statecommitment-packs-those-digest-fields">How <code>StateCommitment</code> packs those digest fields</a></li>
+    <li><a href="#which-root-a-proof-uses">Which root a proof uses</a></li>
+    <li><a href="#scenario-summary">Scenario summary</a></li>
+    <li><a href="#why-a-child-trie-for-requestresponse-data">Why a child trie for request/response data</a></li>
+    <li><a href="#coprocessor-vs-non-coprocessor">Coprocessor vs non-coprocessor</a></li>
+    <li><a href="#why-two-paths--child-trie-vs-mmr">Why two paths — child trie vs MMR</a></li>
+  </ul>
+</nav>
+</aside>
+      <p>Notes mirrored from <strong>Hyperbridge - ISMP Storage Proofs &amp; Substrate Child Trie</strong> (Obsidian). Repo context: <a href="https://github.com/polytope-labs/hyperbridge"><code>polytope-labs/hyperbridge</code></a>. Protocol docs: <a href="https://docs.hyperbridge.network/">docs.hyperbridge.network</a>.</p>
+<p>When reading <code>pallet-ismp</code> and <code>SubstrateStateMachine</code>, three roots show up: the parachain <strong><code>state_root</code></strong>, the optional <strong><code>overlay_root</code> on <code>StateCommitment</code></strong>, and the <strong><code>mmr_root</code></strong> in the per-block <strong><code>ConsensusDigest</code></strong>. They are not interchangeable; each corresponds to a different data structure and proof type.</p>
+<hr>
+<h2 id="what-each-root-is">What each root is</h2>
+<table>
+  <thead>
+      <tr>
+          <th>Name</th>
+          <th>Role</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong><code>state_root</code></strong></td>
+          <td>Root of the chain’s <strong>main</strong> Substrate state trie (<code>Header::state_root</code>). It commits to <strong>all</strong> pallets. Child tries are still <strong>included</strong> under this trie.</td>
+      </tr>
+      <tr>
+          <td><strong><code>mmr_root</code></strong></td>
+          <td>Root of the <strong>ISMP MMR</strong> after the MMR pallet finalizes the block: an <strong>append-only</strong> tree over <strong>message leaves</strong> (full bodies stored off-chain). It appears in the header as part of <strong><code>ConsensusDigest</code></strong>, not as a separate top-level field on <code>StateCommitment</code> by itself.</td>
+      </tr>
+      <tr>
+          <td><strong><code>overlay_root</code> on <code>StateCommitment</code></strong></td>
+          <td>The <strong>ISMP overlay</strong> slot carried in consensus proofs. It is <strong>not</strong> a third independent trie type in the abstract—it is <strong>whatever the chain puts in that slot</strong> (see packing below).</td>
+      </tr>
+  </tbody>
+</table>
+<p>Each block, <code>on_finalize</code> builds:</p>
+<ul>
+<li><strong><code>child_trie_root</code></strong> — <code>storage::child::root</code> for the ISMP child trie (<code>b&quot;ISMP&quot;</code>), where commitment metadata and related keys live.</li>
+<li><strong><code>mmr_root</code></strong> — <code>OffchainDB::finalize()</code> from the MMR accumulator.</li>
+</ul>
+<p>Both go into <strong><code>ConsensusDigest { mmr_root, child_trie_root }</code></strong> in the header digest.</p>
+<hr>
+<h2 id="how-statecommitment-packs-those-digest-fields">How <code>StateCommitment</code> packs those digest fields</h2>
+<p><code>StateCommitment</code> has <code>timestamp</code>, <code>state_root</code>, and optional <code>overlay_root</code>. The parachain consensus client maps header digest + header <code>state_root</code> into that struct. There are two regimes (<code>modules/ismp/clients/parachain/client/src/consensus.rs</code>):</p>
+<p><strong>Ordinary parachain (not the coprocessor)</strong></p>
+<ul>
+<li><code>state_root</code> = header state root (main trie).</li>
+<li><code>overlay_root</code> = <strong><code>child_trie_root</code></strong> from <code>ConsensusDigest</code>.</li>
+</ul>
+<p><strong>Hyperbridge as coprocessor</strong></p>
+<ul>
+<li><code>state_root</code> = <strong><code>child_trie_root</code></strong> (ISMP child trie only).</li>
+<li><code>overlay_root</code> = <strong><code>mmr_root</code></strong>.</li>
+</ul>
+<p>So on Hyperbridge, the <strong>MMR root</strong> is stored in <strong><code>overlay_root</code></strong>, and the <strong>child trie root</strong> is stored in <strong><code>state_root</code></strong>. The naming in <code>StateCommitment</code> is easy to misread; the packing is explicit in code.</p>
+<hr>
+<h2 id="which-root-a-proof-uses">Which root a proof uses</h2>
+<p><strong>1. POST request/response membership via Patricia trie</strong> (<code>verify_membership</code>, <code>OverlayProof</code> in <code>modules/ismp/state-machines/substrate/src/lib.rs</code>)</p>
+<ul>
+<li>Verifies that commitment keys exist under the <strong>child trie</strong> layout.</li>
+<li>Root selection: if the proof targets the <strong>coprocessor</strong> state machine, use <strong><code>state.state_root</code></strong> (which, for that commitment, <strong>is</strong> the child trie root); otherwise use <strong><code>state.overlay_root</code></strong> (child trie root on other chains).</li>
+<li>This path does <strong>not</strong> verify the MMR.</li>
+</ul>
+<p><strong>2. GET / arbitrary storage reads</strong> (<code>verify_state_proof</code>)</p>
+<ul>
+<li><strong><code>StateProof</code></strong> → verify against <strong><code>state_root</code></strong> (full chain trie).</li>
+<li><strong><code>OverlayProof</code></strong> → same root choice as membership when reading keys under the overlay trie.</li>
+</ul>
+<p><strong>3. EVM batch delivery</strong></p>
+<ul>
+<li>Solidity checks <strong>MMR multiproofs</strong> against <strong><code>overlayRoot</code></strong> on the stored commitment. For Hyperbridge, that value <strong>is</strong> the <strong><code>mmr_root</code></strong>.</li>
+</ul>
+<hr>
+<h2 id="scenario-summary">Scenario summary</h2>
+<table>
+  <thead>
+      <tr>
+          <th>Scenario</th>
+          <th>What you prove</th>
+          <th>Root</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Substrate membership of ISMP commitments</td>
+          <td>Child trie (overlay proof)</td>
+          <td><code>overlay_root</code> on normal chains; <strong><code>state_root</code></strong> when the target is Hyperbridge coprocessor (still the child trie).</td>
+      </tr>
+      <tr>
+          <td>Arbitrary storage read</td>
+          <td>Main trie</td>
+          <td><strong><code>state_root</code></strong> with <code>StateProof</code>.</td>
+      </tr>
+      <tr>
+          <td>POST batch to EVM</td>
+          <td>MMR</td>
+          <td><strong><code>overlayRoot</code></strong> = <strong><code>mmr_root</code></strong> for Hyperbridge; MMR multiproof.</td>
+      </tr>
+      <tr>
+          <td>“What commits the whole chain?”</td>
+          <td>—</td>
+          <td><strong><code>state_root</code></strong>.</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Mnemonic:</strong> <strong><code>state_root</code></strong> = entire chain state; <strong>child trie</strong> = compact ISMP commitment/receipt trie; <strong><code>mmr_root</code></strong> = ordered message log for succinct proofs—on Hyperbridge exposed to MMR-speaking clients as <strong><code>overlay_root</code></strong>.</p>
+<p>Related (Polkadot transport vs commitments): <a href="/post/2026-04-09-xcmp-mmd-minimal-poc/">Polkadot XCMP MMD — Minimal POC (merged)</a>.</p>
+<hr>
+<h2 id="why-a-child-trie-for-requestresponse-data">Why a child trie for request/response data</h2>
+<p>ISMP stores commitment metadata under <code>ChildInfo::new_default(&quot;ISMP&quot;)</code> because <strong>child tries yield cheaper Patricia proofs</strong> than proving through the global state trie (<code>child_trie.rs</code> module comment).</p>
+<ul>
+<li><strong>Smaller proofs</strong> — only the ISMP subtree, not paths under the full <strong><code>state_root</code></strong>.</li>
+<li><strong>Separation</strong> — <code>OverlayProof</code> vs <code>StateProof</code>; one <strong><code>child_trie_root</code></strong> in the digest.</li>
+<li><strong>Cross-chain verifiers</strong> — <code>read_child_proof</code> targets the child trie; less data than full-state proofs.</li>
+</ul>
+<hr>
+<h2 id="coprocessor-vs-non-coprocessor">Coprocessor vs non-coprocessor</h2>
+<p><code>Coprocessor: Get&lt;Option&lt;StateMachine&gt;&gt;</code> names an optional <strong>ISMP proxy</strong> (usually Hyperbridge). See <a href="https://docs.hyperbridge.network/protocol/ismp/proxies">ISMP proxies</a>.</p>
+<table>
+  <thead>
+      <tr>
+          <th></th>
+          <th>Non-coprocessor</th>
+          <th>Coprocessor</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Config</td>
+          <td><code>None</code></td>
+          <td><code>Some(Hyperbridge)</code></td>
+      </tr>
+      <tr>
+          <td><code>StateCommitment</code></td>
+          <td><code>overlay_root</code> = child trie; <code>state_root</code> = header</td>
+          <td>swapped: <code>overlay_root</code> = MMR, <code>state_root</code> = child trie</td>
+      </tr>
+      <tr>
+          <td>Overlay proof root</td>
+          <td><code>state.overlay_root</code></td>
+          <td>For proofs about Hyperbridge id, <code>state.state_root</code> (= child trie in that encoding)</td>
+      </tr>
+  </tbody>
+</table>
+<p>Non-coprocessor: no single proxy. Coprocessor: heavy verification aggregated on Hyperbridge; downstream uses cheaper proofs / proxy routing (<code>allowed_proxy()</code> = coprocessor).</p>
+<hr>
+<h2 id="why-two-paths--child-trie-vs-mmr">Why two paths — child trie vs MMR</h2>
+<p>Not two redundant proofs of the same fact.</p>
+<table>
+  <thead>
+      <tr>
+          <th>Path</th>
+          <th>Proves</th>
+          <th>Typical use</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Child trie (<code>OverlayProof</code>)</td>
+          <td>Commitment <strong>stored</strong> in pallet state (metadata, fees, index).</td>
+          <td>Substrate <code>verify_membership</code></td>
+      </tr>
+      <tr>
+          <td>MMR</td>
+          <td>Commitment as <strong>leaf in the message log</strong> for relay / batch delivery.</td>
+          <td>EVM handler vs <code>overlayRoot</code> (MMR root on Hyperbridge)</td>
+      </tr>
+  </tbody>
+</table>
+<p>Trie = <strong>state</strong> registration; MMR = <strong>ordered relay log</strong>. Destinations usually require <strong>one</strong> style, not both. Same commitment hash, two structures for different verifiers and costs.</p>
+
+    </article>
+
+    
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Hyperbridge%20ISMP%20%e2%80%94%20state_root,%20overlay_root,%20and%20mmr_root%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer pager-noitem">&lt; Newer</li>
+      <li class="pager-older">
+        <a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" data-toggle="tooltip" data-placement="top" title="Polkadot XCMP MMD — Minimal POC (merged)">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

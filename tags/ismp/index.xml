@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ISMP on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/ismp/</link>
+    <description>Recent content in ISMP on yrong blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
+    <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
+    <lastBuildDate>Sat, 11 Apr 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://yrong.github.io/blog/tags/ismp/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Hyperbridge ISMP — state_root, overlay_root, and mmr_root</title>
+      <link>https://yrong.github.io/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/</guid>
+      <description>&lt;p&gt;Notes mirrored from &lt;strong&gt;Hyperbridge - ISMP Storage Proofs &amp;amp; Substrate Child Trie&lt;/strong&gt; (Obsidian). Repo context: &lt;a href=&#34;https://github.com/polytope-labs/hyperbridge&#34;&gt;&lt;code&gt;polytope-labs/hyperbridge&lt;/code&gt;&lt;/a&gt;. Protocol docs: &lt;a href=&#34;https://docs.hyperbridge.network/&#34;&gt;docs.hyperbridge.network&lt;/a&gt;.&lt;/p&gt;&#xA;&lt;p&gt;When reading &lt;code&gt;pallet-ismp&lt;/code&gt; and &lt;code&gt;SubstrateStateMachine&lt;/code&gt;, three roots show up: the parachain &lt;strong&gt;&lt;code&gt;state_root&lt;/code&gt;&lt;/strong&gt;, the optional &lt;strong&gt;&lt;code&gt;overlay_root&lt;/code&gt; on &lt;code&gt;StateCommitment&lt;/code&gt;&lt;/strong&gt;, and the &lt;strong&gt;&lt;code&gt;mmr_root&lt;/code&gt;&lt;/strong&gt; in the per-block &lt;strong&gt;&lt;code&gt;ConsensusDigest&lt;/code&gt;&lt;/strong&gt;. They are not interchangeable; each corresponds to a different data structure and proof type.&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;h2 id=&#34;what-each-root-is&#34;&gt;What each root is&lt;/h2&gt;&#xA;&lt;table&gt;&#xA;  &lt;thead&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;th&gt;Name&lt;/th&gt;&#xA;          &lt;th&gt;Role&lt;/th&gt;&#xA;      &lt;/tr&gt;&#xA;  &lt;/thead&gt;&#xA;  &lt;tbody&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td&gt;&lt;strong&gt;&lt;code&gt;state_root&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;&#xA;          &lt;td&gt;Root of the chain’s &lt;strong&gt;main&lt;/strong&gt; Substrate state trie (&lt;code&gt;Header::state_root&lt;/code&gt;). It commits to &lt;strong&gt;all&lt;/strong&gt; pallets. Child tries are still &lt;strong&gt;included&lt;/strong&gt; under this trie.&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td&gt;&lt;strong&gt;&lt;code&gt;mmr_root&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;&#xA;          &lt;td&gt;Root of the &lt;strong&gt;ISMP MMR&lt;/strong&gt; after the MMR pallet finalizes the block: an &lt;strong&gt;append-only&lt;/strong&gt; tree over &lt;strong&gt;message leaves&lt;/strong&gt; (full bodies stored off-chain). It appears in the header as part of &lt;strong&gt;&lt;code&gt;ConsensusDigest&lt;/code&gt;&lt;/strong&gt;, not as a separate top-level field on &lt;code&gt;StateCommitment&lt;/code&gt; by itself.&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td&gt;&lt;strong&gt;&lt;code&gt;overlay_root&lt;/code&gt; on &lt;code&gt;StateCommitment&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;&#xA;          &lt;td&gt;The &lt;strong&gt;ISMP overlay&lt;/strong&gt; slot carried in consensus proofs. It is &lt;strong&gt;not&lt;/strong&gt; a third independent trie type in the abstract—it is &lt;strong&gt;whatever the chain puts in that slot&lt;/strong&gt; (see packing below).&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;  &lt;/tbody&gt;&#xA;&lt;/table&gt;&#xA;&lt;p&gt;Each block, &lt;code&gt;on_finalize&lt;/code&gt; builds:&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

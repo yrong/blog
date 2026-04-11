@@ -45,6 +45,70 @@
   <div class="main" role="main">
     <section class="list section-list">
       <article class="article">
+        <a href="/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/" class="article-titles">
+          <h2 class="article-title">Hyperbridge ISMP — state_root, overlay_root, and mmr_root</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 11, 2026</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/hyperbridge/">
+              <i class="fa-solid fa-tag"></i>
+              Hyperbridge
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/ismp/">
+              <i class="fa-solid fa-tag"></i>
+              ISMP
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>Notes mirrored from <strong>Hyperbridge - ISMP Storage Proofs &amp; Substrate Child Trie</strong> (Obsidian). Repo context: <a href="https://github.com/polytope-labs/hyperbridge"><code>polytope-labs/hyperbridge</code></a>. Protocol docs: <a href="https://docs.hyperbridge.network/">docs.hyperbridge.network</a>.</p>
+<p>When reading <code>pallet-ismp</code> and <code>SubstrateStateMachine</code>, three roots show up: the parachain <strong><code>state_root</code></strong>, the optional <strong><code>overlay_root</code> on <code>StateCommitment</code></strong>, and the <strong><code>mmr_root</code></strong> in the per-block <strong><code>ConsensusDigest</code></strong>. They are not interchangeable; each corresponds to a different data structure and proof type.</p>
+<hr>
+<h2 id="what-each-root-is">What each root is</h2>
+<table>
+  <thead>
+      <tr>
+          <th>Name</th>
+          <th>Role</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong><code>state_root</code></strong></td>
+          <td>Root of the chain’s <strong>main</strong> Substrate state trie (<code>Header::state_root</code>). It commits to <strong>all</strong> pallets. Child tries are still <strong>included</strong> under this trie.</td>
+      </tr>
+      <tr>
+          <td><strong><code>mmr_root</code></strong></td>
+          <td>Root of the <strong>ISMP MMR</strong> after the MMR pallet finalizes the block: an <strong>append-only</strong> tree over <strong>message leaves</strong> (full bodies stored off-chain). It appears in the header as part of <strong><code>ConsensusDigest</code></strong>, not as a separate top-level field on <code>StateCommitment</code> by itself.</td>
+      </tr>
+      <tr>
+          <td><strong><code>overlay_root</code> on <code>StateCommitment</code></strong></td>
+          <td>The <strong>ISMP overlay</strong> slot carried in consensus proofs. It is <strong>not</strong> a third independent trie type in the abstract—it is <strong>whatever the chain puts in that slot</strong> (see packing below).</td>
+      </tr>
+  </tbody>
+</table>
+<p>Each block, <code>on_finalize</code> builds:</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" class="article-titles">
           <h2 class="article-title">Polkadot XCMP MMD — Minimal POC (merged)</h2>
           
@@ -437,51 +501,6 @@ let msg = Xcm::Transact {
         <div class="article-readmore"><a href="/blog/post/2021-04-17-bifrost/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
-      <article class="article">
-        <a href="/blog/post/2021-04-02-darwinia-bridger/" class="article-titles">
-          <h2 class="article-title">Darwinia Bridge</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>April 2, 2021</time></li>
-          <li class="article-meta-tags">
-            <a href="/tags/blockchain/">
-              <i class="fa-solid fa-tag"></i>
-              BlockChain
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <h1 id="theory">Theory</h1>
-<p><a href="https://darwinia.network/ChainRelay_Technical_Paper(Preview)_EN.pdf">White Paper</a></p>
-<p><a href="https://docs.darwinia.network/docs/en/rfc-0012-darwinia-bridge-core-interoperation-in-chainrelay-enabled-blockchains/">Principle</a></p>
-<p><a href="https://docs.google.com/document/d/1NVDSk6KZXV5CjE20cNPA8Swmmd89IYeWyN0T9lRBOEM">Darwinia-Ethereum Bridge</a></p>
-<h1 id="projects-navigation">Projects Navigation</h1>
-<h2 id="darwinia-bridge"><a href="https://github.com/darwinia-network/darwinia-common/tree/master/frame/bridge">Darwinia Bridge</a></h2>
-<p><a href="https://miro.medium.com/max/700/0*W_Q1-GWv4JeCCQ7x">cross-chain overview</a></p>
-<h3 id="background">Background</h3>
-<p><a href="https://github.com/Dexaran/ERC223-token-standard">ERC223</a></p>
-<p><a href="https://zhuanlan.zhihu.com/p/35019858">ERC721</a></p>
-<p><a href="https://eth.wiki/concepts/light-client-protocol">Patricia Merkle Trees</a></p>
-<p><a href="https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md">Mining difficulty calculate</a></p>
-<p><a href="https://github.com/nervosnetwork/merkle-mountain-range">mmr</a></p>
-<p><a href="https://github.com/darwinia-network/darwinia-common/blob/master/frame/bridge/relayer-game/README.md">relay game</a></p>
-<h2 id="bridger"><a href="https://github.com/darwinia-network/bridger">Bridger</a></h2>
-<p>Relayers (aka. Bridgers) in Darwinia Network are offchain worker clients which help relay the headers and messages between source chains and target chains</p>
-<h3 id="background-1">Background</h3>
-<p><a href="https://github.com/actix/actix">actix</a></p>
-<p>deprecated <a href="https://github.com/darwinia-network/dj">dj</a></p>
-<h2 id="shadow"><a href="https://github.com/darwinia-network/shadow">Shadow</a></h2>
-<p>Services for bridger which retrieve header data from public chains and generate mmr proof</p>
-<h3 id="background-2">Background</h3>
-<p><a href="https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html#using-extern-functions-to-call-external-code">ffi</a></p>
-<h2 id="wormhole"><a href="https://github.com/darwinia-network/wormhole">Wormhole</a></h2>
-<h3 id="background-3">Background</h3>
-<p><a href="https://docs.darwinia.network/docs/en/wiki-tut-wormhole-general/">wiki</a></p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2021-04-02-darwinia-bridger/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
     </section>
     
     <ul class="pagination pagination-default">
@@ -510,7 +529,7 @@ let msg = Xcm::Transact {
         <a href="/blog/post/page/2/" aria-label="Next" class="page-link" role="button"><span aria-hidden="true">&raquo;</span></a>
       </li>
       <li class="page-item">
-        <a href="/blog/post/page/7/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
+        <a href="/blog/post/page/8/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
       </li>
     </ul>
   </div>

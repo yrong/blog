@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>ISMP - yrong blog</title>
+  <meta property="og:title" content="ISMP - yrong blog" />
+  <meta name="twitter:title" content="ISMP - yrong blog" />
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/tags/ismp/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link href="/blog/tags/ismp/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
+  <link href="/blog/tags/ismp/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <section class="list term-list">
+      <article class="article">
+        <a href="/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/" class="article-titles">
+          <h2 class="article-title">Hyperbridge ISMP — state_root, overlay_root, and mmr_root</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 11, 2026</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/hyperbridge/">
+              <i class="fa-solid fa-tag"></i>
+              Hyperbridge
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/ismp/">
+              <i class="fa-solid fa-tag"></i>
+              ISMP
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>Notes mirrored from <strong>Hyperbridge - ISMP Storage Proofs &amp; Substrate Child Trie</strong> (Obsidian). Repo context: <a href="https://github.com/polytope-labs/hyperbridge"><code>polytope-labs/hyperbridge</code></a>. Protocol docs: <a href="https://docs.hyperbridge.network/">docs.hyperbridge.network</a>.</p>
+<p>When reading <code>pallet-ismp</code> and <code>SubstrateStateMachine</code>, three roots show up: the parachain <strong><code>state_root</code></strong>, the optional <strong><code>overlay_root</code> on <code>StateCommitment</code></strong>, and the <strong><code>mmr_root</code></strong> in the per-block <strong><code>ConsensusDigest</code></strong>. They are not interchangeable; each corresponds to a different data structure and proof type.</p>
+<hr>
+<h2 id="what-each-root-is">What each root is</h2>
+<table>
+  <thead>
+      <tr>
+          <th>Name</th>
+          <th>Role</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong><code>state_root</code></strong></td>
+          <td>Root of the chain’s <strong>main</strong> Substrate state trie (<code>Header::state_root</code>). It commits to <strong>all</strong> pallets. Child tries are still <strong>included</strong> under this trie.</td>
+      </tr>
+      <tr>
+          <td><strong><code>mmr_root</code></strong></td>
+          <td>Root of the <strong>ISMP MMR</strong> after the MMR pallet finalizes the block: an <strong>append-only</strong> tree over <strong>message leaves</strong> (full bodies stored off-chain). It appears in the header as part of <strong><code>ConsensusDigest</code></strong>, not as a separate top-level field on <code>StateCommitment</code> by itself.</td>
+      </tr>
+      <tr>
+          <td><strong><code>overlay_root</code> on <code>StateCommitment</code></strong></td>
+          <td>The <strong>ISMP overlay</strong> slot carried in consensus proofs. It is <strong>not</strong> a third independent trie type in the abstract—it is <strong>whatever the chain puts in that slot</strong> (see packing below).</td>
+      </tr>
+  </tbody>
+</table>
+<p>Each block, <code>on_finalize</code> builds:</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+    </section>
+    
+  </div>
+
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-rsslink">
+      <a href="/blog/tags/ismp/index.xml" type="application/rss+xml" target="_blank" title="RSS">
+        <i class="fa-solid fa-rss"></i>
+      </a>
+    </li>
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

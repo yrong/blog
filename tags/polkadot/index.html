@@ -42,6 +42,70 @@
   <div class="main" role="main">
     <section class="list term-list">
       <article class="article">
+        <a href="/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/" class="article-titles">
+          <h2 class="article-title">Hyperbridge ISMP — state_root, overlay_root, and mmr_root</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 11, 2026</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/hyperbridge/">
+              <i class="fa-solid fa-tag"></i>
+              Hyperbridge
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/ismp/">
+              <i class="fa-solid fa-tag"></i>
+              ISMP
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>Notes mirrored from <strong>Hyperbridge - ISMP Storage Proofs &amp; Substrate Child Trie</strong> (Obsidian). Repo context: <a href="https://github.com/polytope-labs/hyperbridge"><code>polytope-labs/hyperbridge</code></a>. Protocol docs: <a href="https://docs.hyperbridge.network/">docs.hyperbridge.network</a>.</p>
+<p>When reading <code>pallet-ismp</code> and <code>SubstrateStateMachine</code>, three roots show up: the parachain <strong><code>state_root</code></strong>, the optional <strong><code>overlay_root</code> on <code>StateCommitment</code></strong>, and the <strong><code>mmr_root</code></strong> in the per-block <strong><code>ConsensusDigest</code></strong>. They are not interchangeable; each corresponds to a different data structure and proof type.</p>
+<hr>
+<h2 id="what-each-root-is">What each root is</h2>
+<table>
+  <thead>
+      <tr>
+          <th>Name</th>
+          <th>Role</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong><code>state_root</code></strong></td>
+          <td>Root of the chain’s <strong>main</strong> Substrate state trie (<code>Header::state_root</code>). It commits to <strong>all</strong> pallets. Child tries are still <strong>included</strong> under this trie.</td>
+      </tr>
+      <tr>
+          <td><strong><code>mmr_root</code></strong></td>
+          <td>Root of the <strong>ISMP MMR</strong> after the MMR pallet finalizes the block: an <strong>append-only</strong> tree over <strong>message leaves</strong> (full bodies stored off-chain). It appears in the header as part of <strong><code>ConsensusDigest</code></strong>, not as a separate top-level field on <code>StateCommitment</code> by itself.</td>
+      </tr>
+      <tr>
+          <td><strong><code>overlay_root</code> on <code>StateCommitment</code></strong></td>
+          <td>The <strong>ISMP overlay</strong> slot carried in consensus proofs. It is <strong>not</strong> a third independent trie type in the abstract—it is <strong>whatever the chain puts in that slot</strong> (see packing below).</td>
+      </tr>
+  </tbody>
+</table>
+<p>Each block, <code>on_finalize</code> builds:</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" class="article-titles">
           <h2 class="article-title">Polkadot XCMP MMD — Minimal POC (merged)</h2>
           
