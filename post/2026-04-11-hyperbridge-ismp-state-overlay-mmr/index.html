@@ -138,6 +138,7 @@ When reading pallet-ismp …">
     <li><a href="#why-a-child-trie-for-requestresponse-data">Why a child trie for request/response data</a></li>
     <li><a href="#coprocessor-vs-non-coprocessor">Coprocessor vs non-coprocessor</a></li>
     <li><a href="#why-two-paths--child-trie-vs-mmr">Why two paths — child trie vs MMR</a></li>
+    <li><a href="#verifying-a-layoutv0-storage-proof">Verifying a <code>LayoutV0</code> storage proof</a></li>
   </ul>
 </nav>
 </aside>
@@ -302,6 +303,16 @@ When reading pallet-ismp …">
   </tbody>
 </table>
 <p>Trie = <strong>state</strong> registration; MMR = <strong>ordered relay log</strong>. Destinations usually require <strong>one</strong> style, not both. Same commitment hash, two structures for different verifiers and costs.</p>
+<hr>
+<h2 id="verifying-a-layoutv0-storage-proof">Verifying a <code>LayoutV0</code> storage proof</h2>
+<p><strong><code>LayoutV0&lt;H&gt;</code></strong> (<code>sp_trie</code>) is the Substrate Patricia trie layout; <strong><code>H</code></strong> is the node hasher (must match the source chain). Ethereum storage uses a different layout (e.g. <strong><code>EIP1186Layout</code></strong> in <code>modules/trees/ethereum</code> — RLP / EIP-1186), not <code>LayoutV0</code>.</p>
+<p>Verification pattern in <code>SubstrateStateMachine</code> (<code>modules/ismp/state-machines/substrate/src/lib.rs</code>):</p>
+<ol>
+<li><code>StorageProof::new(nodes).into_memory_db::&lt;H&gt;()</code></li>
+<li><code>TrieDBBuilder::&lt;LayoutV0&lt;H&gt;&gt;::new(&amp;db, &amp;root).build()</code></li>
+<li><code>trie.get(&amp;key)</code> — check value</li>
+</ol>
+<p>Used by <code>verify_membership</code> and <code>verify_state_proof</code>. Helpers: <code>read_proof_check</code>, <code>read_proof_check_for_parachain</code> in the same file. Test: <code>modules/pallets/testsuite/src/tests/child_trie_proof_check.rs</code>.</p>
 
     </article>
 
