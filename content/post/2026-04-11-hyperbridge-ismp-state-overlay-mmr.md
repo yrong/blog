@@ -119,3 +119,17 @@ Not two redundant proofs of the same fact.
 | MMR | Commitment as **leaf in the message log** for relay / batch delivery. | EVM handler vs `overlayRoot` (MMR root on Hyperbridge) |
 
 Trie = **state** registration; MMR = **ordered relay log**. Destinations usually require **one** style, not both. Same commitment hash, two structures for different verifiers and costs.
+
+---
+
+## Verifying a `LayoutV0` storage proof
+
+**`LayoutV0<H>`** (`sp_trie`) is the Substrate Patricia trie layout; **`H`** is the node hasher (must match the source chain). Ethereum storage uses a different layout (e.g. **`EIP1186Layout`** in `modules/trees/ethereum` — RLP / EIP-1186), not `LayoutV0`.
+
+Verification pattern in `SubstrateStateMachine` (`modules/ismp/state-machines/substrate/src/lib.rs`):
+
+1. `StorageProof::new(nodes).into_memory_db::<H>()`
+2. `TrieDBBuilder::<LayoutV0<H>>::new(&db, &root).build()`
+3. `trie.get(&key)` — check value
+
+Used by `verify_membership` and `verify_state_proof`. Helpers: `read_proof_check`, `read_proof_check_for_parachain` in the same file. Test: `modules/pallets/testsuite/src/tests/child_trie_proof_check.rs`.
