@@ -24,6 +24,50 @@ Forum background: [XCMP Design Discussion (Polkadot)](https://forum.polkadot.net
 
 ---
 
+## POC Spec v0 (final, concrete)
+
+This is the minimal, test-focused spec that the implementation follows.
+
+### Semantics
+
+- unordered, best-effort, no delivery guarantee
+- no pruning / receipts / incentives in this POC
+- replay protection required
+
+### Commitments
+
+- **Outbox accumulator:** one global append-only `XcmpOutboxMmr` (monotonic `mmr_leaf_index`)
+- **Leaf:** `(dest: u32, nonce: u64, payload_hash: H256)` (SCALE-encoded)
+- **`payload_hash` (fixed):** `Keccak256(payload_bytes)` where `payload_bytes` is exactly the `Vec<u8>` drained from `XcmpQueue::take_outbound_messages`
+- **Nonce (fixed):** global monotonic `u64`
+- **Header digest (C1):** `DigestItem::PreRuntime(*b"xmmd", SCALE((version, XcmpOutboxMmrRoot)))`
+- **Empty blocks (fixed):** carry-forward last root (repeat previous `XcmpOutboxMmrRoot` if no leaves appended)
+
+### Relay anchoring (fixed)
+
+- **Anchor is implicit:** verify against the current block’s **relay parent** from `set_validation_data`
+
+### Proof types (fixed, POC)
+
+- **Relay MMR proof (single leaf):** `sp_mmr_primitives::EncodableOpaqueLeaf` + `sp_mmr_primitives::LeafProof<H256>`  
+  Verified with `pallet_mmr::verify_leaves_proof::<Keccak256,_>(relay_root, ...)` and decoded to obtain `leaf_extra = ParaHeadsRoot`.
+- **Para-heads proof:** `binary_merkle_tree::MerkleProof<H256, Vec<u8>>` where `leaf = SCALE((source_u32, head_bytes))`
+- **Outbox MMR proof (single leaf):** `sp_mmr_primitives::EncodableOpaqueLeaf` + `sp_mmr_primitives::LeafProof<H256>`  
+  Verified statelessly against `XcmpOutboxMmrRoot`.
+
+### Replay rule (fixed)
+
+- `seen((source, mmr_leaf_index))`
+
+### Bounds (POC/test constants)
+
+- `MaxMessagesPerCall = 4`
+- `MaxPayloadBytes = 256 * 1024` (256 KiB)
+- Relay MMR proof items `≤ 64`, Para-heads proof items `≤ 32`, Outbox MMR proof items `≤ 64`
+- Implied total call size target `≈ 768 * 1024` (768 KiB) via the above bounds
+
+---
+
 ## 1) Problem and motivation
 
 **HRMP** stores message payloads on the relay chain, which is expensive (storage + execution).
@@ -104,27 +148,36 @@ No collator/inherent pipeline changes are required for the minimal POC.
 
 ### What the extrinsic must carry (per message)
 
-- **Anchor (which source commitment):** enough context to pin one relay snapshot and one source header, e.g. **`source: u32`**, relay parent or BEEFY anchor the verifier accepts, and the **para-heads leaf index** for `source` (or equivalent unambiguous pointer). Without this, the destination cannot know which `head_bytes` / which `XcmpOutboxMmrRoot` to verify against.
-- `dest: u32`, `payload: Vec<u8>` (bounded)
-- **Relay MMR:** proof bundle that yields `ParaHeadsRoot` for that anchor (bounded; Appendix A)
-- **`para_heads_merkle_proof`** + the **`head_bytes`** for `(source)` that the proof claims (bounded)
-- **`outbox_mmr_proof`**: MMR membership of the committed leaf under **`XcmpOutboxMmrRoot`** extracted from that header + **`mmr_leaf_index`** (bounded)
+- **Anchor (relay snapshot):** **implicit** — the verifier anchors to the **current block's relay parent** from `set_validation_data` (no relay hash/number in calldata).
+- `source: u32`, `dest: u32`, `nonce: u64`, `mmr_leaf_index: u64`
+- `payload: Vec<u8>` (bounded)
+- **Relay MMR (single leaf):** proof bundle that yields `ParaHeadsRoot` under the implicit anchor (Appendix A).
+  - We restrict the proof bundle to **exactly one proven relay leaf** for the POC.
+- **Para-heads merkle proof:** a proof object whose leaf is exactly `SCALE((source_u32, head_bytes))` (bounded).
+- **Outbox MMR (single leaf):** membership proof for committed outbox leaf `(dest, nonce, payload_hash)` at `mmr_leaf_index` under `XcmpOutboxMmrRoot` extracted from `head_bytes`.
 
 ### Definitions (identifiers / hashing)
 
 - `SourceParaId`, `DestParaId`: `u32` (SCALE where needed).
 - **Routing** is implicit in each outbox leaf **`(dest, nonce, payload_hash)`**; no separate channel-tree id.
-- **Para-heads merkle** must match relay: `H = Keccak256`, leaf `SCALE((para_id_u32, head_bytes))`, relay sorts by `para_id`, odd-count promotion per `binary_merkle_tree` (`substrate/utils/binary-merkle-tree`).
+- **Hashing (fixed for POC):**
+  - `payload_hash = Keccak256(payload_bytes)` where `payload_bytes` is the exact `Vec<u8>` drained from `XcmpQueue::take_outbound_messages`.
+  - Para-heads merkle must match relay: `H = Keccak256`, leaf `SCALE((para_id_u32, head_bytes))`, relay sorts by `para_id`, odd-count promotion per `binary_merkle_tree` (`substrate/utils/binary-merkle-tree`).
+- **Proof types (POC, concrete):**
+  - Para-heads proof: `binary_merkle_tree::MerkleProof<H256, Vec<u8>>` where `leaf = SCALE((source_u32, head_bytes))`.
+  - Relay MMR proof: `sp_mmr_primitives::EncodableOpaqueLeaf` + `sp_mmr_primitives::LeafProof<H256>` (exactly 1 leaf).
+  - Outbox MMR proof: `sp_mmr_primitives::EncodableOpaqueLeaf` + `sp_mmr_primitives::LeafProof<H256>` (exactly 1 leaf).
 
 ### Destination verification algorithm (per message)
 
-1. Obtain relay MMR root; verify MMR leaf proof → `ParaHeadsRoot`.
-2. Verify `SCALE((source, head_bytes))` membership in `ParaHeadsRoot`.
-3. Decode header from `head_bytes` → extract **`XcmpOutboxMmrRoot`** digest item.
-4. Verify **`outbox_mmr_proof`** for **`(dest, nonce, payload_hash)`** at **`mmr_leaf_index`**.
-5. Check **`hash(payload) == payload_hash`**.
-6. Replay protection per your rules.
-7. Execute (POC): emit event (full XCM execution later).
+1. Obtain relay parent header from validation data, extract relay MMR root from the BEEFY digest (Appendix A).
+2. Verify the submitted **relay MMR leaf proof** (single leaf) against that root and decode the proven leaf to read `leaf_extra = ParaHeadsRoot`.
+3. Verify the submitted **para-heads Merkle proof** against `ParaHeadsRoot` and decode its leaf as `SCALE((source_u32, head_bytes))`.
+4. Decode `head_bytes` as the source parachain header → extract **`XcmpOutboxMmrRoot`** digest item (`engine_id = *b"xmmd"`).
+5. Verify the submitted **outbox MMR proof** (single leaf) for outbox leaf `(dest, nonce, payload_hash)` at `mmr_leaf_index` against `XcmpOutboxMmrRoot`.
+6. Check `Keccak256(payload) == payload_hash`.
+7. Replay protection: `seen((source, mmr_leaf_index))` must be false; then mark it seen.
+8. Execute (POC): emit event (full XCM execution later).
 
 ---
 
@@ -141,12 +194,14 @@ No collator/inherent pipeline changes are required for the minimal POC.
 
 ## 7) Must-haves (even for minimal POC)
 
-- **Replay protection** (at least `seen(message_hash)` or `seen((source, dest, mmr_leaf_index))` / `seen((source, dest, nonce))` per your leaf rules)
+- **Replay protection (fixed for POC):** `seen((source, mmr_leaf_index))`.
 - **Hard bounds**:
-  - max messages per call
-  - max payload size
-  - max proof nodes / bytes per proof layer
-  - max total bytes per call
+  - max messages per call: `MaxMessagesPerCall = 4`
+  - max payload size: `MaxPayloadBytes = 256 * 1024` (256 KiB)
+  - relay MMR proof: exactly 1 leaf, max proof items `MaxRelayMmrProofItems = 64`
+  - para-heads Merkle proof: max proof items `MaxParaHeadsProofItems = 32`
+  - outbox MMR proof: exactly 1 leaf, max proof items `MaxOutboxMmrProofItems = 64`
+  - implied max total bytes per call: `MaxTotalCallBytes ≈ 768 * 1024` (768 KiB) via the above bounds
 - **Deterministic source commitment (C1):**
   - During **source** block execution, the outbox must **`deposit_log`** the digest so that **`XcmpOutboxMmrRoot`** is part of the **final parachain header** for that block. The relay’s **`ParaHeadsRoot`** is computed over **`SCALE((para_id, head_bytes))`** where **`head_bytes`** is exactly that encoded header—so the commitment is binding once the source block is included on the relay. PVF / validators must agree on the same header bytes (same digest list, same root).
 
@@ -196,14 +251,14 @@ No collator/inherent pipeline changes are required for the minimal POC.
   - **`on_finalize`** (or inline after last append) to deposit **`XcmpOutboxMmrRoot`** in the header digest (**C1**).
 - In the runtime, replace `type OutboundXcmpMessageSource = XcmpQueue` with a **thin wrapper** that:
   1. Delegates to **`XcmpQueue::take_outbound_messages(maximum_channels)`**.
-  2. For each **`(recipient, data)`**: compute **`payload_hash = H(data)`** with one fixed hash (e.g. Keccak256 or Blake2-256); bump **nonce**; **push leaf** on **`XcmpOutboxMmr`**.
+  2. For each **`(recipient, data)`**: compute **`payload_hash = Keccak256(data)`**; bump **global nonce**; **push leaf** on **`XcmpOutboxMmr`**.
   3. Returns the **same** message list unchanged so existing **`ParachainSystem`** / HRMP bandwidth behavior stays intact for a **dual-run** POC.
 
 **Hashing note:** commit the hash of the **exact** page bytes returned by **`take_outbound_messages`**. Do not assume equality with the **`XcmpMessageSent.message_hash`** from **`deliver`** (that is a Blake2 hash over the **versioned XCM** encoding path and may differ from the final page bytes).
 
 ### Destination and relayer
 
-- **On-chain commitment:** the outbox leaf binds **`(dest_para_id, nonce, payload_hash)`** at **`mmr_leaf_index`** under **`XcmpOutboxMmrRoot`** for a specific **source header** (via **`ParaHeadsRoot`** / relay anchor).
+- **On-chain commitment:** the outbox leaf binds **`(dest_para_id, nonce, payload_hash)`** at **`mmr_leaf_index`** under **`XcmpOutboxMmrRoot`** for a specific **source header** (via **`ParaHeadsRoot`** / implicit relay-parent anchor).
 - **Relayer submission:** provide **`payload`**, **`outbox_mmr_proof`**, **`hash(payload) == payload_hash`**, plus the relay / para-head proof chain.
 
 ### Where the relayer gets the full `payload` (XCM bytes)
@@ -238,13 +293,13 @@ The **relayer** obtains the **original page bytes** from **off-chain / side obse
 
 **Leaf (example):** **`{ dest: ParaId, nonce: u64, payload_hash: H256 }`** (+ optional **`leaf_version`**).
 
-**Nonce:** global **`OutboundNonce`** or **`NextNonce: StorageMap<ParaId, u64>`**—pick one; destination replay rules must match.
+**Nonce (fixed for POC):** global monotonic **`OutboundNonce: u64`** incremented once per appended leaf.
 
-**`payload_hash`:** hash exact **`Vec<u8>`** from **`take_outbound_messages`** with agreed **`H`**.
+**`payload_hash` (fixed for POC):** `Keccak256(payload_bytes)` where `payload_bytes` is the exact **`Vec<u8>`** from **`take_outbound_messages`**.
 
 **MMR:** **`mmr_lib`** over **all leaves ever**; **`mmr_leaf_index`** is **global**. Digest **`XcmpOutboxMmrRoot`** = rolling snapshot after the block.
 
-**Empty blocks:** define behavior when no leaves were pushed (carry forward root, `H256::default()`, or sentinel); source and verifier must match.
+**Empty blocks (fixed for POC):** **carry-forward last root** — if a block appends no leaves, the digest item repeats the previous block's `XcmpOutboxMmrRoot`.
 
 ### 10.3 Depositing the digest (C1)
 
@@ -293,7 +348,7 @@ Destination (via `set_validation_data` relay context): decode relay parent heade
 
 ### POC changes (conceptual)
 
-- **Types:** `OutboxLeaf { dest, nonce, payload_hash }`, `MessageWithProof { source, dest, payload, anchor, para_heads_proof, outbox_mmr_proof, mmr_leaf_index, ... }` with hard bounds.
+- **Types:** `OutboxLeaf { dest, nonce, payload_hash }`, `MessageWithProof { source, dest, nonce, mmr_leaf_index, payload, relay_mmr_proof, para_heads_proof, outbox_mmr_proof }` with hard bounds and an implicit relay-parent anchor.
 - **Source:** global **`XcmpOutboxMmr`** + **`XcmpOutboxMmrRoot`** in digest; **`OutboundXcmpMessageSource` wrapper** around **`XcmpQueue`** (drain + note leaves, return same HRMP pages for dual-run).
 - **C1:** root is in **source header** included in **`ParaHeadsRoot`**; no mandatory relay map `XcmpOutboxMmrRoots[ParaId]` (optional indexing only).
 - **Destination:** permissionless extrinsic; verifies relay MMR → `ParaHeadsRoot` → header digest → outbox MMR + payload hash; replay protection.
