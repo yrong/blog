@@ -139,6 +139,9 @@ When reading pallet-ismp …">
     <li><a href="#coprocessor-vs-non-coprocessor">Coprocessor vs non-coprocessor</a></li>
     <li><a href="#why-two-paths--child-trie-vs-mmr">Why two paths — child trie vs MMR</a></li>
     <li><a href="#verifying-a-layoutv0-storage-proof">Verifying a <code>LayoutV0</code> storage proof</a></li>
+    <li><a href="#evm-optimismhost-has-no-verification">EVM: <code>OptimismHost</code> has no verification</a></li>
+    <li><a href="#iconsensus-on-evm-beefy-stack"><code>IConsensus</code> on EVM (BEEFY stack)</a></li>
+    <li><a href="#two-mmrs-relay-vs-message">Two MMRs (relay vs message)</a></li>
   </ul>
 </nav>
 </aside>
@@ -313,6 +316,21 @@ When reading pallet-ismp …">
 <li><code>trie.get(&amp;key)</code> — check value</li>
 </ol>
 <p>Used by <code>verify_membership</code> and <code>verify_state_proof</code>. Helpers: <code>read_proof_check</code>, <code>read_proof_check_for_parachain</code> in the same file. Test: <code>modules/pallets/testsuite/src/tests/child_trie_proof_check.rs</code>.</p>
+<hr>
+<h2 id="evm-optimismhost-has-no-verification">EVM: <code>OptimismHost</code> has no verification</h2>
+<p><strong><code>OptimismHost</code></strong> (<code>evm/src/hosts/Optimism.sol</code>) only sets <strong><code>CHAIN_ID</code></strong> and inherits <strong><code>EvmHost</code></strong>.</p>
+<p><strong><code>EvmHost</code></strong> holds ISMP state and delegates <strong>all</strong> proof logic to <strong><code>HostParams.handler</code></strong> (usually <strong><code>HandlerV1</code></strong>).</p>
+<p><strong><code>HandlerV1</code></strong>: <code>handleConsensus</code> → <strong><code>IConsensus.verifyConsensus</code></strong> (deployed <strong><code>consensusClient</code></strong>, e.g. BEEFY under <code>evm/src/consensus/</code>); <code>handlePostRequests</code> → <strong>MMR</strong> verify vs <strong><code>overlayRoot</code></strong>, then <code>dispatchIncoming</code>.</p>
+<p>Incoming messages from Substrate (e.g. Bifrost via Hyperbridge) are proved on L2 with <strong>Hyperbridge MMR + consensus updates</strong>, not with custom code in <code>OptimismHost</code>.</p>
+<hr>
+<h2 id="iconsensus-on-evm-beefy-stack"><code>IConsensus</code> on EVM (BEEFY stack)</h2>
+<p><strong>Interface:</strong> <code>sdk/packages/core/contracts/interfaces/IConsensus.sol</code> — <code>verifyConsensus(trustedState, proof) → (newState, IntermediateState[])</code>.</p>
+<p>Implementations under <code>evm/src/consensus/</code>: <strong><code>ConsensusRouter</code></strong> (first proof byte → <strong>BeefyV1</strong> naive, <strong>SP1Beefy</strong> ZK, <strong>BeefyV1FiatShamir</strong>); <strong><code>BeefyV1</code></strong> verifies relay <strong>BEEFY/MMR</strong> update + <strong>parachain header</strong> proofs and returns <strong><code>IntermediateState</code></strong>. Deployed address is <strong><code>HostParams.consensusClient</code></strong>; <strong><code>HandlerV1.handleConsensus</code></strong> calls it.</p>
+<hr>
+<h2 id="two-mmrs-relay-vs-message">Two MMRs (relay vs message)</h2>
+<p><strong>Relay BEEFY MMR</strong> — checked in <strong><code>BeefyV1.verifyMmrUpdateProof</code></strong> (<code>RelayChainProof</code>): Polkadot relay finality / authority / relay MMR. <strong>Not</strong> “this ISMP message exists.”</p>
+<p><strong>Hyperbridge message MMR</strong> — checked in <strong><code>HandlerV1.handlePostRequests</code></strong> against <strong><code>overlayRoot</code></strong>: ISMP request leaves on Hyperbridge. <strong>Not</strong> the same tree as the relay MMR.</p>
+<p>Order: <strong><code>handleConsensus</code></strong> (trust roots) → <strong><code>handlePostRequests</code></strong> (message MMR membership).</p>
 
     </article>
 
@@ -343,7 +361,9 @@ When reading pallet-ismp …">
 
 
     <ul class="pager article-pager">
-      <li class="pager-newer pager-noitem">&lt; Newer</li>
+      <li class="pager-newer">
+          <a href="/blog/post/2026-04-15-merkle-leaf-domain-separation-and-sparse-tree/" data-toggle="tooltip" data-placement="top" title="Merkle 叶子哈希、域分离与稀疏树证明（MerkleDropHelper）">&lt; Newer</a>
+      </li>
       <li class="pager-older">
         <a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" data-toggle="tooltip" data-placement="top" title="Polkadot XCMP MMD — Minimal POC (merged)">Older &gt;</a>
       </li>

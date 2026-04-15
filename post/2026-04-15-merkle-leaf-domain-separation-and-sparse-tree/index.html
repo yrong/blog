@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Merkle 叶子哈希、域分离与稀疏树证明（MerkleDropHelper） - yrong blog</title>
+  <meta property="og:title" content="Merkle 叶子哈希、域分离与稀疏树证明（MerkleDropHelper） - yrong blog" />
+  <meta name="twitter:title" content="Merkle 叶子哈希、域分离与稀疏树证明（MerkleDropHelper） - yrong blog" />
+  <meta name="description" content="结论速记
+
+关键不是“多 hash 一次更强”：keccak256(keccak256(...)) 的主要价值在于域分离（domain separation），让“叶子哈希”和“内部节点哈希”的构造形状不同，避免 Merkle 结构里的“角色混淆”讨论。
+更标准：显式前缀（leaf/internal）通常比 ~hash 或双 keccak 更容易被审计/跨语言实现接受。
+验证端必须逐字对齐：叶子公式、内部节点哈希顺序（是否排序）、稀疏缺失节点默认值（0）必须完全一致。
+
+keccak256(keccak256(abi.encode(member, amount))) 是否足以避免 second preimage？
+在 Merkle 语境里，大家常担心的不是去破 Keccak 的 preimage，而是：">
+  <meta property="og:description" content="结论速记
+
+关键不是“多 hash 一次更强”：keccak256(keccak256(...)) 的主要价值在于域分离（domain separation），让“叶子哈希”和“内部节点哈希”的构造形状不同，避免 Merkle 结构里的“角色混淆”讨论。
+更标准：显式前缀（leaf/internal）通常比 ~hash 或双 keccak 更容易被审计/跨语言实现接受。
+验证端必须逐字对齐：叶子公式、内部节点哈希顺序（是否排序）、稀疏缺失节点默认值（0）必须完全一致。
+
+keccak256(keccak256(abi.encode(member, amount))) 是否足以避免 second preimage？
+在 Merkle 语境里，大家常担心的不是去破 Keccak 的 preimage，而是：">
+  <meta name="twitter:description" content="结论速记
+
+关键不是“多 hash 一次更强”：keccak256(keccak256(...)) 的主要价值在于域分离（domain separation），让“叶子哈希”和“内部节点哈希”的构造形状不同，避免 Merkle 结构里的“角色混淆”讨论。
+更标准：显式前缀（leaf/internal）通常比 ~hash 或双 keccak 更容易被审计/跨语言实现接受。
+验证端必须逐字对齐：叶子公 …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2026-04-15-merkle-leaf-domain-separation-and-sparse-tree/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Merkle 叶子哈希、域分离与稀疏树证明（MerkleDropHelper）</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>April 15, 2026</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/cryptography/">
+            <i class="fa-solid fa-tag"></i>
+            cryptography
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/ethereum/">
+            <i class="fa-solid fa-tag"></i>
+            ethereum
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/merkle/">
+            <i class="fa-solid fa-tag"></i>
+            merkle
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/security/">
+            <i class="fa-solid fa-tag"></i>
+            security
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#结论速记">结论速记</a></li>
+    <li><a href="#keccak256keccak256abiencodemember-amount-是否足以避免-second-preimage"><code>keccak256(keccak256(abi.encode(member, amount)))</code> 是否足以避免 second preimage？</a></li>
+    <li><a href="#merkledrophelper-代码解读稀疏--排序哈希"><code>MerkleDropHelper</code> 代码解读（稀疏 + 排序哈希）</a>
+      <ul>
+        <li><a href="#constructtreemembers-claimamounts"><code>constructTree(members, claimAmounts)</code></a></li>
+        <li><a href="#createproofmemberindex-tree"><code>createProof(memberIndex, tree)</code></a></li>
+        <li><a href="#验证端必须满足的三条">验证端必须满足的三条</a></li>
+      </ul>
+    </li>
+    <li><a href="#merkledrophelper-源码"><code>MerkleDropHelper</code> 源码</a></li>
+  </ul>
+</nav>
+</aside>
+      <h2 id="结论速记">结论速记</h2>
+<ul>
+<li><strong>关键不是“多 hash 一次更强”</strong>：<code>keccak256(keccak256(...))</code> 的主要价值在于<strong>域分离（domain separation）</strong>，让“叶子哈希”和“内部节点哈希”的构造形状不同，避免 Merkle 结构里的“角色混淆”讨论。</li>
+<li><strong>更标准</strong>：显式前缀（leaf/internal）通常比 <code>~hash</code> 或双 keccak 更容易被审计/跨语言实现接受。</li>
+<li><strong>验证端必须逐字对齐</strong>：叶子公式、内部节点哈希顺序（是否排序）、稀疏缺失节点默认值（0）必须完全一致。</li>
+</ul>
+<h2 id="keccak256keccak256abiencodemember-amount-是否足以避免-second-preimage"><code>keccak256(keccak256(abi.encode(member, amount)))</code> 是否足以避免 second preimage？</h2>
+<p>在 Merkle 语境里，大家常担心的不是去破 Keccak 的 preimage，而是：</p>
+<ul>
+<li>叶子与内部节点若缺少明确区分，理论上会讨论“能否拿某个内部节点值来冒充叶子值”造成<strong>叶子/内部节点角色混淆</strong>。</li>
+</ul>
+<p>若内部节点固定为：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span>parent <span style="color:#f92672">=</span> keccak256(abi.encode(min(left, right), max(left, right)));
+</span></span></code></pre></div><p>那么把叶子定义成：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span>leaf <span style="color:#f92672">=</span> keccak256(keccak256(abi.encode(member, amount)));
+</span></span></code></pre></div><p>通常可视为足够的<strong>域分离</strong>：叶子是“对 32 字节 digest 再 hash”，内部节点是“对两个 digest（排序后）再 hash”，两者在构造形态上可区分。</p>
+<p>更常见、更直观的域分离写法是显式前缀：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span>leaf   <span style="color:#f92672">=</span> keccak256(abi.encodePacked(<span style="color:#66d9ef">uint8</span>(<span style="color:#ae81ff">0x00</span>), member, amount));
+</span></span><span style="display:flex;"><span>parent <span style="color:#f92672">=</span> keccak256(abi.encodePacked(<span style="color:#66d9ef">uint8</span>(<span style="color:#ae81ff">0x01</span>), min(left,right), max(left,right)));
+</span></span></code></pre></div><h2 id="merkledrophelper-代码解读稀疏--排序哈希"><code>MerkleDropHelper</code> 代码解读（稀疏 + 排序哈希）</h2>
+<h3 id="constructtreemembers-claimamounts"><code>constructTree(members, claimAmounts)</code></h3>
+<ul>
+<li><strong>树高</strong>：不断把 (n) 变成 (\lceil n/2 \rceil) 直到 0，得到层数 <code>height</code>。</li>
+<li><strong>叶子层</strong>：每个叶子为：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span>nodes[i] <span style="color:#f92672">=</span> <span style="color:#f92672">~</span>keccak256(abi.encode(members[i], claimAmounts[i]));
+</span></span></code></pre></div><p><code>~</code>（按位取反）是一个“与内部节点区分开”的技巧（非标准，但能达到域分离目标的一种实现）。</p>
+<ul>
+<li><strong>内部节点</strong>：缺失的右孩子视为 <code>bytes32(0)</code>（稀疏），并且兄弟始终按排序顺序哈希：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span>hashes[i <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> keccak256(a <span style="color:#f92672">&gt;</span> b <span style="color:#f92672">?</span> abi.encode(b, a) <span style="color:#f92672">:</span> abi.encode(a, b));
+</span></span></code></pre></div><h3 id="createproofmemberindex-tree"><code>createProof(memberIndex, tree)</code></h3>
+<ul>
+<li><code>memberIndex</code> 是叶子数组中的下标。</li>
+<li>每层取兄弟下标：偶数取 <code>+1</code>，奇数取 <code>-1</code>；越界则该层 sibling 为 <code>0</code>（稀疏默认值）。</li>
+<li><code>leafIndex /= 2</code> 上移继续。</li>
+</ul>
+<h3 id="验证端必须满足的三条">验证端必须满足的三条</h3>
+<p>要写 <code>verify(member, amount, index, proof, root)</code>，必须与建树逻辑一致：</p>
+<ul>
+<li>叶子：同一公式（这里是 <code>~keccak256(abi.encode(...))</code>；若你换成双 keccak/前缀，两端一起换）。</li>
+<li>父节点：同样的 sibling 排序规则。</li>
+<li>缺失 sibling：按 <code>0</code> 参与计算。</li>
+</ul>
+<h2 id="merkledrophelper-源码"><code>MerkleDropHelper</code> 源码</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span><span style="color:#66d9ef">contract</span> <span style="color:#a6e22e">MerkleDropHelper</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Construct a sparse merkle tree from a list of members and respective claim
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// amounts. This tree will be sparse in the sense that rather than padding
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// tree levels to the next power of 2, missing nodes will default to a value of
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 0.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">constructTree</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">address</span>[] <span style="color:#66d9ef">memory</span> members,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">uint256</span>[] <span style="color:#66d9ef">memory</span> claimAmounts
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">external</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">pure</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">returns</span> (<span style="color:#66d9ef">bytes32</span> root, <span style="color:#66d9ef">bytes32</span>[][] <span style="color:#66d9ef">memory</span> tree)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        require(members.length <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> members.length <span style="color:#f92672">==</span> claimAmounts.length);
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Determine tree height.
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">uint256</span> height <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">uint256</span> n <span style="color:#f92672">=</span> members.length;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">while</span> (n <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>                n <span style="color:#f92672">=</span> n <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">?</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">:</span> (n <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">++</span>height;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        tree <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">bytes32</span>[][](height);
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// The first layer of the tree contains the leaf nodes, which are
+</span></span></span><span style="display:flex;"><span>        <span style="color:#75715e">// hashes of each member and claim amount.
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">bytes32</span>[] <span style="color:#66d9ef">memory</span> nodes <span style="color:#f92672">=</span> tree[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">bytes32</span>[](members.length);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">uint256</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> members.length; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Leaf hashes are inverted to prevent second preimage attacks.
+</span></span></span><span style="display:flex;"><span>            nodes[i] <span style="color:#f92672">=</span> <span style="color:#f92672">~</span>keccak256(abi.encode(members[i], claimAmounts[i]));
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Build up subsequent layers until we arrive at the root hash.
+</span></span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Each parent node is the hash of the two children below it.
+</span></span></span><span style="display:flex;"><span>        <span style="color:#75715e">// E.g.,
+</span></span></span><span style="display:flex;"><span>        <span style="color:#75715e">//              H0         &lt;-- root (layer 2)
+</span></span></span><span style="display:flex;"><span>        <span style="color:#75715e">//           /     \
+</span></span></span><span style="display:flex;"><span>        <span style="color:#75715e">//        H1        H2
+</span></span></span><span style="display:flex;"><span>        <span style="color:#75715e">//      /   \      /  \
+</span></span></span><span style="display:flex;"><span>        <span style="color:#75715e">//    L1     L2  L3    L4  &lt;--- leaves (layer 0)
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">uint256</span> h <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; h <span style="color:#f92672">&lt;</span> height; <span style="color:#f92672">++</span>h) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">uint256</span> nHashes <span style="color:#f92672">=</span> (nodes.length <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">bytes32</span>[] <span style="color:#66d9ef">memory</span> hashes <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">bytes32</span>[](nHashes);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">uint256</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> nodes.length; i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">2</span>) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">bytes32</span> a <span style="color:#f92672">=</span> nodes[i];
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Tree is sparse. Missing nodes will have a value of 0.
+</span></span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">bytes32</span> b <span style="color:#f92672">=</span> i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;</span> nodes.length <span style="color:#f92672">?</span> nodes[i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">:</span> <span style="color:#66d9ef">bytes32</span>(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Siblings are always hashed in sorted order.
+</span></span></span><span style="display:flex;"><span>                hashes[i <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> keccak256(a <span style="color:#f92672">&gt;</span> b <span style="color:#f92672">?</span> abi.encode(b, a) <span style="color:#f92672">:</span> abi.encode(a, b));
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            tree[h] <span style="color:#f92672">=</span> nodes <span style="color:#f92672">=</span> hashes;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Note the tree root is at the bottom.
+</span></span></span><span style="display:flex;"><span>        root <span style="color:#f92672">=</span> tree[height <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>][<span style="color:#ae81ff">0</span>];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Given a merkle tree and a member index (leaf node index), generate a proof.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// The proof is simply the list of sibling nodes/hashes leading up to the root.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">createProof</span>(<span style="color:#66d9ef">uint256</span> memberIndex, <span style="color:#66d9ef">bytes32</span>[][] <span style="color:#66d9ef">memory</span> tree)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">external</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">pure</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">returns</span> (<span style="color:#66d9ef">bytes32</span>[] <span style="color:#66d9ef">memory</span> proof)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">uint256</span> leafIndex <span style="color:#f92672">=</span> memberIndex;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">uint256</span> height <span style="color:#f92672">=</span> tree.length;
+</span></span><span style="display:flex;"><span>        proof <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">bytes32</span>[](height <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">uint256</span> h <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; h <span style="color:#f92672">&lt;</span> proof.length; <span style="color:#f92672">++</span>h) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">uint256</span> siblingIndex <span style="color:#f92672">=</span> leafIndex <span style="color:#f92672">%</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">?</span> leafIndex <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">:</span> leafIndex <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (siblingIndex <span style="color:#f92672">&lt;</span> tree[h].length) {
+</span></span><span style="display:flex;"><span>                proof[h] <span style="color:#f92672">=</span> tree[h][siblingIndex];
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            leafIndex <span style="color:#f92672">/=</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+    </article>
+
+    
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2026-04-15-merkle-leaf-domain-separation-and-sparse-tree/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Merkle%20%e5%8f%b6%e5%ad%90%e5%93%88%e5%b8%8c%e3%80%81%e5%9f%9f%e5%88%86%e7%a6%bb%e4%b8%8e%e7%a8%80%e7%96%8f%e6%a0%91%e8%af%81%e6%98%8e%ef%bc%88MerkleDropHelper%ef%bc%89%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2026-04-15-merkle-leaf-domain-separation-and-sparse-tree/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer pager-noitem">&lt; Newer</li>
+      <li class="pager-older">
+        <a href="/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/" data-toggle="tooltip" data-placement="top" title="Hyperbridge ISMP — state_root, overlay_root, and mmr_root">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

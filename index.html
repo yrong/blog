@@ -42,6 +42,51 @@
   <div class="main" role="main">
     <section class="list home-list">
       <article class="article">
+        <a href="/blog/post/2026-04-15-merkle-leaf-domain-separation-and-sparse-tree/" class="article-titles">
+          <h2 class="article-title">Merkle 叶子哈希、域分离与稀疏树证明（MerkleDropHelper）</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 15, 2026</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/cryptography/">
+              <i class="fa-solid fa-tag"></i>
+              cryptography
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/ethereum/">
+              <i class="fa-solid fa-tag"></i>
+              ethereum
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/merkle/">
+              <i class="fa-solid fa-tag"></i>
+              merkle
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/security/">
+              <i class="fa-solid fa-tag"></i>
+              security
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <h2 id="结论速记">结论速记</h2>
+<ul>
+<li><strong>关键不是“多 hash 一次更强”</strong>：<code>keccak256(keccak256(...))</code> 的主要价值在于<strong>域分离（domain separation）</strong>，让“叶子哈希”和“内部节点哈希”的构造形状不同，避免 Merkle 结构里的“角色混淆”讨论。</li>
+<li><strong>更标准</strong>：显式前缀（leaf/internal）通常比 <code>~hash</code> 或双 keccak 更容易被审计/跨语言实现接受。</li>
+<li><strong>验证端必须逐字对齐</strong>：叶子公式、内部节点哈希顺序（是否排序）、稀疏缺失节点默认值（0）必须完全一致。</li>
+</ul>
+<h2 id="keccak256keccak256abiencodemember-amount-是否足以避免-second-preimage"><code>keccak256(keccak256(abi.encode(member, amount)))</code> 是否足以避免 second preimage？</h2>
+<p>在 Merkle 语境里，大家常担心的不是去破 Keccak 的 preimage，而是：</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2026-04-15-merkle-leaf-domain-separation-and-sparse-tree/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/" class="article-titles">
           <h2 class="article-title">Hyperbridge ISMP — state_root, overlay_root, and mmr_root</h2>
           
@@ -476,26 +521,6 @@ let msg = Xcm::Transact {
 
         </div>
         <div class="article-readmore"><a href="/blog/post/2021-04-26-substrate/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
-      <article class="article">
-        <a href="/blog/post/2021-04-17-bifrost/" class="article-titles">
-          <h2 class="article-title">bifrost defi</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>April 17, 2021</time></li>
-          <li class="article-meta-tags">
-            <a href="/tags/blockchain/">
-              <i class="fa-solid fa-tag"></i>
-              BlockChain
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <p>Bifrost is a parachain that allows users to deposit their staking tokens and mint vTokens to get staking liquidity.</p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2021-04-17-bifrost/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
     </section>

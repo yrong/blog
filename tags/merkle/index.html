@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <title>Ethereum - yrong blog</title>
-  <meta property="og:title" content="Ethereum - yrong blog" />
-  <meta name="twitter:title" content="Ethereum - yrong blog" />
+  <title>Merkle - yrong blog</title>
+  <meta property="og:title" content="Merkle - yrong blog" />
+  <meta name="twitter:title" content="Merkle - yrong blog" />
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
-  <meta property="og:url" content="https://yrong.github.io/blog/tags/ethereum/" />
+  <meta property="og:url" content="https://yrong.github.io/blog/tags/merkle/" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary" />
   <meta name="generator" content="Hugo 0.159.1">
-  <link href="/blog/tags/ethereum/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
-  <link href="/blog/tags/ethereum/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
+  <link href="/blog/tags/merkle/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
+  <link href="/blog/tags/merkle/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
   <link rel="stylesheet" href="/blog/css/style.css" media="all" />
   <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
 
@@ -86,48 +86,6 @@
         <div class="article-readmore"><a href="/blog/post/2026-04-15-merkle-leaf-domain-separation-and-sparse-tree/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
-      <article class="article">
-        <a href="/blog/post/2022-02-01-solidity-pattern/" class="article-titles">
-          <h2 class="article-title">solidity patterns</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>February 1, 2022</time></li>
-          <li class="article-meta-tags">
-            <a href="/tags/blockchain/">
-              <i class="fa-solid fa-tag"></i>
-              BlockChain
-            </a>&nbsp;
-          </li>
-          <li class="article-meta-tags">
-            <a href="/tags/ethereum/">
-              <i class="fa-solid fa-tag"></i>
-              Ethereum
-            </a>&nbsp;
-          </li>
-          <li class="article-meta-tags">
-            <a href="/tags/solidity/">
-              <i class="fa-solid fa-tag"></i>
-              Solidity
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <h2 id="solidity-设计模式汇总笔记">Solidity 设计模式汇总笔记</h2>
-<p>本笔记总结了用于优化 Gas 消耗、增强安全性以及改善开发体验的核心 Solidity 编程模式。</p>
-<ol>
-<li>
-<p>重入保护模式 (Reentrancy Protection)
-问题： 当合约发起外部调用时，执行控制权会转移给另一方。攻击者可以利用此机会在原始操作完成前再次调用合约函数，从而导致资产被超额提取。
-检查-效果-交互 (CEI) 模式：
-Checks：验证输入参数和初始状态。
-Effects：在进行任何外部调用之前，更新所有的状态变量。
-Interactions：最后再执行外部调用或资产转移。
-重入卫兵 (Reentrancy Guards/Mutex)： 使用一个布尔标志（如 nonReentrant 修饰符）在函数进入时加锁，结束后解锁。如果函数在锁定状态下再次被调用，则交易回滚。</p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2022-02-01-solidity-pattern/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
     </section>
     
   </div>
@@ -138,7 +96,7 @@ Interactions：最后再执行外部调用或资产转移。
   <div class="copyright">&copy; Copyright 2026 Ronyang</div>
   <ul class="site-footer-items">
     <li class="site-footer-item-rsslink">
-      <a href="/blog/tags/ethereum/index.xml" type="application/rss+xml" target="_blank" title="RSS">
+      <a href="/blog/tags/merkle/index.xml" type="application/rss+xml" target="_blank" title="RSS">
         <i class="fa-solid fa-rss"></i>
       </a>
     </li>
