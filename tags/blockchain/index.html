@@ -42,12 +42,46 @@
   <div class="main" role="main">
     <section class="list term-list">
       <article class="article">
-        <a href="/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/" class="article-titles">
+        <a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" class="article-titles">
+          <h2 class="article-title">Polkadot XCMP MMD — Minimal POC (merged)</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 9, 2026</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/xcmp/">
+              <i class="fa-solid fa-tag"></i>
+              XCMP
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>Consolidated from earlier split posts (<strong>1‑pager</strong>, <strong>POC2 spec</strong>, <strong>implementer checklist</strong>, <strong>source outbox</strong>). Master copy lives in Obsidian: <strong>Polkadot XCMP MMD — Minimal POC</strong> (kept in sync with this article).</p>
+<p>Forum background: <a href="https://forum.polkadot.network/t/xcmp-design-discussion/7328">XCMP Design Discussion (Polkadot)</a>.</p>
+<p><strong>POC design revamp (vs forum MMD):</strong> the forum sketch uses <strong>one <code>XcmpMessageMMR</code> per channel</strong> and an <strong><code>XcmpChannelTree</code></strong> over those MMR roots. For this <strong>minimal POC</strong> we <strong>drop that split</strong>: a <strong>single append-only global <code>XcmpOutboxMmr</code></strong> on the source commits all outbound messages; the header digest carries <strong><code>XcmpOutboxMmrRoot</code></strong> only. Each leaf still names <strong><code>dest</code></strong> (and nonce + <code>payload_hash</code>), so there is no loss of routing identity—only a shorter proof path and less on-chain bookkeeping. A future scale-out version can shard back into per-channel MMRs + channel tree.</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/post/2023-04-11-hyperbridge-ismp-state-overlay-mmr/" class="article-titles">
           <h2 class="article-title">Hyperbridge ISMP — state_root, overlay_root, and mmr_root</h2>
           
         </a>
         <ul class="article-meta">
-          <li class="article-meta-date"><time>April 11, 2026</time></li>
+          <li class="article-meta-date"><time>April 11, 2023</time></li>
           <li class="article-meta-tags">
             <a href="/tags/blockchain/">
               <i class="fa-solid fa-tag"></i>
@@ -102,41 +136,7 @@
 </table>
 <p>Each block, <code>on_finalize</code> builds:</p>
         </div>
-        <div class="article-readmore"><a href="/blog/post/2026-04-11-hyperbridge-ismp-state-overlay-mmr/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
-      <article class="article">
-        <a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" class="article-titles">
-          <h2 class="article-title">Polkadot XCMP MMD — Minimal POC (merged)</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>April 9, 2026</time></li>
-          <li class="article-meta-tags">
-            <a href="/tags/blockchain/">
-              <i class="fa-solid fa-tag"></i>
-              BlockChain
-            </a>&nbsp;
-          </li>
-          <li class="article-meta-tags">
-            <a href="/tags/polkadot/">
-              <i class="fa-solid fa-tag"></i>
-              Polkadot
-            </a>&nbsp;
-          </li>
-          <li class="article-meta-tags">
-            <a href="/tags/xcmp/">
-              <i class="fa-solid fa-tag"></i>
-              XCMP
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <p>Consolidated from earlier split posts (<strong>1‑pager</strong>, <strong>POC2 spec</strong>, <strong>implementer checklist</strong>, <strong>source outbox</strong>). Master copy lives in Obsidian: <strong>Polkadot XCMP MMD — Minimal POC</strong> (kept in sync with this article).</p>
-<p>Forum background: <a href="https://forum.polkadot.network/t/xcmp-design-discussion/7328">XCMP Design Discussion (Polkadot)</a>.</p>
-<p><strong>POC design revamp (vs forum MMD):</strong> the forum sketch uses <strong>one <code>XcmpMessageMMR</code> per channel</strong> and an <strong><code>XcmpChannelTree</code></strong> over those MMR roots. For this <strong>minimal POC</strong> we <strong>drop that split</strong>: a <strong>single append-only global <code>XcmpOutboxMmr</code></strong> on the source commits all outbound messages; the header digest carries <strong><code>XcmpOutboxMmrRoot</code></strong> only. Each leaf still names <strong><code>dest</code></strong> (and nonce + <code>payload_hash</code>), so there is no loss of routing identity—only a shorter proof path and less on-chain bookkeeping. A future scale-out version can shard back into per-channel MMRs + channel tree.</p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/">Read more...</a></div>
+        <div class="article-readmore"><a href="/blog/post/2023-04-11-hyperbridge-ismp-state-overlay-mmr/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
       <article class="article">
