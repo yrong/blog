@@ -133,3 +133,33 @@ Verification pattern in `SubstrateStateMachine` (`modules/ismp/state-machines/su
 3. `trie.get(&key)` — check value
 
 Used by `verify_membership` and `verify_state_proof`. Helpers: `read_proof_check`, `read_proof_check_for_parachain` in the same file. Test: `modules/pallets/testsuite/src/tests/child_trie_proof_check.rs`.
+
+---
+
+## EVM: `OptimismHost` has no verification
+
+**`OptimismHost`** (`evm/src/hosts/Optimism.sol`) only sets **`CHAIN_ID`** and inherits **`EvmHost`**.
+
+**`EvmHost`** holds ISMP state and delegates **all** proof logic to **`HostParams.handler`** (usually **`HandlerV1`**).
+
+**`HandlerV1`**: `handleConsensus` → **`IConsensus.verifyConsensus`** (deployed **`consensusClient`**, e.g. BEEFY under `evm/src/consensus/`); `handlePostRequests` → **MMR** verify vs **`overlayRoot`**, then `dispatchIncoming`.
+
+Incoming messages from Substrate (e.g. Bifrost via Hyperbridge) are proved on L2 with **Hyperbridge MMR + consensus updates**, not with custom code in `OptimismHost`.
+
+---
+
+## `IConsensus` on EVM (BEEFY stack)
+
+**Interface:** `sdk/packages/core/contracts/interfaces/IConsensus.sol` — `verifyConsensus(trustedState, proof) → (newState, IntermediateState[])`.
+
+Implementations under `evm/src/consensus/`: **`ConsensusRouter`** (first proof byte → **BeefyV1** naive, **SP1Beefy** ZK, **BeefyV1FiatShamir**); **`BeefyV1`** verifies relay **BEEFY/MMR** update + **parachain header** proofs and returns **`IntermediateState`**. Deployed address is **`HostParams.consensusClient`**; **`HandlerV1.handleConsensus`** calls it.
+
+---
+
+## Two MMRs (relay vs message)
+
+**Relay BEEFY MMR** — checked in **`BeefyV1.verifyMmrUpdateProof`** (`RelayChainProof`): Polkadot relay finality / authority / relay MMR. **Not** “this ISMP message exists.”
+
+**Hyperbridge message MMR** — checked in **`HandlerV1.handlePostRequests`** against **`overlayRoot`**: ISMP request leaves on Hyperbridge. **Not** the same tree as the relay MMR.
+
+Order: **`handleConsensus`** (trust roots) → **`handlePostRequests`** (message MMR membership).
