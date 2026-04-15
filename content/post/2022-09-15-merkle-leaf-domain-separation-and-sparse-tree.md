@@ -1,6 +1,6 @@
 ---
 title: "Merkle 叶子哈希、域分离与稀疏树证明（MerkleDropHelper）"
-date: 2026-04-15
+date: 2022-09-15
 draft: false
 tags: ["cryptography", "ethereum", "merkle", "security"]
 ---
