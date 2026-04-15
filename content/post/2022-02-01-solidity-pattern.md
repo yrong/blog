@@ -249,3 +249,138 @@ assembly { slice := add(arr, 0x20) } // 跳过第一个元素
 - **值得用**：性能热点（循环内）、Merkle/哈希密集、需要保持 revert data 原样、与第三方库类型不一致但 bit 兼容。
 - **不值得/慎用**：边界复杂、团队维护成本高、需要在 `calldata` 上玩指针、struct 布局不稳定（未来升级）。
 
+---
+
+## Pattern: Code-as-storage（把数据存进合约 bytecode）— BigDataStoreV1（独立 section）
+
+### 这个模式在做什么
+
+当你要存很大的 blob（图片/base64/json/证明数据）时，`SSTORE` 非常贵。Code-as-storage 的思路是：
+
+- **写入**：部署一个“数据合约”，把数据变成它的 **runtime bytecode**。
+- **读取**：用 `EXTCODECOPY` 从该地址的 code 区把数据拷回内存。
+
+本文用一个简单约定（带 header）：
+
+- `code(loc) = MAGIC(4 bytes) || VERSION(1 byte) || DATA(bytes)`
+
+这样读取时可以先校验 `MAGIC/VERSION`，避免把任意合约地址的 bytecode 当成数据读出来。
+
+### BigDataStoreV1（完整代码：mstore8 可读版）
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.23;
+
+/// @dev Runtime code layout:
+/// [0..3]  MAGIC   = 0xB10BDA7A
+/// [4]     VERSION = 0x01
+/// [5..]   DATA
+contract BigDataStoreV1 {
+    constructor(bytes memory data) {
+        assembly {
+            // size = data.length
+            let size := mload(data)
+
+            // Overwrite the bytes length word with zeroes (we'll use it as scratch for header)
+            mstore(data, 0)
+
+            // Write 5-byte header into the LAST 5 bytes of the (now zero) length word:
+            // mem[data+27 .. data+31] = B1 0B DA 7A 01
+            mstore8(add(data, 27), 0xB1)
+            mstore8(add(data, 28), 0x0B)
+            mstore8(add(data, 29), 0xDA)
+            mstore8(add(data, 30), 0x7A)
+            mstore8(add(data, 31), 0x01)
+
+            // Return runtime bytecode:
+            // - starts at data+27 (header position)
+            // - length is size+5 (header + payload)
+            //
+            // After deployment, extcodecopy(loc, ...) can read:
+            // MAGIC || VERSION || DATA
+            return(add(data, 27), add(size, 5))
+        }
+    }
+}
+```
+
+### 如何加载（读取 + 校验）CodeStoreV1
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.23;
+
+library CodeStoreV1 {
+    bytes4 internal constant MAGIC = 0xB10BDA7A;
+    uint8 internal constant VERSION = 0x01;
+
+    function loadBytes(address loc) internal view returns (bytes memory out) {
+        // 1) Read code length (not storage!)
+        uint256 n;
+        assembly { n := extcodesize(loc) }
+        require(n >= 5, "CODESTORE_TOO_SMALL");
+
+        // 2) Read first 5 bytes: MAGIC(4) + VERSION(1)
+        bytes memory head = new bytes(5);
+        assembly {
+            // bytes memory layout: [len(32)][data...]
+            extcodecopy(loc, add(head, 0x20), 0, 5)
+        }
+
+        // 3) Parse & validate header
+        bytes4 gotMagic;
+        uint8 gotVer;
+        assembly {
+            // mload(head+32) reads 32 bytes; first 5 bytes are our header
+            gotMagic := mload(add(head, 0x20))           // first 4 bytes
+            gotVer := byte(4, mload(add(head, 0x20)))    // 5th byte (index 4)
+        }
+        require(gotMagic == MAGIC, "BAD_MAGIC");
+        require(gotVer == VERSION, "BAD_VERSION");
+
+        // 4) Copy the payload bytes (skip 5-byte header)
+        uint256 dataSize = n - 5;
+        out = new bytes(dataSize);
+        assembly {
+            extcodecopy(loc, add(out, 0x20), 5, dataSize)
+        }
+    }
+
+    function loadString(address loc) internal view returns (string memory) {
+        return string(loadBytes(loc));
+    }
+}
+```
+
+### 逐行解释：`return(add(data, 27), size+5)` 是什么意思？
+
+在 constructor 里的 `assembly { return(ptr, len) }` 不是“函数返回值”，而是：
+
+- 把内存 `[ptr .. ptr+len-1]` 作为“**新合约的 runtime bytecode**”交给 EVM
+- EVM 用这段 bytes 作为部署后 `loc.code`
+
+因此：
+
+- `add(data, 27)`：从 `data+27` 开始返回（这里正好是我们写入 `MAGIC+VERSION` 的位置）
+- `size+5`：返回 header(5 bytes) + payload(size bytes)
+
+部署完成后：
+
+- `extcodesize(loc) == 5 + size`
+- `extcodecopy(loc, ..., 0, 5)` 读到 header
+- `extcodecopy(loc, ..., 5, size)` 读到原始数据
+
+### 逐行解释：读取为什么用 `extcodesize/extcodecopy`？
+
+这是 Code-as-storage 的“读取存储”方式（读的是 **code 区**，不是 `SLOAD`）：
+
+- `extcodesize(loc)`：读 `loc` 的 runtime code 长度（等价于“数据长度 + header”）
+- `extcodecopy(loc, dst, offset, size)`：把 `loc` 的 code 从 `offset` 开始拷贝 `size` 字节到内存 `dst`
+
+在上面的 `loadBytes` 中：
+
+- 先拷 5 字节校验 `MAGIC/VERSION`（信任模型）
+- 再从 offset=5 拷贝剩余字节作为 payload
+
+
