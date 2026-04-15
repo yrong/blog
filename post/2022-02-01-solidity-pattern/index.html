@@ -3,39 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <title>solidity patterns - yrong blog</title>
-  <meta property="og:title" content="solidity patterns - yrong blog" />
-  <meta name="twitter:title" content="solidity patterns - yrong blog" />
+  <title>Solidity patterns - yrong blog</title>
+  <meta property="og:title" content="Solidity patterns - yrong blog" />
+  <meta name="twitter:title" content="Solidity patterns - yrong blog" />
   <meta name="description" content="Solidity 设计模式汇总笔记
 本笔记总结了用于优化 Gas 消耗、增强安全性以及改善开发体验的核心 Solidity 编程模式。
-
-
-重入保护模式 (Reentrancy Protection)
-问题： 当合约发起外部调用时，执行控制权会转移给另一方。攻击者可以利用此机会在原始操作完成前再次调用合约函数，从而导致资产被超额提取。
-检查-效果-交互 (CEI) 模式：
-Checks：验证输入参数和初始状态。
-Effects：在进行任何外部调用之前，更新所有的状态变量。
-Interactions：最后再执行外部调用或资产转移。
-重入卫兵 (Reentrancy Guards/Mutex)： 使用一个布尔标志（如 nonReentrant 修饰符）在函数进入时加锁，结束后解锁。如果函数在锁定状态下再次被调用，则交易回滚。">
+1. 重入保护模式 (Reentrancy Protection)
+问题：当合约发起外部调用时，执行控制权会转移给另一方。攻击者可以利用此机会在原始操作完成前再次调用合约函数，从而导致资产被超额提取。">
   <meta property="og:description" content="Solidity 设计模式汇总笔记
 本笔记总结了用于优化 Gas 消耗、增强安全性以及改善开发体验的核心 Solidity 编程模式。
-
-
-重入保护模式 (Reentrancy Protection)
-问题： 当合约发起外部调用时，执行控制权会转移给另一方。攻击者可以利用此机会在原始操作完成前再次调用合约函数，从而导致资产被超额提取。
-检查-效果-交互 (CEI) 模式：
-Checks：验证输入参数和初始状态。
-Effects：在进行任何外部调用之前，更新所有的状态变量。
-Interactions：最后再执行外部调用或资产转移。
-重入卫兵 (Reentrancy Guards/Mutex)： 使用一个布尔标志（如 nonReentrant 修饰符）在函数进入时加锁，结束后解锁。如果函数在锁定状态下再次被调用，则交易回滚。">
+1. 重入保护模式 (Reentrancy Protection)
+问题：当合约发起外部调用时，执行控制权会转移给另一方。攻击者可以利用此机会在原始操作完成前再次调用合约函数，从而导致资产被超额提取。">
   <meta name="twitter:description" content="Solidity 设计模式汇总笔记
 本笔记总结了用于优化 Gas 消耗、增强安全性以及改善开发体验的核心 Solidity 编程模式。
-
-
-重入保护模式 (Reentrancy Protection)
-问题： 当合约发起外部调用时，执行控制权会转移给另一方。攻击者可以利用此机会在原始操作完成前再次调用合约函数，从而导致资产被超额提取。
-检查-效果-交互 (CEI) 模式：
-Checks：验证输入参 …">
+1. 重入保护模式 (Reentrancy Protection)
+问题：当合约发起外部调用时，执行控制权会转移给另一方。攻击者可以利用此机会在原始操作完成前再次调用合约函数，从而导致资产被超额提取。">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="https://yrong.github.io/blog/post/2022-02-01-solidity-pattern/" />
@@ -71,7 +53,7 @@ Checks：验证输入参 …">
     <article class="article">
       
       
-      <h1 class="article-title">solidity patterns</h1>
+      <h1 class="article-title">Solidity patterns</h1>
       
       <hr class="article-title-bottom">
       <ul class="article-meta">
@@ -99,64 +81,362 @@ Checks：验证输入参 …">
 <aside class="toc">
   <nav id="TableOfContents">
   <ul>
-    <li><a href="#solidity-设计模式汇总笔记">Solidity 设计模式汇总笔记</a></li>
+    <li><a href="#solidity-设计模式汇总笔记">Solidity 设计模式汇总笔记</a>
+      <ul>
+        <li><a href="#1-重入保护模式-reentrancy-protection">1. 重入保护模式 (Reentrancy Protection)</a></li>
+        <li><a href="#2-存储打包模式-packing-storage">2. 存储打包模式 (Packing Storage)</a></li>
+        <li><a href="#3-permit2-模式">3. Permit2 模式</a></li>
+        <li><a href="#4-委托调用访问控制-onlydelegatecall--nodelegatecall">4. 委托调用访问控制 (onlyDelegateCall / noDelegateCall)</a></li>
+        <li><a href="#5-独立授权目标-separate-allowance-targets">5. 独立授权目标 (Separate Allowance Targets)</a></li>
+        <li><a href="#6-只读委托调用-read-only-delegatecall">6. 只读委托调用 (Read-only Delegatecall)</a></li>
+        <li><a href="#7-栈过深解决方法-stack-too-deep-workarounds">7. “栈过深”解决方法 (Stack Too Deep Workarounds)</a></li>
+      </ul>
+    </li>
+    <li><a href="#assembly-tricks-part-1新增">Assembly Tricks (Part 1)（新增）</a></li>
+    <li><a href="#来源">来源</a></li>
+    <li><a href="#pattern-1-bubble-up-reverts原样冒泡-revert-data">Pattern 1: Bubble up reverts（原样冒泡 revert data）</a>
+      <ul>
+        <li><a href="#问题">问题</a></li>
+        <li><a href="#模式">模式</a></li>
+        <li><a href="#使用场景">使用场景</a></li>
+        <li><a href="#风险边界">风险/边界</a></li>
+      </ul>
+    </li>
+    <li><a href="#pattern-2-hash-two-words两个-word-的-keccak-更便宜写法">Pattern 2: Hash two words（两个 word 的 keccak 更便宜写法）</a>
+      <ul>
+        <li><a href="#问题-1">问题</a></li>
+        <li><a href="#模式-1">模式</a></li>
+        <li><a href="#使用场景-1">使用场景</a></li>
+        <li><a href="#风险边界-1">风险/边界</a></li>
+      </ul>
+    </li>
+    <li><a href="#pattern-3-cast-between-compatible-memory-array-types数组类型零拷贝转型">Pattern 3: Cast between compatible <code>memory</code> array types（数组类型零拷贝转型）</a>
+      <ul>
+        <li><a href="#问题-2">问题</a></li>
+        <li><a href="#模式-2">模式</a></li>
+        <li><a href="#使用场景-2">使用场景</a></li>
+        <li><a href="#风险边界很重要">风险/边界（很重要）</a></li>
+      </ul>
+    </li>
+    <li><a href="#pattern-4-cast-between-compatible-memory-structsstruct-零拷贝转型">Pattern 4: Cast between compatible <code>memory</code> structs（struct 零拷贝转型）</a>
+      <ul>
+        <li><a href="#风险边界-2">风险/边界</a></li>
+      </ul>
+    </li>
+    <li><a href="#pattern-5-shortening-dynamic-memory-arrays原地缩短动态数组">Pattern 5: Shortening dynamic <code>memory</code> arrays（原地缩短动态数组）</a>
+      <ul>
+        <li><a href="#背景">背景</a></li>
+        <li><a href="#模式-3">模式</a></li>
+        <li><a href="#使用场景-3">使用场景</a></li>
+        <li><a href="#风险边界-3">风险/边界</a></li>
+      </ul>
+    </li>
+    <li><a href="#pattern-6-shorten-static-arrays--slicing静态数组截断与切片">Pattern 6: “Shorten” static arrays / slicing（静态数组截断与切片）</a>
+      <ul>
+        <li><a href="#风险边界-4">风险/边界</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结什么时候值得用这些-assembly-tricks">总结：什么时候值得用这些 assembly tricks</a></li>
+    <li><a href="#pattern-code-as-storage把数据存进合约-bytecode-bigdatastorev1独立-section">Pattern: Code-as-storage（把数据存进合约 bytecode）— BigDataStoreV1（独立 section）</a>
+      <ul>
+        <li><a href="#这个模式在做什么">这个模式在做什么</a></li>
+        <li><a href="#bigdatastorev1完整代码mstore8-可读版">BigDataStoreV1（完整代码：mstore8 可读版）</a></li>
+        <li><a href="#如何加载读取--校验codestorev1">如何加载（读取 + 校验）CodeStoreV1</a></li>
+        <li><a href="#逐行解释returnadddata-27-size5-是什么意思">逐行解释：<code>return(add(data, 27), size+5)</code> 是什么意思？</a></li>
+        <li><a href="#逐行解释读取为什么用-extcodesizeextcodecopy">逐行解释：读取为什么用 <code>extcodesize/extcodecopy</code>？</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
 </aside>
       <h2 id="solidity-设计模式汇总笔记">Solidity 设计模式汇总笔记</h2>
 <p>本笔记总结了用于优化 Gas 消耗、增强安全性以及改善开发体验的核心 Solidity 编程模式。</p>
-<ol>
-<li>
-<p>重入保护模式 (Reentrancy Protection)
-问题： 当合约发起外部调用时，执行控制权会转移给另一方。攻击者可以利用此机会在原始操作完成前再次调用合约函数，从而导致资产被超额提取。
-检查-效果-交互 (CEI) 模式：
-Checks：验证输入参数和初始状态。
-Effects：在进行任何外部调用之前，更新所有的状态变量。
-Interactions：最后再执行外部调用或资产转移。
-重入卫兵 (Reentrancy Guards/Mutex)： 使用一个布尔标志（如 nonReentrant 修饰符）在函数进入时加锁，结束后解锁。如果函数在锁定状态下再次被调用，则交易回滚。</p>
-</li>
-<li>
-<p>存储打包模式 (Packing Storage)
-问题： 读写 EVM 存储插槽（32 字节）是极其昂贵的操作。
-自动插槽打包： 将多个小于 32 字节的原始类型（如 uint8, bool, bytes16）相邻声明。Solidity 编译器会将它们压缩进同一个存储插槽，从而大幅减少 Gas 开销。
-共定位建议： 将经常同时读写的变量定义在一起，以利用 EIP-2929 的“热访问” Gas 折扣。
-类型选择： 根据实际需求选择最小的变量类型（例如用 uint40 表示时间戳，而不是 uint256）。</p>
-</li>
-<li>
-<p>Permit2 模式
-问题： 传统的 approve 模式 UX 极差（每个新协议都要发一笔独立交易）且存在安全风险（用户倾向于无限授权）。
-离线签名授权： 用户向 Permit2 规范合约授予一次性无限授权。
-跨协议共享： 之后，用户只需签署符合 EIP-712 的离线消息即可完成授权。所有集成 Permit2 的协议都可以共享这一授权，无需用户再次发送 approve 交易。
-安全优势： 签名包含过期时间，且 Permit2 合约结构简单，比复杂的业务合约更易于审计。</p>
-</li>
-<li>
-<p>委托调用访问控制 (onlyDelegateCall / noDelegateCall)
-问题： 在代理架构中，逻辑合约本身是一个独立合约。如果其敏感函数（如初始化或自毁）未加限制，可能被攻击者直接调用导致严重后果。
-onlyDelegateCall： 使用 immutable 记录部署地址，通过 address(this) != DEPLOYED_ADDRESS 确保函数只能通过代理合约的 delegatecall 执行。
-noDelegateCall： 与上述相反，确保函数绝不能被通过 delegatecall 调用。这常用于防止他人通过代理方式套用或克隆你的合约逻辑（如 Uniswap V3）。</p>
-</li>
-<li>
-<p>独立授权目标 (Separate Allowance Targets)
-问题： 复杂协议逻辑经常需要升级，如果用户直接授权给逻辑合约，每次升级都要重新授权，且逻辑合约的漏洞可能威胁到已授权的所有资产。
-职责分离： 部署一个功能极简、几乎不更改的 授权目标合约 (Allowance Target)。用户只授权给它。
-动态控制： 主业务合约（逻辑合约）向授权合约发起扣款请求。治理方可以随时开启或关闭业务合约对授权合约的访问权限。</p>
-</li>
-<li>
-<p>只读委托调用 (Read-only Delegatecall)
-问题： delegatecall 允许在当前上下文中执行外部代码，但它具有潜在的状态修改风险，且不能直接在 view 函数中使用。
-模拟“静态”版本：
-包装在 staticcall 中：通过对合约自身的辅助函数发起外部 staticcall，由于底层强制只读，即便内部执行 delegatecall 逻辑也无法修改状态。
-执行后回滚：在执行完 delegatecall 后主动调用 revert。这会撤销所有状态更改，但执行结果可以通过回滚消息负载捕获并解码。</p>
-</li>
-<li>
-<p>“栈过深”解决方法 (Stack Too Deep Workarounds)
-问题： EVM 栈只能直接访问顶部 32 个槽位，局部变量或参数过多会导致编译错误。
-IR 编译 (&ndash;via-ir)： 启用较新的编译器标志，自动将栈变量移入内存。
-块级作用域： 使用 { &hellip; } 包裹变量，使编译器能尽早丢弃不再使用的中间变量。
-内存结构体： 将多个变量封装进一个 struct memory，这样在栈上只需要存储一个 32 字节的内存指针。
-离线计算： 将复杂计算逻辑移至链下，合约仅负责对结果进行简单的逻辑验证。</p>
-</li>
-</ol>
+<h3 id="1-重入保护模式-reentrancy-protection">1. 重入保护模式 (Reentrancy Protection)</h3>
+<p>问题：当合约发起外部调用时，执行控制权会转移给另一方。攻击者可以利用此机会在原始操作完成前再次调用合约函数，从而导致资产被超额提取。</p>
+<p>检查-效果-交互 (CEI) 模式：</p>
+<ul>
+<li>Checks：验证输入参数和初始状态。</li>
+<li>Effects：在进行任何外部调用之前，更新所有的状态变量。</li>
+<li>Interactions：最后再执行外部调用或资产转移。</li>
+</ul>
+<p>重入卫兵 (Reentrancy Guards/Mutex)：使用一个布尔标志（如 <code>nonReentrant</code> 修饰符）在函数进入时加锁，结束后解锁。如果函数在锁定状态下再次被调用，则交易回滚。</p>
+<h3 id="2-存储打包模式-packing-storage">2. 存储打包模式 (Packing Storage)</h3>
+<p>问题：读写 EVM 存储插槽（32 字节）是极其昂贵的操作。</p>
+<ul>
+<li>自动插槽打包：将多个小于 32 字节的原始类型（如 <code>uint8</code>, <code>bool</code>, <code>bytes16</code>）相邻声明，编译器会将它们压缩进同一个存储插槽以减少 Gas。</li>
+<li>共定位建议：将经常同时读写的变量定义在一起，以利用 EIP-2929 的“热访问”折扣。</li>
+<li>类型选择：根据需求选择更小的类型（例如用 <code>uint40</code> 表示时间戳，而不是 <code>uint256</code>）。</li>
+</ul>
+<h3 id="3-permit2-模式">3. Permit2 模式</h3>
+<p>问题：传统 <code>approve</code> UX 差（每个协议都要一次授权交易）且存在风险（用户倾向无限授权）。</p>
+<ul>
+<li>离线签名授权：用户向 Permit2 规范合约授予一次性授权。</li>
+<li>跨协议共享：之后用户只需签署符合 EIP-712 的离线消息即可授权，集成 Permit2 的协议可共享授权。</li>
+<li>安全优势：签名包含过期时间，Permit2 合约更简单，通常更易审计。</li>
+</ul>
+<h3 id="4-委托调用访问控制-onlydelegatecall--nodelegatecall">4. 委托调用访问控制 (onlyDelegateCall / noDelegateCall)</h3>
+<p>问题：代理架构中逻辑合约是独立合约，敏感函数若未限制，可能被直接调用导致严重后果。</p>
+<ul>
+<li>onlyDelegateCall：用 immutable 记录部署地址，通过 <code>address(this) != DEPLOYED_ADDRESS</code> 限制只能通过代理的 <code>delegatecall</code> 执行。</li>
+<li>noDelegateCall：确保函数不能被 <code>delegatecall</code> 调用（常见于防止被代理/克隆复用逻辑，例如 Uniswap V3 风格）。</li>
+</ul>
+<h3 id="5-独立授权目标-separate-allowance-targets">5. 独立授权目标 (Separate Allowance Targets)</h3>
+<p>问题：协议升级频繁，若用户授权给易变逻辑合约，升级需重授权且逻辑漏洞可能危及已授权资产。</p>
+<ul>
+<li>职责分离：部署一个极简、稳定的授权目标合约（Allowance Target），用户仅授权给它。</li>
+<li>动态控制：业务合约向授权合约请求扣款，治理可随时开关业务合约的访问权限。</li>
+</ul>
+<h3 id="6-只读委托调用-read-only-delegatecall">6. 只读委托调用 (Read-only Delegatecall)</h3>
+<p>问题：<code>delegatecall</code> 可能修改状态，且不能直接在 <code>view</code> 中使用。</p>
+<p>思路：</p>
+<ul>
+<li>包装在 <code>staticcall</code> 中：对自身辅助函数发起 <code>staticcall</code>，底层强制只读，即便内部使用 <code>delegatecall</code> 也无法修改状态。</li>
+<li>执行后回滚：执行完 <code>delegatecall</code> 后主动 <code>revert</code>，撤销状态更改，并通过回滚 payload 捕获返回值。</li>
+</ul>
+<h3 id="7-栈过深解决方法-stack-too-deep-workarounds">7. “栈过深”解决方法 (Stack Too Deep Workarounds)</h3>
+<p>问题：EVM 栈只能直接访问顶部 32 个槽位，局部变量/参数过多会导致编译错误。</p>
+<ul>
+<li>IR 编译（<code>--via-ir</code>）：让编译器把部分栈变量移入内存。</li>
+<li>块级作用域：用 <code>{ ... }</code> 缩短变量生命周期。</li>
+<li>内存结构体：把多个变量封装进 <code>struct memory</code>，栈上只保留一个指针。</li>
+<li>离线计算：把复杂计算放链下，链上做验证。</li>
+</ul>
+<hr>
+<h2 id="assembly-tricks-part-1新增">Assembly Tricks (Part 1)（新增）</h2>
+<h2 id="来源">来源</h2>
+<p>本篇整理自 Dragonfly 的 patterns（<code>assembly-tricks-1</code>）：<code>https://github.com/dragonfly-xyz/useful-solidity-patterns/tree/main/patterns/assembly-tricks-1</code>。</p>
+<p>目标：总结这些 “short &amp; sweet” assembly 技巧的<strong>模式本质</strong>（为什么省 gas/解决什么限制）、<strong>适用边界</strong>与<strong>踩坑点</strong>，方便在生产代码里安全复用。</p>
+<hr>
+<h2 id="pattern-1-bubble-up-reverts原样冒泡-revert-data">Pattern 1: Bubble up reverts（原样冒泡 revert data）</h2>
+<h3 id="问题">问题</h3>
+<p>当你用低级 <code>call/delegatecall/staticcall</code> 或 <code>try/catch</code> 捕获失败时，会拿到 <code>bytes memory revertBytes</code>。常见错误做法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span>revert(<span style="color:#66d9ef">string</span>(revertBytes));
+</span></span></code></pre></div><p>这会把“原始 revert data”重新编码成 <code>Error(string)</code>，导致错误类型/selector 丢失（也可能破坏自定义 error 的 data）。</p>
+<h3 id="模式">模式</h3>
+<p>在 assembly 里直接 <code>revert(ptr, len)</code> 抛出<strong>原始 revert data</strong>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span><span style="color:#66d9ef">assembly</span> { <span style="color:#a6e22e">revert</span>(<span style="color:#a6e22e">add</span>(revertBytes, <span style="color:#ae81ff">0x20</span>), <span style="color:#a6e22e">mload</span>(revertBytes)) }
+</span></span></code></pre></div><h3 id="使用场景">使用场景</h3>
+<ul>
+<li>你只想对某些错误做特殊处理，其它错误要“向上透传”；</li>
+<li>你希望保留自定义 error / Panic / Error(string) 的原始格式，便于上层解码。</li>
+</ul>
+<h3 id="风险边界">风险/边界</h3>
+<ul>
+<li>仅对 <code>memory</code> 的 <code>bytes</code> 直接适用（catch 里的 bytes 通常在 memory）。</li>
+<li>注意不要在你已经构造了新的错误信息后又混用原始 bytes，避免泄漏或误报。</li>
+</ul>
+<hr>
+<h2 id="pattern-2-hash-two-words两个-word-的-keccak-更便宜写法">Pattern 2: Hash two words（两个 word 的 keccak 更便宜写法）</h2>
+<h3 id="问题-1">问题</h3>
+<p><code>keccak256(abi.encode(x, y))</code> 会触发 <code>abi.encode</code> 分配新内存缓冲区，开销更大。</p>
+<h3 id="模式-1">模式</h3>
+<p>用 scratch space <code>0x00..0x3f</code> 直接拼两个 32 字节再 keccak：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span><span style="color:#66d9ef">bytes32</span> hash;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assembly</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mstore</span>(<span style="color:#ae81ff">0x00</span>, word1)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">mstore</span>(<span style="color:#ae81ff">0x20</span>, word2)
+</span></span><span style="display:flex;"><span>    hash <span style="color:#f92672">:=</span> <span style="color:#a6e22e">keccak256</span>(<span style="color:#ae81ff">0x00</span>, <span style="color:#ae81ff">0x40</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="使用场景-1">使用场景</h3>
+<ul>
+<li>Merkle traversal / pair hashing / 两个 32 字节值组合哈希；</li>
+<li>你明确知道两段数据在 64 字节内（或严格两个 words）。</li>
+</ul>
+<h3 id="风险边界-1">风险/边界</h3>
+<ul>
+<li>只适用于“固定宽度、固定拼接形态”。如果你原来使用 <code>abi.encodePacked</code> 或拼接规则不同，结果会不同。</li>
+<li>scratch space 通常可用，但若你在同一段 assembly 中依赖了 <code>0x00..0x3f</code> 的其它值，要小心覆盖。</li>
+</ul>
+<hr>
+<h2 id="pattern-3-cast-between-compatible-memory-array-types数组类型零拷贝转型">Pattern 3: Cast between compatible <code>memory</code> array types（数组类型零拷贝转型）</h2>
+<h3 id="问题-2">问题</h3>
+<p>Solidity 不允许在类型系统层面直接把 <code>address[]</code> 当作 <code>IERC20[]</code> 之类（即便它们在内存里都是 32-byte slots 的兼容表示）。朴素做法是逐元素复制，浪费 gas。</p>
+<h3 id="模式-2">模式</h3>
+<p>对 <code>memory</code> 动态数组：变量本质是指针，直接把指针赋给另一种数组类型。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span><span style="color:#66d9ef">address</span>[] <span style="color:#66d9ef">memory</span> a <span style="color:#f92672">=</span> ...;
+</span></span><span style="display:flex;"><span>IERC20[] <span style="color:#66d9ef">memory</span> b;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assembly</span> { b <span style="color:#f92672">:=</span> a }
+</span></span></code></pre></div><h3 id="使用场景-2">使用场景</h3>
+<ul>
+<li>你<strong>确信 bit-level 兼容</strong>（例如 <code>address</code> 与 <code>contract/interface</code> 视为 20 字节地址存储在 word 里）；</li>
+<li>需要把某个库函数输入类型“对齐”到你已有数据结构。</li>
+</ul>
+<h3 id="风险边界很重要">风险/边界（很重要）</h3>
+<ul>
+<li>只适用于 <code>memory</code> 数组；<code>calldata</code> 的指针语义不同，不能这样搞。</li>
+<li>兼容性必须严格成立：例如 <code>uint256[]</code> 与 <code>bytes32[]</code> 的 slot 是兼容的，但若元素类型有不同编码/对齐规则就会出错。</li>
+<li>这种“类型欺骗”会让审计/读者更难理解：建议封装成内部函数并在命名里强调 <code>unsafe</code>。</li>
+</ul>
+<hr>
+<h2 id="pattern-4-cast-between-compatible-memory-structsstruct-零拷贝转型">Pattern 4: Cast between compatible <code>memory</code> structs（struct 零拷贝转型）</h2>
+<p>与数组同理，对兼容字段布局的 <code>memory</code> struct 可以用相同技巧：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span>Foo <span style="color:#66d9ef">memory</span> foo <span style="color:#f92672">=</span> ...;
+</span></span><span style="display:flex;"><span>Bar <span style="color:#66d9ef">memory</span> bar;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assembly</span> { bar <span style="color:#f92672">:=</span> foo }
+</span></span></code></pre></div><h3 id="风险边界-2">风险/边界</h3>
+<ul>
+<li>只有当两个 struct 的字段<strong>数量、顺序、slot 布局</strong>完全兼容时才安全。</li>
+<li>这种技巧对可维护性影响更大：建议仅用于非常局部的性能热点，并写清楚兼容性前提。</li>
+</ul>
+<hr>
+<h2 id="pattern-5-shortening-dynamic-memory-arrays原地缩短动态数组">Pattern 5: Shortening dynamic <code>memory</code> arrays（原地缩短动态数组）</h2>
+<h3 id="背景">背景</h3>
+<p>动态 <code>memory</code> 数组的首 word 存长度 <code>mload(arr)</code>，后面紧跟元素。</p>
+<h3 id="模式-3">模式</h3>
+<p>直接改写长度（通常只安全缩短，不要变长）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span><span style="color:#66d9ef">uint256</span>[] <span style="color:#66d9ef">memory</span> arr <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">uint256</span>[](<span style="color:#ae81ff">100</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assembly</span> { <span style="color:#a6e22e">mstore</span>(arr, <span style="color:#ae81ff">99</span>) }
+</span></span></code></pre></div><h3 id="使用场景-3">使用场景</h3>
+<ul>
+<li>你预分配了一个较长数组，后来确定实际有效元素更少；</li>
+<li>想避免再分配/复制一份新数组。</li>
+</ul>
+<h3 id="风险边界-3">风险/边界</h3>
+<ul>
+<li>只能安全缩短；变长可能读到/写到其它变量占用的内存区域。</li>
+<li>这会影响同一引用的其它使用者：确认没有其它代码依赖原长度。</li>
+</ul>
+<hr>
+<h2 id="pattern-6-shorten-static-arrays--slicing静态数组截断与切片">Pattern 6: “Shorten” static arrays / slicing（静态数组截断与切片）</h2>
+<p>静态数组没有 length 前缀，不能用 <code>mstore</code> 改长度。可用“指针复用”创建子视图：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span><span style="color:#66d9ef">uint256</span>[<span style="color:#ae81ff">10</span>] <span style="color:#66d9ef">memory</span> arr;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">uint256</span>[<span style="color:#ae81ff">9</span>] <span style="color:#66d9ef">memory</span> shortArr;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assembly</span> { shortArr <span style="color:#f92672">:=</span> arr }
+</span></span></code></pre></div><p>甚至可以把指针偏移 0x20，从而创建共享 slice：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span><span style="color:#66d9ef">uint256</span>[<span style="color:#ae81ff">10</span>] <span style="color:#66d9ef">memory</span> arr;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">uint256</span>[<span style="color:#ae81ff">8</span>] <span style="color:#66d9ef">memory</span> slice;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assembly</span> { slice <span style="color:#f92672">:=</span> <span style="color:#a6e22e">add</span>(arr, <span style="color:#ae81ff">0x20</span>) } <span style="color:#75715e">// 跳过第一个元素
+</span></span></span></code></pre></div><h3 id="风险边界-4">风险/边界</h3>
+<ul>
+<li>对静态数组声明本身会分配内存（没有动态数组那么省），但仍避免逐元素复制。</li>
+<li>指针偏移 slice 的可读性较差，且容易和真实所有权/边界搞混；尽量限定在 internal 纯函数内。</li>
+</ul>
+<hr>
+<h2 id="总结什么时候值得用这些-assembly-tricks">总结：什么时候值得用这些 assembly tricks</h2>
+<ul>
+<li><strong>值得用</strong>：性能热点（循环内）、Merkle/哈希密集、需要保持 revert data 原样、与第三方库类型不一致但 bit 兼容。</li>
+<li><strong>不值得/慎用</strong>：边界复杂、团队维护成本高、需要在 <code>calldata</code> 上玩指针、struct 布局不稳定（未来升级）。</li>
+</ul>
+<hr>
+<h2 id="pattern-code-as-storage把数据存进合约-bytecode-bigdatastorev1独立-section">Pattern: Code-as-storage（把数据存进合约 bytecode）— BigDataStoreV1（独立 section）</h2>
+<h3 id="这个模式在做什么">这个模式在做什么</h3>
+<p>当你要存很大的 blob（图片/base64/json/证明数据）时，<code>SSTORE</code> 非常贵。Code-as-storage 的思路是：</p>
+<ul>
+<li><strong>写入</strong>：部署一个“数据合约”，把数据变成它的 <strong>runtime bytecode</strong>。</li>
+<li><strong>读取</strong>：用 <code>EXTCODECOPY</code> 从该地址的 code 区把数据拷回内存。</li>
+</ul>
+<p>本文用一个简单约定（带 header）：</p>
+<ul>
+<li><code>code(loc) = MAGIC(4 bytes) || VERSION(1 byte) || DATA(bytes)</code></li>
+</ul>
+<p>这样读取时可以先校验 <code>MAGIC/VERSION</code>，避免把任意合约地址的 bytecode 当成数据读出来。</p>
+<h3 id="bigdatastorev1完整代码mstore8-可读版">BigDataStoreV1（完整代码：mstore8 可读版）</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span><span style="color:#75715e">// SPDX-License-Identifier: MIT
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">pragma solidity</span> <span style="color:#f92672">^</span><span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">8</span>.<span style="color:#ae81ff">23</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/// @dev Runtime code layout:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// [0..3]  MAGIC   = 0xB10BDA7A
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// [4]     VERSION = 0x01
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">/// [5..]   DATA
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">contract</span> <span style="color:#a6e22e">BigDataStoreV1</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">constructor</span>(<span style="color:#66d9ef">bytes</span> <span style="color:#66d9ef">memory</span> data) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">assembly</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// size = data.length
+</span></span></span><span style="display:flex;"><span>            <span style="color:#f92672">let</span> size <span style="color:#f92672">:=</span> <span style="color:#a6e22e">mload</span>(data)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Overwrite the bytes length word with zeroes (we&#39;ll use it as scratch for header)
+</span></span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">mstore</span>(data, <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Write 5-byte header into the LAST 5 bytes of the (now zero) length word:
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// mem[data+27 .. data+31] = B1 0B DA 7A 01
+</span></span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">mstore8</span>(<span style="color:#a6e22e">add</span>(data, <span style="color:#ae81ff">27</span>), <span style="color:#ae81ff">0xB1</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">mstore8</span>(<span style="color:#a6e22e">add</span>(data, <span style="color:#ae81ff">28</span>), <span style="color:#ae81ff">0x0B</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">mstore8</span>(<span style="color:#a6e22e">add</span>(data, <span style="color:#ae81ff">29</span>), <span style="color:#ae81ff">0xDA</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">mstore8</span>(<span style="color:#a6e22e">add</span>(data, <span style="color:#ae81ff">30</span>), <span style="color:#ae81ff">0x7A</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">mstore8</span>(<span style="color:#a6e22e">add</span>(data, <span style="color:#ae81ff">31</span>), <span style="color:#ae81ff">0x01</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Return runtime bytecode:
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// - starts at data+27 (header position)
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// - length is size+5 (header + payload)
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// After deployment, extcodecopy(loc, ...) can read:
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// MAGIC || VERSION || DATA
+</span></span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">return</span>(<span style="color:#a6e22e">add</span>(data, <span style="color:#ae81ff">27</span>), <span style="color:#a6e22e">add</span>(size, <span style="color:#ae81ff">5</span>))
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="如何加载读取--校验codestorev1">如何加载（读取 + 校验）CodeStoreV1</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span><span style="color:#75715e">// SPDX-License-Identifier: MIT
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">pragma solidity</span> <span style="color:#f92672">^</span><span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">8</span>.<span style="color:#ae81ff">23</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">library</span> CodeStoreV1 {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bytes4</span> <span style="color:#66d9ef">internal</span> <span style="color:#66d9ef">constant</span> MAGIC <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xB10BDA7A</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint8</span> <span style="color:#66d9ef">internal</span> <span style="color:#66d9ef">constant</span> VERSION <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x01</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">loadBytes</span>(<span style="color:#66d9ef">address</span> loc) <span style="color:#66d9ef">internal</span> <span style="color:#66d9ef">view</span> <span style="color:#66d9ef">returns</span> (<span style="color:#66d9ef">bytes</span> <span style="color:#66d9ef">memory</span> out) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 1) Read code length (not storage!)
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">uint256</span> n;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">assembly</span> { n <span style="color:#f92672">:=</span> <span style="color:#a6e22e">extcodesize</span>(loc) }
+</span></span><span style="display:flex;"><span>        require(n <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">5</span>, <span style="color:#e6db74">&#34;CODESTORE_TOO_SMALL&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 2) Read first 5 bytes: MAGIC(4) + VERSION(1)
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">bytes</span> <span style="color:#66d9ef">memory</span> head <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">bytes</span>(<span style="color:#ae81ff">5</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">assembly</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// bytes memory layout: [len(32)][data...]
+</span></span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">extcodecopy</span>(loc, <span style="color:#a6e22e">add</span>(head, <span style="color:#ae81ff">0x20</span>), <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">5</span>)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 3) Parse &amp; validate header
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">bytes4</span> gotMagic;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">uint8</span> gotVer;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">assembly</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// mload(head+32) reads 32 bytes; first 5 bytes are our header
+</span></span></span><span style="display:flex;"><span>            gotMagic <span style="color:#f92672">:=</span> <span style="color:#a6e22e">mload</span>(<span style="color:#a6e22e">add</span>(head, <span style="color:#ae81ff">0x20</span>))           <span style="color:#75715e">// first 4 bytes
+</span></span></span><span style="display:flex;"><span>            gotVer <span style="color:#f92672">:=</span> <span style="color:#a6e22e">byte</span>(<span style="color:#ae81ff">4</span>, <span style="color:#a6e22e">mload</span>(<span style="color:#a6e22e">add</span>(head, <span style="color:#ae81ff">0x20</span>)))    <span style="color:#75715e">// 5th byte (index 4)
+</span></span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        require(gotMagic <span style="color:#f92672">==</span> MAGIC, <span style="color:#e6db74">&#34;BAD_MAGIC&#34;</span>);
+</span></span><span style="display:flex;"><span>        require(gotVer <span style="color:#f92672">==</span> VERSION, <span style="color:#e6db74">&#34;BAD_VERSION&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 4) Copy the payload bytes (skip 5-byte header)
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">uint256</span> dataSize <span style="color:#f92672">=</span> n <span style="color:#f92672">-</span> <span style="color:#ae81ff">5</span>;
+</span></span><span style="display:flex;"><span>        out <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">bytes</span>(dataSize);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">assembly</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">extcodecopy</span>(loc, <span style="color:#a6e22e">add</span>(out, <span style="color:#ae81ff">0x20</span>), <span style="color:#ae81ff">5</span>, dataSize)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">loadString</span>(<span style="color:#66d9ef">address</span> loc) <span style="color:#66d9ef">internal</span> <span style="color:#66d9ef">view</span> <span style="color:#66d9ef">returns</span> (<span style="color:#66d9ef">string</span> <span style="color:#66d9ef">memory</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">string</span>(loadBytes(loc));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="逐行解释returnadddata-27-size5-是什么意思">逐行解释：<code>return(add(data, 27), size+5)</code> 是什么意思？</h3>
+<p>在 constructor 里的 <code>assembly { return(ptr, len) }</code> 不是“函数返回值”，而是：</p>
+<ul>
+<li>把内存 <code>[ptr .. ptr+len-1]</code> 作为“<strong>新合约的 runtime bytecode</strong>”交给 EVM</li>
+<li>EVM 用这段 bytes 作为部署后 <code>loc.code</code></li>
+</ul>
+<p>因此：</p>
+<ul>
+<li><code>add(data, 27)</code>：从 <code>data+27</code> 开始返回（这里正好是我们写入 <code>MAGIC+VERSION</code> 的位置）</li>
+<li><code>size+5</code>：返回 header(5 bytes) + payload(size bytes)</li>
+</ul>
+<p>部署完成后：</p>
+<ul>
+<li><code>extcodesize(loc) == 5 + size</code></li>
+<li><code>extcodecopy(loc, ..., 0, 5)</code> 读到 header</li>
+<li><code>extcodecopy(loc, ..., 5, size)</code> 读到原始数据</li>
+</ul>
+<h3 id="逐行解释读取为什么用-extcodesizeextcodecopy">逐行解释：读取为什么用 <code>extcodesize/extcodecopy</code>？</h3>
+<p>这是 Code-as-storage 的“读取存储”方式（读的是 <strong>code 区</strong>，不是 <code>SLOAD</code>）：</p>
+<ul>
+<li><code>extcodesize(loc)</code>：读 <code>loc</code> 的 runtime code 长度（等价于“数据长度 + header”）</li>
+<li><code>extcodecopy(loc, dst, offset, size)</code>：把 <code>loc</code> 的 code 从 <code>offset</code> 开始拷贝 <code>size</code> 字节到内存 <code>dst</code></li>
+</ul>
+<p>在上面的 <code>loadBytes</code> 中：</p>
+<ul>
+<li>先拷 5 字节校验 <code>MAGIC/VERSION</code>（信任模型）</li>
+<li>再从 offset=5 拷贝剩余字节作为 payload</li>
+</ul>
 
     </article>
 
@@ -175,7 +455,7 @@ IR 编译 (&ndash;via-ir)： 启用较新的编译器标志，自动将栈变量
 
   
   <li>
-    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=solidity%20patterns%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2022-02-01-solidity-pattern/" target="_blank" rel="noopener" aria-label="Twitter">
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Solidity%20patterns%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2022-02-01-solidity-pattern/" target="_blank" rel="noopener" aria-label="Twitter">
       <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
     </a>
   </li>

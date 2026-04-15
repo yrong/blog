@@ -88,7 +88,7 @@
       </article>
       <article class="article">
         <a href="/blog/post/2022-02-01-solidity-pattern/" class="article-titles">
-          <h2 class="article-title">solidity patterns</h2>
+          <h2 class="article-title">Solidity patterns</h2>
           
         </a>
         <ul class="article-meta">
@@ -115,15 +115,8 @@
         <div class="article-content">
           <h2 id="solidity-设计模式汇总笔记">Solidity 设计模式汇总笔记</h2>
 <p>本笔记总结了用于优化 Gas 消耗、增强安全性以及改善开发体验的核心 Solidity 编程模式。</p>
-<ol>
-<li>
-<p>重入保护模式 (Reentrancy Protection)
-问题： 当合约发起外部调用时，执行控制权会转移给另一方。攻击者可以利用此机会在原始操作完成前再次调用合约函数，从而导致资产被超额提取。
-检查-效果-交互 (CEI) 模式：
-Checks：验证输入参数和初始状态。
-Effects：在进行任何外部调用之前，更新所有的状态变量。
-Interactions：最后再执行外部调用或资产转移。
-重入卫兵 (Reentrancy Guards/Mutex)： 使用一个布尔标志（如 nonReentrant 修饰符）在函数进入时加锁，结束后解锁。如果函数在锁定状态下再次被调用，则交易回滚。</p>
+<h3 id="1-重入保护模式-reentrancy-protection">1. 重入保护模式 (Reentrancy Protection)</h3>
+<p>问题：当合约发起外部调用时，执行控制权会转移给另一方。攻击者可以利用此机会在原始操作完成前再次调用合约函数，从而导致资产被超额提取。</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2022-02-01-solidity-pattern/">Read more...</a></div>
         <div class="article-floatclear"></div>
