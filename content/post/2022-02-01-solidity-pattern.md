@@ -6,7 +6,7 @@ tags:
 - BlockChain
 - Ethereum
 - Solidity
-title: Solidity patterns: Assembly Tricks (1)
+title: Solidity patterns
 ---
 
 ## Solidity 设计模式汇总笔记
