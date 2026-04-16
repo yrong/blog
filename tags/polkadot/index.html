@@ -43,7 +43,7 @@
     <section class="list term-list">
       <article class="article">
         <a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" class="article-titles">
-          <h2 class="article-title">Polkadot XCMP MMD — Minimal POC (merged)</h2>
+          <h2 class="article-title">Polkadot XCMP MMD — Minimal POC</h2>
           
         </a>
         <ul class="article-meta">
@@ -68,9 +68,28 @@
           </li>
         </ul>
         <div class="article-content">
-          <p>Consolidated from earlier split posts (<strong>1‑pager</strong>, <strong>POC2 spec</strong>, <strong>implementer checklist</strong>, <strong>source outbox</strong>). Master copy lives in Obsidian: <strong>Polkadot XCMP MMD — Minimal POC</strong> (kept in sync with this article).</p>
-<p>Forum background: <a href="https://forum.polkadot.network/t/xcmp-design-discussion/7328">XCMP Design Discussion (Polkadot)</a>.</p>
-<p><strong>POC design revamp (vs forum MMD):</strong> the forum sketch uses <strong>one <code>XcmpMessageMMR</code> per channel</strong> and an <strong><code>XcmpChannelTree</code></strong> over those MMR roots. For this <strong>minimal POC</strong> we <strong>drop that split</strong>: a <strong>single append-only global <code>XcmpOutboxMmr</code></strong> on the source commits all outbound messages; the header digest carries <strong><code>XcmpOutboxMmrRoot</code></strong> only. Each leaf still names <strong><code>dest</code></strong> (and nonce + <code>payload_hash</code>), so there is no loss of routing identity—only a shorter proof path and less on-chain bookkeeping. A future scale-out version can shard back into per-channel MMRs + channel tree.</p>
+          <p>Forum background: <a href="https://forum.polkadot.network/t/xcmp-design-discussion/7328">XCMP Design Discussion (Polkadot)</a>.</p>
+<hr>
+<h2 id="problem-and-motivation">Problem and motivation</h2>
+<p><strong>HRMP</strong> stores message payloads on the relay chain, which is expensive (storage + execution).</p>
+<p><strong>XCMP (MMD approach)</strong> replaces that with:</p>
+<ul>
+<li>payloads kept off the relay chain</li>
+<li>messages proven by <strong>nested Merkle proofs</strong> anchored to relay commitments</li>
+</ul>
+<hr>
+<h2 id="how-mmd-xcmp-replaces-hrmp-conceptually">How MMD XCMP replaces HRMP (conceptually)</h2>
+<p>HRMP:</p>
+<ul>
+<li>relay is a <strong>payload mailbox</strong> (<code>HrmpChannelContents</code>)</li>
+<li>receiver reads relay state proofs + prunes via watermarks</li>
+</ul>
+<p>MMD XCMP:</p>
+<ul>
+<li>relay is a <strong>commitment anchor</strong> (no payload storage)</li>
+<li>receiver accepts <strong>payload + proof bundle</strong>, verifies it, then executes the XCM.</li>
+</ul>
+<p>Minimal POC semantics:</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/">Read more...</a></div>
         <div class="article-floatclear"></div>
