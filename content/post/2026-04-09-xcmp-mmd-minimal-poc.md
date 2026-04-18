@@ -65,6 +65,7 @@ This is the minimal spec that the implementation follows.
 - **Hard bounds**:
   - max messages per call: `MaxMessagesPerCall = 4`
   - max payload size: `MaxPayloadBytes = 256 * 1024` (256 KiB)
+  - **relay `Mmr::RootHash` (option A only)**: extra `StorageProof` bytes in the extrinsic — bound trie nodes the same way as other relay reads (often small next to the relay MMR leaf proof).
   - relay MMR proof: exactly 1 leaf, max proof items `MaxRelayMmrProofItems = 128` (raise for devnets if you expect **deep** historical leaves; proof width grows with relay progress)
   - para-heads Merkle proof: max proof items `MaxParaHeadsProofItems = 32`
   - outbox MMR proof: exactly 1 leaf, max proof items `MaxOutboxMmrProofItems = 64`
@@ -93,15 +94,29 @@ Relay chain runtimes configure `pallet_beefy_mmr::LeafExtra = H256` and set:
 3. **`ParaHeadsRoot`** (relay snapshot): a chosen relay MMR leaf exposes `leaf_extra = ParaHeadsRoot`, a
    binary Merkle root over `SCALE((para_id_u32, head_bytes))` entries (sorted by `para_id`). The relevant
    entry includes the source `head_bytes` whose digest contains the `xmmd` item carrying `XcmpOutboxMmrRoot`.
-4. **Relay MMR root** (implicit root anchor): read from the destination block’s **relay parent** header
-   digest. It commits to the chosen relay MMR leaf; because the relay MMR appends, historical leaves still
-   verify under later roots.
+4. **Relay MMR root** (implicit root anchor): the **relay-parent state trie root** already carried in
+   destination `PersistedValidationData` as **`relay_parent_storage_root`**. Under that root, the relay
+   runtime stores the current MMR root in **`pallet_mmr::RootHash`** (same value BEEFY logs as
+   `ConsensusLog::MmrRoot` for that block). **Two supported ways to obtain `mmr_root` in the verifier**
+   (pick one; Appendix A):
+   - **Option A — relayer `StorageProof`:** the relayer includes a proof for `Mmr::RootHash` in
+     `submit_xcmp_mmd` (no collator / inherent changes).
+   - **Option B — collator relay proof extension:** the destination runtime implements
+     **`KeyToIncludeInRelayProof`** so the collator merges the `Mmr::RootHash` key into the same inherent
+     relay proof already stored as **`ParachainSystem::RelayStateProof`**; the inbox pallet reconstructs
+     `RelayChainStateProof` and **reads** the value (small runtime change; **no** extra proof in the
+     extrinsic).  
+   In both cases the value is decoded from the verified trie — **no** relay header bytes and **no**
+   explicit `relay_mmr_root` scalar in calldata. Because the relay MMR is append-only, **historical**
+   relay leaves still verify under **later** `RootHash` values once you have a wide enough `LeafProof`.
 
 #### Destination verifies nested proofs
 
-1. From the destination block’s relay parent (Appendix A), extract the relay **MMR root**. This root is
-   cumulative (includes all earlier relay leaves).
-2. Verify a single relay MMR leaf proof at **`relay_mmr_leaf_index`** against that root, then decode the
+1. Obtain **`mmr_root`** = **`Mmr::RootHash`** read under **`ValidationData.relay_parent_storage_root`**
+   (**Option A:** verify `relay_mmr_root_proof` in the extrinsic; **Option B:** read from
+   `RelayChainStateProof` rebuilt from `RelayStateProof` + `ValidationData` — Appendix A). Same trie /
+   hasher stack as Cumulus `RelayChainStateProof::new`.
+2. Verify a single relay MMR leaf proof at **`relay_mmr_leaf_index`** against **`mmr_root`**, then decode the
    leaf to obtain `leaf_extra = ParaHeadsRoot`.
 3. Verify **`binary_merkle_tree::MerkleProof`** for `SCALE((source, head_bytes))` against `ParaHeadsRoot`.
 4. Decode **`head_bytes`** as the source parachain **header**, then read **`DigestItem::PreRuntime(*b"xmmd", …)`** → **`XcmpOutboxMmrRoot`**.
@@ -132,11 +147,20 @@ Relay chain runtimes configure `pallet_beefy_mmr::LeafExtra = H256` and set:
   - Para-heads Merkle must match relay: `H = Keccak256`, leaf `SCALE((para_id_u32, head_bytes))`, relay sorts by `para_id`, per `binary_merkle_tree` (`substrate/utils/binary-merkle-tree`)
 
 - **Proof types**:
+  - **Relay `RootHash` (Option A):** `sp_trie::StorageProof` proving **`pallet_mmr::RootHash`** at the relay
+    trie rooted at **`relay_parent_storage_root`**. Decode **`mmr_root`** from the verified trie (no
+    separate `relay_mmr_root: H256` unless you want a redundant witness).
+  - **Relay `RootHash` (Option B):** no extra extrinsic field — value comes from the **inherent** relay
+    proof already stored in **`ParachainSystem::RelayStateProof`**, after the collator merged the key via
+    **`KeyToIncludeInRelayProof`** (Appendix A).
   - **Para-heads proof**: `binary_merkle_tree::MerkleProof<H256, Vec<u8>>` where `leaf = SCALE((source_u32, head_bytes))`
   - **Relay MMR proof (single leaf)**: `sp_mmr_primitives::EncodableOpaqueLeaf` + `sp_mmr_primitives::LeafProof<H256>` (exactly 1 leaf; proof’s sole `leaf_indices[0]` must equal `relay_mmr_leaf_index`)
   - **Outbox MMR proof (single leaf)**: `sp_mmr_primitives::EncodableOpaqueLeaf` + `sp_mmr_primitives::LeafProof<H256>` (exactly 1 leaf; proof’s sole `leaf_indices[0]` must equal `mmr_leaf_index`), verified statelessly against `XcmpOutboxMmrRoot`
 
-- **`MessageWithProof`**: `{ source, dest, mmr_leaf_index, relay_mmr_leaf_index, payload, relay_mmr_proof, para_heads_proof, outbox_mmr_proof }`
+- **`MessageWithProof`**:  
+  - **Option A:** `{ source, dest, mmr_leaf_index, relay_mmr_leaf_index, payload, relay_mmr_root_proof, relay_mmr_proof, para_heads_proof, outbox_mmr_proof }`  
+  - **Option B:** omit **`relay_mmr_root_proof`** (same other fields).  
+  (Naming is up to you; Option B implies a compile-time or runtime flag so the extrinsic codec matches.)
 
 ### Source: XcmpMmdOutbox Pallet 
 
@@ -174,7 +198,11 @@ Anyone can be a relayer. The destination chain exposes an extrinsic, e.g.:
 
 - `submit_xcmp_mmd(messages: Vec<MessageWithProof>)`
 
-No collator/inherent pipeline changes are required for the minimal POC.
+- **Option A:** no collator / inherent changes — the relayer carries the extra relay trie proof.
+- **Option B:** small **destination-runtime** change — implement **`KeyToIncludeInRelayProof`** so the
+  collator merges **`Mmr::RootHash`** into the mandatory relay proof, plus a **`RelayChainStateProof`**
+  helper (e.g. `read_mmr_root_hash()`) used by the inbox pallet. **No** `relay_mmr_root_proof` in the
+  extrinsic.
 
 #### What the extrinsic must carry (per message)
 
@@ -182,7 +210,9 @@ No collator/inherent pipeline changes are required for the minimal POC.
 - `mmr_leaf_index: u64` (outbox MMR leaf index / nonce)
 - `relay_mmr_leaf_index: u64` (relay MMR leaf index that supplies `leaf_extra = ParaHeadsRoot`)
 - `payload: Vec<u8>` (bounded)
-- `relay_mmr_proof` (single leaf at `relay_mmr_leaf_index`, verified against the implicit relay-root; Appendix A)
+- **`relay_mmr_root_proof` (Option A only):** relay-chain **`StorageProof`** for **`pallet_mmr::RootHash`**,
+  verified against **`ValidationData.relay_parent_storage_root`** (Appendix A).
+- `relay_mmr_proof` (single leaf at `relay_mmr_leaf_index`, verified against **`mmr_root`** from Option A or B)
 - `para_heads_proof` (leaf `SCALE((source_u32, head_bytes))`)
 - `outbox_mmr_proof` (single leaf at `mmr_leaf_index`, under `XcmpOutboxMmrRoot` from `head_bytes`)
 
@@ -191,7 +221,10 @@ No collator/inherent pipeline changes are required for the minimal POC.
 - For each source message:
   - fetch `payload` bytes (see below) and compute `payload_hash`
   - choose `relay_mmr_leaf_index` whose `ParaHeadsRoot` contains the exact `(source, head_bytes)`
-  - generate proofs: `relay_mmr_proof`, `para_heads_proof`, `outbox_mmr_proof`
+  - **Option A:** at the **destination’s relay parent**, build a relay **`StorageProof`** that includes the
+    key for **`Mmr::RootHash`** (can merge trie nodes with other reads in one blob).
+  - generate proofs: `relay_mmr_proof`, `para_heads_proof`, `outbox_mmr_proof`, and **if Option A** also
+    `relay_mmr_root_proof`
   - submit `MessageWithProof` to destination
 
 #### Where the relayer gets the full `payload` (XCM bytes)
@@ -227,8 +260,13 @@ desired history range. For a minimal POC this can be **no pruning**; a productio
 window (older proofs become unavailable unless material is retained elsewhere).
 
 #### Verification (canonical algorithm)
-1. Obtain relay parent header from validation data, extract relay MMR root from the BEEFY digest (Appendix A).
-2. Verify the submitted **relay MMR leaf proof** (single leaf) **at `relay_mmr_leaf_index`** against that root; decode the proven leaf and read `leaf_extra = ParaHeadsRoot` (**snapshot for that relay leaf**, not “whatever the tip says today”).
+1. Resolve **`mmr_root`**:  
+   - **Option A:** from `ValidationData.relay_parent_storage_root` + **`relay_mmr_root_proof`** (mirror
+     `RelayChainStateProof::new`, then read **`Mmr::RootHash`**).  
+   - **Option B:** `RelayChainStateProof::new(SelfParaId, relay_parent_storage_root, RelayStateProof::get())`
+     then **`read_mmr_root_hash()`** (or equivalent) — the inherent already proved this key if the runtime
+     listed it in **`KeyToIncludeInRelayProof::keys_to_prove()`**.
+2. Verify the submitted **relay MMR leaf proof** (single leaf) **at `relay_mmr_leaf_index`** against **`mmr_root`**; decode the proven leaf and read `leaf_extra = ParaHeadsRoot` (**snapshot for that relay leaf**, not “whatever the tip says today”).
 3. Verify the submitted **para-heads Merkle proof** against that `ParaHeadsRoot` and decode its leaf as `SCALE((source_u32, head_bytes))`.
 4. Decode `head_bytes` as the source parachain header → extract **`XcmpOutboxMmrRoot`** digest item (`engine_id = *b"xmmd"`).
 5. Verify the submitted **outbox MMR proof** (single leaf) for outbox leaf `(dest, payload_hash)` at `mmr_leaf_index` against `XcmpOutboxMmrRoot`.
@@ -240,23 +278,86 @@ window (older proofs become unavailable unless material is retained elsewhere).
 #### Minimal verifier guards
 
 - Reject unless `dest == SelfParaId`.
-- Reject unless `relay_leaf_proof.leaf_indices[0] == relay_mmr_leaf_index` and
-  `outbox_leaf_proof.leaf_indices[0] == mmr_leaf_index` (single-leaf POC).
+- Reject unless `relay_mmr_proof.leaf_indices[0] == relay_mmr_leaf_index` and
+  `outbox_mmr_proof.leaf_indices[0] == mmr_leaf_index` (single-leaf POC).
 - After decoding the proven outbox leaf, `ensure!(leaf.dest == dest && leaf.payload_hash == Keccak256(payload))`.
 
-## Appendix A: Relay MMR root (where it lives)
+## Appendix A: Relay MMR root (trustless anchor on the destination)
 
-Relay runtimes set `pallet_mmr::Config::OnNewRoot = pallet_beefy_mmr::DepositBeefyDigest`, which deposits:
+### What the parachain already knows
 
-`DigestItem::Consensus(BEEFY_ENGINE_ID, ConsensusLog::MmrRoot(root).encode())`
+`set_validation_data` stores relay `PersistedValidationData`, including:
 
-Extract with:
+- **`relay_parent_storage_root`** — the relay **state trie root** after executing the relay parent block
+- **`relay_parent_number`**
 
-`sp_consensus_beefy::mmr::find_mmr_root_digest(header) -> Option<MmrRootHash>`
+and persists the relay trie proof bytes as **`ParachainSystem::RelayStateProof`** (already verified in
+`set_validation_data` via `RelayChainStateProof::new` against that root).
 
-Destination (via `set_validation_data` relay context): decode **relay parent** header (**implicit MMR-root anchor**) → `find_mmr_root_digest` → verify supplied **relay MMR leaf proof** (POC: exactly **one** leaf) **at `relay_mmr_leaf_index`** → decode that leaf’s `leaf_extra = ParaHeadsRoot` for **that** relay height.
+That storage root is the trust anchor for **any** relay-chain storage read proven inside the parachain
+runtime (same pattern as Cumulus `RelayChainStateProof`, which builds a `TrieBackend` with
+`HashingFor<RelayBlock>` at `relay_parent_storage_root`).
 
-**Historical leaves:** the digest’s `root` is the MMR **after** the relay parent block’s execution; it includes **all** prior relay leaves. Proving an **earlier** leaf under that root is the normal MMR membership story — no extra relay hash in calldata, and **no** requirement that the relayer land “immediately after” source inclusion. You still need an **archive-quality** relay view (or pruned-but-deep-enough state) to **build** wide proofs for very old leaves.
+### Where `mmr_root` lives on the relay chain
+
+`pallet_mmr` persists the latest MMR root as a normal storage value **`RootHash`**, updated as part of
+block execution. Rococo-style Polkadot SDK relay runtimes also wire
+`pallet_mmr::Config::OnNewRoot = pallet_beefy_mmr::DepositBeefyDigest`, which logs the **same** root into
+the relay header as `ConsensusLog::MmrRoot` — useful for light clients, **but the parachain POC verifier
+should not depend on a user-supplied relay header digest** (that digest is not bound by
+`relay_parent_storage_root` alone).
+
+### Storage key (must match the relay runtime)
+
+FRAME’s fixed 32-byte prefix for a storage value is:
+
+`concat(twox_128(pallet_name), twox_128(storage_item_name))`
+
+So for `pallet_mmr::RootHash` you need the **exact** `pallet_name` bytes from the relay’s
+`construct_runtime!` (e.g. **`Mmr`** next to `pallet_mmr` on Rococo), and **`RootHash`** as the item name.
+If the relay renames the pallet, uses a second MMR instance, or you target another relay flavor without
+`pallet_mmr`, the key changes or the read does not exist — **hard-code / generate the key against the
+relay runtime you support.**
+
+### Option A — relayer carries `relay_mmr_root_proof` (no collator change)
+
+- **`relay_mmr_root_proof`**: a `StorageProof` whose trie nodes, together with
+  `ValidationData.relay_parent_storage_root`, allow reading **`Mmr::RootHash`**. Decode the value as the
+  relay’s MMR root hash (`H256` / `MmrRootHash`) → **`mmr_root`**.
+- **No** separate `relay_mmr_root` argument is required: the value is **determined** by relay state once the
+  proof verifies.
+
+### Option B — collator merges the key (`KeyToIncludeInRelayProof`)
+
+Cumulus merges **`KeyToIncludeInRelayProof::keys_to_prove()`** into the same relay proof the collator puts in
+the inherent (`cumulus/client/parachain-inherent` → `collect_relay_storage_proof`). Your **destination**
+runtime returns e.g. `RelayStorageKey::Top(mmr_root_key_bytes)` alongside the static HRMP/DMQ keys.
+
+Reference pattern (test runtime): `cumulus/test/runtime/src/lib.rs` — `impl KeyToIncludeInRelayProof for Runtime { fn keys_to_prove() -> RelayProofRequest { … } }`. The SDK parachain **template** currently returns
+`Default::default()` (no extra keys) until you add them.
+
+Then the inbox pallet does **`RelayChainStateProof::new(para_id, relay_parent_storage_root, RelayStateProof::<T>::get())?`**
+and a small helper (**not** in Cumulus today — you add it) such as **`read_mmr_root_hash()`** that reads the
+key from the verified trie. **Extrinsic:** omit **`relay_mmr_root_proof`**; proof size per block grows slightly
+for **this** parachain only (unlike extending Cumulus’ global static key list, which would affect everyone).
+
+**Requirement:** `keys_to_prove()` must list the **`Mmr::RootHash`** key for every relay runtime / pallet
+name you support. If the collator omits it, the merged proof has no leaf for that key →
+**`read_mmr_root_hash()`** fails and **`submit_xcmp_mmd`** must reject (fail closed). Today’s
+`ParachainSystem` inherent does not read this key itself, so the block can still be built; the bug surfaces
+at your verifier unless you add an explicit inherent-time check.
+
+### After `mmr_root`
+
+Verify **`relay_mmr_proof`** (single leaf) against **`mmr_root`**, decode `leaf_extra = ParaHeadsRoot`, and
+continue the stack as in the main body.
+
+### Historical relay leaves
+
+`RootHash` at the relay parent is the MMR root **after** that relay block’s MMR update; it commits to **all**
+prior relay leaves. Proving an **earlier** relay leaf under that root is the usual append-only MMR story
+(wider `LeafProof` when the leaf is old). You still need an **archive-quality** relay view (or deep enough
+MMR proof material) to **construct** those proofs off-chain.
 
 ---
 
