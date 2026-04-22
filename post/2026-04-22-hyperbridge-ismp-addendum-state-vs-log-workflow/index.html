@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Hyperbridge ISMP — state vs log, coprocessor GET flow, and relayer queue - yrong blog</title>
+  <meta property="og:title" content="Hyperbridge ISMP — state vs log, coprocessor GET flow, and relayer queue - yrong blog" />
+  <meta name="twitter:title" content="Hyperbridge ISMP — state vs log, coprocessor GET flow, and relayer …" />
+  <meta name="description" content="This post supplements Hyperbridge ISMP — state_root, overlay_root, and mmr_root with a consolidated “root map &#43; workflow” view, new framing (trie vs MMR as state vs log, not a Substrate-vs-EVM split), and notes from reading pallet_state_coprocessor and Tesseract EVM messaging.
+Repo context: polytope-labs/hyperbridge.
+
+TL;DR (one paragraph)
+Hyperbridge keeps two “views” of the same ISMP object, keyed by the same commitment hash:
+
+a compact ISMP child trie (Patricia / Substrate LayoutV0) for pallet state: commitment metadata, receipt bookkeeping, claim/fee data, and pointers into the offchain log
+an append-only message MMR (ordered log) for history &#43; succinct inclusion proofs (and relayer/EVM batch verification)
+
+The commitment hash of a request/response is not stored twice as separate unrelated facts: it is used as a key in the trie and as a member of the MMR log, but the stored payloads differ (trie = operational metadata; MMR = message log membership).">
+  <meta property="og:description" content="This post supplements Hyperbridge ISMP — state_root, overlay_root, and mmr_root with a consolidated “root map &#43; workflow” view, new framing (trie vs MMR as state vs log, not a Substrate-vs-EVM split), and notes from reading pallet_state_coprocessor and Tesseract EVM messaging.
+Repo context: polytope-labs/hyperbridge.
+
+TL;DR (one paragraph)
+Hyperbridge keeps two “views” of the same ISMP object, keyed by the same commitment hash:
+
+a compact ISMP child trie (Patricia / Substrate LayoutV0) for pallet state: commitment metadata, receipt bookkeeping, claim/fee data, and pointers into the offchain log
+an append-only message MMR (ordered log) for history &#43; succinct inclusion proofs (and relayer/EVM batch verification)
+
+The commitment hash of a request/response is not stored twice as separate unrelated facts: it is used as a key in the trie and as a member of the MMR log, but the stored payloads differ (trie = operational metadata; MMR = message log membership).">
+  <meta name="twitter:description" content="This post supplements Hyperbridge ISMP — state_root, overlay_root, and mmr_root with a consolidated “root map &#43; workflow” view, new framing (trie vs MMR as state vs log, not a Substrate-vs-EVM split), …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2026-04-22-hyperbridge-ismp-addendum-state-vs-log-workflow/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Hyperbridge ISMP — state vs log, coprocessor GET flow, and relayer queue</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>April 22, 2026</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/blockchain/">
+            <i class="fa-solid fa-tag"></i>
+            BlockChain
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/polkadot/">
+            <i class="fa-solid fa-tag"></i>
+            Polkadot
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/hyperbridge/">
+            <i class="fa-solid fa-tag"></i>
+            Hyperbridge
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/ismp/">
+            <i class="fa-solid fa-tag"></i>
+            ISMP
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#tldr-one-paragraph">TL;DR (one paragraph)</a></li>
+    <li><a href="#ismp-child-trie-vs-message-mmr-is-this-duplication">ISMP child trie vs message MMR (is this duplication?)</a></li>
+    <li><a href="#trie-vs-mmr-its-state-vs-log-not-substrate-vs-ethereum">Trie vs MMR: it’s <strong>state vs log</strong>, not “Substrate vs Ethereum”</a></li>
+    <li><a href="#the-three-roots-you-will-see-and-what-they-actually-mean">The three roots you will see (and what they actually mean)</a>
+      <ul>
+        <li><a href="#how-they-are-packed-into-statecommitment">How they are packed into <code>StateCommitment</code></a></li>
+      </ul>
+    </li>
+    <li><a href="#what-overlayroot-means-on-evm-the-exact-question">What <code>overlayRoot</code> means on EVM (the exact question)</a></li>
+    <li><a href="#hyperbridge-coprocessor-get-workflow-end-to-end">Hyperbridge coprocessor GET workflow (end-to-end)</a>
+      <ul>
+        <li><a href="#1-source-chain-initiates-a-getrequest">1) Source chain initiates a <code>GetRequest</code></a></li>
+        <li><a href="#2-relayer-tesseract-observes-gets-and-assembles-proofs">2) Relayer (Tesseract) observes GETs and assembles proofs</a></li>
+        <li><a href="#3-hyperbridge-verifies-and-certifies-the-response-locally">3) Hyperbridge verifies and certifies the response locally</a></li>
+      </ul>
+    </li>
+    <li><a href="#consuming-hyperbridge-certified-get-responses">Consuming Hyperbridge-certified GET responses</a>
+      <ul>
+        <li><a href="#a-substrate-consumption-runtime-api--node-rpc">A) Substrate consumption (runtime API + node RPC)</a></li>
+        <li><a href="#b-evm-consumption-evmhost--handler">B) EVM consumption (EvmHost + Handler)</a></li>
+      </ul>
+    </li>
+    <li><a href="#tesseract-relayer-what-submit-and-the-queue-pipeline-really-do-evm">Tesseract relayer: what <code>submit()</code> and the queue pipeline really do (EVM)</a></li>
+  </ul>
+</nav>
+</aside>
+      <p>This post <strong>supplements</strong> <a href="/post/2023-04-11-hyperbridge-ismp-state-overlay-mmr/">Hyperbridge ISMP — state_root, overlay_root, and mmr_root</a> with a consolidated “root map + workflow” view, <strong>new framing</strong> (trie vs MMR as <strong>state vs log</strong>, not a Substrate-vs-EVM split), and notes from reading <code>pallet_state_coprocessor</code> and Tesseract EVM messaging.</p>
+<p>Repo context: <a href="https://github.com/polytope-labs/hyperbridge"><code>polytope-labs/hyperbridge</code></a>.</p>
+<hr>
+<h2 id="tldr-one-paragraph">TL;DR (one paragraph)</h2>
+<p>Hyperbridge keeps <strong>two “views” of the same ISMP object</strong>, keyed by the same <strong>commitment hash</strong>:</p>
+<ul>
+<li>a compact <strong>ISMP child trie</strong> (Patricia / Substrate <code>LayoutV0</code>) for <strong>pallet state</strong>: commitment metadata, receipt bookkeeping, claim/fee data, and pointers into the offchain log</li>
+<li>an append-only <strong>message MMR</strong> (ordered log) for <strong>history + succinct inclusion</strong> proofs (and relayer/EVM batch verification)</li>
+</ul>
+<p>The commitment hash of a request/response is <strong>not</strong> stored twice as separate unrelated facts: it is used as a <strong>key</strong> in the trie and as a <strong>member</strong> of the MMR log, but the <strong>stored payloads differ</strong> (trie = operational metadata; MMR = message log membership).</p>
+<p><strong>Role split (keep this mental model):</strong> trie proofs answer <strong>“does this key exist in state, and with what app metadata?”</strong>; MMR proofs answer <strong>“is this message in the ordered log at this place?”</strong> — that is <strong>state vs log</strong>, not a clean “Substrate uses trie, Ethereum uses MMR” rule.</p>
+<p>On the EVM side, Solidity verifies message inclusion against <code>StateCommitment.overlayRoot</code>, which—<strong>for Hyperbridge as coprocessor</strong>—is the <strong>message MMR root</strong> (not the relay-chain BEEFY MMR).</p>
+<hr>
+<h2 id="ismp-child-trie-vs-message-mmr-is-this-duplication">ISMP child trie vs message MMR (is this duplication?)</h2>
+<p><strong>Short answer: yes, intentionally redundant indexing — not “two copies of the same bytes in two merkle trees for no reason.”</strong></p>
+<ul>
+<li><strong>Child trie (overlay child trie)</strong>
+<ul>
+<li>“Database index” in Substrate state for ISMP: did we record a commitment, who delivered it, is it claimed, what fee metadata exists, where is the offchain leaf, etc.</li>
+<li>Proofs are <strong>trie / Patricia proofs</strong> to keys derived from the commitment.</li>
+</ul>
+</li>
+<li><strong>Message MMR</strong>
+<ul>
+<li>“Append-only message history” (requests/responses) where inclusion is proven with <strong>MMR multiproofs</strong> (what EVM <code>HandlerV1</code> typically checks for batch delivery to Solidity).</li>
+</ul>
+</li>
+</ul>
+<p><strong>What the MMR leaf “contains” (conceptual):</strong> it corresponds to a full <code>Request</code> / <code>Response</code> object (or its hash commitment), which already embeds <code>source/dest/nonce/...</code> as part of the message encoding. The proof path is “this hash is a leaf in the MMR at this index/position,” not a separate second preimage.</p>
+<hr>
+<h2 id="trie-vs-mmr-its-state-vs-log-not-substrate-vs-ethereum">Trie vs MMR: it’s <strong>state vs log</strong>, not “Substrate vs Ethereum”</h2>
+<p>The useful split is:</p>
+<ul>
+<li><strong>Trie proofs (main trie + ISMP child trie)</strong>: prove <strong>key existence / absence</strong> in Substrate state — membership of commitment records, receipts, fee metadata, “not yet handled” timeout checks, etc.</li>
+<li><strong>MMR proofs</strong>: prove <strong>inclusion in an append-only message log</strong> — the canonical ordered history of requests/responses for succinct batching and cheap on-chain verification.</li>
+</ul>
+<p><strong>Not a hard platform rule:</strong></p>
+<ul>
+<li>Substrate integrators still frequently fetch <strong>MMR proofs</strong> (e.g. <code>mmr_queryProof</code>) when the <em>verifier on the other side</em> is an EVM host that checks <code>overlayRoot</code> via MMR multiproofs.</li>
+<li>EVM integrators still care about <strong>receipt/commitment state</strong> on the host contract, but for <em>message delivery</em> the handler’s common path is <strong>MMR inclusion</strong> against <code>overlayRoot</code> (for Hyperbridge coprocessor: the message MMR root).</li>
+</ul>
+<p>So: <strong>trie = state/index layer; MMR = log/history layer</strong> — both can appear in both worlds, depending on what you’re proving <em>to</em>.</p>
+<hr>
+<h2 id="the-three-roots-you-will-see-and-what-they-actually-mean">The three roots you will see (and what they actually mean)</h2>
+<table>
+  <thead>
+      <tr>
+          <th>Root name you see</th>
+          <th>What it commits to</th>
+          <th>Where it lives</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Substrate <code>Header::state_root</code></strong></td>
+          <td>full chain state (all pallets)</td>
+          <td>block header</td>
+      </tr>
+      <tr>
+          <td><strong>ISMP child trie root</strong> (<code>child_trie_root</code>)</td>
+          <td>ISMP child trie subtree (commitments/receipts metadata)</td>
+          <td>header digest (<code>ConsensusDigest</code>)</td>
+      </tr>
+      <tr>
+          <td><strong>ISMP message MMR root</strong> (<code>mmr_root</code>)</td>
+          <td>append-only message log of request/response leaves</td>
+          <td>header digest (<code>ConsensusDigest</code>)</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="how-they-are-packed-into-statecommitment">How they are packed into <code>StateCommitment</code></h3>
+<p><code>StateCommitment</code> only has <code>state_root</code> + optional <code>overlay_root</code>, so the parachain client packs digest fields into those slots. There are two regimes:</p>
+<p><strong>Ordinary parachain (not coprocessor):</strong></p>
+<ul>
+<li><code>state_root</code> = header <code>state_root</code> (full trie)</li>
+<li><code>overlay_root</code> = <code>child_trie_root</code></li>
+</ul>
+<p><strong>Hyperbridge as coprocessor:</strong></p>
+<ul>
+<li><code>state_root</code> = <code>child_trie_root</code></li>
+<li><code>overlay_root</code> = <code>mmr_root</code></li>
+</ul>
+<p>So on Hyperbridge, <strong><code>overlay_root</code> is the message MMR root</strong>.</p>
+<hr>
+<h2 id="what-overlayroot-means-on-evm-the-exact-question">What <code>overlayRoot</code> means on EVM (the exact question)</h2>
+<p>In <code>HandlerV1.handleGetResponses</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span><span style="color:#66d9ef">bytes32</span> root <span style="color:#f92672">=</span> host.stateMachineCommitment(message.proof.height).overlayRoot;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> valid <span style="color:#f92672">=</span> MerkleMountainRange.VerifyProof(root, message.proof.multiproof, leaves, message.proof.leafCount);
+</span></span></code></pre></div><p><code>overlayRoot</code> here is <strong>the Hyperbridge ISMP message overlay MMR root</strong> for the referenced Hyperbridge height.</p>
+<p>It is <strong>not</strong> the Polkadot relay-chain/BEEFY MMR root.</p>
+<p>Relationship:</p>
+<ol>
+<li>relay-chain finality proof ⇒ EVM consensus client accepts a Hyperbridge <code>StateCommitment</code></li>
+<li>that <code>StateCommitment.overlayRoot</code> ⇒ used by the handler to verify message leaves (requests/responses) via MMR</li>
+</ol>
+<hr>
+<h2 id="hyperbridge-coprocessor-get-workflow-end-to-end">Hyperbridge coprocessor GET workflow (end-to-end)</h2>
+<p>This is the flow we confirmed while reading <code>pallet_state_coprocessor</code>:</p>
+<h3 id="1-source-chain-initiates-a-getrequest">1) Source chain initiates a <code>GetRequest</code></h3>
+<p>The request exists on the source chain and is committed into the source’s ISMP state (so it can be proven later).</p>
+<h3 id="2-relayer-tesseract-observes-gets-and-assembles-proofs">2) Relayer (Tesseract) observes GETs and assembles proofs</h3>
+<p>Tesseract groups GETs and fetches:</p>
+<ul>
+<li>a <strong>source proof</strong> that the GET request(s) were committed on the source chain at a finalized height</li>
+<li>a <strong>destination storage proof</strong> for the requested keys at <code>GetRequest.height</code></li>
+</ul>
+<p>Then it submits <strong>one unsigned message</strong> to Hyperbridge:</p>
+<ul>
+<li><code>GetRequestsWithProof { requests, source, response, address }</code></li>
+</ul>
+<h3 id="3-hyperbridge-verifies-and-certifies-the-response-locally">3) Hyperbridge verifies and certifies the response locally</h3>
+<p><code>pallet_state_coprocessor::handle_unsigned(GetRequestsWithProof)</code> verifies both proofs, constructs <code>GetResponse { get, values }</code>, then calls:</p>
+<ul>
+<li><code>dispatch_get_response(get_response, address)</code></li>
+</ul>
+<p><strong>What <code>dispatch_get_response</code> does (important):</strong></p>
+<ul>
+<li>inserts the <code>GetResponse</code> as a <strong>response leaf</strong> into the coprocessor’s <strong>MMR</strong> (offchain overlay tree)</li>
+<li>writes <code>ResponseCommitments[response_commitment] -&gt; (leaf index + position + metadata)</code></li>
+<li>marks <code>Responded[request_commitment] = true</code></li>
+<li>emits:
+<ul>
+<li><code>pallet_ismp::Event::Response { commitment, req_commitment, ... }</code></li>
+<li><code>pallet_ismp::Event::GetRequestHandled { commitment: req_commitment, relayer: address }</code></li>
+</ul>
+</li>
+</ul>
+<p>It does <strong>not</strong> “send a response to the source chain” by itself. It certifies/records on Hyperbridge; consumers can then prove or read it.</p>
+<hr>
+<h2 id="consuming-hyperbridge-certified-get-responses">Consuming Hyperbridge-certified GET responses</h2>
+<p>You usually consume the certification via either:</p>
+<ol>
+<li><strong>Substrate runtime API + node RPC</strong> (fetch full response + proof material), or</li>
+<li><strong>EVM Host/Handler delivery</strong> (MMR proof checked on-chain, then app callback invoked).</li>
+</ol>
+<h3 id="a-substrate-consumption-runtime-api--node-rpc">A) Substrate consumption (runtime API + node RPC)</h3>
+<p>From a Substrate client you can:</p>
+<ul>
+<li>
+<p><strong>Read events</strong>:</p>
+<ul>
+<li>runtime API: <code>IsmpRuntimeApi::block_events()</code> / <code>block_events_with_metadata()</code></li>
+<li>node RPC wrapper: <code>ismp_queryEvents*</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Fetch full response objects</strong>:</p>
+<ul>
+<li>runtime API: <code>IsmpRuntimeApi::responses([commitment])</code></li>
+<li>node RPC wrapper: <code>ismp_queryResponses</code></li>
+</ul>
+</li>
+</ul>
+<p>The runtime loads the response by using <code>ResponseCommitments</code> → offchain leaf position → fetch leaf (<code>Leaf::Response(...)</code>).</p>
+<ul>
+<li><strong>Fetch proofs (what you fetch depends on what the <em>verifier</em> checks):</strong> see the section <em>Trie vs MMR: it’s state vs log, not “Substrate vs Ethereum”</em> above.
+<ul>
+<li>to satisfy an <strong>MMR / log inclusion</strong> check (typical for <code>HandlerV1</code> on EVM), fetch an <strong>MMR proof</strong>:
+<ul>
+<li>RPC: <code>mmr_queryProof(at, ProofKeys::Responses([commitment]))</code></li>
+</ul>
+</li>
+<li>to satisfy a <strong>state / child-trie key</strong> check (trie proof), fetch a <strong>child-trie proof</strong>:
+<ul>
+<li>RPC: <code>ismp_queryChildTrieProof(at, [ResponseCommitments::storage_key(commitment)])</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="b-evm-consumption-evmhost--handler">B) EVM consumption (EvmHost + Handler)</h3>
+<p>On EVM, the verifier is typically <code>HandlerV1</code> (set as <code>HostParams.handler</code>). Delivery looks like:</p>
+<ol>
+<li>relayer submits a <code>GetResponseMessage</code> to <code>HandlerV1.handleGetResponses(host, message)</code></li>
+<li>handler checks challenge period, request existence, replay protection</li>
+<li>handler verifies MMR multiproof against:
+<ul>
+<li><code>host.stateMachineCommitment(message.proof.height).overlayRoot</code></li>
+<li>which for Hyperbridge coprocessor is <strong>the Hyperbridge message MMR root</strong></li>
+</ul>
+</li>
+<li>if valid, handler calls <code>host.dispatchIncoming(GetResponse, relayer)</code></li>
+<li><code>EvmHost.dispatchIncoming(GetResponse, relayer)</code> calls the app’s:
+<ul>
+<li><code>IApp.onGetResponse(IncomingGetResponse(response, relayer))</code></li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="tesseract-relayer-what-submit-and-the-queue-pipeline-really-do-evm">Tesseract relayer: what <code>submit()</code> and the queue pipeline really do (EVM)</h2>
+<p>In <code>tesseract/messaging/evm</code>, <code>submit(messages)</code> is just:</p>
+<ul>
+<li>“put <code>Vec&lt;Message&gt;</code> into a pipeline queue and wait”</li>
+</ul>
+<p>The queue is created with <code>start_pipeline</code>, and the handler is:</p>
+<ul>
+<li><code>handle_message_submission(&amp;client, messages)</code> (<code>tesseract/messaging/evm/src/tx.rs</code>)</li>
+</ul>
+<p>That handler:</p>
+<ol>
+<li>converts messages into EVM contract calls (calldata) for the <strong>Handler</strong> contract</li>
+<li>signs/sends transactions</li>
+<li>extracts <code>*Handled</code> events from receipts and returns <code>TxResult</code></li>
+</ol>
+<p>Crucially: <strong>proof bytes are already inside the <code>Message</code> objects</strong> by the time <code>submit()</code> is called; the queue just turns those messages into actual on-chain submissions.</p>
+
+    </article>
+
+    
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2026-04-22-hyperbridge-ismp-addendum-state-vs-log-workflow/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Hyperbridge%20ISMP%20%e2%80%94%20state%20vs%20log,%20coprocessor%20GET%20flow,%20and%20relayer%20queue%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2026-04-22-hyperbridge-ismp-addendum-state-vs-log-workflow/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer pager-noitem">&lt; Newer</li>
+      <li class="pager-older">
+        <a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" data-toggle="tooltip" data-placement="top" title="Polkadot XCMP MMD — Minimal POC">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

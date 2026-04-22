@@ -42,6 +42,53 @@
   <div class="main" role="main">
     <section class="list term-list">
       <article class="article">
+        <a href="/blog/post/2026-04-22-hyperbridge-ismp-addendum-state-vs-log-workflow/" class="article-titles">
+          <h2 class="article-title">Hyperbridge ISMP — state vs log, coprocessor GET flow, and relayer queue</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 22, 2026</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/hyperbridge/">
+              <i class="fa-solid fa-tag"></i>
+              Hyperbridge
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/ismp/">
+              <i class="fa-solid fa-tag"></i>
+              ISMP
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>This post <strong>supplements</strong> <a href="/post/2023-04-11-hyperbridge-ismp-state-overlay-mmr/">Hyperbridge ISMP — state_root, overlay_root, and mmr_root</a> with a consolidated “root map + workflow” view, <strong>new framing</strong> (trie vs MMR as <strong>state vs log</strong>, not a Substrate-vs-EVM split), and notes from reading <code>pallet_state_coprocessor</code> and Tesseract EVM messaging.</p>
+<p>Repo context: <a href="https://github.com/polytope-labs/hyperbridge"><code>polytope-labs/hyperbridge</code></a>.</p>
+<hr>
+<h2 id="tldr-one-paragraph">TL;DR (one paragraph)</h2>
+<p>Hyperbridge keeps <strong>two “views” of the same ISMP object</strong>, keyed by the same <strong>commitment hash</strong>:</p>
+<ul>
+<li>a compact <strong>ISMP child trie</strong> (Patricia / Substrate <code>LayoutV0</code>) for <strong>pallet state</strong>: commitment metadata, receipt bookkeeping, claim/fee data, and pointers into the offchain log</li>
+<li>an append-only <strong>message MMR</strong> (ordered log) for <strong>history + succinct inclusion</strong> proofs (and relayer/EVM batch verification)</li>
+</ul>
+<p>The commitment hash of a request/response is <strong>not</strong> stored twice as separate unrelated facts: it is used as a <strong>key</strong> in the trie and as a <strong>member</strong> of the MMR log, but the <strong>stored payloads differ</strong> (trie = operational metadata; MMR = message log membership).</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2026-04-22-hyperbridge-ismp-addendum-state-vs-log-workflow/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/post/2023-04-11-hyperbridge-ismp-state-overlay-mmr/" class="article-titles">
           <h2 class="article-title">Hyperbridge ISMP — state_root, overlay_root, and mmr_root</h2>
           
