@@ -7,7 +7,7 @@ tags:
 - Polkadot
 - Hyperbridge
 - ISMP
-title: Hyperbridge ISMP — addendum: state vs log, coprocessor GET flow, and relayer queue
+title: Hyperbridge ISMP — state vs log, coprocessor GET flow, and relayer queue
 ---
 
 This post **supplements** [Hyperbridge ISMP — state_root, overlay_root, and mmr_root](/post/2023-04-11-hyperbridge-ismp-state-overlay-mmr/) with a consolidated “root map + workflow” view, **new framing** (trie vs MMR as **state vs log**, not a Substrate-vs-EVM split), and notes from reading `pallet_state_coprocessor` and Tesseract EVM messaging.
