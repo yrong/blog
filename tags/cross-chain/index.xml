@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Cross-Chain on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/cross-chain/</link>
+    <description>Recent content in Cross-Chain on yrong blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
+    <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
+    <lastBuildDate>Mon, 04 May 2026 15:00:00 +0000</lastBuildDate>
+    <atom:link href="https://yrong.github.io/blog/tags/cross-chain/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Speculative Messaging — Original Design Document</title>
+      <link>https://yrong.github.io/blog/post/2026-05-04-speculative-messaging-design/</link>
+      <pubDate>Mon, 04 May 2026 15:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2026-05-04-speculative-messaging-design/</guid>
+      <description>&lt;h1 id=&#34;speculative-messaging&#34;&gt;Speculative Messaging&lt;/h1&gt;&#xA;&lt;h2 id=&#34;design-document&#34;&gt;Design Document&lt;/h2&gt;&#xA;&lt;table&gt;&#xA;  &lt;thead&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;th&gt;Field&lt;/th&gt;&#xA;          &lt;th&gt;Value&lt;/th&gt;&#xA;      &lt;/tr&gt;&#xA;  &lt;/thead&gt;&#xA;  &lt;tbody&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td&gt;&lt;strong&gt;Authors&lt;/strong&gt;&lt;/td&gt;&#xA;          &lt;td&gt;eskimor&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td&gt;&lt;strong&gt;Status&lt;/strong&gt;&lt;/td&gt;&#xA;          &lt;td&gt;Draft&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td&gt;&lt;strong&gt;Version&lt;/strong&gt;&lt;/td&gt;&#xA;          &lt;td&gt;0.2&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td&gt;&lt;strong&gt;Related Designs&lt;/strong&gt;&lt;/td&gt;&#xA;          &lt;td&gt;&lt;a href=&#34;low-latency-v2-design.md&#34;&gt;Low-Latency Parachains v2&lt;/a&gt;&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;  &lt;/tbody&gt;&#xA;&lt;/table&gt;&#xA;&lt;hr&gt;&#xA;&lt;h2 id=&#34;table-of-contents&#34;&gt;Table of Contents&lt;/h2&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#introduction&#34;&gt;Introduction&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#motivation&#34;&gt;Motivation&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#goals&#34;&gt;Goals&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#non-goals&#34;&gt;Non-Goals&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#background&#34;&gt;Background&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#solution-overview&#34;&gt;Solution Overview&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#detailed-design&#34;&gt;Detailed Design&lt;/a&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#message-accumulators&#34;&gt;Message Accumulators&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#provides-commitment&#34;&gt;Provides Commitment&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#requires-commitment&#34;&gt;Requires Commitment&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#relay-chain-matching&#34;&gt;Relay Chain Matching&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#late-block-proofs&#34;&gt;Late Block Proofs&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#proof-size-considerations&#34;&gt;Proof Size Considerations&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#acknowledgement-extensions&#34;&gt;Acknowledgement Extensions&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#cycle-prevention&#34;&gt;Cycle Prevention&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#super-chains&#34;&gt;Super Chains&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#trust-domains&#34;&gt;Trust Domains&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#censorship-considerations&#34;&gt;Censorship Considerations&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#comparison-with-alternatives&#34;&gt;Comparison with Alternatives&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#implementation-considerations&#34;&gt;Implementation Considerations&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;#security-analysis&#34;&gt;Security Analysis&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ol&gt;&#xA;&lt;hr&gt;&#xA;&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;&#xA;&lt;p&gt;Speculative Messaging introduces a new cross-chain messaging mechanism for&#xA;Polkadot that replaces HRMP with a more scalable, lower-latency alternative. By&#xA;using cryptographic accumulators (such as Merkle Mountain Ranges) to commit to&#xA;messages off-chain and having the relay chain enforce these commitments at&#xA;inclusion time, we achieve:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Polkadot Speculative Messaging — Design Deep Dive</title>
+      <link>https://yrong.github.io/blog/post/2026-05-03-polkadot-speculative-messaging/</link>
+      <pubDate>Sun, 03 May 2026 14:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2026-05-03-polkadot-speculative-messaging/</guid>
+      <description>&lt;p&gt;Speculative Messaging is the companion design to Low-Latency Parachains v2. Its goal: replace HRMP (Horizontal Relay Message Passing) with a faster, more scalable cross-chain communication mechanism built on MMR accumulators, on-chain commitments, and off-chain message delivery.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

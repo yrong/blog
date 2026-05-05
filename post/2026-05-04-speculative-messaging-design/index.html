@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Speculative Messaging — Original Design Document - yrong blog</title>
+  <meta property="og:title" content="Speculative Messaging — Original Design Document - yrong blog" />
+  <meta name="twitter:title" content="Speculative Messaging — Original Design Document - yrong blog" />
+  <meta name="description" content="Speculative Messaging
+Design Document
+
+  
+      
+          Field
+          Value
+      
+  
+  
+      
+          Authors
+          eskimor
+      
+      
+          Status
+          Draft
+      
+      
+          Version
+          0.2
+      
+      
+          Related Designs
+          Low-Latency Parachains v2
+      
+  
+
+
+Table of Contents
+
+Introduction
+Motivation
+Goals
+Non-Goals
+Background
+Solution Overview
+Detailed Design
+
+Message Accumulators
+Provides Commitment
+Requires Commitment
+Relay Chain Matching
+Late Block Proofs
+Proof Size Considerations
+Acknowledgement Extensions
+Cycle Prevention
+Super Chains
+
+
+Trust Domains
+Censorship Considerations
+Comparison with Alternatives
+Implementation Considerations
+Security Analysis
+
+
+Introduction
+Speculative Messaging introduces a new cross-chain messaging mechanism for
+Polkadot that replaces HRMP with a more scalable, lower-latency alternative. By
+using cryptographic accumulators (such as Merkle Mountain Ranges) to commit to
+messages off-chain and having the relay chain enforce these commitments at
+inclusion time, we achieve:">
+  <meta property="og:description" content="Speculative Messaging
+Design Document
+
+  
+      
+          Field
+          Value
+      
+  
+  
+      
+          Authors
+          eskimor
+      
+      
+          Status
+          Draft
+      
+      
+          Version
+          0.2
+      
+      
+          Related Designs
+          Low-Latency Parachains v2
+      
+  
+
+
+Table of Contents
+
+Introduction
+Motivation
+Goals
+Non-Goals
+Background
+Solution Overview
+Detailed Design
+
+Message Accumulators
+Provides Commitment
+Requires Commitment
+Relay Chain Matching
+Late Block Proofs
+Proof Size Considerations
+Acknowledgement Extensions
+Cycle Prevention
+Super Chains
+
+
+Trust Domains
+Censorship Considerations
+Comparison with Alternatives
+Implementation Considerations
+Security Analysis
+
+
+Introduction
+Speculative Messaging introduces a new cross-chain messaging mechanism for
+Polkadot that replaces HRMP with a more scalable, lower-latency alternative. By
+using cryptographic accumulators (such as Merkle Mountain Ranges) to commit to
+messages off-chain and having the relay chain enforce these commitments at
+inclusion time, we achieve:">
+  <meta name="twitter:description" content="Speculative Messaging
+Design Document
+
+  
+      
+          Field
+          Value
+      
+  
+  
+      
+          Authors
+          eskimor
+      
+      
+          Status
+          Draft …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2026-05-04-speculative-messaging-design/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Speculative Messaging — Original Design Document</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>May 4, 2026</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/polkadot/">
+            <i class="fa-solid fa-tag"></i>
+            polkadot
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/xcm/">
+            <i class="fa-solid fa-tag"></i>
+            xcm
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/cross-chain/">
+            <i class="fa-solid fa-tag"></i>
+            cross-chain
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/merkle-tree/">
+            <i class="fa-solid fa-tag"></i>
+            merkle-tree
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/design/">
+            <i class="fa-solid fa-tag"></i>
+            design
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#design-document">Design Document</a></li>
+    <li><a href="#table-of-contents">Table of Contents</a></li>
+    <li><a href="#introduction">Introduction</a></li>
+    <li><a href="#motivation">Motivation</a>
+      <ul>
+        <li><a href="#the-problem-with-current-messaging-hrmp">The Problem with Current Messaging (HRMP)</a></li>
+        <li><a href="#why-this-matters">Why This Matters</a></li>
+        <li><a href="#the-opportunity">The Opportunity</a></li>
+      </ul>
+    </li>
+    <li><a href="#goals">Goals</a></li>
+    <li><a href="#background">Background</a>
+      <ul>
+        <li><a href="#relay-parent-and-message-context">Relay Parent and Message Context</a></li>
+        <li><a href="#low-latency-v2">Low-Latency v2</a></li>
+        <li><a href="#merkle-mountain-ranges-mmr">Merkle Mountain Ranges (MMR)</a></li>
+      </ul>
+    </li>
+    <li><a href="#solution-overview">Solution Overview</a></li>
+    <li><a href="#detailed-design">Detailed Design</a>
+      <ul>
+        <li><a href="#message-accumulators">Message Accumulators</a></li>
+        <li><a href="#parachain-runtime-state-internal">Parachain Runtime State (Internal)</a></li>
+        <li><a href="#off-chain-communication-between-collators">Off-Chain Communication (Between Collators)</a></li>
+        <li><a href="#relay-chain-matching">Relay Chain Matching</a></li>
+        <li><a href="#late-block-proofs">Late Block Proofs</a></li>
+        <li><a href="#proof-size-considerations">Proof Size Considerations</a></li>
+        <li><a href="#acknowledgement-extensions">Acknowledgement Extensions</a></li>
+        <li><a href="#cycle-prevention">Cycle Prevention</a></li>
+        <li><a href="#super-chains">Super Chains</a></li>
+      </ul>
+    </li>
+    <li><a href="#trust-domains">Trust Domains</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#censorship-considerations">Censorship Considerations</a>
+      <ul>
+        <li><a href="#cascading-dependencies">Cascading Dependencies</a></li>
+        <li><a href="#mitigation-strategies">Mitigation Strategies</a></li>
+      </ul>
+    </li>
+    <li><a href="#comparison-with-alternatives">Comparison with Alternatives</a>
+      <ul>
+        <li><a href="#vs-current-hrmp">vs. Current HRMP</a></li>
+        <li><a href="#vs-parallel-processing-runtimes-solana-style">vs. Parallel Processing Runtimes (Solana-style)</a></li>
+        <li><a href="#vs-ethereum-l2-preconfirmations">vs. Ethereum L2 Preconfirmations</a></li>
+      </ul>
+    </li>
+    <li><a href="#implementation-considerations">Implementation Considerations</a>
+      <ul>
+        <li><a href="#relay-chain-runtime-changes">Relay Chain Runtime Changes</a></li>
+        <li><a href="#pvf-changes">PVF Changes</a></li>
+        <li><a href="#parachain-runtime-changes">Parachain Runtime Changes</a></li>
+        <li><a href="#collator-changes">Collator Changes</a></li>
+        <li><a href="#networking">Networking</a></li>
+      </ul>
+    </li>
+    <li><a href="#security-analysis">Security Analysis</a>
+      <ul>
+        <li><a href="#threat-fake-provides">Threat: Fake Provides</a></li>
+        <li><a href="#threat-invalid-extension-proof">Threat: Invalid Extension Proof</a></li>
+        <li><a href="#threat-message-replayskip">Threat: Message Replay/Skip</a></li>
+        <li><a href="#threat-acknowledgement-without-verification">Threat: Acknowledgement Without Verification</a></li>
+        <li><a href="#threat-super-chain-collusion">Threat: Super-Chain Collusion</a></li>
+      </ul>
+    </li>
+    <li><a href="#conclusion">Conclusion</a></li>
+    <li><a href="#appendix-a-separation-of-concerns">Appendix A: Separation of Concerns</a></li>
+    <li><a href="#appendix-b-mmr-extension-proof-details">Appendix B: MMR Extension Proof Details</a></li>
+    <li><a href="#appendix-c-acknowledgement-rule-summary">Appendix C: Acknowledgement Rule Summary</a></li>
+    <li><a href="#appendix-d-commitment-schema-summary">Appendix D: Commitment Schema Summary</a></li>
+    <li><a href="#appendix-e-comparison-of-messaging-modes">Appendix E: Comparison of Messaging Modes</a></li>
+  </ul>
+</nav>
+</aside>
+      <h1 id="speculative-messaging">Speculative Messaging</h1>
+<h2 id="design-document">Design Document</h2>
+<table>
+  <thead>
+      <tr>
+          <th>Field</th>
+          <th>Value</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Authors</strong></td>
+          <td>eskimor</td>
+      </tr>
+      <tr>
+          <td><strong>Status</strong></td>
+          <td>Draft</td>
+      </tr>
+      <tr>
+          <td><strong>Version</strong></td>
+          <td>0.2</td>
+      </tr>
+      <tr>
+          <td><strong>Related Designs</strong></td>
+          <td><a href="low-latency-v2-design.md">Low-Latency Parachains v2</a></td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#motivation">Motivation</a></li>
+<li><a href="#goals">Goals</a></li>
+<li><a href="#non-goals">Non-Goals</a></li>
+<li><a href="#background">Background</a></li>
+<li><a href="#solution-overview">Solution Overview</a></li>
+<li><a href="#detailed-design">Detailed Design</a>
+<ul>
+<li><a href="#message-accumulators">Message Accumulators</a></li>
+<li><a href="#provides-commitment">Provides Commitment</a></li>
+<li><a href="#requires-commitment">Requires Commitment</a></li>
+<li><a href="#relay-chain-matching">Relay Chain Matching</a></li>
+<li><a href="#late-block-proofs">Late Block Proofs</a></li>
+<li><a href="#proof-size-considerations">Proof Size Considerations</a></li>
+<li><a href="#acknowledgement-extensions">Acknowledgement Extensions</a></li>
+<li><a href="#cycle-prevention">Cycle Prevention</a></li>
+<li><a href="#super-chains">Super Chains</a></li>
+</ul>
+</li>
+<li><a href="#trust-domains">Trust Domains</a></li>
+<li><a href="#censorship-considerations">Censorship Considerations</a></li>
+<li><a href="#comparison-with-alternatives">Comparison with Alternatives</a></li>
+<li><a href="#implementation-considerations">Implementation Considerations</a></li>
+<li><a href="#security-analysis">Security Analysis</a></li>
+</ol>
+<hr>
+<h2 id="introduction">Introduction</h2>
+<p>Speculative Messaging introduces a new cross-chain messaging mechanism for
+Polkadot that replaces HRMP with a more scalable, lower-latency alternative. By
+using cryptographic accumulators (such as Merkle Mountain Ranges) to commit to
+messages off-chain and having the relay chain enforce these commitments at
+inclusion time, we achieve:</p>
+<ul>
+<li><strong>Lower latency</strong>: Messaging at parachain block times rather than relay chain
+block times</li>
+<li><strong>Better scalability</strong>: Off-chain message passing with on-chain commitment
+verification</li>
+<li><strong>Compatibility with Low-Latency v2</strong>: Works seamlessly with older relay
+parents</li>
+</ul>
+<p>This design builds upon and complements the Low-Latency Parachains v2 design.
+While that design introduces older relay parents (for relay chain fork
+immunity), it would normally increase messaging latency. Speculative Messaging
+solves this problem entirely by decoupling message passing from relay parents.</p>
+<hr>
+<h2 id="motivation">Motivation</h2>
+<h3 id="the-problem-with-current-messaging-hrmp">The Problem with Current Messaging (HRMP)</h3>
+<p>Current cross-chain messaging in Polkadot (HRMP) relies on the relay chain as
+the coordination layer:</p>
+<ol>
+<li>Parachain A produces a block that sends a message</li>
+<li>The block gets backed and included on the relay chain</li>
+<li>The relay chain stores the message in its state</li>
+<li>Parachain B observes the message via its relay parent</li>
+<li>Parachain B can now receive the message in its next block</li>
+</ol>
+<p>This process takes a minimum of 2-3 relay chain blocks (~12-18 seconds) under
+ideal conditions. With Low-Latency v2 recommending finalized relay parents (for
+fork immunity), this latency would increase significantly if we relied on HRMP.</p>
+<p>Additionally, HRMP has scalability concerns:</p>
+<ul>
+<li>Messages flow through relay chain state</li>
+<li>Relay chain must store and manage message queues</li>
+<li>Every validator processes message routing</li>
+</ul>
+<h3 id="why-this-matters">Why This Matters</h3>
+<p>For many cross-chain use cases, 12-18+ second messaging latency is prohibitive:</p>
+<ul>
+<li><strong>DeFi</strong>: Cross-chain arbitrage, liquidations, and atomic swaps require fast
+execution</li>
+<li><strong>Gaming</strong>: Interactive cross-chain gameplay needs sub-second responses</li>
+<li><strong>User Experience</strong>: Multi-chain dApps feel sluggish when every cross-chain
+action takes 20+ seconds</li>
+</ul>
+<h3 id="the-opportunity">The Opportunity</h3>
+<p>By moving message coordination off-chain and using cryptographic commitments for
+verification, we can:</p>
+<ol>
+<li>Achieve messaging latencies comparable to parachain block times</li>
+<li>Remove message data from relay chain state entirely</li>
+<li>Build super chains</li>
+</ol>
+<hr>
+<h2 id="goals">Goals</h2>
+<ol>
+<li>
+<p><strong>Replace HRMP</strong>: Provide a complete replacement for HRMP that is faster and
+more scalable.</p>
+</li>
+<li>
+<p><strong>Low-Latency Messaging</strong>: Reduce cross-chain messaging latency to parachain
+block times for chains in the same trust domain.</p>
+</li>
+<li>
+<p><strong>Intra-Block Messaging</strong>: Enable &ldquo;super chains&rdquo; (multiple parachains run by
+the same collator set) to exchange messages within the same block production
+cycle.</p>
+</li>
+<li>
+<p><strong>Off-Chain Scalability</strong>: Keep message data off the relay chain; only
+commitments are verified on-chain.</p>
+</li>
+<li>
+<p><strong>Graceful Degradation</strong>: When speculative messaging acknowledgements aren&rsquo;t
+available, fall back to inclusion-based commitment matching (still faster
+than HRMP).</p>
+</li>
+<li>
+<p><strong>Horizontal Scaling</strong>: Maintain Polkadot&rsquo;s horizontal scaling
+properties—full nodes only need to follow chains they care about.</p>
+</li>
+</ol>
+<hr>
+<h2 id="background">Background</h2>
+<h3 id="relay-parent-and-message-context">Relay Parent and Message Context</h3>
+<p>In current Polkadot, a parachain block&rsquo;s relay parent determines its &ldquo;view&rdquo; of
+the world, including what messages are available to receive.</p>
+<p>With Low-Latency v2, we decouple scheduling from the relay parent, allowing
+older (finalized) relay parents for fork immunity. This means the relay
+parent—and thus any HRMP-based message receiving context—could be significantly
+behind the current relay chain head, making HRMP impractical.</p>
+<h3 id="low-latency-v2">Low-Latency v2</h3>
+<p>Low-Latency v2 introduces acknowledgement signatures where collators commit to
+blocks becoming canonical and decoupling of candidates from parachain blocks. We
+build on those features in this design.</p>
+<h3 id="merkle-mountain-ranges-mmr">Merkle Mountain Ranges (MMR)</h3>
+<p>An MMR is an append-only authenticated data structure that allows:</p>
+<ul>
+<li>Efficient appending of new elements</li>
+<li>Compact proofs of inclusion for any element</li>
+<li>Compact proofs connecting any two points in the accumulator&rsquo;s history</li>
+</ul>
+<p>This makes MMRs ideal for accumulating messages over time while allowing
+efficient proofs for late-arriving blocks.</p>
+<hr>
+<h2 id="solution-overview">Solution Overview</h2>
+<p>Instead of routing messages through relay chain state, we:</p>
+<ol>
+<li>
+<p><strong>Accumulate Messages</strong>: Each chain maintains an MMR of all outgoing messages
+to all destinations.</p>
+</li>
+<li>
+<p><strong>Emit Commitments</strong>: Sending chains emit a &ldquo;provides&rdquo; commitment (the MMR
+root); receiving chains emit &ldquo;requires&rdquo; commitments (per source chain).</p>
+</li>
+<li>
+<p><strong>Off-Chain Coordination</strong>: Collators exchange messages directly, without
+relay chain involvement.</p>
+</li>
+<li>
+<p><strong>Relay Chain Enforcement</strong>: At inclusion time, the relay chain verifies that
+all &ldquo;requires&rdquo; are satisfied by corresponding &ldquo;provides&rdquo;.</p>
+</li>
+<li>
+<p><strong>Late Block Proofs</strong>: When blocks arrive at different times, the late block
+includes a proof in its POV connecting the current provides to its older
+requires.</p>
+</li>
+</ol>
+<pre tabindex="0"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                     Current HRMP Flow (Slow)                         │
+├──────────────────────────────────────────────────────────────────────┤
+│  Chain A Block    →    Relay Chain     →    Relay Chain  →  Chain B  │
+│  (sends msg)           stores msg           State lookup    receives │
+│                        ~12-18s total                                 │
+└──────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                  Speculative Messaging (Fast)                       │
+├─────────────────────────────────────────────────────────────────────┤
+│  Chain A Block    →    Off-chain     →    Chain B Block             │
+│  (provides: MMR)       msg passing        (requires: A&#39;s MMR pos)   │
+│                        ~block time                                  │
+│                                                                     │
+│  Relay chain only verifies: provides(A) satisfies requires(B)       │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│              Late Block with Proof (Fallback)                       │
+├─────────────────────────────────────────────────────────────────────┤
+│  Chain A Block N   ...time passes...   Chain A Block N+K            │
+│  (provides: R_N)                       (provides: R_{N+K})          │
+│                                                                     │
+│  Chain B Block M (late, requires A at position P from block N)      │
+│  POV includes: proof that R_{N+K} extends R_N covering position P   │
+│  Commitment includes: matched requires with proof reference         │
+└─────────────────────────────────────────────────────────────────────┘
+</code></pre><hr>
+<h2 id="detailed-design">Detailed Design</h2>
+<h3 id="message-accumulators">Message Accumulators</h3>
+<p>Each parachain maintains a Merkle Mountain Range (MMR) accumulating all outgoing
+messages:</p>
+<p>We use a hierarchical structure: per-destination MMRs with a top-level Merkle
+commitment.</p>
+<pre tabindex="0"><code class="language-Top-Level" data-lang="Top-Level">MMR_B Root → [Msg1, Msg2, Msg3, ...] ├── Chain C: MMR_C Root → [Msg1, Msg2, ...]
+├── Chain D: MMR_D Root → [Msg1, ...] └── ... ```
+
+**Why hierarchical?**
+- Receiver only needs to prove their subtree, not traverse all messages
+- Proof size: O(log D + log m) where D = destinations, m = messages to receiver
+- Much better than O(k log n) for a flat structure where k =number of messages
+  to prove, n = total number of messages sent by the chain.
+- Late block proofs only grow with messages to that specific receiver
+
+### Candidate Commitments (Verified by Relay Chain)
+
+The commitments in candidate receipts are minimal—just the hashes needed for
+relay chain verification:
+
+```rust
+/// In candidate commitments - what the relay chain verifies
+struct ProvidesCommitment {
+    /// Top-level Merkle root over all per-destination MMR roots
+    root: Hash,
+}
+
+struct RequiresCommitment {
+    /// Source parachain we&#39;re receiving from
+    source: ParaId,
+    /// The root we built against (from source&#39;s provides)
+    expected_root: Hash,
+}
+</code></pre><p>The relay chain verifies matches the &ldquo;requires&rdquo; commitment with the
+corresponding &ldquo;provides&rdquo; commitment. A parachain block will only be made
+available/enacted when all its &ldquo;requires&rdquo; are provided.</p>
+<h3 id="parachain-runtime-state-internal">Parachain Runtime State (Internal)</h3>
+<p>Each parachain runtime maintains internal state for message tracking.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// Sender-side: tracking outgoing messages (in parachain runtime)
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">OutgoingMessageState</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Per-destination MMRs
+</span></span></span><span style="display:flex;"><span>    per_destination: <span style="color:#a6e22e">BTreeMap</span><span style="color:#f92672">&lt;</span>ParaId, <span style="color:#66d9ef">MMR</span><span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Current top-level root (this goes into ProvidesCommitment)
+</span></span></span><span style="display:flex;"><span>    current_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">/// Receiver-side: tracking incoming messages (in parachain runtime)  
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">IncomingMessageState</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Per-source tracking
+</span></span></span><span style="display:flex;"><span>    per_source: <span style="color:#a6e22e">BTreeMap</span><span style="color:#f92672">&lt;</span>ParaId, SourceState<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">SourceState</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Last processed position in source&#39;s per-destination MMR for us
+</span></span></span><span style="display:flex;"><span>    last_processed: <span style="color:#66d9ef">u64</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The source&#39;s root we last built against
+</span></span></span><span style="display:flex;"><span>    last_seen_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The source&#39;s per-destination MMR root for us
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// TODO: Why do we need this?
+</span></span></span><span style="display:flex;"><span>    last_seen_subtree_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="off-chain-communication-between-collators">Off-Chain Communication (Between Collators)</h3>
+<p>Messages are exchanged off-chain between collators. The relay chain never sees
+message contents—only commitments.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// Message exchanged off-chain between collators
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">OutgoingMessage</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Destination parachain
+</span></span></span><span style="display:flex;"><span>    destination: <span style="color:#a6e22e">ParaId</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Message payload (actual XCM or other data)
+</span></span></span><span style="display:flex;"><span>    payload: Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Position in sender&#39;s per-destination MMR
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Is this field needed? Or can this be constructed from the proof?
+</span></span></span><span style="display:flex;"><span>    position: <span style="color:#66d9ef">u64</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">/// What a sender shares with receivers (off-chain)
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">MessageBatch</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Source chain
+</span></span></span><span style="display:flex;"><span>    source: <span style="color:#a6e22e">ParaId</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Source block that produced these messages
+</span></span></span><span style="display:flex;"><span>    source_block: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The provides root for this block
+</span></span></span><span style="display:flex;"><span>    provides_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Our per-destination MMR root (for the receiver)
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// TODO: Why do we need this?
+</span></span></span><span style="display:flex;"><span>    subtree_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Proof that subtree_root is in provides_root
+</span></span></span><span style="display:flex;"><span>    subtree_inclusion_proof: <span style="color:#a6e22e">MerkleProof</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The actual messages
+</span></span></span><span style="display:flex;"><span>    messages: Vec<span style="color:#f92672">&lt;</span>OutgoingMessage<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Receivers verify:</p>
+<ol>
+<li><code>subtree_inclusion_proof</code> proves <code>subtree_root</code> is in <code>provides_root</code></li>
+<li>Messages hash to leaves in the subtree MMR</li>
+<li>Messages are sequential from last processed position</li>
+</ol>
+<h3 id="relay-chain-matching">Relay Chain Matching</h3>
+<p>When the relay chain processes candidates for inclusion, it performs commitment
+matching. The relay chain only sees the minimal commitments (hashes), not
+internal state.</p>
+<h4 id="live-communication-simultaneous-arrival">Live Communication (Simultaneous Arrival)</h4>
+<p>When both sending and receiving blocks arrive at the relay chain at
+approximately the same time:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">verify_live_matching</span>(
+</span></span><span style="display:flex;"><span>    sender_candidate: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">CandidateReceipt</span>,
+</span></span><span style="display:flex;"><span>    receiver_candidate: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">CandidateReceipt</span>,
+</span></span><span style="display:flex;"><span>) -&gt; Result<span style="color:#f92672">&lt;</span>(), Error<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> provides <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>sender_candidate.commitments.provides;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> requires <span style="color:#f92672">=</span> receiver_candidate.commitments.requires
+</span></span><span style="display:flex;"><span>        .iter()
+</span></span><span style="display:flex;"><span>        .find(<span style="color:#f92672">|</span>r<span style="color:#f92672">|</span> r.source <span style="color:#f92672">==</span> sender_candidate.para_id)
+</span></span><span style="display:flex;"><span>        .ok_or(Error::NoRequirement)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Direct match: receiver expects exactly what sender provides
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> requires.expected_root <span style="color:#f92672">==</span> provides.root {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Ok(());
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    Err(Error::MissingRequirement)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="matching-with-included-blocks">Matching with Included Blocks</h4>
+<p>For requirements against already-included blocks:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">verify_against_included</span>(
+</span></span><span style="display:flex;"><span>    receiver_candidate: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">CandidateReceipt</span>,
+</span></span><span style="display:flex;"><span>    included_provides: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">BTreeMap</span><span style="color:#f92672">&lt;</span>ParaId, Hash<span style="color:#f92672">&gt;</span>,  <span style="color:#75715e">// Just the roots
+</span></span></span><span style="display:flex;"><span>) -&gt; Result<span style="color:#f92672">&lt;</span>(), Error<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> requires <span style="color:#66d9ef">in</span> <span style="color:#f92672">&amp;</span>receiver_candidate.commitments.requires {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> provides_root <span style="color:#f92672">=</span> included_provides
+</span></span><span style="display:flex;"><span>            .get(<span style="color:#f92672">&amp;</span>requires.source)
+</span></span><span style="display:flex;"><span>            .ok_or(Error::MissingRequirement)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">&amp;</span>requires.expected_root <span style="color:#f92672">==</span> provides_root {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Exact match
+</span></span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Roots don&#39;t match - need late block proof in POV
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Err(Error::RequiresProof);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    Ok(())
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="late-block-proofs">Late Block Proofs</h3>
+<p>When a receiving block&rsquo;s requirements reference an older state than what&rsquo;s
+currently available, we need a proof mechanism. This is similar to the
+scheduling parent header chain in Low-Latency v2.</p>
+<h4 id="the-problem">The Problem</h4>
+<pre tabindex="0"><code>Timeline:
+  Block A_N: provides root R_N
+  Block A_{N+1}: provides root R_{N+1}
+  Block A_{N+2}: provides root R_{N+2}
+  
+  Block B_M: built expecting A_N&#39;s state (requires.expected_root = R_N)
+  
+  By the time B_M arrives at relay chain, A_{N+2} is already included.
+  B_M&#39;s requires (R_N) doesn&#39;t match current provides (R_{N+2}).
+</code></pre><h4 id="the-solution">The Solution</h4>
+<p>The late block includes a proof in its POV (outside the block itself)
+demonstrating that the messages it processed are still valid under the current
+provides root.</p>
+<p>With the hierarchical structure, B only needs to prove its subtree:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// Late block proof included in POV (not in commitments!)
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">LateBlockProof</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Source chain this proof is for
+</span></span></span><span style="display:flex;"><span>    source: <span style="color:#a6e22e">ParaId</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Prove our subtree was in the old (expected) root
+</span></span></span><span style="display:flex;"><span>    old_subtree_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    old_subtree_proof: <span style="color:#a6e22e">MerkleProof</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The current provides root we&#39;re updating to
+</span></span></span><span style="display:flex;"><span>    new_provides_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Prove our subtree is in the new (current) root
+</span></span></span><span style="display:flex;"><span>    new_subtree_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    new_subtree_proof: <span style="color:#a6e22e">MerkleProof</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// If our subtree&#39;s MMR grew, prove it extended correctly
+</span></span></span><span style="display:flex;"><span>    subtree_extension: Option<span style="color:#f92672">&lt;</span>MMRExtensionProof<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">/// MMR extension proof (only needed if new messages were added to our subtree)
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">MMRExtensionProof</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// MMR proof data (peaks and connecting nodes)
+</span></span></span><span style="display:flex;"><span>    proof: Vec<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="verification">Verification</h4>
+<p>The PVF verifies the late block proof and <strong>transforms</strong> the block&rsquo;s original
+<code>requires</code> commitment into an updated one that references the current <code>provides</code>
+root. This way, the relay chain only ever sees a commitment it can verify
+against currently-available state.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">process_late_block_requires</span>(
+</span></span><span style="display:flex;"><span>    block_requires: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">RequiresCommitment</span>,  <span style="color:#75715e">// From the block itself (references old root)
+</span></span></span><span style="display:flex;"><span>    proof: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">LateBlockProof</span>,               <span style="color:#75715e">// From POV
+</span></span></span><span style="display:flex;"><span>) -&gt; Result<span style="color:#f92672">&lt;</span>RequiresCommitment, Error<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 1. Verify old subtree was in the root the block expected
+</span></span></span><span style="display:flex;"><span>    verify_merkle_proof(
+</span></span><span style="display:flex;"><span>        block_requires.expected_root,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&amp;</span>proof.old_subtree_proof,
+</span></span><span style="display:flex;"><span>        (block_requires.source, proof.old_subtree_root),
+</span></span><span style="display:flex;"><span>    )<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 2. Verify new subtree is in the current root (which we&#39;ll output)
+</span></span></span><span style="display:flex;"><span>    verify_merkle_proof(
+</span></span><span style="display:flex;"><span>        proof.new_provides_root,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&amp;</span>proof.new_subtree_proof,
+</span></span><span style="display:flex;"><span>        (block_requires.source, proof.new_subtree_root),
+</span></span><span style="display:flex;"><span>    )<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 3. Verify subtrees are related (same or extended)
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> proof.old_subtree_root <span style="color:#f92672">!=</span> proof.new_subtree_root {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">let</span> Some(ext) <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>proof.subtree_extension {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Subtree grew - verify extension
+</span></span></span><span style="display:flex;"><span>            verify_mmr_extension(
+</span></span><span style="display:flex;"><span>                proof.old_subtree_root,
+</span></span><span style="display:flex;"><span>                proof.new_subtree_root,
+</span></span><span style="display:flex;"><span>                ext,
+</span></span><span style="display:flex;"><span>            )<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> Err(Error::SubtreeChangedWithoutProof);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 4. Return UPDATED commitment for the candidate
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// The relay chain will verify this against the current provides root
+</span></span></span><span style="display:flex;"><span>    Ok(RequiresCommitment {
+</span></span><span style="display:flex;"><span>        source: <span style="color:#a6e22e">block_requires</span>.source,
+</span></span><span style="display:flex;"><span>        expected_root: <span style="color:#a6e22e">proof</span>.new_provides_root,
+</span></span><span style="display:flex;"><span>    })
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Note: The PVF verifies the proof—the relay chain only sees the transformed
+commitment. Message ranges, MMR sizes, and proof details are all internal to the
+parachain. The proof just demonstrates that the receiver&rsquo;s view of their subtree
+is consistent with the current provides root.</p>
+<h3 id="proof-size-considerations">Proof Size Considerations</h3>
+<p>With the hierarchical structure and Low-Latency v2 allowing relay parents up to
+~14,400 blocks old (24 hours), we must consider proof sizes for worst-case
+scenarios.</p>
+<h4 id="late-block-proof-components">Late Block Proof Components</h4>
+<p>A late block proof consists of:</p>
+<ol>
+<li><strong>Top-level Merkle proofs</strong>: O(log D) where D = number of destinations</li>
+<li><strong>Subtree MMR extension proof</strong>: O(log m) where m = messages to this receiver</li>
+</ol>
+<h4 id="proof-size-analysis">Proof Size Analysis</h4>
+<p>For a sender with 100 destinations, receiver getting 1000 messages:</p>
+<ul>
+<li>Top-level proofs: ~2 × log₂(100) ≈ 14 hashes ≈ 450 bytes</li>
+<li>Subtree extension: ~log₂(1000) ≈ 10 hashes ≈ 320 bytes</li>
+<li><strong>Total: ~770 bytes</strong></li>
+</ul>
+<p>Worst case (1000 destinations, 24 hours of messages to one receiver):</p>
+<ul>
+<li>Top-level proofs: ~2 × log₂(1000) ≈ 20 hashes ≈ 640 bytes</li>
+<li>Subtree extension: ~30 hashes ≈ 960 bytes</li>
+<li><strong>Total: ~1.6 KB</strong></li>
+</ul>
+<p>This is much better than a flat structure where proof size depends on ALL
+messages, not just messages to the receiver.</p>
+<h4 id="practical-limits">Practical Limits</h4>
+<p>Proofs are expected to stay small and should therefore practically fit into any
+POV. To be sure, we should nevertheless set aside a few kB (e.g. 50) for not
+breaking the late submission opportunity due to the POV getting too large.</p>
+<p>The hierarchical structure naturally keeps proofs small because:</p>
+<ul>
+<li>Receiver only proves their subtree</li>
+<li>Subtree only contains messages to that specific receiver</li>
+<li>High volume to other chains doesn&rsquo;t affect proof size</li>
+</ul>
+<h3 id="acknowledgement-extensions">Acknowledgement Extensions</h3>
+<p>For low-latency chains using speculative messaging, the acknowledgement rules
+from Low-Latency v2 are extended:</p>
+<h4 id="extended-rule-for-message-dependencies">Extended Rule for Message Dependencies</h4>
+<blockquote>
+<p>A collator must not acknowledge a block if it depends on speculative messages
+from blocks that are not yet sufficiently confirmed.</p>
+</blockquote>
+<p>&ldquo;Sufficiently confirmed&rdquo; depends on the trust relationship:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Source Chain Type</th>
+          <th>Confirmation Required</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Same super-chain</td>
+          <td>Same super-block (co-authored)</td>
+      </tr>
+      <tr>
+          <td>Same trust domain (low-latency)</td>
+          <td>Acknowledged by source chain collators</td>
+      </tr>
+      <tr>
+          <td>Different trust domain</td>
+          <td>Included on relay chain</td>
+      </tr>
+  </tbody>
+</table>
+<h4 id="acknowledgement-timing">Acknowledgement Timing</h4>
+<pre tabindex="0"><code>Timeline for Block B receiving message from Block A (same trust domain):
+
+t=0:    Chain A collator produces Block A (sends message, provides P_A)
+t=1:    Chain B collator sees Block A + messages, produces Block B (requires P_A)
+t=1:    Chain A collator acknowledges Block A (in parallel with above)
+t=2:    Chain B collator sees A&#39;s acknowledgement, acknowledges Block B
+...
+t=N:    Both blocks included on relay chain, commitments verified
+</code></pre><p>For different trust domains, acknowledgement of Block B depends on relay chain
+inclusion of Block A instead of collator acknowledgement.</p>
+<h3 id="cycle-prevention">Cycle Prevention</h3>
+<p>When two chains want to exchange messages speculatively in the same block, we
+risk deadlock: each waits for the other&rsquo;s acknowledgement. For non-super chains
+(above scenario), we trivially break cycles, by sticking to the procedure
+above. In particular t=1: We only process the messages in block <code>A</code> once we
+have seen the entire block. By doing this both ways, block <code>A</code> can not depend
+on the current block <code>B</code>, because it did not exist when <code>A</code> was built. This
+holds even for multi-party communication.</p>
+<p>Conclusion: By not allowing intra-block communication, no cycles between blocks
+can exist and above acknowledgment procedure is sound. For Basti Blocks, we
+will end up with cycles between POVs, but those don&rsquo;t seem problematic, apart
+from the fact that those candidates can only become available atomically: All
+or nothing.</p>
+<h3 id="super-chains">Super Chains</h3>
+<p>Super chains are a set of parachains operated by the same collator set, enabling
+the tightest possible integration including intra-block messaging.</p>
+<h4 id="definition">Definition</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">SuperChainConfig</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The parachains that form this super chain
+</span></span></span><span style="display:flex;"><span>    member_chains: <span style="color:#a6e22e">BTreeSet</span><span style="color:#f92672">&lt;</span>ParaId<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Collator set (must be identical across all members)  
+</span></span></span><span style="display:flex;"><span>    collators: Vec<span style="color:#f92672">&lt;</span>CollatorId<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Slot duration (must be synchronized)
+</span></span></span><span style="display:flex;"><span>    slot_duration: <span style="color:#a6e22e">Duration</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="super-block-production">Super-Block Production</h4>
+<p>When a collator&rsquo;s slot arrives, they produce blocks for ALL member chains atomically:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">SuperBlock</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Individual chain blocks, keyed by ParaId
+</span></span></span><span style="display:flex;"><span>    blocks: <span style="color:#a6e22e">BTreeMap</span><span style="color:#f92672">&lt;</span>ParaId, Block<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Slot this super-block was produced in
+</span></span></span><span style="display:flex;"><span>    slot: <span style="color:#a6e22e">Slot</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The collator who produced this super-block
+</span></span></span><span style="display:flex;"><span>    author: <span style="color:#a6e22e">CollatorId</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span> SuperBlock {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">hash</span>(<span style="color:#f92672">&amp;</span>self) -&gt; <span style="color:#a6e22e">Hash</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Merkle root of constituent block hashes for efficient individual proofs
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> block_hashes: Vec<span style="color:#f92672">&lt;</span>(ParaId, Hash)<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> self.blocks
+</span></span><span style="display:flex;"><span>            .iter()
+</span></span><span style="display:flex;"><span>            .map(<span style="color:#f92672">|</span>(id, b)<span style="color:#f92672">|</span> (<span style="color:#f92672">*</span>id, b.hash()))
+</span></span><span style="display:flex;"><span>            .collect();
+</span></span><span style="display:flex;"><span>        merkle_root(<span style="color:#f92672">&amp;</span>block_hashes)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="intra-block-messaging">Intra-Block Messaging</h4>
+<p>Within a super-block, messages can flow in both directions between any member
+chains because:</p>
+<ol>
+<li>The same collator produces all blocks</li>
+<li>They have access to all chains&rsquo; state simultaneously</li>
+<li>They can resolve message dependencies during block production</li>
+<li>Cycles are fine and supported</li>
+</ol>
+<pre tabindex="0"><code>┌─────────────────────────────────────────────────────────────────┐
+│                     Super-Block N (Slot S)                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   Chain A Block    ←──── messages ────→    Chain B Block        │
+│        │                                        │               │
+│        │           ←──── messages ────→         │               │
+│        ↓                                        ↓               │
+│   Chain C Block    ←──── messages ────→    Chain D Block        │
+│                                                                 │
+│   All blocks co-authored, bidirectional messages in one cycle   │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre><h4 id="super-block-acknowledgements">Super-Block Acknowledgements</h4>
+<p>Instead of acknowledging individual blocks, collators acknowledge the entire
+super-block:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">SuperBlockAcknowledgement</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Merkle root of constituent block hashes
+</span></span></span><span style="display:flex;"><span>    super_block_hash: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Slot the super-block was produced in
+</span></span></span><span style="display:flex;"><span>    slot: <span style="color:#a6e22e">Slot</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Signature from the acknowledging collator
+</span></span></span><span style="display:flex;"><span>    signature: <span style="color:#a6e22e">Signature</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This binds all constituent blocks together—either all make it to the relay
+chain, or the acknowledging collators are slashable.</p>
+<h4 id="partial-failures">Partial Failures</h4>
+<p>If a collator cannot produce a block for one member chain (e.g., state
+unavailable):</p>
+<ol>
+<li>
+<p><strong>Independent chains</strong>: If the failing chain has no message dependencies with
+others in this super-block, other chains can proceed normally.</p>
+</li>
+<li>
+<p><strong>Dependent chains</strong>: Chains with message dependencies on the failing chain
+must also skip this super-block.</p>
+</li>
+<li>
+<p><strong>Next collator takes over</strong>: The next collator in the slot rotation handles
+the skipped chains.</p>
+</li>
+</ol>
+<hr>
+<h2 id="trust-domains">Trust Domains</h2>
+<p>Not all chains trust each other equally. We organize chains into trust domains:</p>
+<pre tabindex="0"><code>┌─────────────────────────────────────────────────────────────────┐
+│                         Trust Domain A                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
+│  │  Chain 1    │←→│  Chain 2    │←→│  Chain 3    │              │
+│  │  (super)    │  │  (super)    │  │             │              │
+│  └─────────────┘  └─────────────┘  └─────────────┘              │
+│         ↑               ↑               ↑                       │
+│         └───────────────┴───────────────┘                       │
+│              Fast speculative messaging                         │
+│              (acknowledgement-based)                            │
+└─────────────────────────────────────────────────────────────────┘
+          │ 
+          │ Inclusion-based (still faster than HRMP,
+          │ still off-chain, just waits for provides inclusion)
+          ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                         Trust Domain B                          │
+│  ┌─────────────┐  ┌─────────────┐                               │
+│  │  Chain 4    │←→│  Chain 5    │                               │
+│  └─────────────┘  └─────────────┘                               │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre><h4 id="within-a-trust-domain">Within a Trust Domain</h4>
+<ul>
+<li>Speculative messaging based on acknowledgements</li>
+<li>Low latency (parachain block times)</li>
+<li>Chains trust each other&rsquo;s collators to acknowledge honestly</li>
+</ul>
+<h4 id="across-trust-domains">Across Trust Domains</h4>
+<ul>
+<li>Inclusion-based messaging (wait for provides to be included)</li>
+<li>Higher latency but no trust assumptions beyond relay chain</li>
+<li>Still faster than HRMP (off-chain message passing, on-chain commitment
+verification only)</li>
+</ul>
+<h4 id="establishing-trust">Establishing Trust</h4>
+<p>Trust domains are configured at the parachain runtime level:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">// In parachain runtime configuration
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">parameter_types!</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> TrustedPeers: Vec<span style="color:#f92672">&lt;</span>ParaId<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">vec!</span>[
+</span></span><span style="display:flex;"><span>        ParaId(<span style="color:#ae81ff">1001</span>),  <span style="color:#75715e">// Trust chain 1001 for speculative messaging  
+</span></span></span><span style="display:flex;"><span>        ParaId(<span style="color:#ae81ff">1002</span>),  <span style="color:#75715e">// Trust chain 1002
+</span></span></span><span style="display:flex;"><span>    ];
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="censorship-considerations">Censorship Considerations</h2>
+<p>Speculative messaging introduces new censorship dynamics that must be
+understood.</p>
+<h3 id="cascading-dependencies">Cascading Dependencies</h3>
+<p>If Chain A&rsquo;s backing group censors Chain A&rsquo;s block, and Chain B has a <code>requires</code>
+dependency on that block:</p>
+<ul>
+<li>Chain B&rsquo;s block cannot be included until Chain A&rsquo;s block is included</li>
+<li>If Chain A is delayed long enough, Chain B&rsquo;s availability will time out and B
+must be resubmitted</li>
+<li>When both are resubmitted (likely around the same time), they&rsquo;ll typically
+arrive together—no late block proof needed</li>
+</ul>
+<h3 id="mitigation-strategies">Mitigation Strategies</h3>
+<h4 id="1-domain-size-limits">1. Domain Size Limits</h4>
+<p>Limit trust domains to a reasonable size (e.g., 5-10 chains). This bounds the
+&ldquo;blast radius&rdquo; of cascading delays.</p>
+<h4 id="2-resubmission">2. Resubmission</h4>
+<p>If Chain A is censored long enough that Chain B&rsquo;s availability times out, Chain
+B simply resubmits. Since both chains are likely resubmitting around the same
+time, they&rsquo;ll typically be included together without needing late block proofs,
+although they are available if necessary, adding robustness.</p>
+<h4 id="3-on-demand-parachains">3. On-Demand Parachains</h4>
+<p>If a chain detects persistent censorship, it can use on-demand parachain slots
+(different backing group) to get a block included.</p>
+<h4 id="4-cross-domain-independence">4. Cross-Domain Independence</h4>
+<p>Organize chains such that critical paths don&rsquo;t depend on speculative messaging
+across many chains. Keep the speculative &ldquo;hot path&rdquo; short; use inclusion-based
+for less time-sensitive communication.</p>
+<hr>
+<h2 id="comparison-with-alternatives">Comparison with Alternatives</h2>
+<h3 id="vs-current-hrmp">vs. Current HRMP</h3>
+<table>
+  <thead>
+      <tr>
+          <th>Aspect</th>
+          <th>HRMP</th>
+          <th>Speculative Messaging</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Latency</td>
+          <td>12-18+ seconds</td>
+          <td>Parachain block time (speculative) or 2 relay blocks (inclusion-based)</td>
+      </tr>
+      <tr>
+          <td>Scalability</td>
+          <td>Limited (relay chain state)</td>
+          <td>High (off-chain, only commitments on-chain)</td>
+      </tr>
+      <tr>
+          <td>Trust</td>
+          <td>Relay chain only</td>
+          <td>Relay chain + optional collator acknowledgements</td>
+      </tr>
+      <tr>
+          <td>Message data</td>
+          <td>Flows through relay chain</td>
+          <td>Never touches relay chain</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="vs-parallel-processing-runtimes-solana-style">vs. Parallel Processing Runtimes (Solana-style)</h3>
+<table>
+  <thead>
+      <tr>
+          <th>Aspect</th>
+          <th>Parallel Runtime</th>
+          <th>Super Chains</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Scaling</td>
+          <td>Vertical (all nodes process everything)</td>
+          <td>Horizontal (load distributed)</td>
+      </tr>
+      <tr>
+          <td>State</td>
+          <td>All nodes hold all state</td>
+          <td>Sharded across chains</td>
+      </tr>
+      <tr>
+          <td>Development</td>
+          <td>Implicit parallelism</td>
+          <td>Explicit sharding</td>
+      </tr>
+      <tr>
+          <td>Hardware</td>
+          <td>High requirements for all nodes</td>
+          <td>Lower requirements, specialized by chain</td>
+      </tr>
+  </tbody>
+</table>
+<p>Super chains provide similar developer experience (tight integration, fast
+messaging) while maintaining horizontal scaling.</p>
+<h3 id="vs-ethereum-l2-preconfirmations">vs. Ethereum L2 Preconfirmations</h3>
+<table>
+  <thead>
+      <tr>
+          <th>Aspect</th>
+          <th>Preconfirmations</th>
+          <th>Speculative Messaging</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Confirmation source</td>
+          <td>L1 validators</td>
+          <td>Parachain collators</td>
+      </tr>
+      <tr>
+          <td>Complexity</td>
+          <td>Very high (L1 understands L2 txs)</td>
+          <td>Moderate (chain-agnostic commitments)</td>
+      </tr>
+      <tr>
+          <td>Decentralization</td>
+          <td>Often centralized sequencers</td>
+          <td>Decentralized collator sets</td>
+      </tr>
+      <tr>
+          <td>Enforcement</td>
+          <td>Limited (many failure modes)</td>
+          <td>Higher (clear rules)</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="implementation-considerations">Implementation Considerations</h2>
+<h3 id="relay-chain-runtime-changes">Relay Chain Runtime Changes</h3>
+<ol>
+<li><strong>New commitment types</strong>: Add <code>provides</code> and <code>requires</code> to candidate commitments</li>
+<li><strong>Commitment matching</strong>: At inclusion time, verify that each <code>requires.expected_root</code> matches a <code>provides.root</code> from a currently backed or included candidate</li>
+</ol>
+<p>Note: The relay chain has no MMR verification logic and does not track history. All proof verification happens in the PVF, which transforms commitments before the relay chain sees them. The relay chain only performs simple hash matching on current candidates.</p>
+<h3 id="pvf-changes">PVF Changes</h3>
+<p>Similar to how Low-Latency v2 introduces a separate PVF entry point for
+scheduling information (verifying header chains and signed core selection),
+speculative messaging requires PVF logic for processing late block proofs and
+transforming commitments.</p>
+<p>The PVF receives additional inputs via the POV (outside the block itself):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">MessagingProofInputs</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Late block proofs for each source chain where the block&#39;s requires
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// references an older root than currently available
+</span></span></span><span style="display:flex;"><span>    late_block_proofs: Vec<span style="color:#f92672">&lt;</span>LateBlockProof<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The PVF then:</p>
+<ol>
+<li>
+<p><strong>Executes the block</strong>: The block produces <code>requires</code> commitments based on
+the messages it processed (referencing the <code>provides</code> roots it was built
+against)</p>
+</li>
+<li>
+<p><strong>Processes late block proofs</strong>: For each <code>requires</code> commitment where a
+<code>LateBlockProof</code> is provided:</p>
+<ul>
+<li>Verifies the proof connects the old root (block&rsquo;s <code>requires.expected_root</code>)
+to the new root (<code>proof.new_provides_root</code>)</li>
+<li>Transforms the commitment to reference the new root</li>
+</ul>
+</li>
+<li>
+<p><strong>Outputs transformed commitments</strong>: The candidate commitments contain the
+(possibly transformed) <code>requires</code> that the relay chain can verify against
+currently available <code>provides</code></p>
+</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">process_messaging_commitments</span>(
+</span></span><span style="display:flex;"><span>    block_requires: Vec<span style="color:#f92672">&lt;</span>RequiresCommitment<span style="color:#f92672">&gt;</span>,  <span style="color:#75715e">// From block execution
+</span></span></span><span style="display:flex;"><span>    proof_inputs: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">MessagingProofInputs</span>,      <span style="color:#75715e">// From POV
+</span></span></span><span style="display:flex;"><span>) -&gt; Result<span style="color:#f92672">&lt;</span>Vec<span style="color:#f92672">&lt;</span>RequiresCommitment<span style="color:#f92672">&gt;</span>, Error<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    block_requires.into_iter().map(<span style="color:#f92672">|</span>req<span style="color:#f92672">|</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">let</span> Some(proof) <span style="color:#f92672">=</span> find_proof_for_source(<span style="color:#f92672">&amp;</span>proof_inputs, req.source) {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Transform: verify proof and update to current root
+</span></span></span><span style="display:flex;"><span>            process_late_block_requires(<span style="color:#f92672">&amp;</span>req, proof)
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// No transformation needed - block was built against current root
+</span></span></span><span style="display:flex;"><span>            Ok(req)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }).collect()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This follows the same pattern as the scheduling parent header chain in
+Low-Latency v2: the PVF verifies proofs and transforms inputs so the relay chain
+only sees commitments it can verify against current state.</p>
+<h3 id="parachain-runtime-changes">Parachain Runtime Changes</h3>
+<ol>
+<li><strong>MMR maintenance</strong>: Append messages to outgoing MMR, emit provides</li>
+<li><strong>Requires generation</strong>: Track incoming message positions, emit requires</li>
+<li><strong>Trust domain configuration</strong>: Define trusted peers for speculative messaging</li>
+<li><strong>Message processing</strong>: Consume messages based on requires ranges</li>
+</ol>
+<h3 id="collator-changes">Collator Changes</h3>
+<ol>
+<li><strong>Cross-chain message fetching</strong>: Obtain messages from peer chains</li>
+<li><strong>MMR proof generation</strong>: Create extension proofs for late blocks</li>
+<li><strong>Extended acknowledgement rules</strong>: Verify message dependencies before acknowledging</li>
+<li><strong>Super-block production</strong> (if applicable): Coordinate multi-chain block production</li>
+</ol>
+<h3 id="networking">Networking</h3>
+<ol>
+<li><strong>Message propagation</strong>: Efficient cross-chain message dissemination</li>
+<li><strong>Acknowledgement propagation</strong>: Quick distribution of acknowledgement signatures</li>
+<li><strong>MMR state sharing</strong>: Allow peers to request MMR proofs</li>
+</ol>
+<hr>
+<h2 id="security-analysis">Security Analysis</h2>
+<h3 id="threat-fake-provides">Threat: Fake Provides</h3>
+<p><strong>Attack</strong>: Malicious collator claims provides root that doesn&rsquo;t match actual
+messages.</p>
+<p><strong>Mitigation</strong>: Receiving chains verify actual message content against the
+requires commitment. The MMR root commits to specific message hashes. Any
+mismatch is detectable.</p>
+<h3 id="threat-invalid-extension-proof">Threat: Invalid Extension Proof</h3>
+<p><strong>Attack</strong>: Late block includes a fabricated extension proof.</p>
+<p><strong>Mitigation</strong>: Extension proofs are cryptographically verified by the PVF.
+Invalid proofs cause candidate validation to fail.</p>
+<h3 id="threat-message-replayskip">Threat: Message Replay/Skip</h3>
+<p><strong>Attack</strong>: Receiving chain processes messages out of order or skips messages.</p>
+<p><strong>Mitigation</strong>: The parachain runtime tracks which messages have been processed
+and enforces consecutive processing. This is internal to the parachain—the relay
+chain only sees the resulting <code>requires</code> commitment.</p>
+<h3 id="threat-acknowledgement-without-verification">Threat: Acknowledgement Without Verification</h3>
+<p><strong>Attack</strong>: Collator acknowledges a block without verifying message
+availability.</p>
+<p><strong>Mitigation</strong>: If the block later fails inclusion due to unmet requires, the
+acknowledging collator violated Low-Latency v2 rules and is slashable.</p>
+<h3 id="threat-super-chain-collusion">Threat: Super-Chain Collusion</h3>
+<p><strong>Attack</strong>: All collators in a super-chain collude to equivocate across chains.</p>
+<p><strong>Mitigation</strong>: Same as Low-Latency v2—requires at least one honest collator to
+submit proofs. For high-value super-chains, ensure diverse collator set.</p>
+<hr>
+<h2 id="conclusion">Conclusion</h2>
+<p>Speculative Messaging replaces HRMP with a more scalable, lower-latency
+alternative that:</p>
+<ul>
+<li><strong>Eliminates relay chain message storage</strong>: Messages flow off-chain; only
+commitments are verified on-chain</li>
+<li><strong>Enables parachain-speed messaging</strong>: Within trust domains, messaging latency
+drops to parachain block times</li>
+<li><strong>Supports super chains</strong>: Tightly coupled chains can exchange messages within
+the same block production cycle</li>
+<li><strong>Gracefully handles late blocks</strong>: MMR extension proofs allow blocks with
+older requirements to still be included</li>
+<li><strong>Maintains horizontal scaling</strong>: Even for super chains: Full nodes can still
+be per chain and don&rsquo;t need to keep the entire state or process all sub-chain
+blocks.</li>
+</ul>
+<p>Combined with Low-Latency Parachains v2, this positions Polkadot to offer user
+experiences competitive with monolithic chains while preserving its core value
+propositions of decentralization, security, and horizontal scalability.</p>
+<hr>
+<h2 id="appendix-a-separation-of-concerns">Appendix A: Separation of Concerns</h2>
+<p>Different layers handle different data:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Layer</th>
+          <th>Data</th>
+          <th>Purpose</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Candidate Commitments</strong></td>
+          <td><code>provides.root</code>, <code>requires.{source, expected_root}</code></td>
+          <td>Relay chain verification</td>
+      </tr>
+      <tr>
+          <td><strong>Late Block Proofs (POV)</strong></td>
+          <td>Merkle proofs, MMR extension proofs</td>
+          <td>Prove old requires valid under new provides</td>
+      </tr>
+      <tr>
+          <td><strong>Parachain Runtime</strong></td>
+          <td>MMR structures, message positions, last processed indices</td>
+          <td>Internal bookkeeping</td>
+      </tr>
+      <tr>
+          <td><strong>Off-Chain (Collators)</strong></td>
+          <td>Actual messages, inclusion proofs</td>
+          <td>Message delivery</td>
+      </tr>
+  </tbody>
+</table>
+<p>The relay chain only sees hashes. It verifies that provides/requires match (or
+that a valid proof exists). It never sees message contents, MMR sizes, or
+processing positions.</p>
+<h2 id="appendix-b-mmr-extension-proof-details">Appendix B: MMR Extension Proof Details</h2>
+<p>An MMR extension proof demonstrates that a newer MMR root extends an older one:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// MMR extension proof structure
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">MMRExtensionProof</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Peaks of the old MMR
+</span></span></span><span style="display:flex;"><span>    old_peaks: Vec<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Peaks of the new MMR  
+</span></span></span><span style="display:flex;"><span>    new_peaks: Vec<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Nodes connecting old peaks to new peaks
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// (proves old peaks are prefix of new structure)
+</span></span></span><span style="display:flex;"><span>    connecting_nodes: Vec<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span> MMRExtensionProof {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">verify</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&amp;</span>self,
+</span></span><span style="display:flex;"><span>        old_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>        new_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    ) -&gt; <span style="color:#66d9ef">bool</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 1. Verify old_peaks produce old_root
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> computed_old_root <span style="color:#f92672">=</span> bag_peaks(<span style="color:#f92672">&amp;</span>self.old_peaks);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> computed_old_root <span style="color:#f92672">!=</span> old_root {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 2. Verify new_peaks produce new_root
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> computed_new_root <span style="color:#f92672">=</span> bag_peaks(<span style="color:#f92672">&amp;</span>self.new_peaks);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> computed_new_root <span style="color:#f92672">!=</span> new_root {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 3. Verify old structure is prefix of new structure
+</span></span></span><span style="display:flex;"><span>        <span style="color:#75715e">// using connecting_nodes
+</span></span></span><span style="display:flex;"><span>        verify_prefix_relationship(
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&amp;</span>self.old_peaks,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&amp;</span>self.new_peaks,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&amp;</span>self.connecting_nodes,
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="appendix-c-acknowledgement-rule-summary">Appendix C: Acknowledgement Rule Summary</h2>
+<table>
+  <thead>
+      <tr>
+          <th>Rule</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Base rules</td>
+          <td>All rules from Low-Latency v2</td>
+      </tr>
+      <tr>
+          <td>Message verification</td>
+          <td>Don&rsquo;t acknowledge if dependent messages aren&rsquo;t confirmed</td>
+      </tr>
+      <tr>
+          <td>Same super-chain</td>
+          <td>Messages from co-authored blocks are immediately trusted</td>
+      </tr>
+      <tr>
+          <td>Same trust domain</td>
+          <td>Wait for source block acknowledgement</td>
+      </tr>
+      <tr>
+          <td>Cross-domain</td>
+          <td>Wait for source block inclusion on relay chain</td>
+      </tr>
+      <tr>
+          <td>Cycle prevention</td>
+          <td>No intra block communication apart from super chains (wait for next block, not inclusion)</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="appendix-d-commitment-schema-summary">Appendix D: Commitment Schema Summary</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">// === CANDIDATE COMMITMENTS (minimal, verified by relay chain) ===
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">ProvidesCommitment</span> {
+</span></span><span style="display:flex;"><span>    root: <span style="color:#a6e22e">Hash</span>,  <span style="color:#75715e">// Top-level Merkle root over per-destination MMR roots
+</span></span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">RequiresCommitment</span> {
+</span></span><span style="display:flex;"><span>    source: <span style="color:#a6e22e">ParaId</span>,
+</span></span><span style="display:flex;"><span>    expected_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// === LATE BLOCK PROOF (in POV, not commitments) ===
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">LateBlockProof</span> {
+</span></span><span style="display:flex;"><span>    source: <span style="color:#a6e22e">ParaId</span>,
+</span></span><span style="display:flex;"><span>    old_subtree_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    old_subtree_proof: <span style="color:#a6e22e">MerkleProof</span>,
+</span></span><span style="display:flex;"><span>    new_subtree_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    new_subtree_proof: <span style="color:#a6e22e">MerkleProof</span>,
+</span></span><span style="display:flex;"><span>    subtree_extension: Option<span style="color:#f92672">&lt;</span>MMRExtensionProof<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// === PARACHAIN RUNTIME STATE (internal, not on relay chain) ===
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Sender tracks: per_destination MMRs, current top-level root
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// Receiver tracks: last_processed position per source, last seen roots
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// === OFF-CHAIN (between collators) ===
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// MessageBatch: source, provides_root, subtree_root, subtree_proof, messages
+</span></span></span></code></pre></div><h2 id="appendix-e-comparison-of-messaging-modes">Appendix E: Comparison of Messaging Modes</h2>
+<table>
+  <thead>
+      <tr>
+          <th>Mode</th>
+          <th>Latency</th>
+          <th>Trust</th>
+          <th>Use Case</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Super-chain (intra-block)</td>
+          <td>&lt; 1 block</td>
+          <td>Same collator set</td>
+          <td>Tightly coupled shards</td>
+      </tr>
+      <tr>
+          <td>Speculative (acknowledged)</td>
+          <td>~1-2 blocks</td>
+          <td>Trust domain collators</td>
+          <td>Fast cross-chain DeFi</td>
+      </tr>
+      <tr>
+          <td>Inclusion-based</td>
+          <td>~2-3 relay blocks</td>
+          <td>Relay chain only</td>
+          <td>Cross-domain, untrusted</td>
+      </tr>
+      <tr>
+          <td>HRMP (legacy)</td>
+          <td>~3+ relay blocks</td>
+          <td>Relay chain only</td>
+          <td>Deprecated</td>
+      </tr>
+  </tbody>
+</table>
+
+    </article>
+
+    
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2026-05-04-speculative-messaging-design/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Speculative%20Messaging%20%e2%80%94%20Original%20Design%20Document%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2026-05-04-speculative-messaging-design/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/post/2026-05-05-speculative-messaging-impl-design/" data-toggle="tooltip" data-placement="top" title="Speculative Messaging — POC Implementation Design">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/post/2026-05-03-polkadot-speculative-messaging/" data-toggle="tooltip" data-placement="top" title="Polkadot Speculative Messaging — Design Deep Dive">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

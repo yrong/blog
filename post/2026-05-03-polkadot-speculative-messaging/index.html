@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Polkadot Speculative Messaging — Design Deep Dive - yrong blog</title>
+  <meta property="og:title" content="Polkadot Speculative Messaging — Design Deep Dive - yrong blog" />
+  <meta name="twitter:title" content="Polkadot Speculative Messaging — Design Deep Dive - yrong blog" />
+  <meta name="description" content="Speculative Messaging is the companion design to Low-Latency Parachains v2. Its goal: replace HRMP (Horizontal Relay Message Passing) with a faster, more scalable cross-chain communication mechanism built on MMR accumulators, on-chain commitments, and off-chain message delivery.">
+  <meta property="og:description" content="Speculative Messaging is the companion design to Low-Latency Parachains v2. Its goal: replace HRMP (Horizontal Relay Message Passing) with a faster, more scalable cross-chain communication mechanism built on MMR accumulators, on-chain commitments, and off-chain message delivery.">
+  <meta name="twitter:description" content="Speculative Messaging is the companion design to Low-Latency Parachains v2. Its goal: replace HRMP (Horizontal Relay Message Passing) with a faster, more scalable cross-chain communication mechanism …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2026-05-03-polkadot-speculative-messaging/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Polkadot Speculative Messaging — Design Deep Dive</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>May 3, 2026</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/polkadot/">
+            <i class="fa-solid fa-tag"></i>
+            polkadot
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/xcm/">
+            <i class="fa-solid fa-tag"></i>
+            xcm
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/cross-chain/">
+            <i class="fa-solid fa-tag"></i>
+            cross-chain
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/merkle-tree/">
+            <i class="fa-solid fa-tag"></i>
+            merkle-tree
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#why-replace-hrmp">Why Replace HRMP?</a></li>
+    <li><a href="#core-idea">Core Idea</a>
+      <ul>
+        <li><a href="#step-1-message-accumulators-mmr">Step 1: Message Accumulators (MMR)</a></li>
+        <li><a href="#step-2-on-chain-commitments">Step 2: On-Chain Commitments</a></li>
+        <li><a href="#step-3-off-chain-message-delivery">Step 3: Off-Chain Message Delivery</a></li>
+        <li><a href="#step-4-relay-chain-enforcement">Step 4: Relay Chain Enforcement</a></li>
+      </ul>
+    </li>
+    <li><a href="#the-core-flow-execute-first-verify-later">The Core Flow: Execute First, Verify Later</a></li>
+    <li><a href="#hrmp-vs-speculative-messaging">HRMP vs Speculative Messaging</a></li>
+    <li><a href="#relay-chain-verification-code-level-walkthrough">Relay Chain Verification (Code-Level Walkthrough)</a>
+      <ul>
+        <li><a href="#when-enact_candidate">When: enact_candidate</a></li>
+        <li><a href="#storage-minimal">Storage: Minimal</a></li>
+        <li><a href="#two-phase-matching">Two-Phase Matching</a></li>
+        <li><a href="#mismatch-only-the-failing-candidate-is-dropped">Mismatch: Only the Failing Candidate Is Dropped</a></li>
+      </ul>
+    </li>
+    <li><a href="#late-block-proofs">Late Block Proofs</a></li>
+    <li><a href="#super-chains">Super Chains</a></li>
+    <li><a href="#trust-domains">Trust Domains</a></li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</nav>
+</aside>
+      <p>Speculative Messaging is the companion design to Low-Latency Parachains v2. Its goal: replace HRMP (Horizontal Relay Message Passing) with a faster, more scalable cross-chain communication mechanism built on MMR accumulators, on-chain commitments, and off-chain message delivery.</p>
+<h2 id="why-replace-hrmp">Why Replace HRMP?</h2>
+<p>Three pain points with current HRMP:</p>
+<ol>
+<li><strong>High latency</strong>: messages must flow through relay chain storage and routing, taking 12–18 seconds under ideal conditions</li>
+<li><strong>Poor scalability</strong>: all messages pass through relay chain state; every validator processes message routing</li>
+<li><strong>Incompatible with Low-Latency v2</strong>: LLv2 recommends building on older finalized relay parents (for fork immunity). Using HRMP with old relay parents would worsen latency dramatically</li>
+</ol>
+<h2 id="core-idea">Core Idea</h2>
+<p><strong>Messages don&rsquo;t live on the relay chain. They flow off-chain. The relay chain does exactly one thing: verify that hash commitments match.</strong></p>
+<h3 id="step-1-message-accumulators-mmr">Step 1: Message Accumulators (MMR)</h3>
+<p>Each chain maintains a hierarchical Merkle Mountain Range accumulating all outgoing messages:</p>
+<pre tabindex="0"><code>Top-Level Root (Merkle tree over per-destination MMR roots)
+├── Chain B: MMR_B Root → [hash(msg1), hash(msg2), ...]
+├── Chain C: MMR_C Root → [hash(msg1), ...]
+└── Chain D: MMR_D Root → [hash(msg1), ...]
+</code></pre><p>The hierarchical structure means a receiver only proves their subtree — proof size is <code>O(log D + log m)</code> where D = destinations and m = messages to that receiver.</p>
+<h3 id="step-2-on-chain-commitments">Step 2: On-Chain Commitments</h3>
+<ul>
+<li>Sender emits a <strong>provides commitment</strong> in each block: the top-level MMR root hash</li>
+<li>Receiver emits a <strong>requires commitment</strong>: <code>{source: ChainId, expected_root: the provides root it was built against}</code></li>
+</ul>
+<h3 id="step-3-off-chain-message-delivery">Step 3: Off-Chain Message Delivery</h3>
+<p>Collators exchange messages directly over the existing libp2p network layer, via <code>MessageBatch</code>:</p>
+<pre tabindex="0"><code>MessageBatch {
+    source: Chain A,
+    provides_root: 0xabc...            ← top-level Merkle root
+    subtree_root: 0xdef...             ← Chain A→B subtree MMR root
+    subtree_inclusion_proof: [...]      ← proves subtree_root is in provides_root
+    messages: [msg1, msg2, msg3]
+}
+</code></pre><p>The receiving collator verifies in two layers:</p>
+<ol>
+<li><strong>Top-level proof</strong>: <code>subtree_root</code> is indeed within <code>provides_root</code> (standard Merkle proof, O(log D) hashes)</li>
+<li><strong>Subtree internal verification</strong>: extend the local subtree MMR (only stores hashes of messages sent to this chain) with new messages, compute the new root, and compare with <code>subtree_root</code></li>
+</ol>
+<p>Chain B only maintains a lightweight <code>SourceState</code> for Chain A — the <code>last_processed</code> position and a subtree MMR containing only Chain A→B messages. No full MMR tree needed.</p>
+<h3 id="step-4-relay-chain-enforcement">Step 4: Relay Chain Enforcement</h3>
+<p>At inclusion time, the relay chain performs two-phase commitment matching in <code>enact_candidate</code>.</p>
+<hr>
+<h2 id="the-core-flow-execute-first-verify-later">The Core Flow: Execute First, Verify Later</h2>
+<p>This is the &ldquo;speculative&rdquo; part — XCM messages execute during block building, not after relay chain verification:</p>
+<pre tabindex="0"><code>t=0: Chain A collator produces block → emits provides commitment → sends messages off-chain to Chain B
+t=1: Chain B collator receives messages → executes XCM during block building → emits requires commitment
+t=2+: Both blocks submitted to relay chain → relay chain does commitment matching
+</code></pre><p>The collator bears the speculative risk: if Chain A&rsquo;s block never makes it on-chain, or its provides root changes, Chain B&rsquo;s block cannot be included — it becomes an orphan whose state changes never happened. This is what makes Low-Latency v2&rsquo;s acknowledgement rules essential: the collator made an economic commitment when acknowledging the block, and gets slashed if the speculation fails.</p>
+<h2 id="hrmp-vs-speculative-messaging">HRMP vs Speculative Messaging</h2>
+<table>
+  <thead>
+      <tr>
+          <th></th>
+          <th>HRMP</th>
+          <th>Speculative Messaging</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>When messages execute</td>
+          <td>After relay chain confirms message exists</td>
+          <td>During block building</td>
+      </tr>
+      <tr>
+          <td>Latency</td>
+          <td>12–18s</td>
+          <td>Parachain block time</td>
+      </tr>
+      <tr>
+          <td>Who bears risk</td>
+          <td>User (must wait)</td>
+          <td>Collator (slashed on failure)</td>
+      </tr>
+      <tr>
+          <td>Relay chain&rsquo;s role</td>
+          <td>Store + route messages</td>
+          <td>Hash matching only</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="relay-chain-verification-code-level-walkthrough">Relay Chain Verification (Code-Level Walkthrough)</h2>
+<h3 id="when-enact_candidate">When: enact_candidate</h3>
+<p>In the current codebase, <code>inclusion/mod.rs</code> <code>enact_candidate</code> runs when a backed candidate is included in a relay chain block. The existing order:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">enact_candidate</span>(<span style="color:#f92672">..</span>.) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 1. Reward backing validators
+</span></span></span><span style="display:flex;"><span>    T::RewardValidators::reward_backing(<span style="color:#f92672">..</span>.);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 2. Handle code upgrades
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 3. Process upward messages (UMP)
+</span></span></span><span style="display:flex;"><span>    Self::receive_upward_messages(<span style="color:#f92672">..</span>.);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 4. HRMP: prune incoming
+</span></span></span><span style="display:flex;"><span>    hrmp::prune_hrmp(para_id, hrmp_watermark);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 5. HRMP: queue outgoing
+</span></span></span><span style="display:flex;"><span>    hrmp::queue_outbound_hrmp(para_id, horizontal_messages);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 6. Emit CandidateIncluded event
+</span></span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Speculative messaging adds a commitment-matching step alongside the existing HRMP processing.</p>
+<h3 id="storage-minimal">Storage: Minimal</h3>
+<p>The relay chain only needs one lightweight storage map:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// Latest provides root per parachain
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#[pallet::storage]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">type</span> <span style="color:#a6e22e">ProvidesRoots</span><span style="color:#f92672">&lt;</span>T: <span style="color:#a6e22e">Config</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> StorageMap<span style="color:#f92672">&lt;</span>_, Twox64Concat, ParaId, Hash<span style="color:#f92672">&gt;</span>;
+</span></span></code></pre></div><p>Compare this to HRMP&rsquo;s full message queues (<code>HrmpChannels</code>, <code>HrmpChannelDigests</code>, etc.) — orders of magnitude less state.</p>
+<h3 id="two-phase-matching">Two-Phase Matching</h3>
+<p>Candidates within a single relay chain block are processed in <code>ParaId</code> order. Chain B (ParaId=1000) might be processed before Chain A (ParaId=2000) even though B depends on A. The fix: <strong>Phase 0 pre-collects all provides</strong> before any processing begins.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span>(<span style="color:#66d9ef">crate</span>) <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">process_candidates</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">GV</span><span style="color:#f92672">&gt;</span>(<span style="color:#f92672">..</span>.) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ═══════ Phase 0: collect all provides in this block ═══════
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> provides_this_block: <span style="color:#a6e22e">BTreeMap</span><span style="color:#f92672">&lt;</span>ParaId, Hash<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> BTreeMap::new();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (para_id, backed_list) <span style="color:#66d9ef">in</span> candidates.iter() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (candidate, _) <span style="color:#66d9ef">in</span> backed_list {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">let</span> Some(provides) <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>candidate.commitments.provides {
+</span></span><span style="display:flex;"><span>                provides_this_block.insert(<span style="color:#f92672">*</span>para_id, provides.root);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ═══ Phase 1: verify requires per candidate, then enact ═══
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (para_id, backed_list) <span style="color:#66d9ef">in</span> candidates.iter() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (candidate, core_index) <span style="color:#66d9ef">in</span> backed_list {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// ──── Speculative messaging commitment matching ────
+</span></span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> req <span style="color:#66d9ef">in</span> <span style="color:#f92672">&amp;</span>candidate.commitments.requires {
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Path 1: provides from another candidate in THIS block
+</span></span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">let</span> ok1 <span style="color:#f92672">=</span> provides_this_block
+</span></span><span style="display:flex;"><span>                    .get(<span style="color:#f92672">&amp;</span>req.source)
+</span></span><span style="display:flex;"><span>                    .map_or(<span style="color:#66d9ef">false</span>, <span style="color:#f92672">|</span>r<span style="color:#f92672">|</span> r <span style="color:#f92672">==</span> <span style="color:#f92672">&amp;</span>req.expected_root);
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Path 2: provides from a PREVIOUS block (persisted state)
+</span></span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">let</span> ok2 <span style="color:#f92672">=</span> ProvidesRoots::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::get(<span style="color:#f92672">&amp;</span>req.source)
+</span></span><span style="display:flex;"><span>                    .map_or(<span style="color:#66d9ef">false</span>, <span style="color:#f92672">|</span>r<span style="color:#f92672">|</span> r <span style="color:#f92672">==</span> req.expected_root);
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">ensure!</span>(ok1 <span style="color:#f92672">||</span> ok2, <span style="color:#e6db74">&#34;requires not satisfied&#34;</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            enact_candidate(<span style="color:#f92672">..</span>.);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// After successful inclusion, persist provides for future blocks
+</span></span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">let</span> Some(provides) <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>candidate.commitments.provides {
+</span></span><span style="display:flex;"><span>                ProvidesRoots::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::insert(<span style="color:#f92672">*</span>para_id, provides.root);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The lookup logic:</p>
+<pre tabindex="0"><code>Chain B&#39;s requires (expected_root = 0xabc, source = ChainA)
+
+┌─────────────────────────────┐
+│ Path 1: provides_this_block │   ← in-memory map (Phase 0 pre-collected)
+│ { ChainA =&gt; 0xabc }         │     handles intra-block dependencies
+│ ✅ Match!                   │     regardless of processing order
+└─────────────────────────────┘
+         ↓ if Path 1 fails
+┌─────────────────────────────┐
+│ Path 2: ProvidesRoots       │   ← relay chain persisted state
+│ ChainA =&gt; 0xabc             │     written when ChainA was included
+│ ✅ Match!                   │     in a previous block
+└─────────────────────────────┘
+         ↓ if Path 2 also fails
+┌─────────────────────────────┐
+│ ❌ Candidate invalid        │
+│ requires unsatisfied → dropped │
+└─────────────────────────────┘
+</code></pre><h3 id="mismatch-only-the-failing-candidate-is-dropped">Mismatch: Only the Failing Candidate Is Dropped</h3>
+<pre tabindex="0"><code>Relay chain block N processes two candidates:
+
+Candidate A (provides = 0xabc)    Candidate B (requires ChainA = 0xdef)
+  ↓                                  ↓
+  No requires                     requires lookup fails
+  ✅ Included                     ❌ Dropped
+
+Result: Chain A lands on-chain. Chain B&#39;s block becomes an orphan.
+</code></pre><p>Chain A is unaffected — its provides commitment is self-contained and valid regardless of whether anyone references it.</p>
+<hr>
+<h2 id="late-block-proofs">Late Block Proofs</h2>
+<p>When a receiving block&rsquo;s required root is older than the current provides root (the sender has advanced several blocks), the POV carries an MMR extension proof demonstrating the old requires is still valid under the new provides. Proof size: typically ~770 bytes, worst case ~1.6 KB.</p>
+<hr>
+<h2 id="super-chains">Super Chains</h2>
+<p>When one collator set operates multiple chains, they can form a super chain — producing all member-chain blocks atomically in one slot. Intra-block bidirectional messaging becomes possible because the collator has simultaneous access to all chains&rsquo; state.</p>
+<hr>
+<h2 id="trust-domains">Trust Domains</h2>
+<table>
+  <thead>
+      <tr>
+          <th>Message source</th>
+          <th>Confirmed by</th>
+          <th>Latency</th>
+          <th>Use case</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Same super chain</td>
+          <td>Co-authored block</td>
+          <td>&lt;1 block</td>
+          <td>Tightly coupled shards</td>
+      </tr>
+      <tr>
+          <td>Same trust domain</td>
+          <td>Source chain collator ACK</td>
+          <td>~1–2 blocks</td>
+          <td>Fast cross-chain DeFi</td>
+      </tr>
+      <tr>
+          <td>Cross-domain</td>
+          <td>Source chain relay inclusion</td>
+          <td>~2–3 relay blocks</td>
+          <td>Untrusted / cross-domain</td>
+      </tr>
+      <tr>
+          <td>HRMP (legacy)</td>
+          <td>Relay chain only</td>
+          <td>~3+ relay blocks</td>
+          <td>Deprecated</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="summary">Summary</h2>
+<p>Speculative Messaging, combined with Low-Latency v2, reduces cross-chain messaging latency from ~18 seconds to parachain block times (~100ms–6s), while preserving decentralization and horizontal scaling. The core insight: demote the relay chain from a message store-and-forward layer to a lightweight hash-commitment verifier.</p>
+    </article>
+
+    
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2026-05-03-polkadot-speculative-messaging/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Polkadot%20Speculative%20Messaging%20%e2%80%94%20Design%20Deep%20Dive%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2026-05-03-polkadot-speculative-messaging/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/post/2026-05-04-speculative-messaging-design/" data-toggle="tooltip" data-placement="top" title="Speculative Messaging — Original Design Document">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" data-toggle="tooltip" data-placement="top" title="Polkadot XCMP MMD — Minimal POC">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

@@ -2,25 +2,49 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://yrong.github.io/blog/tags/blockchain/</loc>
-    <lastmod>2026-04-09T00:00:00+00:00</lastmod>
+    <loc>https://yrong.github.io/blog/tags/design/</loc>
+    <lastmod>2026-05-05T16:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/tags/implementation/</loc>
+    <lastmod>2026-05-05T16:00:00+00:00</lastmod>
   </url><url>
     <loc>https://yrong.github.io/blog/tags/polkadot/</loc>
+    <lastmod>2026-05-05T16:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/post/</loc>
+    <lastmod>2026-05-05T16:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/post/2026-05-05-speculative-messaging-impl-design/</loc>
+    <lastmod>2026-05-05T16:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/tags/</loc>
+    <lastmod>2026-05-05T16:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/tags/xcm/</loc>
+    <lastmod>2026-05-05T16:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/</loc>
+    <lastmod>2026-05-05T16:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/tags/cross-chain/</loc>
+    <lastmod>2026-05-04T15:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/tags/merkle-tree/</loc>
+    <lastmod>2026-05-04T15:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/post/2026-05-04-speculative-messaging-design/</loc>
+    <lastmod>2026-05-04T15:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/post/2026-05-03-polkadot-speculative-messaging/</loc>
+    <lastmod>2026-05-03T14:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/tags/blockchain/</loc>
     <lastmod>2026-04-09T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://yrong.github.io/blog/post/2026-04-09-xcmp-mmd-minimal-poc/</loc>
     <lastmod>2026-04-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://yrong.github.io/blog/post/</loc>
-    <lastmod>2026-04-09T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://yrong.github.io/blog/tags/</loc>
-    <lastmod>2026-04-09T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://yrong.github.io/blog/tags/xcmp/</loc>
-    <lastmod>2026-04-09T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://yrong.github.io/blog/</loc>
     <lastmod>2026-04-09T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://yrong.github.io/blog/tags/hyperbridge/</loc>
