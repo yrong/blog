@@ -72,27 +72,11 @@
         </ul>
         <div class="article-content">
           <p>Forum background: <a href="https://forum.polkadot.network/t/xcmp-design-discussion/7328">XCMP Design Discussion (Polkadot)</a>.</p>
-<hr>
-<h2 id="problem-and-motivation">Problem and motivation</h2>
-<p><strong>HRMP</strong> stores message payloads on the relay chain, which is expensive (storage + execution).</p>
-<p><strong>XCMP (MMD approach)</strong> replaces that with:</p>
-<ul>
-<li>payloads kept off the relay chain</li>
-<li>messages proven by <strong>nested Merkle proofs</strong> anchored to relay commitments</li>
-</ul>
-<hr>
-<h2 id="how-mmd-xcmp-replaces-hrmp-conceptually">How MMD XCMP replaces HRMP (conceptually)</h2>
-<p>HRMP:</p>
-<ul>
-<li>relay is a <strong>payload mailbox</strong> (<code>HrmpChannelContents</code>)</li>
-<li>receiver reads relay state proofs + prunes via watermarks</li>
-</ul>
-<p>MMD XCMP:</p>
-<ul>
-<li>relay is a <strong>commitment anchor</strong> (no payload storage)</li>
-<li>receiver accepts <strong>payload + proof bundle</strong>, verifies it, then executes the XCM.</li>
-</ul>
-<p>Minimal POC semantics:</p>
+<h1 id="xcmp-mmd---design-document">XCMP MMD - Design Document</h1>
+<h2 id="overview">Overview</h2>
+<p>XCMP MMD (Merkle Mountain Range based cross-chain messaging) is a proof-of-concept for trustless cross-chain message delivery between parachains. It uses a three-tier cryptographic proof system that leverages the relay chain&rsquo;s BEEFY finality gadget and Merkle structures.</p>
+<h2 id="problem-statement">Problem Statement</h2>
+<p><strong>HRMP</strong> (Horizontal Relay-routed Message Passing) stores message payloads on the relay chain, which is expensive in terms of storage and execution costs.</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/">Read more...</a></div>
         <div class="article-floatclear"></div>

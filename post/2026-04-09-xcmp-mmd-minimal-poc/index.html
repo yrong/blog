@@ -7,54 +7,21 @@
   <meta property="og:title" content="Polkadot XCMP MMD — Minimal POC - yrong blog" />
   <meta name="twitter:title" content="Polkadot XCMP MMD — Minimal POC - yrong blog" />
   <meta name="description" content="Forum background: XCMP Design Discussion (Polkadot).
-
-Problem and motivation
-HRMP stores message payloads on the relay chain, which is expensive (storage &#43; execution).
-XCMP (MMD approach) replaces that with:
-
-payloads kept off the relay chain
-messages proven by nested Merkle proofs anchored to relay commitments
-
-
-How MMD XCMP replaces HRMP (conceptually)
-HRMP:
-
-relay is a payload mailbox (HrmpChannelContents)
-receiver reads relay state proofs &#43; prunes via watermarks
-
-MMD XCMP:
-
-relay is a commitment anchor (no payload storage)
-receiver accepts payload &#43; proof bundle, verifies it, then executes the XCM.
-
-Minimal POC semantics:">
+XCMP MMD - Design Document
+Overview
+XCMP MMD (Merkle Mountain Range based cross-chain messaging) is a proof-of-concept for trustless cross-chain message delivery between parachains. It uses a three-tier cryptographic proof system that leverages the relay chain&rsquo;s BEEFY finality gadget and Merkle structures.
+Problem Statement
+HRMP (Horizontal Relay-routed Message Passing) stores message payloads on the relay chain, which is expensive in terms of storage and execution costs.">
   <meta property="og:description" content="Forum background: XCMP Design Discussion (Polkadot).
-
-Problem and motivation
-HRMP stores message payloads on the relay chain, which is expensive (storage &#43; execution).
-XCMP (MMD approach) replaces that with:
-
-payloads kept off the relay chain
-messages proven by nested Merkle proofs anchored to relay commitments
-
-
-How MMD XCMP replaces HRMP (conceptually)
-HRMP:
-
-relay is a payload mailbox (HrmpChannelContents)
-receiver reads relay state proofs &#43; prunes via watermarks
-
-MMD XCMP:
-
-relay is a commitment anchor (no payload storage)
-receiver accepts payload &#43; proof bundle, verifies it, then executes the XCM.
-
-Minimal POC semantics:">
+XCMP MMD - Design Document
+Overview
+XCMP MMD (Merkle Mountain Range based cross-chain messaging) is a proof-of-concept for trustless cross-chain message delivery between parachains. It uses a three-tier cryptographic proof system that leverages the relay chain&rsquo;s BEEFY finality gadget and Merkle structures.
+Problem Statement
+HRMP (Horizontal Relay-routed Message Passing) stores message payloads on the relay chain, which is expensive in terms of storage and execution costs.">
   <meta name="twitter:description" content="Forum background: XCMP Design Discussion (Polkadot).
-
-Problem and motivation
-HRMP stores message payloads on the relay chain, which is expensive (storage &#43; execution).
-XCMP (MMD approach) replaces …">
+XCMP MMD - Design Document
+Overview
+XCMP MMD (Merkle Mountain Range based cross-chain messaging) is a proof-of-concept for trustless cross-chain …">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="https://yrong.github.io/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" />
@@ -118,397 +85,526 @@ XCMP (MMD approach) replaces …">
 <aside class="toc">
   <nav id="TableOfContents">
   <ul>
-    <li><a href="#problem-and-motivation">Problem and motivation</a></li>
-    <li><a href="#how-mmd-xcmp-replaces-hrmp-conceptually">How MMD XCMP replaces HRMP (conceptually)</a></li>
-    <li><a href="#poc-spec-high-level">POC Spec (high level)</a>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#problem-statement">Problem Statement</a>
       <ul>
-        <li><a href="#poc-design-revamp-vs-forum-mmd">POC design revamp (vs forum MMD)</a></li>
-        <li><a href="#must-haves-even-for-minimal-poc">Must-haves (even for minimal POC)</a></li>
-        <li><a href="#current-beefy-mmr-implementation-on-the-relay-chain-that-we-rely-on">Current Beefy-(MMR) implementation on the relay chain that we rely on</a></li>
-        <li><a href="#matryoshka-proof-stack-minimal-poc-variant-simplified">“Matryoshka” proof stack (minimal POC variant, simplified)</a></li>
+        <li><a href="#how-mmd-xcmp-replaces-hrmp">How MMD XCMP Replaces HRMP</a></li>
+        <li><a href="#poc-semantics">POC Semantics</a></li>
+        <li><a href="#design-rationale">Design Rationale</a></li>
       </ul>
     </li>
-    <li><a href="#poc-implementation-low-level">POC Implementation (low level)</a>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#three-tier-proof-system">Three-Tier Proof System</a>
       <ul>
-        <li></li>
-        <li><a href="#source-xcmpmmdoutbox-pallet">Source: XcmpMmdOutbox Pallet</a></li>
-        <li><a href="#destination-xcmpmmdinbox-pallet">Destination: XcmpMmdInbox Pallet</a></li>
+        <li><a href="#tier-1-relay-mmr-proof">Tier 1: Relay MMR Proof</a></li>
+        <li><a href="#tier-2-para-heads-merkle-proof">Tier 2: Para-heads Merkle Proof</a></li>
+        <li><a href="#tier-3-outbox-mmr-proof">Tier 3: Outbox MMR Proof</a></li>
       </ul>
     </li>
-    <li><a href="#appendix-a-relay-mmr-root-trustless-anchor-on-the-destination">Appendix A: Relay MMR root (trustless anchor on the destination)</a>
+    <li><a href="#beefy-and-relay-chain-dependencies">BEEFY and Relay Chain Dependencies</a>
       <ul>
-        <li><a href="#what-the-parachain-already-knows">What the parachain already knows</a></li>
-        <li><a href="#where-mmr_root-lives-on-the-relay-chain">Where <code>mmr_root</code> lives on the relay chain</a></li>
-        <li><a href="#storage-key-must-match-the-relay-runtime">Storage key (must match the relay runtime)</a></li>
-        <li><a href="#option-a--relayer-carries-relay_mmr_root_proof-no-collator-change">Option A — relayer carries <code>relay_mmr_root_proof</code> (no collator change)</a></li>
-        <li><a href="#option-b--collator-merges-the-key-keytoincludeinrelayproof">Option B — collator merges the key (<code>KeyToIncludeInRelayProof</code>)</a></li>
-        <li><a href="#after-mmr_root">After <code>mmr_root</code></a></li>
-        <li><a href="#historical-relay-leaves">Historical relay leaves</a></li>
+        <li><a href="#beefy-mmr-implementation">BEEFY MMR Implementation</a></li>
+        <li><a href="#relay-mmr-root-access">Relay MMR Root Access</a></li>
+        <li><a href="#data-availability">Data Availability</a></li>
       </ul>
     </li>
-    <li><a href="#appendix-b-where-hrmp-flows-today">Appendix B: Where HRMP flows today</a></li>
+    <li><a href="#message-flow">Message Flow</a>
+      <ul>
+        <li><a href="#1-message-commitment-source-parachain">1. Message Commitment (Source Parachain)</a></li>
+        <li><a href="#2-proof-construction-off-chain-relayer">2. Proof Construction (Off-chain Relayer)</a></li>
+        <li><a href="#3-verification-destination-parachain">3. Verification (Destination Parachain)</a></li>
+      </ul>
+    </li>
+    <li><a href="#components">Components</a>
+      <ul>
+        <li><a href="#outbox-pallet-source-parachain">Outbox Pallet (Source Parachain)</a></li>
+        <li><a href="#inbox-pallet-destination-parachain">Inbox Pallet (Destination Parachain)</a></li>
+        <li><a href="#relayer-off-chain">Relayer (Off-chain)</a></li>
+      </ul>
+    </li>
+    <li><a href="#technical-specifications">Technical Specifications</a>
+      <ul>
+        <li><a href="#hard-bounds">Hard Bounds</a></li>
+        <li><a href="#data-structures">Data Structures</a></li>
+        <li><a href="#hashing-and-encoding">Hashing and Encoding</a></li>
+        <li><a href="#verification-guards">Verification Guards</a></li>
+      </ul>
+    </li>
+    <li><a href="#security-properties">Security Properties</a>
+      <ul>
+        <li><a href="#trustlessness">Trustlessness</a></li>
+        <li><a href="#replay-protection">Replay Protection</a></li>
+        <li><a href="#finality">Finality</a></li>
+        <li><a href="#censorship-resistance">Censorship Resistance</a></li>
+      </ul>
+    </li>
+    <li><a href="#performance-characteristics">Performance Characteristics</a>
+      <ul>
+        <li><a href="#latency">Latency</a></li>
+        <li><a href="#proof-size">Proof Size</a></li>
+        <li><a href="#scalability">Scalability</a></li>
+      </ul>
+    </li>
+    <li><a href="#comparison-to-alternatives">Comparison to Alternatives</a>
+      <ul>
+        <li><a href="#vs-validator-based-xcmp">vs. Validator-based XCMP</a></li>
+        <li><a href="#vs-light-client-bridges">vs. Light Client Bridges</a></li>
+      </ul>
+    </li>
+    <li><a href="#future-improvements">Future Improvements</a></li>
+    <li><a href="#references">References</a></li>
   </ul>
 </nav>
 </aside>
       <p>Forum background: <a href="https://forum.polkadot.network/t/xcmp-design-discussion/7328">XCMP Design Discussion (Polkadot)</a>.</p>
-<hr>
-<h2 id="problem-and-motivation">Problem and motivation</h2>
-<p><strong>HRMP</strong> stores message payloads on the relay chain, which is expensive (storage + execution).</p>
-<p><strong>XCMP (MMD approach)</strong> replaces that with:</p>
+<h1 id="xcmp-mmd---design-document">XCMP MMD - Design Document</h1>
+<h2 id="overview">Overview</h2>
+<p>XCMP MMD (Merkle Mountain Range based cross-chain messaging) is a proof-of-concept for trustless cross-chain message delivery between parachains. It uses a three-tier cryptographic proof system that leverages the relay chain&rsquo;s BEEFY finality gadget and Merkle structures.</p>
+<h2 id="problem-statement">Problem Statement</h2>
+<p><strong>HRMP</strong> (Horizontal Relay-routed Message Passing) stores message payloads on the relay chain, which is expensive in terms of storage and execution costs.</p>
+<p><strong>XCMP MMD</strong> replaces that with:</p>
 <ul>
-<li>payloads kept off the relay chain</li>
-<li>messages proven by <strong>nested Merkle proofs</strong> anchored to relay commitments</li>
+<li>Payloads kept off the relay chain</li>
+<li>Messages proven by nested Merkle proofs anchored to relay commitments</li>
 </ul>
-<hr>
-<h2 id="how-mmd-xcmp-replaces-hrmp-conceptually">How MMD XCMP replaces HRMP (conceptually)</h2>
-<p>HRMP:</p>
+<h3 id="how-mmd-xcmp-replaces-hrmp">How MMD XCMP Replaces HRMP</h3>
+<p><strong>HRMP approach:</strong></p>
 <ul>
-<li>relay is a <strong>payload mailbox</strong> (<code>HrmpChannelContents</code>)</li>
-<li>receiver reads relay state proofs + prunes via watermarks</li>
+<li>Relay chain acts as a payload mailbox (<code>HrmpChannelContents</code>)</li>
+<li>Receiver reads relay state proofs and prunes via watermarks</li>
 </ul>
-<p>MMD XCMP:</p>
+<p><strong>MMD XCMP approach:</strong></p>
 <ul>
-<li>relay is a <strong>commitment anchor</strong> (no payload storage)</li>
-<li>receiver accepts <strong>payload + proof bundle</strong>, verifies it, then executes the XCM.</li>
+<li>Relay chain acts as a commitment anchor (no payload storage)</li>
+<li>Receiver accepts payload + proof bundle, verifies it, then executes the XCM</li>
 </ul>
-<p>Minimal POC semantics:</p>
+<h3 id="poc-semantics">POC Semantics</h3>
+<p>This minimal POC has the following characteristics:</p>
 <ul>
-<li><strong>unordered</strong>: messages can arrive in any order</li>
-<li><strong>best-effort</strong>: if nobody submits the proof bundle, nothing happens</li>
-<li><strong>no pruning</strong>: of message stores / MMRs</li>
-<li><strong>no receipts/acks</strong></li>
-<li><strong>no Incentive mechanism for relayers</strong></li>
-<li><strong>replay protection required</strong>: prevent executing the same proven message repeatedly</li>
+<li><strong>Unordered</strong>: Messages can arrive in any order</li>
+<li><strong>Best-effort</strong>: If nobody submits the proof bundle, nothing happens</li>
+<li><strong>No pruning</strong>: Of message stores, outbox payload storage, or MMRs</li>
+<li><strong>No receipts/acknowledgments</strong></li>
+<li><strong>No incentive mechanism</strong> for relayers</li>
+<li><strong>Replay protection required</strong>: Prevents executing the same proven message repeatedly</li>
 </ul>
-<hr>
-<h2 id="poc-spec-high-level">POC Spec (high level)</h2>
-<p>This is the minimal spec that the implementation follows.</p>
-<h3 id="poc-design-revamp-vs-forum-mmd">POC design revamp (vs forum MMD)</h3>
+<h3 id="design-rationale">Design Rationale</h3>
+<p>This POC uses a <strong>single global append-only <code>XcmpOutboxMmr</code></strong> that commits all outbound messages across all destinations. This differs from the forum sketch which proposed one <code>XcmpMessageMMR</code> per channel plus an <code>XcmpChannelTree</code> over those roots.</p>
+<p>Benefits of the single global MMR approach:</p>
 <ul>
-<li>The forum sketch uses <strong>one <code>XcmpMessageMMR</code> per channel</strong> plus an <strong><code>XcmpChannelTree</code></strong> over those roots.
-This POC drops that split: a <strong>single global append-only <code>XcmpOutboxMmr</code></strong> commits all outbound pages, and
-the parachain header digest carries only <strong><code>XcmpOutboxMmrRoot</code></strong>.</li>
-<li>The outbox is <strong>one accumulator across all blocks</strong>: leaves only append, and <code>mmr_leaf_index</code> is globally
-monotonic. We do <strong>not</strong> use a per-block Merkle snapshot as the primary commitment.</li>
+<li>Simpler implementation (one accumulator)</li>
+<li>Globally monotonic <code>mmr_leaf_index</code> serves as message nonce</li>
+<li>Parachain header digest carries only <code>XcmpOutboxMmrRoot</code></li>
+<li>No per-block Merkle snapshot needed as primary commitment</li>
 </ul>
-<h3 id="must-haves-even-for-minimal-poc">Must-haves (even for minimal POC)</h3>
+<h2 id="architecture">Architecture</h2>
+<pre tabindex="0"><code>┌─────────────────────────────────────────────────────────────────┐
+│                         Relay Chain                              │
+│  ┌──────────────┐         ┌─────────────────┐                  │
+│  │  BEEFY MMR   │────────▶│ ParaHeadsRoot   │                  │
+│  │  (pallet-mmr)│         │ (Merkle tree)   │                  │
+│  └──────────────┘         └─────────────────┘                  │
+│         │                          │                             │
+│         │ Proof 1                  │ Proof 2                    │
+│         ▼                          ▼                             │
+└─────────────────────────────────────────────────────────────────┘
+          │                          │
+          │                          │
+┌─────────▼──────────┐      ┌───────▼────────────┐
+│  Source Para 1000  │      │  Dest Para 2000    │
+│                    │      │                     │
+│  ┌──────────────┐  │      │  ┌──────────────┐  │
+│  │ Outbox MMR   │  │      │  │ Inbox Pallet │  │
+│  │ (messages)   │  │      │  │ (verifier)   │  │
+│  └──────────────┘  │      │  └──────────────┘  │
+│         │          │      │                     │
+│         │ Proof 3  │      │                     │
+│         ▼          │      │                     │
+│  ┌──────────────┐  │      │                     │
+│  │ xmmd digest  │  │      │                     │
+│  │ in header    │  │      │                     │
+│  └──────────────┘  │      │                     │
+└────────────────────┘      └─────────────────────┘
+         │                           ▲
+         │                           │
+         └───────────────────────────┘
+                  Relayer
+           (off-chain proof builder)
+</code></pre><h2 id="three-tier-proof-system">Three-Tier Proof System</h2>
+<p>The system uses three nested proofs to establish a chain of trust from the destination parachain back to the source parachain&rsquo;s committed messages.</p>
+<h3 id="tier-1-relay-mmr-proof">Tier 1: Relay MMR Proof</h3>
+<p><strong>Purpose</strong>: Prove that a relay chain block containing the source parachain&rsquo;s header is finalized by BEEFY.</p>
+<p><strong>How it works</strong>:</p>
+<ol>
+<li>The relay chain maintains a Merkle Mountain Range (MMR) of all blocks via <code>pallet-mmr</code></li>
+<li>BEEFY validators sign MMR roots, providing finality guarantees</li>
+<li>Each BEEFY MMR leaf contains a <code>ParaHeadsRoot</code> in its <code>leaf_extra</code> field</li>
+<li>The relayer fetches an MMR proof for a specific relay block (the &ldquo;MMR leaf block&rdquo;)</li>
+<li>The destination parachain verifies this proof against the relay MMR root cached in <code>LatestRelayMmr</code></li>
+</ol>
+<p><strong>Destination Anchor (<code>LatestRelayMmr</code>) Mechanism</strong>:</p>
+<p>In practice the destination is not guaranteed to author a block at every relay height (e.g. a
+coretime on-demand parachain). The inbox therefore cannot assume it can verify against an arbitrary
+historical relay context; it can only verify against relay information it has actually cached at
+execution time.</p>
+<p>The mechanism is:</p>
 <ul>
-<li><strong>Replay protection:</strong> <code>seen((source, mmr_leaf_index))</code>.</li>
-<li><strong>Hard bounds</strong>:
-<ul>
-<li>max messages per call: <code>MaxMessagesPerCall = 4</code></li>
-<li>max payload size: <code>MaxPayloadBytes = 256 * 1024</code> (256 KiB)</li>
-<li><strong>relay <code>Mmr::RootHash</code> (option A only)</strong>: extra <code>StorageProof</code> bytes in the extrinsic — bound trie nodes the same way as other relay reads (often small next to the relay MMR leaf proof).</li>
-<li>relay MMR proof: exactly 1 leaf, max proof items <code>MaxRelayMmrProofItems = 128</code> (raise for devnets if you expect <strong>deep</strong> historical leaves; proof width grows with relay progress)</li>
-<li>para-heads Merkle proof: max proof items <code>MaxParaHeadsProofItems = 32</code></li>
-<li>outbox MMR proof: exactly 1 leaf, max proof items <code>MaxOutboxMmrProofItems = 64</code></li>
-<li>implied max total bytes per call: <code>MaxTotalCallBytes ≈ 768 * 1024</code> (768 KiB) via the above bounds</li>
+<li><strong>Destination</strong>: caches a single <code>(relay_parent_number, mmr_root)</code> in <code>LatestRelayMmr</code> in
+<code>on_finalize</code>.</li>
+<li><strong>Relayer</strong>: reads <code>LatestRelayMmr</code> and uses it as the <em>anchor</em> for Tier 1. If the message was
+included on the relay at block (B), the relayer proves the <strong>MMR leaf for (B+1)</strong> (since that
+leaf commits the <code>ParaHeadsRoot</code> for relay state at the end of (B)), and ensures the chosen
+anchor is high enough to include that leaf (effectively (A \ge B+1)).</li>
+<li><strong>Verification</strong>: the destination verifies the relay MMR proof against <code>LatestRelayMmr.mmr_root</code>.</li>
 </ul>
-</li>
-<li><strong>Deterministic source commitment</strong>
+<p><strong>Data structure</strong>:</p>
 <ul>
-<li>During <strong>source</strong> block execution, the outbox must <strong><code>deposit_log</code></strong> the digest so that <strong><code>XcmpOutboxMmrRoot</code></strong> is part of the <strong>final parachain header</strong> for that block. The relay’s <strong><code>ParaHeadsRoot</code></strong> is computed over <strong><code>SCALE((para_id, head_bytes))</code></strong> where <strong><code>head_bytes</code></strong> is exactly that encoded header—so the commitment is binding once the source block is included on the relay. PVF / validators must agree on the same header bytes (same digest list, same root).</li>
+<li>MMR leaf: BEEFY <code>MmrLeaf</code> (version, parent_hash, authority_set, <strong>ParaHeadsRoot</strong>)</li>
+<li>Proof: Vector of sibling hashes (Merkle path)</li>
+<li>Cached root: <code>LatestRelayMmr</code> — one <code>(relay_parent_number, mmr_root)</code> at a time</li>
+<li>Verification: <code>mmr-lib</code> calculates root from leaf + proof, verifies against <code>LatestRelayMmr.mmr_root</code></li>
 </ul>
-</li>
-</ul>
-<h3 id="current-beefy-mmr-implementation-on-the-relay-chain-that-we-rely-on">Current Beefy-(MMR) implementation on the relay chain that we rely on</h3>
-<p>Relay chain runtimes configure <code>pallet_beefy_mmr::LeafExtra = H256</code> and set:</p>
+<p><strong>Security</strong>: Relies on BEEFY finality - if 2/3+ validators signed the MMR root, the relay block is finalized. Cached roots are read from the relay state proof, ensuring trustless verification.</p>
+<h3 id="tier-2-para-heads-merkle-proof">Tier 2: Para-heads Merkle Proof</h3>
+<p><strong>Purpose</strong>: Prove that the source parachain&rsquo;s header is included in the <code>ParaHeadsRoot</code> from Tier 1.</p>
+<p><strong>How it works</strong>:</p>
+<ol>
+<li>The relay chain builds a binary Merkle tree of all parachain headers each block</li>
+<li>Leaves are <code>SCALE((para_id: u32, head_bytes: Vec&lt;u8&gt;))</code> sorted by para_id</li>
+<li>The tree root is stored in the BEEFY MMR leaf as <code>ParaHeadsRoot</code></li>
+<li>The relayer reconstructs the Merkle proof by fetching all para heads from relay state</li>
+<li>The destination parachain verifies the source header is in the tree</li>
+</ol>
+<p><strong>Data structure</strong>:</p>
 <ul>
-<li><code>LeafExtra = ParaHeadsRoot</code></li>
+<li>Leaf: SCALE-encoded <code>(para_id, header_bytes)</code> tuple</li>
+<li>Proof: Vector of sibling hashes (Merkle path)</li>
+<li>Tree: Binary Merkle tree with KeccakHasher</li>
+<li>Verification: <code>binary_merkle_tree::verify_proof</code></li>
+</ul>
+<p><strong>Security</strong>: If the header is in the ParaHeadsRoot, and the ParaHeadsRoot is in the finalized BEEFY MMR, then the header is finalized.</p>
+<h3 id="tier-3-outbox-mmr-proof">Tier 3: Outbox MMR Proof</h3>
+<p><strong>Purpose</strong>: Prove that a specific message is committed in the source parachain&rsquo;s outbox MMR.</p>
+<p><strong>How it works</strong>:</p>
+<ol>
+<li>The source parachain maintains an MMR of all outbound messages via <code>pallet-xcmp-mmd-outbox</code></li>
+<li>Each message is hashed and appended to the MMR as a leaf</li>
+<li>The MMR root is deposited in the block header as a <code>DigestItem::Other(b&quot;xmmd&quot; ++ SCALE(XcmpMmdDigest))</code> digest</li>
+<li>The relayer calls a runtime API to generate a proof for a specific message</li>
+<li>The destination parachain extracts the MMR root from the verified source header (Tier 2) and verifies the message proof</li>
+</ol>
+<p><strong>Data structure</strong>:</p>
+<ul>
+<li>Leaf: <code>OutboxLeaf { dest: u32, payload_hash: H256 }</code></li>
+<li>Proof: Vector of sibling hashes (Merkle path)</li>
+<li>MMR root: Stored in source header digest</li>
+<li>Verification: <code>mmr-lib</code> calculates root from leaf + proof</li>
+</ul>
+<p><strong>Security</strong>: If the message is in the outbox MMR, and the MMR root is in the finalized source header, then the message was committed by the source parachain.</p>
+<h2 id="beefy-and-relay-chain-dependencies">BEEFY and Relay Chain Dependencies</h2>
+<h3 id="beefy-mmr-implementation">BEEFY MMR Implementation</h3>
+<p>The relay chain&rsquo;s <code>pallet_beefy_mmr</code> is configured with:</p>
+<ul>
+<li><code>LeafExtra = H256</code> set to <code>ParaHeadsRoot</code></li>
 <li><code>ParaHeadsRootProvider</code> computes Merkle root over <code>sorted_para_heads()</code>
 <ul>
-<li><code>(para_id_u32, head_bytes)</code> sorted by id</li>
+<li>Leaves are <code>SCALE((para_id: u32, head_bytes: Vec&lt;u8&gt;))</code> sorted by para_id</li>
+<li>Uses <code>binary_merkle_tree</code> with <code>KeccakHasher</code></li>
 </ul>
 </li>
 </ul>
-<p><strong>Important</strong>: this defines the proof format and hashing. Our verifier must match it exactly.</p>
-<h3 id="matryoshka-proof-stack-minimal-poc-variant-simplified">“Matryoshka” proof stack (minimal POC variant, simplified)</h3>
-<h4 id="smallest--largest-commitments">Smallest → largest commitments</h4>
+<p>This defines the exact proof format and hashing that the inbox verifier must match.</p>
+<h3 id="relay-mmr-root-access">Relay MMR Root Access</h3>
+<p>The destination parachain obtains the relay MMR root trustlessly via:</p>
 <ol>
-<li><strong><code>XcmpOutboxMmr</code></strong> (source chain, global, append-only): each drained outbound page becomes one leaf
-containing <code>(dest_para_id, payload_hash)</code>, where <code>payload_hash = Keccak256(page_bytes)</code>. The global
-<code>mmr_leaf_index</code> is the only monotonic identifier (“nonce”).</li>
-<li><strong>Source parachain header</strong>: the header digest commits the rolling <strong><code>XcmpOutboxMmrRoot</code></strong> (bagged MMR root after the block’s appends; empty blocks carry-forward the last root).</li>
-<li><strong><code>ParaHeadsRoot</code></strong> (relay snapshot): a chosen relay MMR leaf exposes <code>leaf_extra = ParaHeadsRoot</code>, a
-binary Merkle root over <code>SCALE((para_id_u32, head_bytes))</code> entries (sorted by <code>para_id</code>). The relevant
-entry includes the source <code>head_bytes</code> whose digest contains the <code>xmmd</code> item carrying <code>XcmpOutboxMmrRoot</code>.</li>
-<li><strong>Relay MMR root</strong> (implicit root anchor): the <strong>relay-parent state trie root</strong> already carried in
-destination <code>PersistedValidationData</code> as <strong><code>relay_parent_storage_root</code></strong>. Under that root, the relay
-runtime stores the current MMR root in <strong><code>pallet_mmr::RootHash</code></strong> (same value BEEFY logs as
-<code>ConsensusLog::MmrRoot</code> for that block). <strong>Two supported ways to obtain <code>mmr_root</code> in the verifier</strong>
-(pick one; Appendix A):
-<ul>
-<li><strong>Option A — relayer <code>StorageProof</code>:</strong> the relayer includes a proof for <code>Mmr::RootHash</code> in
-<code>submit_xcmp_mmd</code> (no collator / inherent changes).</li>
-<li><strong>Option B — collator relay proof extension:</strong> the destination runtime implements
-<strong><code>KeyToIncludeInRelayProof</code></strong> so the collator merges the <code>Mmr::RootHash</code> key into the same inherent
-relay proof already stored as <strong><code>ParachainSystem::RelayStateProof</code></strong>; the inbox pallet reconstructs
-<code>RelayChainStateProof</code> and <strong>reads</strong> the value (small runtime change; <strong>no</strong> extra proof in the
-extrinsic).<br>
-In both cases the value is decoded from the verified trie — <strong>no</strong> relay header bytes and <strong>no</strong>
-explicit <code>relay_mmr_root</code> scalar in calldata. Because the relay MMR is append-only, <strong>historical</strong>
-relay leaves still verify under <strong>later</strong> <code>RootHash</code> values once you have a wide enough <code>LeafProof</code>.</li>
-</ul>
-</li>
+<li><strong>Trust anchor</strong>: <code>ValidationData.relay_parent_storage_root</code> (already verified in <code>set_validation_data</code>)</li>
+<li><strong>Storage key</strong>: <code>pallet_mmr::RootHash</code> at <code>twox_128(&quot;Mmr&quot;) ++ twox_128(&quot;RootHash&quot;)</code></li>
+<li><strong>Collator integration</strong>: Runtime implements <code>KeyToIncludeInRelayProof</code> to include this key in the inherent relay proof</li>
+<li><strong>Verification</strong>: Inbox pallet reads the value from <code>RelayChainStateProof</code> (no extra proof in extrinsic)</li>
 </ol>
-<h4 id="destination-verifies-nested-proofs">Destination verifies nested proofs</h4>
+<p><strong>Important</strong>: The storage key must match the relay runtime&rsquo;s pallet name (e.g., &ldquo;Mmr&rdquo; on Westend).</p>
+<h3 id="data-availability">Data Availability</h3>
+<p><strong>On-chain commitment</strong>: Only <code>payload_hash = Keccak256(payload)</code> is committed to the outbox MMR.</p>
+<p><strong>POC payload availability (current code)</strong>: The outbox pallet emits the full payload bytes in an
+event (<code>XcmpMmdOutbox::MessageCommitted</code>) and does <strong>not</strong> store them in state. The outbox runtime
+API returns the proof (and <code>committed_at</code>), while relayers fetch the payload bytes from events.
+This keeps the end-to-end flow working without relying on legacy HRMP storage.</p>
+<p><strong>Cryptographic binding</strong>: The hash commitment is on-chain. In this PoC, payload bytes are emitted
+in an on-chain event (not stored in state), and are retrieved off-chain via RPC/indexing; long-term
+availability depends on node history/archival rather than on-chain storage.</p>
+<h2 id="message-flow">Message Flow</h2>
+<h3 id="1-message-commitment-source-parachain">1. Message Commitment (Source Parachain)</h3>
+<pre tabindex="0"><code>User submits XCM
+    ↓
+XcmpQueue enqueues message
+    ↓
+XcmpMmdOutbox wraps XcmpQueue
+    ↓
+On block finalization:
+  - Hash message payload
+  - Create OutboxLeaf { dest, payload_hash }
+  - Append to outbox MMR
+  - Deposit xmmd digest in header
+</code></pre><h3 id="2-proof-construction-off-chain-relayer">2. Proof Construction (Off-chain Relayer)</h3>
+<pre tabindex="0"><code>Monitor source finalized headers
+    ↓
+Poll outbox leaf count (`XcmpMmdOutboxApi::mmr_leaf_count`)
+    ↓
+For each new leaf index:
+  - Call `XcmpMmdOutboxApi::generate_outbox_proof`
+    - gets `(leaf, proof, mmr_size, committed_at)`
+    ↓
+Find relay block containing source header
+  - Scan relay chain for matching para head
+    ↓
+Read destination anchor from storage
+  - Read destination `LatestRelayMmr` (single `(relay_parent, mmr_root)`)
+    ↓
+Build Tier 1 proof (relay MMR)
+  - Ensure anchor is high enough (roughly \(A \ge B+1\) for inclusion at relay block \(B\))
+  - Call mmr_generateProof RPC (anchored at cached block)
+  - Extract ParaHeadsRoot from BEEFY leaf
+    ↓
+Build Tier 2 proof (para-heads Merkle)
+  - Fetch all para heads from relay state
+  - Reconstruct Merkle proof
+    ↓
+Assemble MessageWithProof
+  - Set relay_ancestry_proof to None
+    ↓
+Sign and submit to destination
+</code></pre><h3 id="3-verification-destination-parachain">3. Verification (Destination Parachain)</h3>
+<pre tabindex="0"><code>Receive submit_xcmp_mmd(MessageWithProof)
+    ↓
+Read LatestRelayMmr (cached relay parent + MMR root)
+    ↓
+Verify Tier 1 (relay MMR proof)
+  - Verify against **cached** relay MMR root from `LatestRelayMmr`
+  - Extract ParaHeadsRoot from BEEFY leaf
+    ↓
+Verify Tier 2 (para-heads Merkle proof)
+  - Verify source header is in ParaHeadsRoot
+    ↓
+Extract outbox MMR root from source header digest
+    ↓
+Verify Tier 3 (outbox MMR proof)
+  - Verify message leaf is in outbox MMR
+    ↓
+Verify payload hash matches
+    ↓
+Check message not already seen (replay protection)
+    ↓
+Dispatch message to XcmpQueue
+</code></pre><h2 id="components">Components</h2>
+<h3 id="outbox-pallet-source-parachain">Outbox Pallet (Source Parachain)</h3>
+<p><strong>Role</strong>: Commit outbound messages to an MMR and publish the root in block headers.</p>
+<p><strong>Key features</strong>:</p>
+<ul>
+<li>Wraps <code>XcmpQueue</code> as <code>OutboundXcmpMessageSource</code></li>
+<li>Maintains an append-only MMR of message leaves</li>
+<li>Deposits <code>Other(b&quot;xmmd&quot; ++ SCALE(XcmpMmdDigest))</code> in headers</li>
+<li>Provides runtime API for proof generation</li>
+</ul>
+<p><strong>Storage</strong>:</p>
+<ul>
+<li><code>OutboxMessages</code> - <code>mmr_leaf_index -&gt; { OutboxLeaf, committed_at }</code></li>
+<li><code>OutboxLeafCountByBlock</code> - <code>block number -&gt; block-final leaf count</code> (for correct <code>mmr_size</code>)</li>
+<li><code>MmrLeafCount</code> - current MMR leaf count</li>
+<li><code>MmrRootHash</code> - current MMR root</li>
+</ul>
+<h3 id="inbox-pallet-destination-parachain">Inbox Pallet (Destination Parachain)</h3>
+<p><strong>Role</strong>: Verify three-tier proofs and dispatch verified messages.</p>
+<p><strong>Key features</strong>:</p>
+<ul>
+<li>Accepts <code>MessageWithProof</code> via <code>submit_xcmp_mmd</code> extrinsic</li>
+<li>Verifies all three proof tiers</li>
+<li>Tracks seen messages by <code>(source_para_id, mmr_leaf_index)</code></li>
+<li>Dispatches verified messages to <code>XcmpQueue</code></li>
+</ul>
+<p><strong>Storage</strong>:</p>
+<ul>
+<li><code>SeenMessages</code> - Set of <code>(ParaId, u64)</code> for replay protection</li>
+</ul>
+<h3 id="relayer-off-chain">Relayer (Off-chain)</h3>
+<p><strong>Role</strong>: Monitor source parachains and construct proofs for destination parachains.</p>
+<p><strong>Key features</strong>:</p>
+<ul>
+<li>Polls <code>XcmpMmdOutboxApi::mmr_leaf_count</code> and iterates new leaf indices</li>
+<li>Fetches payload + proof via <code>XcmpMmdOutboxApi::generate_outbox_proof</code></li>
+<li>Constructs three-tier proof bundles</li>
+<li>Signs and submits extrinsics to destination</li>
+</ul>
+<p><strong>Architecture</strong>:</p>
+<ul>
+<li>Event loop: Poll source every 6 seconds</li>
+<li>Proof builder: Orchestrates three proof tiers</li>
+<li>RPC clients: Source, destination, relay chain</li>
+<li>Signer: SR25519 extrinsic signing (FRAME V2)</li>
+</ul>
+<h2 id="technical-specifications">Technical Specifications</h2>
+<h3 id="hard-bounds">Hard Bounds</h3>
+<p>The POC enforces the following limits:</p>
+<ul>
+<li><code>MAX_MESSAGES_PER_CALL = 4</code> - Maximum messages per <code>submit_xcmp_mmd</code> call (batch bound)</li>
+<li><code>MAX_PAYLOAD_BYTES = 256 * 1024</code> (256 KiB) - Maximum message payload size</li>
+<li><code>MAX_RELAY_MMR_PROOF_ITEMS = 128</code> - Maximum proof items for relay MMR (grows with relay chain age)</li>
+<li><code>MAX_PARA_HEADS_PROOF_ITEMS = 128</code> - Maximum proof items for para-heads Merkle tree</li>
+<li><code>MAX_OUTBOX_MMR_PROOF_ITEMS = 64</code> - Maximum proof items for outbox MMR</li>
+</ul>
+<p>These bounds ensure:</p>
+<ul>
+<li>Predictable weight calculation</li>
+<li>Protection against DoS via oversized proofs</li>
+<li>Reasonable extrinsic size (~768 KiB total)</li>
+</ul>
+<h3 id="data-structures">Data Structures</h3>
+<p><strong>OutboxLeaf</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">OutboxLeaf</span> {
+</span></span><span style="display:flex;"><span>    dest: <span style="color:#66d9ef">u32</span>,              <span style="color:#75715e">// Destination para ID
+</span></span></span><span style="display:flex;"><span>    payload_hash: <span style="color:#a6e22e">H256</span>,     <span style="color:#75715e">// Keccak256(payload)
+</span></span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>XcmpMmdDigest</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">XcmpMmdDigest</span> {
+</span></span><span style="display:flex;"><span>    version: <span style="color:#66d9ef">u8</span>,
+</span></span><span style="display:flex;"><span>    root: <span style="color:#a6e22e">H256</span>,             <span style="color:#75715e">// Outbox MMR root
+</span></span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Deposited as: DigestItem::Other(b&#34;xmmd&#34; ++ SCALE(digest))
+</span></span></span></code></pre></div><p><strong>MessageWithProof</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">MessageWithProof</span> {
+</span></span><span style="display:flex;"><span>    source: <span style="color:#a6e22e">ParaId</span>,
+</span></span><span style="display:flex;"><span>    dest: <span style="color:#a6e22e">ParaId</span>,
+</span></span><span style="display:flex;"><span>    mmr_leaf_index: <span style="color:#66d9ef">u64</span>,
+</span></span><span style="display:flex;"><span>    relay_mmr_leaf_index: <span style="color:#66d9ef">u64</span>,
+</span></span><span style="display:flex;"><span>    payload: Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Tier 1: Relay MMR proof
+</span></span></span><span style="display:flex;"><span>    relay_mmr_proof: Vec<span style="color:#f92672">&lt;</span>H256<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    relay_mmr_leaf: Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span>,        <span style="color:#75715e">// BEEFY MMR leaf
+</span></span></span><span style="display:flex;"><span>    relay_mmr_size: <span style="color:#66d9ef">u64</span>,
+</span></span><span style="display:flex;"><span>    relay_ancestry_proof: Option<span style="color:#f92672">&lt;</span>AncestryProof<span style="color:#f92672">&lt;</span>H256<span style="color:#f92672">&gt;&gt;</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Tier 2: Para-heads Merkle proof
+</span></span></span><span style="display:flex;"><span>    para_heads_proof: Vec<span style="color:#f92672">&lt;</span>H256<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    source_head: Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span>,           <span style="color:#75715e">// Source header bytes
+</span></span></span><span style="display:flex;"><span>    para_head_index: <span style="color:#66d9ef">u32</span>,
+</span></span><span style="display:flex;"><span>    para_heads_count: <span style="color:#66d9ef">u32</span>,
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Tier 3: Outbox MMR proof
+</span></span></span><span style="display:flex;"><span>    outbox_leaf: <span style="color:#a6e22e">OutboxLeaf</span>,
+</span></span><span style="display:flex;"><span>    outbox_mmr_proof: Vec<span style="color:#f92672">&lt;</span>H256<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    outbox_mmr_size: <span style="color:#66d9ef">u64</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="hashing-and-encoding">Hashing and Encoding</h3>
+<ul>
+<li><strong>Payload hash</strong>: <code>Keccak256(payload_bytes)</code></li>
+<li><strong>MMR merge</strong>: <code>Keccak256(left_hash || right_hash)</code></li>
+<li><strong>Para-heads leaves</strong>: <code>SCALE((para_id: u32, head_bytes: Vec&lt;u8&gt;))</code> sorted by para_id</li>
+<li><strong>Binary Merkle tree</strong>: Uses <code>KeccakHasher</code> (matches relay chain)</li>
+</ul>
+<h3 id="verification-guards">Verification Guards</h3>
+<p>The inbox pallet enforces:</p>
+<ul>
+<li><code>dest == SelfParaId</code> (message is for this parachain)</li>
+<li><code>relay_mmr_proof</code> contains exactly 1 leaf at <code>relay_mmr_leaf_index</code></li>
+<li><code>outbox_mmr_proof</code> contains exactly 1 leaf at <code>mmr_leaf_index</code></li>
+<li><code>leaf.dest == dest &amp;&amp; leaf.payload_hash == Keccak256(payload)</code></li>
+<li><code>!seen((source, mmr_leaf_index))</code> (replay protection)</li>
+</ul>
+<h2 id="security-properties">Security Properties</h2>
+<h3 id="trustlessness">Trustlessness</h3>
+<p>The destination parachain does not trust:</p>
+<ul>
+<li>The relayer (can only submit valid proofs)</li>
+<li>The source parachain (proofs are verified against finalized state)</li>
+<li>Individual validators (relies on BEEFY 2/3+ threshold)</li>
+</ul>
+<h3 id="replay-protection">Replay Protection</h3>
+<p>Messages are identified by <code>(source_para_id, mmr_leaf_index)</code>. Once processed, the inbox pallet rejects duplicate submissions.</p>
+<h3 id="finality">Finality</h3>
+<p>Messages are only delivered after:</p>
 <ol>
-<li>Obtain <strong><code>mmr_root</code></strong> = <strong><code>Mmr::RootHash</code></strong> read under <strong><code>ValidationData.relay_parent_storage_root</code></strong>
-(<strong>Option A:</strong> verify <code>relay_mmr_root_proof</code> in the extrinsic; <strong>Option B:</strong> read from
-<code>RelayChainStateProof</code> rebuilt from <code>RelayStateProof</code> + <code>ValidationData</code> — Appendix A). Same trie /
-hasher stack as Cumulus <code>RelayChainStateProof::new</code>.</li>
-<li>Verify a single relay MMR leaf proof at <strong><code>relay_mmr_leaf_index</code></strong> against <strong><code>mmr_root</code></strong>, then decode the
-leaf to obtain <code>leaf_extra = ParaHeadsRoot</code>.</li>
-<li>Verify <strong><code>binary_merkle_tree::MerkleProof</code></strong> for <code>SCALE((source, head_bytes))</code> against <code>ParaHeadsRoot</code>.</li>
-<li>Decode <strong><code>head_bytes</code></strong> as the source parachain <strong>header</strong>, then read <strong><code>DigestItem::PreRuntime(*b&quot;xmmd&quot;, …)</code></strong> → <strong><code>XcmpOutboxMmrRoot</code></strong>.</li>
-<li>Verify <strong>outbox MMR leaf proof</strong> (single leaf) for leaf <strong><code>(dest, payload_hash)</code></strong> at <strong><code>mmr_leaf_index</code></strong> against <strong><code>XcmpOutboxMmrRoot</code></strong>.</li>
-<li>Check <strong><code>Keccak256(payload) == payload_hash</code></strong> (relayer supplies bytes).</li>
-<li>Replay protection: reject if <strong><code>seen((source, mmr_leaf_index))</code></strong>.</li>
-<li>POC execution: emit event / enqueue bytes / XCM execution</li>
+<li>Source parachain block is finalized (included in relay chain)</li>
+<li>Relay chain block is finalized (BEEFY signatures)</li>
+<li>Proofs are verified on destination</li>
 </ol>
-<hr>
-<h2 id="poc-implementation-low-level">POC Implementation (low level)</h2>
-<h4 id="commitments-identifiers-and-proof-types-concrete">Commitments, identifiers, and proof types (concrete)</h4>
+<h3 id="censorship-resistance">Censorship Resistance</h3>
+<p>Anyone can run a relayer. If one relayer fails or censors messages, others can submit the same proof.</p>
+<h2 id="performance-characteristics">Performance Characteristics</h2>
+<h3 id="latency">Latency</h3>
+<p>Typical message delivery time: <strong>30-45 seconds</strong></p>
+<p>Breakdown:</p>
 <ul>
-<li>
-<p><strong>Outbox accumulator</strong>: one global append-only <code>XcmpOutboxMmr</code></p>
-</li>
-<li>
-<p><strong>OutboxLeaf</strong>: <code>(dest: u32, payload_hash: H256)</code> (SCALE-encoded)</p>
-</li>
-<li>
-<p><strong>Outbox leaf index / “nonce”</strong>: <code>mmr_leaf_index: u64</code> (global monotonic; not stored in the leaf)</p>
-</li>
-<li>
-<p><strong>Header digest (source header)</strong>: <code>DigestItem::PreRuntime(*b&quot;xmmd&quot;, SCALE((version, XcmpOutboxMmrRoot)))</code></p>
-</li>
-<li>
-<p><strong>Empty blocks</strong>: carry-forward last root (repeat previous <code>XcmpOutboxMmrRoot</code>)</p>
-</li>
-<li>
-<p><code>SourceParaId</code>, <code>DestParaId</code>: <code>u32</code> (SCALE where needed)</p>
-</li>
-<li>
-<p><strong><code>relay_mmr_leaf_index</code></strong>: relay <code>pallet_mmr</code> leaf index whose relay MMR leaf carries the <code>ParaHeadsRoot</code>
-you prove against (must match the sole leaf index in the relay <code>LeafProof</code>)</p>
-</li>
-<li>
-<p><strong>Routing</strong>: implicit in <code>(dest, payload_hash)</code>; no channel tree</p>
-</li>
-<li>
-<p><strong>Hashing</strong>:</p>
+<li>Source para block production: ~6s</li>
+<li>Relay chain inclusion: ~6-12s</li>
+<li>BEEFY finality: ~12-18s</li>
+<li>Relayer proof construction: ~1-2s</li>
+<li>Destination para processing: ~6s</li>
+</ul>
+<h3 id="proof-size">Proof Size</h3>
+<p>Approximate sizes:</p>
 <ul>
-<li><code>payload_hash = Keccak256(payload_bytes)</code> where <code>payload_bytes</code> is the exact <code>Vec&lt;u8&gt;</code> drained from <code>XcmpQueue::take_outbound_messages</code></li>
-<li>Para-heads Merkle must match relay: <code>H = Keccak256</code>, leaf <code>SCALE((para_id_u32, head_bytes))</code>, relay sorts by <code>para_id</code>, per <code>binary_merkle_tree</code> (<code>substrate/utils/binary-merkle-tree</code>)</li>
+<li>Relay MMR proof: ~5-10 sibling hashes (160-320 bytes)</li>
+<li>Optional <code>relay_ancestry_proof</code> (unused in standard PoC; use <code>None</code> with <code>LatestRelayMmr</code> anchoring): size varies if populated</li>
+<li>Para-heads Merkle proof: ~1-5 sibling hashes (32-160 bytes)</li>
+<li>Outbox MMR proof: ~5-15 sibling hashes (160-480 bytes)</li>
+<li>Source header: ~100-200 bytes</li>
+<li>Total: <strong>~500-1200 bytes</strong> per message</li>
 </ul>
-</li>
-<li>
-<p><strong>Proof types</strong>:</p>
+<h3 id="scalability">Scalability</h3>
+<p><strong>Bottlenecks</strong>:</p>
 <ul>
-<li><strong>Relay <code>RootHash</code> (Option A):</strong> <code>sp_trie::StorageProof</code> proving <strong><code>pallet_mmr::RootHash</code></strong> at the relay
-trie rooted at <strong><code>relay_parent_storage_root</code></strong>. Decode <strong><code>mmr_root</code></strong> from the verified trie (no
-separate <code>relay_mmr_root: H256</code> unless you want a redundant witness).</li>
-<li><strong>Relay <code>RootHash</code> (Option B):</strong> no extra extrinsic field — value comes from the <strong>inherent</strong> relay
-proof already stored in <strong><code>ParachainSystem::RelayStateProof</code></strong>, after the collator merged the key via
-<strong><code>KeyToIncludeInRelayProof</code></strong> (Appendix A).</li>
-<li><strong>Para-heads proof</strong>: <code>binary_merkle_tree::MerkleProof&lt;H256, Vec&lt;u8&gt;&gt;</code> where <code>leaf = SCALE((source_u32, head_bytes))</code></li>
-<li><strong>Relay MMR proof (single leaf)</strong>: <code>sp_mmr_primitives::EncodableOpaqueLeaf</code> + <code>sp_mmr_primitives::LeafProof&lt;H256&gt;</code> (exactly 1 leaf; proof’s sole <code>leaf_indices[0]</code> must equal <code>relay_mmr_leaf_index</code>)</li>
-<li><strong>Outbox MMR proof (single leaf)</strong>: <code>sp_mmr_primitives::EncodableOpaqueLeaf</code> + <code>sp_mmr_primitives::LeafProof&lt;H256&gt;</code> (exactly 1 leaf; proof’s sole <code>leaf_indices[0]</code> must equal <code>mmr_leaf_index</code>), verified statelessly against <code>XcmpOutboxMmrRoot</code></li>
+<li>Para-heads proof size grows with number of parachains (log₂(N))</li>
+<li>Relay MMR proof size grows with relay chain age (log₂(blocks))</li>
+<li>Relayer must fetch all para heads from relay state</li>
 </ul>
-</li>
-<li>
-<p><strong><code>MessageWithProof</code></strong>:</p>
+<p><strong>Optimizations</strong>:</p>
 <ul>
-<li><strong>Option A:</strong> <code>{ source, dest, mmr_leaf_index, relay_mmr_leaf_index, payload, relay_mmr_root_proof, relay_mmr_proof, para_heads_proof, outbox_mmr_proof }</code></li>
-<li><strong>Option B:</strong> omit <strong><code>relay_mmr_root_proof</code></strong> (same other fields).<br>
-(Naming is up to you; Option B implies a compile-time or runtime flag so the extrinsic codec matches.)</li>
+<li>Batch multiple messages in one proof (share relay/para-heads proofs)</li>
+<li>Cache relay MMR proofs for recent blocks</li>
+<li>Use state proof compression</li>
 </ul>
-</li>
-</ul>
-<h3 id="source-xcmpmmdoutbox-pallet">Source: XcmpMmdOutbox Pallet</h3>
-<h4 id="how-to-integrate-with-the-current-xcmpqueue">How to integrate with the current XcmpQueue</h4>
+<h2 id="comparison-to-alternatives">Comparison to Alternatives</h2>
+<h3 id="vs-validator-based-xcmp">vs. Validator-based XCMP</h3>
+<p><strong>Advantages</strong>:</p>
 <ul>
-<li>Hook point: <code>ParachainSystem::on_finalize</code> drains <code>OutboundXcmpMessageSource::take_outbound_messages</code>
-(typically <code>XcmpQueue</code>), yielding <code>Vec&lt;(ParaId, Vec&lt;u8&gt;)&gt;</code>.</li>
-<li>Runtime wiring: set <code>type OutboundXcmpMessageSource = XcmpMmdOutbox</code> so the wrapper can observe the drained
-bytes.</li>
-<li>Wrapper behavior (per <code>(dest, data)</code>):
+<li>Trustless (no reliance on validators to deliver)</li>
+<li>Censorship resistant (anyone can relay)</li>
+<li>Verifiable on-chain</li>
+</ul>
+<p><strong>Disadvantages</strong>:</p>
 <ul>
-<li><code>payload_hash = Keccak256(data)</code></li>
-<li>append one outbox leaf <code>(dest, payload_hash)</code> to the global MMR (this defines <code>mmr_leaf_index</code>)</li>
+<li>Higher latency (requires finality)</li>
+<li>Larger proof size</li>
+<li>Requires off-chain relayers</li>
 </ul>
-</li>
-<li>Finalize: compute bagged <code>XcmpOutboxMmrRoot</code> and <code>deposit_log(DigestItem::PreRuntime(*b&quot;xmmd&quot;, ...))</code>.</li>
-</ul>
-<h4 id="one-block-dataflow">One-block dataflow</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>ParachainSystem::on_finalize
-</span></span><span style="display:flex;"><span>  └─ take_outbound_messages (wrapper)
-</span></span><span style="display:flex;"><span>       ├─ XcmpQueue::take_outbound_messages
-</span></span><span style="display:flex;"><span>       └─ for each (dest, data): note_outbound → push leaf on XcmpOutboxMmr
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>XcmpMmdOutbox::on_finalize   // after ParachainSystem
-</span></span><span style="display:flex;"><span>  └─ XcmpOutboxMmrRoot = bag_peaks (current MMR root)
-</span></span><span style="display:flex;"><span>  └─ deposit_log(PreRuntime, (version, XcmpOutboxMmrRoot))
-</span></span></code></pre></div><p><strong>Critical:</strong> in <strong><code>construct_runtime!</code></strong>, place <strong><code>XcmpMmdOutbox</code> after <code>ParachainSystem</code></strong>.</p>
-<h3 id="destination-xcmpmmdinbox-pallet">Destination: XcmpMmdInbox Pallet</h3>
-<h4 id="submission-model-permissionless-extrinsic">Submission model: permissionless extrinsic</h4>
-<p>Anyone can be a relayer. The destination chain exposes an extrinsic, e.g.:</p>
+<h3 id="vs-light-client-bridges">vs. Light Client Bridges</h3>
+<p><strong>Advantages</strong>:</p>
 <ul>
-<li>
-<p><code>submit_xcmp_mmd(messages: Vec&lt;MessageWithProof&gt;)</code></p>
-</li>
-<li>
-<p><strong>Option A:</strong> no collator / inherent changes — the relayer carries the extra relay trie proof.</p>
-</li>
-<li>
-<p><strong>Option B:</strong> small <strong>destination-runtime</strong> change — implement <strong><code>KeyToIncludeInRelayProof</code></strong> so the
-collator merges <strong><code>Mmr::RootHash</code></strong> into the mandatory relay proof, plus a <strong><code>RelayChainStateProof</code></strong>
-helper (e.g. <code>read_mmr_root_hash()</code>) used by the inbox pallet. <strong>No</strong> <code>relay_mmr_root_proof</code> in the
-extrinsic.</p>
-</li>
+<li>Leverages existing relay chain infrastructure</li>
+<li>No need to track validator set changes</li>
+<li>Simpler verification logic</li>
 </ul>
-<h4 id="what-the-extrinsic-must-carry-per-message">What the extrinsic must carry (per message)</h4>
+<p><strong>Disadvantages</strong>:</p>
 <ul>
-<li><code>source: u32</code>, <code>dest: u32</code></li>
-<li><code>mmr_leaf_index: u64</code> (outbox MMR leaf index / nonce)</li>
-<li><code>relay_mmr_leaf_index: u64</code> (relay MMR leaf index that supplies <code>leaf_extra = ParaHeadsRoot</code>)</li>
-<li><code>payload: Vec&lt;u8&gt;</code> (bounded)</li>
-<li><strong><code>relay_mmr_root_proof</code> (Option A only):</strong> relay-chain <strong><code>StorageProof</code></strong> for <strong><code>pallet_mmr::RootHash</code></strong>,
-verified against <strong><code>ValidationData.relay_parent_storage_root</code></strong> (Appendix A).</li>
-<li><code>relay_mmr_proof</code> (single leaf at <code>relay_mmr_leaf_index</code>, verified against <strong><code>mmr_root</code></strong> from Option A or B)</li>
-<li><code>para_heads_proof</code> (leaf <code>SCALE((source_u32, head_bytes))</code>)</li>
-<li><code>outbox_mmr_proof</code> (single leaf at <code>mmr_leaf_index</code>, under <code>XcmpOutboxMmrRoot</code> from <code>head_bytes</code>)</li>
+<li>Only works between parachains (not external chains)</li>
+<li>Requires relay chain to maintain MMR and ParaHeadsRoot</li>
 </ul>
-<h4 id="off-chain-relayer-tool">Off-chain relayer tool</h4>
-<ul>
-<li>For each source message:
-<ul>
-<li>fetch <code>payload</code> bytes (see below) and compute <code>payload_hash</code></li>
-<li>choose <code>relay_mmr_leaf_index</code> whose <code>ParaHeadsRoot</code> contains the exact <code>(source, head_bytes)</code></li>
-<li><strong>Option A:</strong> at the <strong>destination’s relay parent</strong>, build a relay <strong><code>StorageProof</code></strong> that includes the
-key for <strong><code>Mmr::RootHash</code></strong> (can merge trie nodes with other reads in one blob).</li>
-<li>generate proofs: <code>relay_mmr_proof</code>, <code>para_heads_proof</code>, <code>outbox_mmr_proof</code>, and <strong>if Option A</strong> also
-<code>relay_mmr_root_proof</code></li>
-<li>submit <code>MessageWithProof</code> to destination</li>
-</ul>
-</li>
-</ul>
-<h4 id="where-the-relayer-gets-the-full-payload-xcm-bytes">Where the relayer gets the full <code>payload</code> (XCM bytes)</h4>
-<p><strong>On-chain we only commit <code>payload_hash</code>.</strong> The <strong>verifier</strong> checks that submitted <strong><code>Vec&lt;u8&gt;</code></strong> matches that hash; it does <strong>not</strong> reconstruct the message from the chain.</p>
-<p>The <strong>relayer</strong> obtains the <strong>original page bytes</strong> from a <strong>data-availability path</strong>, for example:</p>
-<ul>
-<li><strong>Source parachain archival state (recommended for POC):</strong> fetch the drained outbound bytes from the
-<strong>source parachain’s state at the committed block</strong> (archive node / historical state RPC). In today’s
-Cumulus flow, <code>ParachainSystem::on_finalize</code> drains <code>take_outbound_messages</code> and stores outbound HRMP
-messages for PVF; an archive node can read that storage (e.g. <code>HrmpOutboundMessages</code> in
-<code>cumulus/pallets/parachain-system</code>) at the source block hash and recover the exact <code>Vec&lt;u8&gt;</code> page bytes
-that were hashed into <code>payload_hash</code>.
-<strong>Cryptographic binding is on-chain; bytes are a data-availability problem.</strong> This POC assumes some off-chain publication/custody path exists for the committed bytes.</li>
-</ul>
-<h4 id="how-the-relayer-generates-the-outbox-mmr-proof">How the relayer generates the outbox MMR proof</h4>
-<p>To submit <code>outbox_mmr_proof</code> for a historical <code>mmr_leaf_index</code>, the relayer needs a way to obtain a
-single-leaf <code>sp_mmr_primitives::LeafProof&lt;H256&gt;</code> against the <code>XcmpOutboxMmrRoot</code> committed in the source
-header.</p>
-<p><strong>Preferred (POC-friendly):</strong> expose a <strong>runtime API</strong> that returns the outbox leaf + proof at a given block:</p>
-<ul>
-<li>Input: <code>{ at: source_block_hash, mmr_leaf_index }</code></li>
-<li>Output: <code>{ outbox_leaf: (dest, payload_hash), outbox_leaf_proof: LeafProof&lt;H256&gt; }</code></li>
-</ul>
-<p>The relayer calls this against a full/archive source node (historical state), then submits that proof
-bundle to the destination.</p>
-<p><strong>Storage implication:</strong> the source chain must retain enough MMR node/peak data to build proofs for the
-desired history range. For a minimal POC this can be <strong>no pruning</strong>; a production design can use a bounded
-window (older proofs become unavailable unless material is retained elsewhere).</p>
-<h4 id="verification-canonical-algorithm">Verification (canonical algorithm)</h4>
+<h2 id="future-improvements">Future Improvements</h2>
 <ol>
-<li>Resolve <strong><code>mmr_root</code></strong>:
-<ul>
-<li><strong>Option A:</strong> from <code>ValidationData.relay_parent_storage_root</code> + <strong><code>relay_mmr_root_proof</code></strong> (mirror
-<code>RelayChainStateProof::new</code>, then read <strong><code>Mmr::RootHash</code></strong>).</li>
-<li><strong>Option B:</strong> <code>RelayChainStateProof::new(SelfParaId, relay_parent_storage_root, RelayStateProof::get())</code>
-then <strong><code>read_mmr_root_hash()</code></strong> (or equivalent) — the inherent already proved this key if the runtime
-listed it in <strong><code>KeyToIncludeInRelayProof::keys_to_prove()</code></strong>.</li>
-</ul>
-</li>
-<li>Verify the submitted <strong>relay MMR leaf proof</strong> (single leaf) <strong>at <code>relay_mmr_leaf_index</code></strong> against <strong><code>mmr_root</code></strong>; decode the proven leaf and read <code>leaf_extra = ParaHeadsRoot</code> (<strong>snapshot for that relay leaf</strong>, not “whatever the tip says today”).</li>
-<li>Verify the submitted <strong>para-heads Merkle proof</strong> against that <code>ParaHeadsRoot</code> and decode its leaf as <code>SCALE((source_u32, head_bytes))</code>.</li>
-<li>Decode <code>head_bytes</code> as the source parachain header → extract <strong><code>XcmpOutboxMmrRoot</code></strong> digest item (<code>engine_id = *b&quot;xmmd&quot;</code>).</li>
-<li>Verify the submitted <strong>outbox MMR proof</strong> (single leaf) for outbox leaf <code>(dest, payload_hash)</code> at <code>mmr_leaf_index</code> against <code>XcmpOutboxMmrRoot</code>.</li>
-<li>Check <code>Keccak256(payload) == payload_hash</code>.</li>
-<li>Replay protection: <code>seen((source, mmr_leaf_index))</code> must be false; then mark it seen.</li>
-<li><strong>Post-verify:</strong> destination execution — feed those bytes into the destination runtime’s <strong>normal inbound XCMP dispatch path</strong> with the correct <strong>sender origin</strong> (<code>ParaId::from(source)</code> / <code>Sibling(ParaId)</code>), typically by invoking the configured <strong><code>XcmpMessageHandler</code></strong> (in Cumulus templates this is usually <strong><code>XcmpQueue</code></strong>) using whatever <strong>internal hook / helper</strong> your runtime exposes for “append sibling message bytes”.</li>
+<li>Batch multiple messages in one proof</li>
+<li>WebSocket subscriptions instead of polling</li>
+<li>Persistent relayer state (database)</li>
+<li>Retry logic and error handling</li>
+<li>Economic incentives for relayers (fee mechanism)</li>
+<li>Proof compression (aggregate signatures, state proof compression)</li>
+<li>Parallel proof construction (multiple relayers)</li>
 </ol>
-<h4 id="minimal-verifier-guards">Minimal verifier guards</h4>
+<h2 id="references">References</h2>
 <ul>
-<li>Reject unless <code>dest == SelfParaId</code>.</li>
-<li>Reject unless <code>relay_mmr_proof.leaf_indices[0] == relay_mmr_leaf_index</code> and
-<code>outbox_mmr_proof.leaf_indices[0] == mmr_leaf_index</code> (single-leaf POC).</li>
-<li>After decoding the proven outbox leaf, <code>ensure!(leaf.dest == dest &amp;&amp; leaf.payload_hash == Keccak256(payload))</code>.</li>
-</ul>
-<h2 id="appendix-a-relay-mmr-root-trustless-anchor-on-the-destination">Appendix A: Relay MMR root (trustless anchor on the destination)</h2>
-<h3 id="what-the-parachain-already-knows">What the parachain already knows</h3>
-<p><code>set_validation_data</code> stores relay <code>PersistedValidationData</code>, including:</p>
-<ul>
-<li><strong><code>relay_parent_storage_root</code></strong> — the relay <strong>state trie root</strong> after executing the relay parent block</li>
-<li><strong><code>relay_parent_number</code></strong></li>
-</ul>
-<p>and persists the relay trie proof bytes as <strong><code>ParachainSystem::RelayStateProof</code></strong> (already verified in
-<code>set_validation_data</code> via <code>RelayChainStateProof::new</code> against that root).</p>
-<p>That storage root is the trust anchor for <strong>any</strong> relay-chain storage read proven inside the parachain
-runtime (same pattern as Cumulus <code>RelayChainStateProof</code>, which builds a <code>TrieBackend</code> with
-<code>HashingFor&lt;RelayBlock&gt;</code> at <code>relay_parent_storage_root</code>).</p>
-<h3 id="where-mmr_root-lives-on-the-relay-chain">Where <code>mmr_root</code> lives on the relay chain</h3>
-<p><code>pallet_mmr</code> persists the latest MMR root as a normal storage value <strong><code>RootHash</code></strong>, updated as part of
-block execution. Rococo-style Polkadot SDK relay runtimes also wire
-<code>pallet_mmr::Config::OnNewRoot = pallet_beefy_mmr::DepositBeefyDigest</code>, which logs the <strong>same</strong> root into
-the relay header as <code>ConsensusLog::MmrRoot</code> — useful for light clients, <strong>but the parachain POC verifier
-should not depend on a user-supplied relay header digest</strong> (that digest is not bound by
-<code>relay_parent_storage_root</code> alone).</p>
-<h3 id="storage-key-must-match-the-relay-runtime">Storage key (must match the relay runtime)</h3>
-<p>FRAME’s fixed 32-byte prefix for a storage value is:</p>
-<p><code>concat(twox_128(pallet_name), twox_128(storage_item_name))</code></p>
-<p>So for <code>pallet_mmr::RootHash</code> you need the <strong>exact</strong> <code>pallet_name</code> bytes from the relay’s
-<code>construct_runtime!</code> (e.g. <strong><code>Mmr</code></strong> next to <code>pallet_mmr</code> on Rococo), and <strong><code>RootHash</code></strong> as the item name.
-If the relay renames the pallet, uses a second MMR instance, or you target another relay flavor without
-<code>pallet_mmr</code>, the key changes or the read does not exist — <strong>hard-code / generate the key against the
-relay runtime you support.</strong></p>
-<h3 id="option-a--relayer-carries-relay_mmr_root_proof-no-collator-change">Option A — relayer carries <code>relay_mmr_root_proof</code> (no collator change)</h3>
-<ul>
-<li><strong><code>relay_mmr_root_proof</code></strong>: a <code>StorageProof</code> whose trie nodes, together with
-<code>ValidationData.relay_parent_storage_root</code>, allow reading <strong><code>Mmr::RootHash</code></strong>. Decode the value as the
-relay’s MMR root hash (<code>H256</code> / <code>MmrRootHash</code>) → <strong><code>mmr_root</code></strong>.</li>
-<li><strong>No</strong> separate <code>relay_mmr_root</code> argument is required: the value is <strong>determined</strong> by relay state once the
-proof verifies.</li>
-</ul>
-<h3 id="option-b--collator-merges-the-key-keytoincludeinrelayproof">Option B — collator merges the key (<code>KeyToIncludeInRelayProof</code>)</h3>
-<p>Cumulus merges <strong><code>KeyToIncludeInRelayProof::keys_to_prove()</code></strong> into the same relay proof the collator puts in
-the inherent (<code>cumulus/client/parachain-inherent</code> → <code>collect_relay_storage_proof</code>). Your <strong>destination</strong>
-runtime returns e.g. <code>RelayStorageKey::Top(mmr_root_key_bytes)</code> alongside the static HRMP/DMQ keys.</p>
-<p>Reference pattern (test runtime): <code>cumulus/test/runtime/src/lib.rs</code> — <code>impl KeyToIncludeInRelayProof for Runtime { fn keys_to_prove() -&gt; RelayProofRequest { … } }</code>. The SDK parachain <strong>template</strong> currently returns
-<code>Default::default()</code> (no extra keys) until you add them.</p>
-<p>Then the inbox pallet does <strong><code>RelayChainStateProof::new(para_id, relay_parent_storage_root, RelayStateProof::&lt;T&gt;::get())?</code></strong>
-and a small helper (<strong>not</strong> in Cumulus today — you add it) such as <strong><code>read_mmr_root_hash()</code></strong> that reads the
-key from the verified trie. <strong>Extrinsic:</strong> omit <strong><code>relay_mmr_root_proof</code></strong>; proof size per block grows slightly
-for <strong>this</strong> parachain only (unlike extending Cumulus’ global static key list, which would affect everyone).</p>
-<p><strong>Requirement:</strong> <code>keys_to_prove()</code> must list the <strong><code>Mmr::RootHash</code></strong> key for every relay runtime / pallet
-name you support. If the collator omits it, the merged proof has no leaf for that key →
-<strong><code>read_mmr_root_hash()</code></strong> fails and <strong><code>submit_xcmp_mmd</code></strong> must reject (fail closed). Today’s
-<code>ParachainSystem</code> inherent does not read this key itself, so the block can still be built; the bug surfaces
-at your verifier unless you add an explicit inherent-time check.</p>
-<h3 id="after-mmr_root">After <code>mmr_root</code></h3>
-<p>Verify <strong><code>relay_mmr_proof</code></strong> (single leaf) against <strong><code>mmr_root</code></strong>, decode <code>leaf_extra = ParaHeadsRoot</code>, and
-continue the stack as in the main body.</p>
-<h3 id="historical-relay-leaves">Historical relay leaves</h3>
-<p><code>RootHash</code> at the relay parent is the MMR root <strong>after</strong> that relay block’s MMR update; it commits to <strong>all</strong>
-prior relay leaves. Proving an <strong>earlier</strong> relay leaf under that root is the usual append-only MMR story
-(wider <code>LeafProof</code> when the leaf is old). You still need an <strong>archive-quality</strong> relay view (or deep enough
-MMR proof material) to <strong>construct</strong> those proofs off-chain.</p>
-<hr>
-<h2 id="appendix-b-where-hrmp-flows-today">Appendix B: Where HRMP flows today</h2>
-<ul>
-<li><code>cumulus/pallets/parachain-system/src/lib.rs</code> — <code>on_finalize</code> drains <code>take_outbound_messages</code>, stores <code>HrmpOutboundMessages</code>.</li>
-<li><code>cumulus/pallets/parachain-system/src/validate_block/implementation.rs</code> — PVF reads <code>HrmpOutboundMessages</code> → <code>ValidationResult.horizontal_messages</code>.</li>
-<li><code>polkadot/runtime/parachains/src/inclusion/mod.rs</code> — <code>hrmp::prune_hrmp</code>, <code>queue_outbound_hrmp</code>.</li>
+<li><a href="https://github.com/opentimestamps/opentimestamps-server/blob/master/doc/merkle-mountain-range.md">Merkle Mountain Ranges</a></li>
+<li><a href="https://spec.polkadot.network/sect-finality#sect-grandpa-beefy">BEEFY Finality Gadget</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Merkle_tree">Binary Merkle Trees</a></li>
+<li><a href="https://wiki.polkadot.network/docs/learn-xcm">XCMP Design</a></li>
 </ul>
 
     </article>
