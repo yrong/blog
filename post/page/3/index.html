@@ -45,39 +45,6 @@
   <div class="main" role="main">
     <section class="list section-list">
       <article class="article">
-        <a href="/blog/post/2018-04-09-skynet/" class="article-titles">
-          <h2 class="article-title">Introduction to Skynet</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>April 9, 2018</time></li>
-          <li class="article-meta-tags">
-            <a href="/tags/lua/">
-              <i class="fa-solid fa-tag"></i>
-              lua
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <h2 id="代码结构">代码结构</h2>
-<p>首先要关注一下config.path文件。</p>
-<p>skynet/example/config.path</p>
-<pre tabindex="0"><code>root = &#34;./&#34;
-luaservice = root..&#34;service/?.lua;&#34;..root..&#34;test/?.lua;&#34;..root..&#34;examples/?.lua;&#34;..root..&#34;test/?/init.lua&#34;
-lualoader = root .. &#34;lualib/loader.lua&#34;
-lua_path = root..&#34;lualib/?.lua;&#34;..root..&#34;lualib/?/init.lua&#34;
-lua_cpath = root .. &#34;luaclib/?.so&#34;
-snax = root..&#34;examples/?.lua;&#34;..root..&#34;test/?.lua&#34;
-</code></pre><p>root代表的是skynet所在的目录。
-luaservice代表服务所在的目录。
-lualoader 用哪一段 lua 代码加载 lua 服务。通常配置为 lualib/loader.lua ，再由这段代码解析服务名称，进一步加载 lua 代码。不用去修改它。
-lua_path和lua_cpath代表require要加载的文件所在的目录。
-snax代表使用snax框架写的服务所在的目录。</p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2018-04-09-skynet/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
-      <article class="article">
         <a href="/blog/post/2018-02-09-gomodule/" class="article-titles">
           <h2 class="article-title">Introduction to Go Modules</h2>
           
@@ -279,6 +246,26 @@ snax代表使用snax框架写的服务所在的目录。</p>
           <p>go micro code analysis</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2017-04-25-go-micro/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/post/2017-04-20-kafka/" class="article-titles">
+          <h2 class="article-title">kafka in depth analysis</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>April 20, 2017</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/kafka/">
+              <i class="fa-solid fa-tag"></i>
+              kafka
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <p>kafka架构分析</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2017-04-20-kafka/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
     </section>
