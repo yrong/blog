@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Implementation on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/implementation/</link>
+    <description>Recent content in Implementation on yrong blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
+    <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
+    <lastBuildDate>Fri, 08 May 2026 16:00:00 +0000</lastBuildDate>
+    <atom:link href="https://yrong.github.io/blog/tags/implementation/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Speculative Messaging — POC Implementation Design</title>
+      <link>https://yrong.github.io/blog/post/2026-05-08-speculative-messaging-impl-design/</link>
+      <pubDate>Fri, 08 May 2026 16:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2026-05-08-speculative-messaging-impl-design/</guid>
+      <description>&lt;h1 id=&#34;speculative-messaging--minimal-poc-implementation-design&#34;&gt;Speculative Messaging — Minimal POC Implementation Design&lt;/h1&gt;&#xA;&lt;p&gt;Based on &lt;a href=&#34;speculative-messaging-design.md&#34;&gt;speculative-messaging-design.md&lt;/a&gt;.&lt;/p&gt;&#xA;&lt;p&gt;This is the &lt;strong&gt;single source of truth&lt;/strong&gt; for the minimal speculative-messaging POC&#xA;on the current codebase, covering implementation design, end-to-end workflow,&#xA;off-chain networking, and the follow-up roadmap.&lt;/p&gt;&#xA;&lt;p&gt;&lt;strong&gt;Phase 1 scope — Inclusion-based messaging with Late Block Proofs.&lt;/strong&gt; Removes&#xA;message storage from relay chain state while keeping latency at ~6–12s (1–2 relay&#xA;blocks for inclusion). This is the first implementation slice of the broader&#xA;offchain-XCMP replacement direction — the conservative inclusion-based path of&#xA;the general commitment-driven speculative messaging model.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

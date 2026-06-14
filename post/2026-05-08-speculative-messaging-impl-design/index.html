@@ -1,0 +1,1777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Speculative Messaging — POC Implementation Design - yrong blog</title>
+  <meta property="og:title" content="Speculative Messaging — POC Implementation Design - yrong blog" />
+  <meta name="twitter:title" content="Speculative Messaging — POC Implementation Design - yrong blog" />
+  <meta name="description" content="Speculative Messaging — Minimal POC Implementation Design
+Based on speculative-messaging-design.md.
+This is the single source of truth for the minimal speculative-messaging POC
+on the current codebase, covering implementation design, end-to-end workflow,
+off-chain networking, and the follow-up roadmap.
+Phase 1 scope — Inclusion-based messaging with Late Block Proofs. Removes
+message storage from relay chain state while keeping latency at ~6–12s (1–2 relay
+blocks for inclusion). This is the first implementation slice of the broader
+offchain-XCMP replacement direction — the conservative inclusion-based path of
+the general commitment-driven speculative messaging model.">
+  <meta property="og:description" content="Speculative Messaging — Minimal POC Implementation Design
+Based on speculative-messaging-design.md.
+This is the single source of truth for the minimal speculative-messaging POC
+on the current codebase, covering implementation design, end-to-end workflow,
+off-chain networking, and the follow-up roadmap.
+Phase 1 scope — Inclusion-based messaging with Late Block Proofs. Removes
+message storage from relay chain state while keeping latency at ~6–12s (1–2 relay
+blocks for inclusion). This is the first implementation slice of the broader
+offchain-XCMP replacement direction — the conservative inclusion-based path of
+the general commitment-driven speculative messaging model.">
+  <meta name="twitter:description" content="Speculative Messaging — Minimal POC Implementation Design
+Based on speculative-messaging-design.md.
+This is the single source of truth for the minimal speculative-messaging POC
+on the current …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2026-05-08-speculative-messaging-impl-design/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Speculative Messaging — POC Implementation Design</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>May 8, 2026</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/polkadot/">
+            <i class="fa-solid fa-tag"></i>
+            polkadot
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/xcm/">
+            <i class="fa-solid fa-tag"></i>
+            xcm
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/implementation/">
+            <i class="fa-solid fa-tag"></i>
+            implementation
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/design/">
+            <i class="fa-solid fa-tag"></i>
+            design
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-core-concept-and-end-to-end-workflow">1. Core Concept and End-to-End Workflow</a>
+      <ul>
+        <li><a href="#11-workflow-diagram">1.1 Workflow Diagram</a></li>
+        <li><a href="#12-detailed-walkthrough">1.2 Detailed Walkthrough</a></li>
+        <li><a href="#13-protocol-pipeline-end-to-end">1.3 Protocol Pipeline (End-to-End)</a></li>
+      </ul>
+    </li>
+    <li><a href="#2-commitments-versioning-strategy">2. Commitments Versioning Strategy</a></li>
+    <li><a href="#3-primitives-polkadot-primitives-v10">3. Primitives (polkadot-primitives v10)</a>
+      <ul>
+        <li><a href="#31-commitment-types">3.1 Commitment Types</a></li>
+        <li><a href="#32-off-chain-types">3.2 Off-Chain Types</a></li>
+        <li><a href="#33-deterministic-ingress-types">3.3 Deterministic Ingress Types</a></li>
+        <li><a href="#34-message-payload-format">3.4 Message Payload Format</a></li>
+        <li><a href="#35-late-block-proof-types">3.5 Late Block Proof Types</a></li>
+      </ul>
+    </li>
+    <li><a href="#4-relay-chain-runtime-changes">4. Relay Chain Runtime Changes</a>
+      <ul>
+        <li><a href="#41-new-module-speculative_messagingrs">4.1 New Module: <code>speculative_messaging.rs</code></a></li>
+        <li><a href="#42-enactment-time-matching">4.2 Enactment-Time Matching</a></li>
+        <li><a href="#43-new-error">4.3 New Error</a></li>
+        <li><a href="#44-what-the-relay-chain-does-not-do">4.4 What the Relay Chain Does <em>Not</em> Do</a></li>
+      </ul>
+    </li>
+    <li><a href="#5-parachain-runtime-changes">5. Parachain Runtime Changes</a>
+      <ul>
+        <li><a href="#51-outgoing-message-mmr-sender-side">5.1 Outgoing Message MMR (Sender Side)</a></li>
+        <li><a href="#52-incoming-message-state-receiver-side">5.2 Incoming Message State (Receiver Side)</a></li>
+        <li><a href="#53-producing-commitments">5.3 Producing Commitments</a></li>
+      </ul>
+    </li>
+    <li><a href="#6-pvf-validation-entry-point">6. PVF Validation Entry Point</a>
+      <ul>
+        <li><a href="#61-candidate-commitments-reconstruction">6.1 Candidate Commitments Reconstruction</a></li>
+        <li><a href="#62-late-block-proofs-pov-approach">6.2 Late Block Proofs (PoV Approach)</a></li>
+      </ul>
+    </li>
+    <li><a href="#7-off-chain-networking">7. Off-Chain Networking</a>
+      <ul>
+        <li><a href="#71-model">7.1 Model</a></li>
+        <li><a href="#72-sender-side-batch-construction-and-retention">7.2 Sender-Side: Batch Construction and Retention</a></li>
+        <li><a href="#73-transport-http-api">7.3 Transport: HTTP API</a></li>
+        <li><a href="#74-receiver-side-fetch-precheck-inject">7.4 Receiver-Side: Fetch, Precheck, Inject</a></li>
+        <li><a href="#75-provider-discovery">7.5 Provider Discovery</a></li>
+        <li><a href="#76-error-handling-and-retry">7.6 Error Handling and Retry</a></li>
+        <li><a href="#77-boundedness-and-failure-modes">7.7 Boundedness and Failure Modes</a></li>
+        <li><a href="#78-tradeoffs">7.8 Tradeoffs</a></li>
+        <li><a href="#79-native-collator-transport-future">7.9 Native Collator Transport (Future)</a></li>
+      </ul>
+    </li>
+    <li><a href="#8-hrmp-coexistence">8. HRMP Coexistence</a></li>
+    <li><a href="#9-feature-gating--upgrade-path">9. Feature Gating &amp; Upgrade Path</a>
+      <ul>
+        <li><a href="#91-per-parachain-enablement">9.1 Per-Parachain Enablement</a></li>
+        <li><a href="#92-per-channel-gating-optional">9.2 Per-Channel Gating (Optional)</a></li>
+      </ul>
+    </li>
+    <li><a href="#10-implementation-plan">10. Implementation Plan</a>
+      <ul>
+        <li><a href="#101-step-1-primitives-and-version-gating">10.1 Step 1: Primitives and Version Gating</a></li>
+        <li><a href="#102-step-2-receiver-runtime-ingress-path">10.2 Step 2: Receiver Runtime Ingress Path</a></li>
+        <li><a href="#103-step-3-sender-runtime-outbox-path">10.3 Step 3: Sender Runtime Outbox Path</a></li>
+        <li><a href="#104-step-4-collator-side-inherent-injection-and-commitment-assembly">10.4 Step 4: Collator-Side Inherent Injection and Commitment Assembly</a></li>
+        <li><a href="#105-step-5-pvf--wasm-validation-abi">10.5 Step 5: PVF / Wasm Validation ABI</a></li>
+        <li><a href="#106-step-6-node-side-candidate-validation">10.6 Step 6: Node-Side Candidate Validation</a></li>
+        <li><a href="#107-step-7-late-block-proofs-pvf--provider">10.7 Step 7: Late Block Proofs (PVF + Provider)</a></li>
+        <li><a href="#108-step-8-relay-chain-runtime-enactment-rules">10.8 Step 8: Relay-Chain Runtime Enactment Rules</a></li>
+        <li><a href="#109-step-9-off-chain-networking">10.9 Step 9: Off-Chain Networking</a></li>
+        <li><a href="#1010-step-10-poc-runtime-and-tests">10.10 Step 10: POC Runtime and Tests</a></li>
+      </ul>
+    </li>
+    <li><a href="#11-whats-not-in-this-poc">11. What&rsquo;s NOT In This POC</a></li>
+    <li><a href="#12-follow-up-roadmap">12. Follow-Up Roadmap</a>
+      <ul>
+        <li><a href="#delivery-bounds-and-pruning">Delivery Bounds and Pruning</a></li>
+        <li><a href="#rate-limiting-and-dos-protection">Rate Limiting and DoS Protection</a></li>
+        <li><a href="#proof-and-storage-bounds">Proof and Storage Bounds</a></li>
+        <li><a href="#trust-domains-and-acknowledgements">Trust Domains and Acknowledgements</a></li>
+        <li><a href="#migration-and-coexistence">Migration and Coexistence</a></li>
+        <li><a href="#production-hardening">Production Hardening</a></li>
+        <li><a href="#optional-future-directions">Optional Future Directions</a></li>
+      </ul>
+    </li>
+    <li><a href="#13-related-documents">13. Related Documents</a></li>
+  </ul>
+</nav>
+</aside>
+      <h1 id="speculative-messaging--minimal-poc-implementation-design">Speculative Messaging — Minimal POC Implementation Design</h1>
+<p>Based on <a href="speculative-messaging-design.md">speculative-messaging-design.md</a>.</p>
+<p>This is the <strong>single source of truth</strong> for the minimal speculative-messaging POC
+on the current codebase, covering implementation design, end-to-end workflow,
+off-chain networking, and the follow-up roadmap.</p>
+<p><strong>Phase 1 scope — Inclusion-based messaging with Late Block Proofs.</strong> Removes
+message storage from relay chain state while keeping latency at ~6–12s (1–2 relay
+blocks for inclusion). This is the first implementation slice of the broader
+offchain-XCMP replacement direction — the conservative inclusion-based path of
+the general commitment-driven speculative messaging model.</p>
+<p>The POC includes Late Block Proofs (section 6.2) so that receivers can
+successfully enact candidates even when the source chain&rsquo;s <code>provides_root</code> has
+advanced between block building and enactment — a normal case under any realistic
+backing pipeline, not just core-on-demand chains. A minimal collator resubmission
+loop (section 7.4) provides basic eventual-delivery behavior: if a candidate is
+rejected, the collator fetches fresh data and retries. Full eventual-delivery
+guarantees (bounded catch-up, persistent queues, production retry policy) are
+deferred to section 12.</p>
+<hr>
+<h2 id="1-core-concept-and-end-to-end-workflow">1. Core Concept and End-to-End Workflow</h2>
+<p>The POC keeps one critical rule: <strong>nothing consensus-critical happens only
+off-chain</strong>. Off-chain logic may fetch, cache, and precheck batches, but
+validators never trust that by itself. The actual consensus path is:</p>
+<ol>
+<li>the sender runtime executes and produces a <code>provides</code> root</li>
+<li>the receiver collator fetches candidate ingress data from a relayer/provider</li>
+<li>the receiver embeds that ingress into the block body</li>
+<li>the receiver runtime re-verifies and executes it</li>
+<li>the PVF replays the same block deterministically</li>
+<li>the relay chain checks <code>requires</code> against <code>provides</code> at enactment</li>
+</ol>
+<p>That is what makes this design practical on the current architecture: it reuses
+the existing parachain lifecycle instead of inventing a second execution path.</p>
+<h3 id="11-workflow-diagram">1.1 Workflow Diagram</h3>
+<pre tabindex="0"><code> Chain A (Sender)                         Chain B (Receiver)
+ ════════════════                         ══════════════════
+
+ 1. Execute block                         3. Pull MessageBatch off-chain
+    - Produce outbound XCM                    - Fetch from relayer/provider
+    - Update per-destination MMR              - Precheck proof + continuity
+    - Derive cumulative provides root
+
+ 2. Emit ProvidesCommitment { root }      4. Build receiver block
+    in CandidateCommitments                   - Embed SpeculativeIngress inherent
+    and retain recent batch/proof data        - Re-verify in runtime
+                                               - Dispatch through XCMP handler
+                                               - Record requires for this block
+                                           ═══════════════════════════════════════
+
+                                           Relay Chain
+                                           ═══════════════════════════════════════
+                                           5. Backing / PVF
+                                              - Replay block deterministically
+                                              - Return provides / requires in v4 validation result
+
+                                           6. Enactment / inclusion
+                                              - Match requires against:
+                                                latest persisted provides root
+                                              - Update ProvidesRoots only after actual enactment
+</code></pre><h3 id="12-detailed-walkthrough">1.2 Detailed Walkthrough</h3>
+<p><strong>Step 1 — Sender block execution.</strong> The source parachain collator builds a block
+normally. During runtime execution, outbound sibling-parachain XCM is produced
+through the existing path. A speculative outbox wrapper records the payloads into
+per-destination MMR/subtree state, and the sender&rsquo;s cumulative top-level
+<code>provides</code> root becomes derivable from the resulting runtime state. See section 5.1.</p>
+<p><strong>Step 2 — Source-side batch/proof retention.</strong> After the sender block exists, a
+relayer/provider process retains a bounded recent history of: the sender
+<code>provides_root</code>, destination subtree roots, subtree inclusion proofs, and ordered
+messages with positions. See section 7.2.</p>
+<p><strong>Step 3 — Receiver collator fetches and prechecks.</strong> Before proposing its own
+block, the destination collator fetches recent batches from a provider and
+performs a local precheck: verify the subtree inclusion proof, verify message
+positions are consecutive, verify local subtree continuity. See section 7.4.</p>
+<p><strong>Step 4 — Receiver embeds <code>SpeculativeIngress</code>.</strong> The receiver collator converts
+accepted batches into <code>SpeculativeIngress</code>, inserts it into <code>InherentData</code>, and
+the runtime constructs an inherent-style call in the block body. See section 3.3.</p>
+<p><strong>Step 5 — Receiver runtime re-verifies and dispatches.</strong> The runtime re-verifies
+each embedded batch against on-chain state: subtree proof, message ordering and
+continuity, updates <code>IncomingState</code>, records consumed source roots, and
+dispatches payloads through the existing XCMP handler. See section 5.2.</p>
+<p><strong>Step 6 — Collator assembles <code>provides</code> and <code>requires</code>.</strong> After execution, the
+collator reads the speculative outputs from runtime state: sender-side cumulative
+<code>provides</code> and receiver-side <code>requires</code>. These populate the candidate
+commitments. See section 5.3.</p>
+<p><strong>Step 7 — PVF replays the same block deterministically.</strong> Backing validators
+execute the wasm PVF over the candidate&rsquo;s <code>block_data</code>. Since <code>SpeculativeIngress</code>
+was embedded in the block body, validators replay the same ingress call and
+produce the same <code>provides</code>/<code>requires</code>. See section 6.</p>
+<p><strong>Step 8 — Node-side candidate validation reconstructs commitments.</strong> After the
+PVF returns, candidate validation reconstructs commitments from the validation
+outputs and checks the hash against the candidate receipt. See section 6.1.</p>
+<p><strong>Step 9 — Relay-chain enactment checks dependency satisfaction.</strong> At enactment
+time, the relay chain checks every <code>RequiresCommitment</code> against the latest
+persisted provides root, then updates <code>ProvidesRoots[source]</code> on success.
+See section 4.2.</p>
+<p>The detailed implementation order, including specific files and modules for each step, is in section 10.</p>
+<h3 id="13-protocol-pipeline-end-to-end">1.3 Protocol Pipeline (End-to-End)</h3>
+<p>How our design maps onto the existing parachain–relay-chain communication flow.</p>
+<p><strong>Phase 1 — Collator builds the block</strong></p>
+<ol>
+<li><strong>Fetch off-chain data</strong> (§7.4). Collator queries provider for <code>MessageBatch</code>es.
+Prechecks proofs and message continuity. If source root has advanced, also
+fetches and prechecks <code>LateBlockProof</code> (§6.2).</li>
+<li><strong>Assemble inherents</strong> (§3.3). Collator creates <code>InherentData</code>: parachain-system
+data + <code>SpeculativeIngress</code> (batches). Appends <code>LateBlockProof</code> bytes to PoV
+after block data (§6.2).</li>
+<li><strong>Execute block</strong> (§5.1, §5.2). Runtime executes. Outbox wrapper records
+outbound XCM into <code>OutgoingMMRs</code>. <code>ingest_verified_messages</code> verifies batches,
+updates <code>IncomingState</code>, dispatches XCM, records consumed sources.</li>
+<li><strong>Collect outputs</strong> (§5.3). Collator calls <code>compute_provides_root()</code> and
+<code>get_requires_commitments()</code> via runtime API. Overrides requires with
+LateBlockProof transformed roots. Assembles <code>CandidateCommitments</code>.</li>
+<li><strong>Build receipt</strong>. Collator hashes commitments → <code>commitments_hash</code>. Builds
+<code>CommittedCandidateReceipt</code> with descriptor + hash + signature. Submits
+(PoV, receipt) to backing validators.</li>
+</ol>
+<p><strong>Phase 2 — Backing</strong></p>
+<ol start="6">
+<li><strong>PVF execution</strong> (§6, §6.2). Each backing validator spins up Wasm sandbox,
+loads the parachain&rsquo;s Wasm blob, calls <code>validate_block</code> with the PoV. PVF
+executes the block deterministically — same inherents, same
+<code>ingest_verified_messages</code>, same outbox updates. After execution, reads
+<code>LateBlockProof</code> from PoV trailing bytes, verifies each proof, transforms
+requires. Returns <code>ValidationResultV4</code>.</li>
+<li><strong>Commitments reconstruction</strong> (§6.1). Node-side validation reconstructs
+<code>CandidateCommitments</code> from <code>ValidationResultV4</code>, hashes, checks against the
+receipt&rsquo;s <code>commitments_hash</code>. Match → commitments are valid. Validators sign,
+candidate enters <code>PendingAvailability</code>.</li>
+</ol>
+<p><strong>Phase 3 — Inclusion / Enactment</strong></p>
+<ol start="8">
+<li><strong>Dependency check</strong> (§4.2). Relay block author decides which pending
+candidates to include. For each v4 candidate, the relay chain checks every
+<code>RequiresCommitment.expected_root</code> against persisted <code>ProvidesRoots[source]</code>.
+Unmet → <code>UnsatisfiedRequires</code>, candidate dropped.</li>
+<li><strong>Enact</strong> (§4.1). <code>enact_candidate()</code> runs. For v4 candidates with
+<code>ProvidesCommitment</code>: update <code>ProvidesRoots[para_id]</code>.</li>
+</ol>
+<p><strong>Phase 4 — Availability &amp; Finality</strong></p>
+<ol start="10">
+<li>PoV is erasure-coded and distributed. Relay chain finality confirms the
+candidate is canonical. <code>ProvidesRoots[source]</code> is now permanently available
+for future receiver blocks.</li>
+</ol>
+<hr>
+<h2 id="2-commitments-versioning-strategy">2. Commitments Versioning Strategy</h2>
+<p>New types go into a <strong>new <code>v10</code> primitives module</strong>. The existing <code>v9</code> types are
+frozen. New speculative-messaging candidates use <code>v10</code> types, while legacy
+candidates continue to use the existing <code>v9</code> path.</p>
+<pre tabindex="0"><code>polkadot/primitives/src/v10/mod.rs  ← NEW FILE
+</code></pre><p>A <code>CandidateDescriptor</code> version bump signals that the parachain supports
+speculative messaging. The current codebase centers on <code>CandidateDescriptorV2</code> /
+<code>CandidateReceiptV2</code> / <code>CommittedCandidateReceiptV2</code> with a reserved-byte
+pattern for backward-compatible version detection. &ldquo;v4&rdquo; in this document
+should be read as <strong>the next concrete speculative-capable descriptor/receipt
+version</strong> — the important point is the <strong>version-gated coexistence model</strong>, not
+the literal version numeral.</p>
+<p><strong>Settled decision — new concrete version family.</strong> Introduce a new
+descriptor/receipt version rather than evolving the existing V2 struct.
+Overloading the V2 reserved bytes with speculative fields risks
+backward-compatibility bugs where a non-speculative node parsing a speculative
+candidate silently misinterprets fields. Legacy candidates continue on the
+unchanged v9 path; v4 candidates use v10 types.</p>
+<p>Concretely, the intended behavior:</p>
+<ul>
+<li>legacy candidates keep their existing commitments layout and validation/reconstruction path</li>
+<li>v4 candidates use the extended commitments layout with speculative messaging fields</li>
+<li>relay-chain inclusion only enforces requires/provides matching for v4+ candidates</li>
+<li>node-side candidate validation reconstructs commitments according to the candidate descriptor version</li>
+</ul>
+<p>This means the upgrade is additive: pre-v4 parachains remain valid, v4 parachains
+opt into new semantics, and both formats coexist during migration. Every component
+that touches commitments is version-aware:</p>
+<ul>
+<li><strong>Collator</strong> (§5.3): branches on <code>api_version</code> to include speculative fields for
+v4 parachains, skips them for legacy.</li>
+<li><strong>Relay chain backing</strong> (§4.2): <code>process_candidates</code> accepts both formats
+unchanged into <code>PendingAvailability</code>.</li>
+<li><strong>Relay chain enactment</strong> (§4.2): only enforces <code>requires</code>/<code>provides</code> matching
+for <code>descriptor.version() &gt;= V4</code> candidates.</li>
+<li><strong>Node-side validation</strong> (§6.1): reconstructs <code>v9::CandidateCommitments</code> for V1–V3,
+<code>v10::CandidateCommitments</code> for V4.</li>
+<li><strong>Relay chain runtime API</strong> (<code>check_validation_outputs</code>): accepts the extended
+type from the start, ignoring optional speculative fields for pre-speculative
+candidates.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">// In v10/mod.rs:
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">CandidateDescriptorV4</span><span style="color:#f92672">&lt;</span>N <span style="color:#f92672">=</span> BlockNumber<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> para_id: <span style="color:#a6e22e">ParaId</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> relay_parent: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Phase 1 speculative messaging does not require LLv2 fields. If the
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// implementation wants to stay strictly decoupled from LLv2, these can be
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// omitted from the initial V4. If the team intentionally wants one shared
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// descriptor upgrade path, they can be included as optional fields:
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> scheduling_parent: Option<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> scheduling_session_index: Option<span style="color:#f92672">&lt;</span>SessionIndex<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> collator: <span style="color:#a6e22e">CollatorId</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> persisted_validation_data_hash: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> pov_hash: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> erasure_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> para_head: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> validation_code_hash: <span style="color:#a6e22e">ValidationCodeHash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> signature: <span style="color:#a6e22e">CollatorSignature</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> core_index: <span style="color:#a6e22e">CoreIndex</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> session_index: <span style="color:#a6e22e">SessionIndex</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">CandidateCommitments</span><span style="color:#f92672">&lt;</span>N <span style="color:#f92672">=</span> BlockNumber<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> upward_messages: <span style="color:#a6e22e">UpwardMessages</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> horizontal_messages: <span style="color:#a6e22e">HorizontalMessages</span>,  <span style="color:#75715e">// HRMP (legacy, coexists in Phase 1)
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> new_validation_code: Option<span style="color:#f92672">&lt;</span>ValidationCode<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> head_data: <span style="color:#a6e22e">HeadData</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> processed_downward_messages: <span style="color:#66d9ef">u32</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> hrmp_watermark: <span style="color:#a6e22e">N</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ── New speculative messaging fields ──
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> provides: Option<span style="color:#f92672">&lt;</span>ProvidesCommitment<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> requires: Vec<span style="color:#f92672">&lt;</span>RequiresCommitment<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Additional structural rules for <code>CandidateCommitments</code> in v4:</p>
+<ul>
+<li><code>requires</code> must be in a <strong>canonical order</strong>, sorted by <code>source: ParaId</code></li>
+<li>there must be at most <strong>one <code>RequiresCommitment</code> per source parachain</strong></li>
+<li>duplicate sources must be rejected before hashing / inclusion</li>
+<li><code>requires</code> should be <strong>bounded</strong> at the type or protocol level for production code; the POC may start with <code>Vec</code> but should define a concrete maximum</li>
+</ul>
+<p>These rules are important because commitments are hashed. Two semantically
+equivalent but differently ordered <code>requires</code> vectors must not lead to different
+candidate commitments hashes.</p>
+<hr>
+<h2 id="3-primitives-polkadot-primitives-v10">3. Primitives (polkadot-primitives v10)</h2>
+<h3 id="31-commitment-types">3.1 Commitment Types</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// A commitment that a parachain provides a set of outbound messages.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// The root is the top-level Merkle root over all per-destination MMR roots.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">ProvidesCommitment</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Top-level Merkle root over all per-destination MMR roots.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">/// A commitment that a parachain requires messages from a source parachain.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">RequiresCommitment</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The source parachain whose provides root we expect.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> source: <span style="color:#a6e22e">ParaId</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The provides root we built against (the source chain&#39;s top-level root at the
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// block from which we received messages).
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> expected_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This split is intentional: subtree roots remain internal runtime state used for
+message-batch verification, while <code>RequiresCommitment.expected_root</code> always
+refers to the sender&rsquo;s top-level <code>ProvidesCommitment.root</code>, which is the value
+matched by the relay chain.</p>
+<p>Two invariants are implicit and should be treated as part of the Phase 1 design:</p>
+<ol>
+<li>
+<p><strong>Canonicalization of <code>requires</code></strong> — sort entries by <code>source: ParaId</code>
+ascending, allow at most one entry per source, reject duplicates before
+hashing. Semantically equivalent dependency sets must produce identical
+<code>CandidateCommitments</code> hashes.</p>
+</li>
+<li>
+<p><strong>Exact top-level root construction</strong> — gather <code>(destination_para_id, subtree_root)</code> pairs from the sender&rsquo;s per-destination outbox state, sort by
+<code>destination_para_id</code>, compute each leaf as <code>keccak256(SCALE(destination_para_id, subtree_root))</code>, and compute the Merkle root over that ordered leaf list. All
+proof generation, proof verification, and relay-visible commitment matching
+must use this exact same keyed-leaf encoding.</p>
+</li>
+</ol>
+<h3 id="32-off-chain-types">3.2 Off-Chain Types</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// A message batch sent off-chain between collators.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#[derive(Clone, Encode, Decode, Debug)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">MessageBatch</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Source parachain
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> source: <span style="color:#a6e22e">ParaId</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Source block hash that produced these messages
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> source_block: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Relay-chain block number associated with the source batch when dispatching
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// through the existing `XcmpMessageHandler` interface.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">///
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// This is the source chain&#39;s relay parent block number at the time the source
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// block executed — available in the sender runtime as
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// `frame_system::Pallet::&lt;T&gt;::parent_number()` or equivalent.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> source_relay_parent_number: <span style="color:#a6e22e">RelayChainBlockNumber</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The top-level provides root for this block
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> provides_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The per-destination MMR root for the receiver
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> subtree_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Merkle proof that subtree_root is in provides_root.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Length: O(log D) where D = number of destinations.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> subtree_inclusion_proof: Vec<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The messages with their positions in the sender&#39;s subtree MMR.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> messages: Vec<span style="color:#f92672">&lt;</span>OutgoingMessage<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#[derive(Clone, Encode, Decode, Debug)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">OutgoingMessage</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Zero-based position in the source&#39;s per-destination MMR.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> position: <span style="color:#66d9ef">u64</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Raw XCM message bytes (what gets passed to `handle_xcmp_messages`).
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> payload: Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>For the minimal POC, this shape is sufficient. It contains everything the
+receiver needs to verify that the destination-specific subtree is included in the
+sender&rsquo;s top-level <code>provides_root</code>, verify per-source ordered continuity of
+messages against local receiver state, reconstruct the receiver&rsquo;s local subtree
+and check it matches <code>subtree_root</code>, and dispatch the verified payloads through
+the existing XCMP batch handler.</p>
+<p>Invariants:</p>
+<ol>
+<li>
+<p><strong>Canonical subtree proof leaf</strong> — <code>subtree_inclusion_proof</code> must always prove
+inclusion of <code>keccak256(SCALE(destination_para_id, subtree_root))</code> into
+<code>provides_root</code>. The destination parachain is not carried explicitly in
+<code>MessageBatch</code> because the receiver already knows &ldquo;this batch is for me,&rdquo; but
+both sides must use the same keyed leaf format.</p>
+</li>
+<li>
+<p><strong>Canonical message ordering</strong> — <code>messages</code> must be ordered by ascending
+<code>position</code> with no duplicates. During verification, the receiver expects them
+to advance continuously from <code>last_processed + 1</code>.</p>
+</li>
+<li>
+<p><strong>Batch-to-root consistency</strong> — <code>provides_root</code> commits to <code>subtree_root</code>,
+which commits to the ordered message sequence. The receiver checks both links.</p>
+</li>
+<li>
+<p><strong>Practical bounds</strong> — <code>subtree_inclusion_proof</code>, <code>messages</code>, and each
+<code>payload</code> should have explicit bounds in a production implementation. The POC
+pseudocode can leave them as <code>Vec</code>, but the implementation should define
+concrete maxima.</p>
+</li>
+</ol>
+<h3 id="33-deterministic-ingress-types">3.3 Deterministic Ingress Types</h3>
+<p>Off-chain fetch is only a transport step. For deterministic execution, the
+verified batches that a collator wants to consume in a block must be embedded in
+the block itself via an inherent-like call. Validators then replay that same
+input when executing the block inside the PVF.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// Block input carried in the parachain block body.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// This is the canonical ingress payload for speculative messaging.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#[derive(Clone, Encode, Decode, Debug)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">SpeculativeIngress</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Verified batches selected by the collator for this block.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> batches: Vec<span style="color:#f92672">&lt;</span>MessageBatch<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>For Phase 1, <code>SpeculativeIngress.batches</code> follows simple canonical selection
+rules: batches are grouped logically per <code>source</code>, for a given source they appear
+oldest-to-newest, and duplicate or overlapping batches for the same source in a
+single block should be rejected by both collator precheck and runtime
+re-verification.</p>
+<p>Phase 1 uses a single inherent-like dispatch, following the same pattern as
+<code>ParachainSystem::set_validation_data</code>: a node-local component fetches batches
+off-chain, <code>ProvideInherent</code> turns them into a block-body call, the runtime
+re-verifies deterministically, and <code>validate_block</code> replays the same call.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span>SpeculativeInbox::ingest_verified_messages { ingress: <span style="color:#a6e22e">SpeculativeIngress</span> }
+</span></span></code></pre></div><p>The wiring:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">// client-side before proposal
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> inherent_data <span style="color:#f92672">=</span> other_inherent_providers.create_inherent_data().<span style="color:#66d9ef">await</span><span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>inherent_data.put_data(<span style="color:#66d9ef">SPECULATIVE_INGRESS_IDENTIFIER</span>, <span style="color:#f92672">&amp;</span>ingress)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// runtime-side during block construction
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>T: <span style="color:#a6e22e">Config</span><span style="color:#f92672">&gt;</span> ProvideInherent <span style="color:#66d9ef">for</span> Pallet<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">INHERENT_IDENTIFIER</span>: <span style="color:#a6e22e">InherentIdentifier</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">SPECULATIVE_INGRESS_IDENTIFIER</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">create_inherent</span>(data: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">InherentData</span>) -&gt; Option<span style="color:#f92672">&lt;</span>Self::Call<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> ingress <span style="color:#f92672">=</span> data.get_data::<span style="color:#f92672">&lt;</span>SpeculativeIngress<span style="color:#f92672">&gt;</span>(<span style="color:#f92672">&amp;</span>Self::<span style="color:#66d9ef">INHERENT_IDENTIFIER</span>)
+</span></span><span style="display:flex;"><span>            .ok()
+</span></span><span style="display:flex;"><span>            .flatten()<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>        Some(Call::ingest_verified_messages { ingress })
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Validators do not trust the collator&rsquo;s off-chain fetch — they only re-verify the
+batch data present in the block body.</p>
+<p>If <code>ingest_verified_messages</code> depends on fresh parachain-system state written by
+<code>set_validation_data</code>, the speculative inbox pallet should be ordered in the
+runtime such that its inherent executes <strong>after</strong> <code>ParachainSystem</code>&rsquo;s inherent.</p>
+<h3 id="34-message-payload-format">3.4 Message Payload Format</h3>
+<p><code>OutgoingMessage.payload</code> contains raw XCM bytes — the same blob that the
+receiver wants to deliver. During ingress execution, the runtime re-batches the
+verified messages into the aggregate XCMP wire format expected by the configured
+<code>T::XcmpMessageHandler::handle_xcmp_messages</code> interface. No new message-execution
+trait is introduced for Phase 1; speculative ingress adapts to the existing XCMP
+batch handler shape.</p>
+<p>For empty blocks (no outbound messages, no inbound messages):</p>
+<ul>
+<li><code>provides: None</code></li>
+<li><code>requires: vec![]</code></li>
+</ul>
+<h3 id="35-late-block-proof-types">3.5 Late Block Proof Types</h3>
+<p>When a receiver block is built against an older source <code>provides_root</code> than
+what&rsquo;s now current on the relay chain, the receiver collator includes a
+<code>LateBlockProof</code> in the PoV. The collator prechecks the proof and uses the
+transformed root in the candidate commitments. The PVF independently verifies
+the proof and transforms the <code>RequiresCommitment</code> during <code>validate_block</code>, before
+the relay chain sees it.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// Included in the receiver candidate&#39;s PoV when the block was built against
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// an older source root than what&#39;s persisted in ProvidesRoots.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#[derive(Clone, Encode, Decode, Debug)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">LateBlockProof</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The source parachain this proof covers.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> source: <span style="color:#a6e22e">ParaId</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The provides root the receiver block was built against (the old root
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// from the batch). This is the root that would appear in
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// RequiresCommitment.expected_root without the proof.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> old_provides_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The subtree root the receiver built against (from the old source block).
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> old_subtree_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Merkle proof that old_subtree_root was in old_provides_root.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> old_subtree_proof: Vec<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The current provides root of the source (what&#39;s now in ProvidesRoots).
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> new_provides_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The subtree root under the new provides root.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> new_subtree_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Merkle proof that new_subtree_root is in new_provides_root.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> new_subtree_proof: Vec<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// If the source produced additional messages to this receiver since the
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// block was built, this proof shows the old subtree is a valid prefix of
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// the new subtree.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> subtree_extension: Option<span style="color:#f92672">&lt;</span>MMRExtensionProof<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">/// Proves that an MMR root R_old is an ancestor of R_new, i.e. the MMR was
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// only appended to, not mutated.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#[derive(Clone, Encode, Decode, Debug)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">MMRExtensionProof</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The peaks of the old MMR.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> old_peaks: Vec<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The peaks of the new (larger) MMR.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> new_peaks: Vec<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Nodes connecting old peaks to new peaks to prove prefix relationship.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> connecting_nodes: Vec<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The canonical leaf format for top-level proofs matches section 3.1:
+<code>keccak256(SCALE(destination_para_id, subtree_root))</code>. Subtree extension proofs
+are per-destination MMR proofs — they follow the standard MMR append-only
+verification semantics of <code>sp-mmr-primitives</code>.</p>
+<hr>
+<h2 id="4-relay-chain-runtime-changes">4. Relay Chain Runtime Changes</h2>
+<h3 id="41-new-module-speculative_messagingrs">4.1 New Module: <code>speculative_messaging.rs</code></h3>
+<pre tabindex="0"><code>polkadot/runtime/parachains/src/speculative_messaging.rs  ← NEW FILE
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// Latest provides root per parachain.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// Updated each time a v4 candidate with a provides commitment is included.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// Only the most recent root is stored — old roots are overwritten.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#[pallet::storage]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">type</span> <span style="color:#a6e22e">ProvidesRoots</span><span style="color:#f92672">&lt;</span>T: <span style="color:#a6e22e">Config</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> StorageMap<span style="color:#f92672">&lt;</span>_, Twox64Concat, ParaId, Hash<span style="color:#f92672">&gt;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>T: <span style="color:#a6e22e">Config</span><span style="color:#f92672">&gt;</span> Pallet<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Read the latest provides root for a parachain.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">provides_root</span>(para_id: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">ParaId</span>) -&gt; Option<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>        ProvidesRoots::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::get(para_id)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Update the provides root after a candidate is included.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">update_provides_root</span>(para_id: <span style="color:#a6e22e">ParaId</span>, root: <span style="color:#a6e22e">Hash</span>) {
+</span></span><span style="display:flex;"><span>        ProvidesRoots::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::insert(para_id, root);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Register in <code>polkadot/runtime/parachains/src/lib.rs</code>.</p>
+<h3 id="42-enactment-time-matching">4.2 Enactment-Time Matching</h3>
+<p>The relay-chain integration must distinguish <strong>backing/pending-availability</strong>
+from <strong>actual inclusion/enactment</strong>. In the current architecture,
+<code>inclusion::process_candidates()</code> handles newly backed candidates and moves them
+into <code>PendingAvailability</code>, while <code>inclusion::enact_candidate()</code> is the
+inclusion-time path that applies relay-visible messaging effects.</p>
+<p>For speculative messaging:</p>
+<ul>
+<li>persisted <code>ProvidesRoots</code> must be updated only when a candidate is actually enacted/included</li>
+<li>requires/provides dependency satisfaction is checked only against the relay parent&rsquo;s state
+(i.e., roots persisted by prior relay blocks), not against candidates being enacted in
+the current block</li>
+</ul>
+<p>This simplification avoids in-block candidate ordering tracking at the cost of at most
+one relay block of additional latency in the rare case where both the providing and
+consuming candidate land in the same relay block. The providing candidate is enacted in
+relay block N, its <code>ProvidesRoots</code> entry persists, and the consuming candidate succeeds
+when resubmitted in relay block N+1.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">// Stage 1: backing / pending-availability admission
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span>(<span style="color:#66d9ef">crate</span>) <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">process_candidates</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">GV</span><span style="color:#f92672">&gt;</span>(<span style="color:#f92672">..</span>.) -&gt; Result<span style="color:#f92672">&lt;..</span>., Error<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (para_id, backed_list) <span style="color:#66d9ef">in</span> candidates.iter() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (candidate, core_index) <span style="color:#66d9ef">in</span> backed_list {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// ... existing candidate checks ...
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Store the v4 commitments unchanged in PendingAvailability.
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// No requires satisfaction decision is finalized here.
+</span></span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Stage 2: inclusion / enactment in the current relay block
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">enact_pending_candidates_for_current_block</span>(<span style="color:#f92672">..</span>.) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> candidate <span style="color:#66d9ef">in</span> candidates_being_enacted_now {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> candidate.descriptor.version() <span style="color:#f92672">&gt;=</span> V4 {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> req <span style="color:#66d9ef">in</span> <span style="color:#f92672">&amp;</span>candidate.commitments.requires {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">let</span> satisfied <span style="color:#f92672">=</span> SpeculativeMessaging::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::provides_root(<span style="color:#f92672">&amp;</span>req.source)
+</span></span><span style="display:flex;"><span>                    .map_or(<span style="color:#66d9ef">false</span>, <span style="color:#f92672">|</span>root<span style="color:#f92672">|</span> root <span style="color:#f92672">==</span> req.expected_root);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">ensure!</span>(satisfied, Error::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::UnsatisfiedRequires);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Self::enact_candidate(<span style="color:#f92672">..</span>.);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> candidate.descriptor.version() <span style="color:#f92672">&gt;=</span> V4 {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">let</span> Some(<span style="color:#66d9ef">ref</span> p) <span style="color:#f92672">=</span> candidate.commitments.provides {
+</span></span><span style="display:flex;"><span>                SpeculativeMessaging::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::update_provides_root(candidate.para_id(), p.root);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The relay chain is not asked to verify message proofs again. It only needs to
+inspect the already-validated <code>provides</code> / <code>requires</code> fields, check dependency
+satisfaction, and persist the newest provides root. This is a relay-runtime
+inclusion rule change, not a new protocol stage.</p>
+<p><strong>Simplification versus the original design.</strong> The original high-level proposal
+included a same-block enacted matching path (checking against in-block candidate
+ordering). The POC deliberately drops this for simplicity: the collator always
+reads from the relay parent&rsquo;s state, which doesn&rsquo;t contain roots that will only
+be written later in the same block. The same-block optimization can be added
+later without breaking existing candidates — it only changes what the relay
+chain accepts, not how the collator builds candidates.</p>
+<p><strong>Relation to late block proofs.</strong> When the source root has advanced beyond what
+the receiver built against, Late Block Proofs (§6.2) transform the
+<code>RequiresCommitment</code> to reference the current root before the relay chain sees
+it. From the relay chain&rsquo;s perspective, the rule is always &ldquo;the expected_root
+must match the latest persisted <code>ProvidesRoots[source]</code>&rdquo; — the PVF handles the
+transformation.</p>
+<p>Note that this problem is asymmetric: LateBlockProofs are only needed when the
+source chain outpaces the destination (i.e., the source produces more blocks, or
+the destination&rsquo;s candidate is delayed in the backing pipeline). If the
+destination produces blocks faster than the source, the source root remains
+stable across multiple destination blocks, and each can match against the
+unchanged <code>ProvidesRoots[source]</code> without a proof. Faster destination production
+is not a problem; slower destination <em>inclusion</em> is.</p>
+<h3 id="43-new-error">4.3 New Error</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// A requires commitment could not be matched to any provides.
+</span></span></span><span style="display:flex;"><span>UnsatisfiedRequires,
+</span></span></code></pre></div><h3 id="44-what-the-relay-chain-does-not-do">4.4 What the Relay Chain Does <em>Not</em> Do</h3>
+<p>A common misconception is that the relay chain must verify cryptographic proofs.
+It does not. The division of labor is:</p>
+<ul>
+<li><strong>No MMR verification.</strong> All MMR proof verification (subtree inclusion, message
+continuity, subtree extension) happens in the parachain runtime and is replayed
+deterministically by the PVF. The relay chain only compares 32-byte hashes.</li>
+<li><strong>No message storage.</strong> Message payloads never touch relay chain state. They
+flow off-chain via the relayer/provider, are embedded in the receiver&rsquo;s block
+body as <code>SpeculativeIngress</code>, and are verified by the receiver runtime.</li>
+<li><strong>No history.</strong> <code>ProvidesRoots</code> stores one hash per parachain, overwritten each
+time a candidate with a new provides root is enacted. There is no per-block
+root history, no MMR of roots, no retention of old values. The relay chain only
+needs the latest root for dependency matching.</li>
+<li><strong>No new protocol stage.</strong> The relay chain still backs candidates, admits them
+to pending availability, and enacts them. Speculative messaging adds one
+inclusion-time check: <code>RequiresCommitment.expected_root</code> must match the latest
+persisted <code>ProvidesRoots[source]</code>. That check is a
+hash comparison, not a cryptographic verification.</li>
+</ul>
+<p>In short: all cryptographic work lives in the PVF; the relay chain only adds
+hash-equality checks on already-validated commitment fields.</p>
+<hr>
+<h2 id="5-parachain-runtime-changes">5. Parachain Runtime Changes</h2>
+<h3 id="51-outgoing-message-mmr-sender-side">5.1 Outgoing Message MMR (Sender Side)</h3>
+<p>Pattern: <strong>wrap the runtime&rsquo;s configured <code>OutboundXcmpMessageSource</code></strong> (typically
+<code>XcmpQueue</code>) by implementing the <code>XcmpMessageSource</code> trait such that each
+outbound message is both recorded in the speculative outbox and forwarded to the
+inner source. The wrapping type then replaces <code>XcmpQueue</code> as the <code>type OutboundXcmpMessageSource</code> in the parachain runtime&rsquo;s <code>ParachainSystem</code> config.
+This is the same interception-point pattern that parachain-system already uses to
+drain outbound HRMP messages in <code>on_finalize</code> (see
+<code>cumulus/pallets/parachain-system/src/lib.rs</code> line ~409).</p>
+<p>This sender-side flow must be produced by <strong>normal runtime block execution</strong> so
+validators can replay the same state transition during <code>validate_block</code>. The
+intended execution model:</p>
+<ol>
+<li>Runtime execution emits outbound sibling-parachain XCM through the existing <code>SendXcm</code>/<code>XcmpQueue</code> path.</li>
+<li>The speculative outbox wrapper intercepts those outbound payloads during that same runtime execution and appends them into per-destination MMR state.</li>
+<li>After block execution finishes, the collator reads the resulting <code>provides_root</code> from runtime state via runtime API.</li>
+</ol>
+<p>For a minimal POC, a new <code>pallet-speculative-outbox</code> should:</p>
+<ul>
+<li>hook into the runtime path that currently sends sibling-parachain XCM through <code>XcmpQueue</code></li>
+<li>hash each outbound payload and append it to <code>OutgoingMMRs[destination]</code></li>
+<li>preserve the normal XCMP delivery path so HRMP/XCMP output behavior remains intact</li>
+<li>expose <code>compute_provides_root()</code> as a runtime API for the collator after execution</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// Per-destination MMRs for outgoing messages.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#[pallet::storage]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">type</span> <span style="color:#a6e22e">OutgoingMMRs</span><span style="color:#f92672">&lt;</span>T: <span style="color:#a6e22e">Config</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> StorageMap<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>    _, Twox64Concat, ParaId, MMRState,
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&gt;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#[derive(Clone, Encode, Decode, TypeInfo, Default)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">MMRState</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Leaf count for THIS destination&#39;s subtree MMR.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> leaf_count: <span style="color:#66d9ef">u64</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> root: <span style="color:#a6e22e">H256</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Nodes stored for proof generation (peaks + internal nodes).
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> nodes: <span style="color:#a6e22e">BTreeMap</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u64</span>, H256<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">/// Payload bytes for outgoing messages, keyed by destination and leaf position.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// Stored on-chain for the POC to keep the relayer simple — no event indexing
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// or off-chain indexer needed. The relay chain is unaffected (this is
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// parachain-local storage). A production implementation may move payloads
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// off-chain with a pruning strategy; for the POC, bounded storage growth is
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// acceptable.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">///
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// Pruning: entries can be removed after a configurable retention window (e.g.,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// N blocks past the point where the destination has acknowledged consumption
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// via ProvidesRoots advancement). The POC may start without automated pruning
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// and add it when retention bounds are defined.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#[pallet::storage]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">type</span> <span style="color:#a6e22e">OutgoingMessages</span><span style="color:#f92672">&lt;</span>T: <span style="color:#a6e22e">Config</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> StorageDoubleMap<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>    _,
+</span></span><span style="display:flex;"><span>    Twox64Concat,
+</span></span><span style="display:flex;"><span>    ParaId,
+</span></span><span style="display:flex;"><span>    Twox64Concat,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">u64</span>,
+</span></span><span style="display:flex;"><span>    Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&gt;</span>;
+</span></span></code></pre></div><p>The important distinction: <code>OutgoingMMRs[destination].leaf_count</code> is the
+authoritative leaf count for that destination&rsquo;s subtree MMR,
+<code>OutgoingMessage.position</code> refers to that per-destination counter,
+<code>ProvidesCommitment.root</code> is derived from the set of current subtree roots, and a
+single sender-wide counter does <strong>not</strong> define the proof/position space used by
+receivers.</p>
+<p><strong>MMR implementation approach.</strong> The hierarchical accumulator structure uses two
+different constructions:</p>
+<ul>
+<li><strong>Per-destination subtrees</strong> are MMRs that grow over time. The codebase ships
+<code>sp-mmr-primitives</code> (at <code>substrate/primitives/merkle-mountain-range/</code>) with
+append, prove, and peek operations. Per-destination subtrees can be implemented
+as instances of <code>sp_mmr_primitives::MMR</code> stored in <code>OutgoingMMRs</code> and
+<code>IncomingState</code>.</li>
+<li><strong>The top level</strong> is rebuilt every block from the current set of
+<code>(destination_para_id, subtree_root)</code> pairs. Since it never needs append-only
+proofs connecting historical roots, a plain binary Merkle tree (not an MMR) is
+sufficient. The canonical construction: sort leaves by <code>destination_para_id</code>,
+compute each leaf as <code>keccak256(SCALE(key))</code>, and build a standard binary
+Merkle tree.</li>
+</ul>
+<p>The top-level tree uses <strong>Keccak256</strong> rather than the Substrate-default Blake2.
+Two reasons: (a) the keyed-leaf pattern <code>keccak256(SCALE(para_id, root))</code>
+prevents second-preimage attacks where an attacker could interpret a leaf hash as
+an internal node hash, a known concern with unbalanced or non-padded Merkle
+trees; (b) Keccak256 is the EVM-native hash, which simplifies interop with
+EVM-side light-client or bridge verifiers that may need to check subtree
+inclusion against a top-level provides root in the future.</p>
+<p><strong>Computing the provides root</strong> — called by the collator after block execution to
+populate <code>CandidateCommitments.provides</code>. Phase 1 uses <strong>cumulative latest-root
+semantics</strong>: the root commits to the sender&rsquo;s full current speculative outbox
+state after executing this block, not merely &ldquo;the delta produced by this block.&rdquo;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">compute_provides_root</span>() -&gt; Option<span style="color:#f92672">&lt;</span>ProvidesCommitment<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> roots: Vec<span style="color:#f92672">&lt;</span>(ParaId, H256)<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> OutgoingMMRs::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::iter()
+</span></span><span style="display:flex;"><span>        .map(<span style="color:#f92672">|</span>(dest, state)<span style="color:#f92672">|</span> (dest, state.root))
+</span></span><span style="display:flex;"><span>        .collect();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> roots.is_empty() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> None;  <span style="color:#75715e">// no speculative outbox state exists yet
+</span></span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    roots.sort_by_key(<span style="color:#f92672">|</span>(id, _)<span style="color:#f92672">|</span> <span style="color:#f92672">*</span>id);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> leaves: Vec<span style="color:#f92672">&lt;</span>H256<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> roots.into_iter().map(<span style="color:#f92672">|</span>(dest, root)<span style="color:#f92672">|</span> {
+</span></span><span style="display:flex;"><span>        H256::from(sp_io::hashing::keccak_256(<span style="color:#f92672">&amp;</span>(dest, root).encode()))
+</span></span><span style="display:flex;"><span>    }).collect();
+</span></span><span style="display:flex;"><span>    Some(ProvidesCommitment { root: <span style="color:#a6e22e">compute_merkle_root</span>(<span style="color:#f92672">&amp;</span>leaves) })
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="52-incoming-message-state-receiver-side">5.2 Incoming Message State (Receiver Side)</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// Per-source tracking.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#[pallet::storage]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">type</span> <span style="color:#a6e22e">IncomingState</span><span style="color:#f92672">&lt;</span>T: <span style="color:#a6e22e">Config</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> StorageMap<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>    _, Twox64Concat, ParaId, SourceState,
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&gt;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#[derive(Clone, Encode, Decode, TypeInfo, Default)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">SourceState</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Last processed message position in the source&#39;s subtree MMR.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> last_processed: <span style="color:#66d9ef">u64</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The source&#39;s top-level provides root for the latest batch we accepted.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Used in the `MultipleRootsPerSourceInOneBlock` check.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> last_seen_provides_root: <span style="color:#a6e22e">H256</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// The source&#39;s subtree root we last accepted. The original design carried
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// a TODO asking why this was needed. In the current POC, subtree
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// continuity is already enforced by `last_processed + 1` (message
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// position) + `local_subtree.root == batch.subtree_root` (root
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// reconstruction). This field is a snapshot of the last verification
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// result, useful for diagnostics and forward-looking: in LateBlockProof
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// verification the PVF compares `proof.old_subtree_root` against the last
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// accepted root.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> last_seen_subtree_root: <span style="color:#a6e22e">H256</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Local copy of the subtree MMR (only messages sent to us). Not present
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// in the original design. The receiver independently reconstructs the
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// per-destination subtree from ingested messages and verifies its root
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// matches the batch&#39;s `subtree_root`. Without this, the receiver would
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// trust the batch&#39;s subtree root claim without being able to verify it.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> local_subtree: <span style="color:#a6e22e">MMRState</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">/// Per-block sources actually consumed during THIS block.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// Cleared in `on_initialize`, populated by `ingest_verified_messages`,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// then read by a runtime API after block execution to populate
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">/// `CandidateCommitments.requires`.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#[pallet::storage]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">type</span> <span style="color:#a6e22e">ConsumedSourcesThisBlock</span><span style="color:#f92672">&lt;</span>T: <span style="color:#a6e22e">Config</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> StorageValue<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>    _,
+</span></span><span style="display:flex;"><span>    Vec<span style="color:#f92672">&lt;</span>(ParaId, H256)<span style="color:#f92672">&gt;</span>, <span style="color:#75715e">// (source, expected top-level provides root)
+</span></span></span><span style="display:flex;"><span>    ValueQuery,
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&gt;</span>;
+</span></span></code></pre></div><p><strong>Message batch verification</strong> has two phases:</p>
+<ol>
+<li><strong>Collator-local precheck</strong> before block building — uses a collator-local
+cache of the receiver&rsquo;s latest finalized <code>IncomingState</code> snapshot and does not
+mutate runtime storage. An optimization for selecting batches, not
+consensus-critical.</li>
+<li><strong>Runtime verification</strong> inside <code>ingest_verified_messages</code> — replays the same
+checks against on-chain state and updates pallet storage deterministically.
+The consensus-critical path that validators replay.</li>
+</ol>
+<p><strong>Collator-local precheck:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">LocalIncomingSnapshot</span> {
+</span></span><span style="display:flex;"><span>    per_source: <span style="color:#a6e22e">BTreeMap</span><span style="color:#f92672">&lt;</span>ParaId, SourceState<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">precheck_message_batch</span>(
+</span></span><span style="display:flex;"><span>    snapshot: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">mut</span> LocalIncomingSnapshot,
+</span></span><span style="display:flex;"><span>    batch: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">MessageBatch</span>,
+</span></span><span style="display:flex;"><span>) -&gt; Result<span style="color:#f92672">&lt;</span>(), VerificationError<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 1. Verify subtree_inclusion_proof
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> leaf <span style="color:#f92672">=</span> (<span style="color:#66d9ef">LOCAL_PARA_ID</span>, batch.subtree_root).encode();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> leaf_hash <span style="color:#f92672">=</span> sp_io::hashing::keccak_256(<span style="color:#f92672">&amp;</span>leaf);
+</span></span><span style="display:flex;"><span>    verify_merkle_proof(batch.provides_root, <span style="color:#f92672">&amp;</span>batch.subtree_inclusion_proof, leaf_hash)
+</span></span><span style="display:flex;"><span>        .map_err(<span style="color:#f92672">|</span>_<span style="color:#f92672">|</span> VerificationError::InvalidSubtreeProof)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 2. Verify message continuity against collator-local state
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> local_state <span style="color:#f92672">=</span> snapshot.per_source
+</span></span><span style="display:flex;"><span>        .get(<span style="color:#f92672">&amp;</span>batch.source)
+</span></span><span style="display:flex;"><span>        .cloned()
+</span></span><span style="display:flex;"><span>        .unwrap_or_default();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> msg <span style="color:#66d9ef">in</span> <span style="color:#f92672">&amp;</span>batch.messages {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ensure!</span>(
+</span></span><span style="display:flex;"><span>            msg.position <span style="color:#f92672">==</span> local_state.last_processed <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>            VerificationError::NonConsecutiveMessage,
+</span></span><span style="display:flex;"><span>        );
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> msg_hash <span style="color:#f92672">=</span> sp_io::hashing::keccak_256(<span style="color:#f92672">&amp;</span>msg.payload);
+</span></span><span style="display:flex;"><span>        local_state.local_subtree.insert_leaf(msg_hash);
+</span></span><span style="display:flex;"><span>        local_state.last_processed <span style="color:#f92672">=</span> msg.position;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 3. Verify computed root matches batch
+</span></span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ensure!</span>(
+</span></span><span style="display:flex;"><span>        local_state.local_subtree.root <span style="color:#f92672">==</span> batch.subtree_root,
+</span></span><span style="display:flex;"><span>        VerificationError::SubtreeRootMismatch,
+</span></span><span style="display:flex;"><span>    );
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 4. Persist updated collator-local snapshot
+</span></span></span><span style="display:flex;"><span>    local_state.last_seen_provides_root <span style="color:#f92672">=</span> batch.provides_root;
+</span></span><span style="display:flex;"><span>    local_state.last_seen_subtree_root <span style="color:#f92672">=</span> batch.subtree_root;
+</span></span><span style="display:flex;"><span>    snapshot.per_source.insert(batch.source, local_state);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Ok(())
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>On-chain ingress execution</strong> — the consensus-critical path:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">on_initialize</span>(_n: <span style="color:#a6e22e">BlockNumberFor</span><span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>) -&gt; <span style="color:#a6e22e">Weight</span> {
+</span></span><span style="display:flex;"><span>    ConsumedSourcesThisBlock::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::kill();
+</span></span><span style="display:flex;"><span>    Weight::zero()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#[pallet::call]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>T: <span style="color:#a6e22e">Config</span><span style="color:#f92672">&gt;</span> Pallet<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">ingest_verified_messages</span>(
+</span></span><span style="display:flex;"><span>        origin: <span style="color:#a6e22e">OriginFor</span><span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>        ingress: <span style="color:#a6e22e">SpeculativeIngress</span>,
+</span></span><span style="display:flex;"><span>    ) -&gt; <span style="color:#a6e22e">DispatchResult</span> {
+</span></span><span style="display:flex;"><span>        ensure_none(origin)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> consumed <span style="color:#f92672">=</span> Vec::new();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> batch <span style="color:#66d9ef">in</span> ingress.batches {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">let</span> leaf <span style="color:#f92672">=</span> (T::SelfParaId::get(), batch.subtree_root).encode();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">let</span> leaf_hash <span style="color:#f92672">=</span> sp_io::hashing::keccak_256(<span style="color:#f92672">&amp;</span>leaf);
+</span></span><span style="display:flex;"><span>            verify_merkle_proof(batch.provides_root, <span style="color:#f92672">&amp;</span>batch.subtree_inclusion_proof, leaf_hash)
+</span></span><span style="display:flex;"><span>                .map_err(<span style="color:#f92672">|</span>_<span style="color:#f92672">|</span> Error::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::InvalidSubtreeProof)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> state <span style="color:#f92672">=</span> IncomingState::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::get(<span style="color:#f92672">&amp;</span>batch.source).unwrap_or_default();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> msg <span style="color:#66d9ef">in</span> <span style="color:#f92672">&amp;</span>batch.messages {
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">ensure!</span>(msg.position <span style="color:#f92672">==</span> state.last_processed <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, Error::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::NonConsecutiveMessage);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">let</span> msg_hash <span style="color:#f92672">=</span> sp_io::hashing::keccak_256(<span style="color:#f92672">&amp;</span>msg.payload);
+</span></span><span style="display:flex;"><span>                state.local_subtree.insert_leaf(msg_hash);
+</span></span><span style="display:flex;"><span>                state.last_processed <span style="color:#f92672">=</span> msg.position;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">ensure!</span>(state.local_subtree.root <span style="color:#f92672">==</span> batch.subtree_root, Error::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::SubtreeRootMismatch);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Phase 1 invariant: one distinct top-level provides root per source per block
+</span></span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> state.last_processed <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">ensure!</span>(
+</span></span><span style="display:flex;"><span>                    state.last_seen_provides_root <span style="color:#f92672">==</span> batch.provides_root <span style="color:#f92672">||</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">!</span>consumed.iter().any(<span style="color:#f92672">|</span>(source, _)<span style="color:#f92672">|</span> source <span style="color:#f92672">==</span> <span style="color:#f92672">&amp;</span>batch.source),
+</span></span><span style="display:flex;"><span>                    Error::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::MultipleRootsPerSourceInOneBlock,
+</span></span><span style="display:flex;"><span>                );
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            state.last_seen_provides_root <span style="color:#f92672">=</span> batch.provides_root;
+</span></span><span style="display:flex;"><span>            state.last_seen_subtree_root <span style="color:#f92672">=</span> batch.subtree_root;
+</span></span><span style="display:flex;"><span>            IncomingState::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::insert(batch.source, state);
+</span></span><span style="display:flex;"><span>            consumed.push((batch.source, batch.provides_root));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Re-batch and dispatch through the standard XCMP handler
+</span></span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">let</span> encoded_batch <span style="color:#f92672">=</span> encode_xcmp_batch(
+</span></span><span style="display:flex;"><span>                batch.messages.iter().map(<span style="color:#f92672">|</span>msg<span style="color:#f92672">|</span> msg.payload.as_slice())
+</span></span><span style="display:flex;"><span>            );
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">let</span> max_weight <span style="color:#f92672">=</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&lt;</span>ReservedXcmpWeightOverride<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;&gt;</span>::get().unwrap_or_else(T::ReservedXcmpWeight::get);
+</span></span><span style="display:flex;"><span>            T::XcmpMessageHandler::handle_xcmp_messages(
+</span></span><span style="display:flex;"><span>                core::iter::once((
+</span></span><span style="display:flex;"><span>                    batch.source,
+</span></span><span style="display:flex;"><span>                    batch.source_relay_parent_number,
+</span></span><span style="display:flex;"><span>                    encoded_batch.as_slice(),
+</span></span><span style="display:flex;"><span>                )),
+</span></span><span style="display:flex;"><span>                max_weight,
+</span></span><span style="display:flex;"><span>            );
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        ConsumedSourcesThisBlock::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::put(consumed);
+</span></span><span style="display:flex;"><span>        Ok(())
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>Encoding for the XCMP handler.</strong> The existing <code>XcmpMessageHandler::handle_xcmp_messages</code>
+interface (defined in <code>polkadot/parachain/src/primitives.rs</code>) takes an iterator
+of <code>(ParaId, RelayChainBlockNumber, &amp;[u8])</code> where each <code>&amp;[u8]</code> is an XCMP
+<em>page</em> — a byte slice prefixed with an <code>XcmpMessageFormat</code> tag followed by
+concatenated message data. The <code>encode_xcmp_batch</code> helper produces this page
+format:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">encode_xcmp_batch</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">&#39;a</span><span style="color:#f92672">&gt;</span>(payloads: <span style="color:#a6e22e">impl</span> Iterator<span style="color:#f92672">&lt;</span>Item <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">&#39;a</span> [<span style="color:#66d9ef">u8</span>]<span style="color:#f92672">&gt;</span>) -&gt; Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> page <span style="color:#f92672">=</span> XcmpMessageFormat::ConcatenatedVersionedXcm.encode();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> payload <span style="color:#66d9ef">in</span> payloads {
+</span></span><span style="display:flex;"><span>        page.extend_from_slice(payload);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    page
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The format variant must match what the receiver&rsquo;s <code>XcmpMessageHandler</code>
+implementation knows how to decode. For the POC, using
+<code>ConcatenatedVersionedXcm</code> throughout is the simplest consistent choice.</p>
+<h3 id="53-producing-commitments">5.3 Producing Commitments</h3>
+<p>After block execution, the collator reads the provides/requires from runtime
+storage and populates <code>CandidateCommitments</code>. Phase 1 enforces at most one
+<code>RequiresCommitment</code> per source parachain per block.</p>
+<p><strong>Codebase integration.</strong> In the current codebase,
+<code>cumulus/client/collator/src/service.rs</code> line 238 calls <code>fetch_collation_info</code>
+to retrieve <code>CollationInfo</code> (upward_messages, horizontal_messages, head_data,
+etc.) and assembles <code>CandidateCommitments</code> from it at line ~294. For speculative
+messaging, the collator makes two additional runtime API calls right after
+<code>fetch_collation_info</code> and adds the results to the commitments struct:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">// In cumulus/client/collator/src/service.rs, after fetch_collation_info:
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> commitments <span style="color:#f92672">=</span> <span style="color:#66d9ef">if</span> api_version <span style="color:#f92672">&gt;=</span> <span style="color:#66d9ef">SPECULATIVE_API_VERSION</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// v4+ parachain: include speculative fields
+</span></span></span><span style="display:flex;"><span>    CandidateCommitments {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ... existing fields from collation_info ...
+</span></span></span><span style="display:flex;"><span>        provides: <span style="color:#a6e22e">self</span>.runtime_api.compute_provides_root(block_hash)<span style="color:#f92672">?</span>,
+</span></span><span style="display:flex;"><span>        requires: <span style="color:#a6e22e">self</span>.runtime_api.get_requires_commitments(block_hash)<span style="color:#f92672">?</span>,
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Legacy parachain: unchanged v9 path, no speculative fields
+</span></span></span><span style="display:flex;"><span>    CandidateCommitments {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ... existing fields only ...
+</span></span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>The collator already branches on <code>api_version</code> for PoV encoding format in the
+existing code (line ~267). The same pattern gates speculative fields — a
+speculative-capable runtime exports <code>compute_provides_root</code> and
+<code>get_requires_commitments</code> at the known API version; a non-speculative runtime
+doesn&rsquo;t. No new <code>CollationInfo</code> fields or pipeline changes needed.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">get_requires_commitments</span>() -&gt; Vec<span style="color:#f92672">&lt;</span>RequiresCommitment<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> consumed <span style="color:#f92672">=</span> ConsumedSourcesThisBlock::<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>::get();
+</span></span><span style="display:flex;"><span>    consumed.sort_by_key(<span style="color:#f92672">|</span>(source, _)<span style="color:#f92672">|</span> <span style="color:#f92672">*</span>source);
+</span></span><span style="display:flex;"><span>    consumed.dedup_by_key(<span style="color:#f92672">|</span>(source, _)<span style="color:#f92672">|</span> <span style="color:#f92672">*</span>source);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    consumed.into_iter().map(<span style="color:#f92672">|</span>(source, provides_root)<span style="color:#f92672">|</span> RequiresCommitment {
+</span></span><span style="display:flex;"><span>        source,
+</span></span><span style="display:flex;"><span>        expected_root: <span style="color:#a6e22e">provides_root</span>,
+</span></span><span style="display:flex;"><span>    }).collect()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>If late block proofs were prechecked (<span style="color:#960050;background-color:#1e0010">§</span><span style="color:#ae81ff">6.2</span>), the collator overrides the
+</span></span><span style="display:flex;"><span>transformed root <span style="color:#66d9ef">for</span> each source with a proof before assembling commitments:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">```</span>rust
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> proof <span style="color:#66d9ef">in</span> <span style="color:#f92672">&amp;</span>self.prechecked_late_block_proofs {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">let</span> Some(req) <span style="color:#f92672">=</span> requires.iter_mut().find(<span style="color:#f92672">|</span>r<span style="color:#f92672">|</span> r.source <span style="color:#f92672">==</span> proof.source) {
+</span></span><span style="display:flex;"><span>        req.expected_root <span style="color:#f92672">=</span> proof.new_provides_root;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>requires.sort_by_key(<span style="color:#f92672">|</span>r<span style="color:#f92672">|</span> r.source);
+</span></span></code></pre></div><hr>
+<h2 id="6-pvf-validation-entry-point">6. PVF Validation Entry Point</h2>
+<p>Phase 1 requires a <strong>small validation ABI extension</strong>. The current parachain
+validation ABI returns a <code>ValidationResult</code> containing only legacy fields.
+Speculative messaging adds:</p>
+<ul>
+<li><code>provides: Option&lt;ProvidesCommitment&gt;</code></li>
+<li><code>requires: Vec&lt;RequiresCommitment&gt;</code></li>
+</ul>
+<p>The wasm entrypoint returns <strong>one upgraded validation-result struct</strong>.
+Non-speculative candidates on upgraded runtimes return <code>provides: None</code> and
+<code>requires: vec![]</code>. Version-gating happens on the node side — candidate
+validation branches on descriptor version to know whether to expect populated
+speculative fields. The relay-chain runtime API (<code>check_validation_outputs</code>)
+must evolve to accept the extended type from the start, ignoring optional
+speculative fields for pre-speculative candidates.</p>
+<p><strong>Current-codebase embedding:</strong></p>
+<ol>
+<li>In <code>polkadot/parachain/src/primitives.rs</code>, introduce an extended validation result shape.</li>
+<li>In <code>cumulus/pallets/parachain-system/src/validate_block/implementation.rs</code>, after block execution, read speculative outputs (<code>provides</code>, <code>requires</code>) from runtime state and include them in the returned validation result.</li>
+<li>In <code>polkadot/parachain/src/wasm_api.rs</code>, return that extended result from the wasm entrypoint.</li>
+<li>In <code>polkadot/node/core/candidate-validation</code>, decode the extended result and reconstruct <code>v10::CandidateCommitments</code> for v4 candidates.</li>
+<li>Keep older descriptor versions on the legacy path.</li>
+<li>Update relay-chain runtime-API entrypoints that still accept the legacy unversioned <code>CandidateCommitments</code> (<code>ParachainHost::check_validation_outputs</code> and <code>check_validation_outputs_for_runtime_api(...)</code>).</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// Extended wasm validation result for v4 speculative-messaging candidates.
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">ValidationResultV4</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> head_data: <span style="color:#a6e22e">HeadData</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> new_validation_code: Option<span style="color:#f92672">&lt;</span>ValidationCode<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> upward_messages: <span style="color:#a6e22e">UpwardMessages</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> horizontal_messages: <span style="color:#a6e22e">HorizontalMessages</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> processed_downward_messages: <span style="color:#66d9ef">u32</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> hrmp_watermark: <span style="color:#a6e22e">RelayChainBlockNumber</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> provides: Option<span style="color:#f92672">&lt;</span>ProvidesCommitment<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> requires: Vec<span style="color:#f92672">&lt;</span>RequiresCommitment<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">validate_block</span>(params: <span style="color:#a6e22e">ValidationParams</span>) -&gt; Result<span style="color:#f92672">&lt;</span>ValidationResultV4, ValidationError<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> result <span style="color:#f92672">=</span> execute_block_and_collect_outputs(<span style="color:#f92672">&amp;</span>params)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>    Ok(ValidationResultV4 {
+</span></span><span style="display:flex;"><span>        head_data: <span style="color:#a6e22e">result</span>.head_data,
+</span></span><span style="display:flex;"><span>        new_validation_code: <span style="color:#a6e22e">result</span>.new_validation_code,
+</span></span><span style="display:flex;"><span>        upward_messages: <span style="color:#a6e22e">result</span>.upward_messages,
+</span></span><span style="display:flex;"><span>        horizontal_messages: <span style="color:#a6e22e">result</span>.horizontal_messages,
+</span></span><span style="display:flex;"><span>        processed_downward_messages: <span style="color:#a6e22e">result</span>.processed_downward_messages,
+</span></span><span style="display:flex;"><span>        hrmp_watermark: <span style="color:#a6e22e">result</span>.hrmp_watermark,
+</span></span><span style="display:flex;"><span>        provides: <span style="color:#a6e22e">result</span>.provides,
+</span></span><span style="display:flex;"><span>        requires: <span style="color:#a6e22e">result</span>.requires,
+</span></span><span style="display:flex;"><span>    })
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The wasm PVF does <strong>not</strong> read candidate commitments as an input. It executes the
+block, derives the full validation outputs, and returns them. The node-side
+candidate-validation pipeline then reconstructs <code>CandidateCommitments</code> from those
+returned outputs and checks the commitments hash.</p>
+<p>The pseudocode above shows the basic path. The full implementation (section 6.2)
+additionally reads <code>LateBlockProof</code> data from the PoV after block execution,
+verifies each proof, and transforms the <code>requires</code> in the returned validation
+result.</p>
+<h3 id="61-candidate-commitments-reconstruction">6.1 Candidate Commitments Reconstruction</h3>
+<p>After the PVF returns a <code>ValidationResultV4</code>, the node-side candidate validation
+subsystem reconstructs <code>CandidateCommitments</code> from the returned outputs, hashes
+them, and checks the hash against the candidate receipt&rsquo;s <code>commitments_hash</code>.
+This is a <strong>hash comparison only</strong> — it ensures the PVF produced the same
+commitments the collator claimed. If the PVF produced different <code>provides</code> or
+<code>requires</code> (e.g., the collator lied, or a LateBlockProof verification failed
+upstream inside the PVF), the hash won&rsquo;t match and the candidate is rejected.</p>
+<p>LateBlockProof verification itself happens earlier, inside <code>validate_block</code>
+(§6.2) — the PVF reads proofs from the PoV, verifies them, transforms requires,
+and returns the result. The hash check here is the downstream safety net that
+catches any mismatch between the PVF&rsquo;s output and what the collator put in the
+receipt.</p>
+<p>Once validated, these commitments flow to the relay chain (§4.2) where
+<code>requires</code> / <code>provides</code> matching happens. The relay chain trusts the commitments
+because they&rsquo;ve already been PVF-verified and hash-checked here.</p>
+<p>Node-side candidate validation already reconstructs commitments for legacy fields
+today. For the POC, update that logic to branch on candidate descriptor
+version:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">match</span> candidate_receipt.descriptor.version() {
+</span></span><span style="display:flex;"><span>    V1 <span style="color:#f92672">|</span> V2 <span style="color:#f92672">|</span> V3 <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> commitments <span style="color:#f92672">=</span> v9::CandidateCommitments {
+</span></span><span style="display:flex;"><span>            head_data, upward_messages, horizontal_messages,
+</span></span><span style="display:flex;"><span>            new_validation_code, processed_downward_messages, hrmp_watermark,
+</span></span><span style="display:flex;"><span>        };
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ensure!</span>(commitments.hash() <span style="color:#f92672">==</span> candidate_receipt.commitments_hash, <span style="color:#f92672">..</span>.);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    V4 <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> commitments <span style="color:#f92672">=</span> v10::CandidateCommitments {
+</span></span><span style="display:flex;"><span>            head_data, upward_messages, horizontal_messages,
+</span></span><span style="display:flex;"><span>            new_validation_code, processed_downward_messages, hrmp_watermark,
+</span></span><span style="display:flex;"><span>            provides, requires,
+</span></span><span style="display:flex;"><span>        };
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ensure!</span>(commitments.hash() <span style="color:#f92672">==</span> candidate_receipt.commitments_hash, <span style="color:#f92672">..</span>.);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The corresponding implementation work:</p>
+<ol>
+<li>add <code>v10::CandidateCommitments</code> and speculative types in <code>polkadot/primitives</code></li>
+<li>extend candidate receipt / descriptor version handling so v4 candidates use the new commitments layout</li>
+<li>update <code>polkadot/node/core/candidate-validation</code> to reconstruct the correct commitments type per descriptor version</li>
+<li>keep all pre-v4 candidates on the unchanged legacy reconstruction path</li>
+</ol>
+<h3 id="62-late-block-proofs-pov-approach">6.2 Late Block Proofs (PoV Approach)</h3>
+<p>When a receiver block was built against an older source root than what&rsquo;s now in
+<code>ProvidesRoots</code>, the receiver collator includes a <code>LateBlockProof</code> in the PoV.
+The proof verifies that the old root the block was built against is a valid
+ancestor of the current root, so the relay chain can accept the dependency.</p>
+<p><strong>Two-phase verification.</strong> Late block proofs use the same two-phase model as
+message batches (§5.2):</p>
+<ol>
+<li>
+<p><strong>Collator precheck.</strong> Before building the candidate, the collator fetches the
+proof from the provider, verifies it locally (same logic as the PVF), and uses
+the transformed root (<code>proof.new_provides_root</code>) in the candidate
+commitments. This precheck is for efficiency — it prevents submitting a
+candidate with a bad proof.</p>
+</li>
+<li>
+<p><strong>PVF verification.</strong> During <code>validate_block</code>, the PVF independently reads the
+proof from the PoV, verifies it, and confirms the transformation. If the PVF
+produces a different transformed root than the collator put in the candidate
+commitments, the commitments hash won&rsquo;t match and the candidate is rejected —
+the same safety model as every other commitment field.</p>
+</li>
+</ol>
+<p><strong>When this triggers.</strong> The collator detects the mismatch before block proposal:
+it reads <code>ProvidesRoots[source]</code> from the relay parent&rsquo;s state and compares it to
+the <code>provides_root</code> of the fetched batch. If they differ, the collator fetches a
+<code>LateBlockProof</code> from the provider, prechecks it, and:</p>
+<ol>
+<li>Uses <code>proof.new_provides_root</code> (not <code>batch.provides_root</code>) in the candidate
+commitments via the standard <code>get_requires_commitments()</code> path.</li>
+<li>Appends the serialized proof to the PoV after the block data, with a
+well-known length-prefixed format.</li>
+</ol>
+<p><strong>PoV format and construction.</strong> The collator builds the PoV as normal (block
+data), then appends the proof section. In the current Cumulus codebase, the
+collator constructs the PoV during block proposal — <code>block_data</code> is the SCALE-
+encoded block. The integration point is after block construction and before
+candidate submission:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">// In the collator&#39;s proposal path (cumulus/client/consensus/aura/src/collator.rs):
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> block_data <span style="color:#f92672">=</span> build_block(<span style="color:#f92672">..</span>.)<span style="color:#f92672">?</span>;  <span style="color:#75715e">// existing PoV content
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Append late block proof section
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> pov <span style="color:#f92672">=</span> block_data.encode();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> num_proofs <span style="color:#f92672">=</span> late_block_proofs.len() <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u32</span>;
+</span></span><span style="display:flex;"><span>pov.extend(<span style="color:#f92672">&amp;</span>num_proofs.encode());
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> proof <span style="color:#66d9ef">in</span> <span style="color:#f92672">&amp;</span>late_block_proofs {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> proof_bytes <span style="color:#f92672">=</span> proof.encode();
+</span></span><span style="display:flex;"><span>    pov.extend(<span style="color:#f92672">&amp;</span>(proof_bytes.len() <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u32</span>).encode());
+</span></span><span style="display:flex;"><span>    pov.extend(<span style="color:#f92672">&amp;</span>proof_bytes);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Submit candidate with the extended PoV
+</span></span></span></code></pre></div><p>The PoV wire format is:</p>
+<pre tabindex="0"><code>[ block_data bytes ]
+[ u32: num_proofs ]
+[ for each proof: u32 length || LateBlockProof bytes ]
+</code></pre><p>On the PVF side, <code>validate_block</code> receives the PoV via <code>ValidationParams.pov</code>.
+The existing block execution path reads <code>block_data</code> from the PoV as it does
+today. After execution, <code>read_late_block_proofs_from_pov</code> reads the trailing
+bytes, parses the proof section, and calls <code>verify_and_transform</code> for each proof
+(see the PVF verification pseudocode below). No PVF host changes needed — the
+PoV is already passed to the PVF as opaque bytes.</p>
+<p>The relay chain never sees the proofs and never verifies them. The entire
+pipeline is: collator appends proofs to PoV → PVF verifies and transforms
+requires → node-side validation reconstructs commitments from the
+transformed result → relay chain matches <code>expected_root</code> against
+<code>ProvidesRoots</code>. See §4.4 for what the relay chain does <em>not</em> do, and
+§6.1 for commitments reconstruction.</p>
+<p><strong>PVF verification.</strong> During <code>validate_block</code>, after executing the block, the PVF
+reads the proof data from the PoV and verifies each proof:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">validate_block</span>(params: <span style="color:#a6e22e">ValidationParams</span>) -&gt; Result<span style="color:#f92672">&lt;</span>ValidationResultV4, ValidationError<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 1. Execute the block and collect standard validation outputs
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> result <span style="color:#f92672">=</span> execute_block_and_collect_outputs(<span style="color:#f92672">&amp;</span>params)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 2. Read late block proofs from the PoV
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> proofs <span style="color:#f92672">=</span> read_late_block_proofs_from_pov(<span style="color:#f92672">&amp;</span>params.pov)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 3. Verify each proof and transform requires
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> transformed_requires <span style="color:#f92672">=</span> Vec::new();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> proof <span style="color:#66d9ef">in</span> <span style="color:#f92672">&amp;</span>proofs {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> transformed <span style="color:#f92672">=</span> verify_and_transform(<span style="color:#f92672">&amp;</span>result.requires, proof)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>        transformed_requires.push(transformed);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Keep non-transformed requires for sources without proofs
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> req <span style="color:#66d9ef">in</span> <span style="color:#f92672">&amp;</span>result.requires {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">!</span>proofs.iter().any(<span style="color:#f92672">|</span>p<span style="color:#f92672">|</span> p.source <span style="color:#f92672">==</span> req.source) {
+</span></span><span style="display:flex;"><span>            transformed_requires.push(req.clone());
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    result.requires <span style="color:#f92672">=</span> transformed_requires;
+</span></span><span style="display:flex;"><span>    Ok(result)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">verify_and_transform</span>(
+</span></span><span style="display:flex;"><span>    block_requires: <span style="color:#66d9ef">&amp;</span>[RequiresCommitment],
+</span></span><span style="display:flex;"><span>    proof: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">LateBlockProof</span>,
+</span></span><span style="display:flex;"><span>) -&gt; Result<span style="color:#f92672">&lt;</span>RequiresCommitment, ValidationError<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 1. Verify old subtree was in the old provides root
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> old_leaf <span style="color:#f92672">=</span> (proof.source, proof.old_subtree_root).encode();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> old_leaf_hash <span style="color:#f92672">=</span> keccak_256(<span style="color:#f92672">&amp;</span>old_leaf);
+</span></span><span style="display:flex;"><span>    verify_merkle_proof(
+</span></span><span style="display:flex;"><span>        proof.old_provides_root,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&amp;</span>proof.old_subtree_proof,
+</span></span><span style="display:flex;"><span>        old_leaf_hash,
+</span></span><span style="display:flex;"><span>    )<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 2. Verify new subtree is in the current root
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> new_leaf <span style="color:#f92672">=</span> (proof.source, proof.new_subtree_root).encode();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> new_leaf_hash <span style="color:#f92672">=</span> keccak_256(<span style="color:#f92672">&amp;</span>new_leaf);
+</span></span><span style="display:flex;"><span>    verify_merkle_proof(
+</span></span><span style="display:flex;"><span>        proof.new_provides_root,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&amp;</span>proof.new_subtree_proof,
+</span></span><span style="display:flex;"><span>        new_leaf_hash,
+</span></span><span style="display:flex;"><span>    )<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 3. Subtrees must be identical or old must be a valid prefix
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> proof.old_subtree_root <span style="color:#f92672">!=</span> proof.new_subtree_root {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> ext <span style="color:#f92672">=</span> proof.subtree_extension
+</span></span><span style="display:flex;"><span>            .as_ref()
+</span></span><span style="display:flex;"><span>            .ok_or(ValidationError::SubtreeChangedWithoutProof)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>        verify_mmr_extension(
+</span></span><span style="display:flex;"><span>            proof.old_subtree_root,
+</span></span><span style="display:flex;"><span>            proof.new_subtree_root,
+</span></span><span style="display:flex;"><span>            ext,
+</span></span><span style="display:flex;"><span>        )<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 4. Return transformed commitment — references the current root
+</span></span></span><span style="display:flex;"><span>    Ok(RequiresCommitment {
+</span></span><span style="display:flex;"><span>        source: <span style="color:#a6e22e">proof</span>.source,
+</span></span><span style="display:flex;"><span>        expected_root: <span style="color:#a6e22e">proof</span>.new_provides_root,
+</span></span><span style="display:flex;"><span>    })
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>How the collator pre-transforms commitments.</strong> The collator&rsquo;s precheck
+produces the same transformed root. When building commitments (§5.3), the
+collator uses the transformed root directly — <code>ConsumedSourcesThisBlock</code> still
+stores the original root from batch processing, but the collator overrides it
+with the proof-verified root when constructing <code>CandidateCommitments</code>. The PVF
+confirms this override independently.</p>
+<p><strong>What the relay chain sees.</strong> No change from section 4.2. The relay chain always
+matches <code>RequiresCommitment.expected_root</code> against <code>ProvidesRoots[source]</code>. The
+transformation happens before commitments are finalized, so the relay chain never
+knows whether a proof was needed.</p>
+<p><strong>Proof size.</strong> For a sender with D destinations and m messages to this receiver:
+the two top-level Merkle proofs are O(log D) each (~14 hashes for 100
+destinations), and the subtree extension is O(log m) (~10 hashes for 1000
+messages). Total: well under 2 KB in typical cases. The PoV size budget should
+reserve a small allowance for these proofs (e.g., 50 KB).</p>
+<p><strong>Serving extension proofs.</strong> The provider serves <code>LateBlockProof</code> data via the
+same HTTP endpoint (section 7.3), returning proofs alongside or instead of
+batches when the cursor root differs from the current root.</p>
+<hr>
+<h2 id="7-off-chain-networking">7. Off-Chain Networking</h2>
+<h3 id="71-model">7.1 Model</h3>
+<p>The POC uses a <strong>relayer/provider</strong> model rather than native collator-to-collator P2P:</p>
+<ul>
+<li>One or more provider processes watch source chain blocks and serve <code>MessageBatch</code> data to destination collators.</li>
+<li>Destination collators fetch batches from known providers before block proposal, precheck them locally, and encode accepted batches into <code>SpeculativeIngress</code>.</li>
+<li>The transport is a data-fetch path, not a consensus path. Consensus depends only on <code>SpeculativeIngress</code> being embedded in the block body and re-verified deterministically during PVF execution.</li>
+</ul>
+<p>The relay-chain interaction is <strong>pull-based</strong>: destination collators ask a
+provider for batches they want to import. If no provider answers, the destination
+simply skips speculative ingress for that source in this block and can fall back
+to HRMP.</p>
+<h3 id="72-sender-side-batch-construction-and-retention">7.2 Sender-Side: Batch Construction and Retention</h3>
+<p>The sender runtime exposes APIs that the provider queries after block
+finalization. These are not consensus-critical but must return correct data for
+the receiver to accept the resulting batches.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">#[runtime_api]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">trait</span> SpeculativeOutboxApi {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">provides_root</span>() -&gt; Option<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">destination_state</span>(dest: <span style="color:#a6e22e">ParaId</span>) -&gt; Option<span style="color:#f92672">&lt;</span>(Hash, <span style="color:#66d9ef">u64</span>)<span style="color:#f92672">&gt;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Read payload bytes from on-chain storage for a destination starting at
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// `from_position`. Returns up to `max_messages` entries.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">outbound_messages</span>(dest: <span style="color:#a6e22e">ParaId</span>, from_position: <span style="color:#66d9ef">u64</span>, max_messages: <span style="color:#66d9ef">u32</span>) -&gt; Vec<span style="color:#f92672">&lt;</span>(<span style="color:#66d9ef">u64</span>, Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span>)<span style="color:#f92672">&gt;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">subtree_inclusion_proof</span>(dest: <span style="color:#a6e22e">ParaId</span>, subtree_root: <span style="color:#a6e22e">Hash</span>) -&gt; Option<span style="color:#f92672">&lt;</span>Vec<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;&gt;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// Return an MMR extension proof proving that `old_subtree_root` at
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// `old_subtree_size` is a valid prefix of the current subtree for
+</span></span></span><span style="display:flex;"><span>    <span style="color:#e6db74">/// this destination.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">mmr_extension_proof</span>(
+</span></span><span style="display:flex;"><span>        dest: <span style="color:#a6e22e">ParaId</span>,
+</span></span><span style="display:flex;"><span>        old_subtree_root: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>        old_subtree_size: <span style="color:#66d9ef">u64</span>,
+</span></span><span style="display:flex;"><span>    ) -&gt; Option<span style="color:#f92672">&lt;</span>MMRExtensionProof<span style="color:#f92672">&gt;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>Payload bytes are read from on-chain storage.</strong> The outbox pallet stores full
+payload bytes in <code>OutgoingMessages</code> (see §5.1). The provider calls
+<code>outbound_messages(dest, last_known_position, max)</code> to retrieve them — no event
+indexing or off-chain indexer needed. A production implementation may move
+payloads off-chain (events, off-chain indexer, or similar) once a pruning
+strategy is defined; for the POC, on-chain storage keeps the relayer simple.</p>
+<p>For each destination that received messages in a source block, the provider:
+reads <code>destination_state(dest)</code> for <code>(subtree_root, leaf_count)</code>, reads
+<code>subtree_inclusion_proof(dest, subtree_root)</code> for the Merkle proof, reads
+<code>outbound_messages(dest, last_known_position, max)</code> for payload bytes, reads
+<code>provides_root()</code>, and assembles the <code>MessageBatch</code>.</p>
+<p>The provider retains batches in a bounded in-memory cache keyed by
+<code>(destination_para_id, provides_root)</code> with a retention window of the last N
+finalized source blocks (e.g., N = 64) or last T minutes (e.g., T = 10). The
+cache is purely in-memory for the POC — the source chain&rsquo;s runtime state is the
+canonical store.</p>
+<h3 id="73-transport-http-api">7.3 Transport: HTTP API</h3>
+<p>For the POC, a simple HTTP endpoint:</p>
+<pre tabindex="0"><code>GET /batches/{destination_para_id}?since_provides_root={hash}
+</code></pre><ul>
+<li><code>destination_para_id</code> (path): the parachain requesting batches.</li>
+<li><code>since_provides_root</code> (query, optional): the last provides root the receiver
+has accepted. If omitted or unrecognized, returns batches from the oldest
+retained root (cold-start). If no new batches exist, returns an empty list.</li>
+</ul>
+<p>Response (JSON):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;source&#34;</span>: <span style="color:#ae81ff">1000</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;batches&#34;</span>: [
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;source_block&#34;</span>: <span style="color:#e6db74">&#34;0x...&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;source_relay_parent_number&#34;</span>: <span style="color:#ae81ff">12345</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;provides_root&#34;</span>: <span style="color:#e6db74">&#34;0x...&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;subtree_root&#34;</span>: <span style="color:#e6db74">&#34;0x...&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;subtree_inclusion_proof&#34;</span>: [<span style="color:#e6db74">&#34;0x...&#34;</span>, <span style="color:#e6db74">&#34;0x...&#34;</span>],
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;messages&#34;</span>: [
+</span></span><span style="display:flex;"><span>        { <span style="color:#f92672">&#34;position&#34;</span>: <span style="color:#ae81ff">42</span>, <span style="color:#f92672">&#34;payload&#34;</span>: <span style="color:#e6db74">&#34;0x...&#34;</span> },
+</span></span><span style="display:flex;"><span>        { <span style="color:#f92672">&#34;position&#34;</span>: <span style="color:#ae81ff">43</span>, <span style="color:#f92672">&#34;payload&#34;</span>: <span style="color:#e6db74">&#34;0x...&#34;</span> }
+</span></span><span style="display:flex;"><span>      ]
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The provider is a separate process that connects to the source chain&rsquo;s node,
+subscribes to finalized blocks, extracts outbox state via the runtime API, and
+serves the HTTP endpoint.</p>
+<h3 id="74-receiver-side-fetch-precheck-inject">7.4 Receiver-Side: Fetch, Precheck, Inject</h3>
+<p><strong>Fetch.</strong> Before building a block, the collator&rsquo;s inherent-data provider
+iterates over configured source parachains, reads the local
+<code>IncomingState[source].last_seen_provides_root</code>, queries each known provider with
+<code>since_provides_root</code>, and collects all returned batches. Timeouts (e.g., 2
+seconds per provider) prevent hanging.</p>
+<p><strong>Precheck.</strong> Each fetched batch goes through the collator-local precheck
+described in section 5.2: verify subtree inclusion proof, verify message
+continuity, reconstruct local subtree. If the batch&rsquo;s <code>provides_root</code> differs
+from <code>ProvidesRoots[source]</code>, the collator also fetches and prechecks a
+<code>LateBlockProof</code> (section 6.2) — verifying it locally and recording the
+transformed root for use in commitment assembly. Batches and proofs that fail
+precheck are discarded.</p>
+<p><strong>Selection.</strong> Batches are ordered by source priority (configurable) then by age
+(oldest first). The collator selects greedily until block weight or size limits
+are met. At most one distinct <code>provides_root</code> per source per block.</p>
+<p><strong>Injection.</strong> Selected batches are encoded into <code>SpeculativeIngress</code> and
+injected into <code>InherentData</code> under <code>SPECULATIVE_INGRESS_IDENTIFIER</code>. Prechecked
+<code>LateBlockProof</code> data is appended to the PoV after block data.</p>
+<p><strong>Resubmission.</strong> After submitting the candidate, the collator watches the relay
+chain for a configurable window (e.g., 6 relay blocks). If the candidate is not
+enacted within the window — either because a dependency was unsatisfied
+(<code>UnsatisfiedRequires</code>), a LateBlockProof was stale, or the candidate was
+dropped from the pipeline — the collator fetches fresh data from the provider
+(updated batches and/or proofs), rebuilds the block, and resubmits. This minimal
+retry loop converts transient failures into eventual success:</p>
+<pre tabindex="0"><code>loop {
+    fetch fresh batches + proofs from provider
+    precheck → select → inject → build candidate → submit
+    wait for enactment (configurable N relay blocks)
+    if enacted { break; }
+}
+</code></pre><p>The production-grade retry policy (exponential backoff, persistent message
+queues, bounded catch-up) is deferred to §12. The POC only needs enough
+resilience to survive the normal backing-pipeline variability on a testnet.</p>
+<h3 id="75-provider-discovery">7.5 Provider Discovery</h3>
+<p>For the POC, static configuration:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-toml" data-lang="toml"><span style="display:flex;"><span>[<span style="color:#a6e22e">speculative_messaging_providers</span>]
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">1000</span> = [<span style="color:#e6db74">&#34;http://provider-a.example:9100&#34;</span>]
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">2000</span> = [<span style="color:#e6db74">&#34;http://provider-b.example:9100&#34;</span>]
+</span></span></code></pre></div><p>The collator tries providers in order until one responds. Native collator
+discovery / request-response is deferred past the POC.</p>
+<h3 id="76-error-handling-and-retry">7.6 Error Handling and Retry</h3>
+<pre tabindex="0"><code>For each source chain:
+  1. Try to connect to any known provider
+  2. Request MessageBatch data with since_provides_root cursor
+  3. If response received → precheck each batch → encode accepted batches
+  4. If timeout or error → log warning → SKIP this source for this block
+</code></pre><p>Skipped sources are retried in the next block. No block production is ever
+blocked by networking failures. The block can still be produced without
+speculative ingress — consensus remains correct.</p>
+<h3 id="77-boundedness-and-failure-modes">7.7 Boundedness and Failure Modes</h3>
+<p><strong>Catch-up window.</strong> The provider retains a sliding window. A destination that
+falls behind by more than the retention window cannot fetch the missing batches
+(the provider has pruned them). The receiver&rsquo;s precheck rejects batches where
+<code>source_relay_parent_number</code> is too far behind the current relay parent. Within
+the retention window, Late Block Proofs (§6.2) handle the case where the source
+root has advanced.</p>
+<p><strong>Provider failure.</strong> If all providers for a source are unreachable, speculative
+messages from that source are skipped. The collator continues with HRMP messages
+if configured. No block production is blocked.</p>
+<p><strong>Stale batches from forked source blocks.</strong> If a provider serves a batch where
+the corresponding sender candidate was never included (forked), the receiver
+block&rsquo;s <code>RequiresCommitment</code> will reference a <code>provides_root</code> that never appears
+in <code>ProvidesRoots</code>. At enactment time, the relay chain rejects with
+<code>UnsatisfiedRequires</code>. The candidate is not included; no state corruption. The
+receiver collator can reduce the chance by only fetching batches for finalized
+source blocks, but finalized does not mean included.</p>
+<p><strong>Malicious provider.</strong> The transport is untrusted. The receiver re-verifies all
+proofs in the runtime. A malicious provider can serve invalid proofs (runtime
+rejects), stale batches (continuity check rejects), or withhold batches
+(receiver skips). No new trust assumptions are introduced.</p>
+<h3 id="78-tradeoffs">7.8 Tradeoffs</h3>
+<p>The relayer/provider-first approach is a practical POC simplification:</p>
+<ul>
+<li><strong>Advantages</strong>: simpler transport implementation, easier debugging, clear separation between consensus and transport logic, natural place for bounded recent history.</li>
+<li><strong>Tradeoffs</strong>: a single provider can become a latency bottleneck, adds an extra operational component, more centralized than the peer-native end-state.</li>
+</ul>
+<p>This is <strong>not</strong> a consensus-safety bottleneck — an unavailable provider means the
+collator skips speculative ingress for that block.</p>
+<h3 id="79-native-collator-transport-future">7.9 Native Collator Transport (Future)</h3>
+<p>Direct collator request/response is a later native fast path:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">SPECULATIVE_MSG_PROTOCOL</span>: <span style="color:#66d9ef">&amp;</span><span style="color:#66d9ef">str</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/polkadot/speculative-messaging/1&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#[derive(Encode, Decode, Debug)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">MessageBatchRequest</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> source: <span style="color:#a6e22e">ParaId</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> destination: <span style="color:#a6e22e">ParaId</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> from_block: <span style="color:#a6e22e">Hash</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> to_block: Option<span style="color:#f92672">&lt;</span>Hash<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#[derive(Encode, Decode, Debug)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">MessageBatchResponse</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> batches: Vec<span style="color:#f92672">&lt;</span>MessageBatch<span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>For a later native implementation, <code>cumulus/client/bootnodes</code> is a good example
+of a small request/response protocol. The relayer/provider path can remain as the
+fallback/catch-up layer even after native collator transport is added.</p>
+<hr>
+<h2 id="8-hrmp-coexistence">8. HRMP Coexistence</h2>
+<p>Phase 1 runs <strong>alongside HRMP</strong>. Both paths produce/consume messages. The receiver
+deduplicates: if the same message arrives via both HRMP and speculative
+messaging, the second dispatch attempt is ignored (replay protection by
+<code>(source, position)</code> or message hash).</p>
+<p><strong>Collator block building order:</strong></p>
+<ol>
+<li>Fetch pending messages via HRMP (from relay parent, as before)</li>
+<li>Fetch pending messages via speculative messaging (off-chain)</li>
+<li>Locally precheck speculative batches and encode them into <code>SpeculativeIngress</code></li>
+<li>Both sets of messages are executed in the same block</li>
+<li>Both HRMP watermark and provides/requires are emitted in <code>CandidateCommitments</code></li>
+</ol>
+<p>The <code>horizontal_messages</code> field in <code>CandidateCommitments</code> continues to carry HRMP
+messages. Speculative messaging messages are NOT carried in <code>horizontal_messages</code>
+— they are carried in the block body&rsquo;s <code>SpeculativeIngress</code> call.</p>
+<p><strong>Weight accounting.</strong> Both HRMP (called from
+<code>ParachainSystem::set_validation_data</code>) and speculative ingress call
+<code>handle_xcmp_messages</code>, each consuming from the same
+<code>ReservedXcmpWeight</code>/<code>ReservedXcmpWeightOverride</code> budget. The simplest POC
+approach: set the total reserved XCMP weight high enough to cover both paths in
+the worst case, and let each call consume what it needs. The two calls are
+independent.</p>
+<hr>
+<h2 id="9-feature-gating--upgrade-path">9. Feature Gating &amp; Upgrade Path</h2>
+<h3 id="91-per-parachain-enablement">9.1 Per-Parachain Enablement</h3>
+<p>A parachain signals speculative messaging support by upgrading to a v4
+<code>CandidateDescriptor</code>. The relay chain only enforces requires/provides for v4
+candidates; v3 (and v2) candidates skip the new validation entirely.</p>
+<p>The upgrade order:</p>
+<ol>
+<li>Parachain runtime upgrades to maintain speculative inbox/outbox state and expose runtime APIs</li>
+<li>Collator nodes upgrade to support v4 descriptors and the new protocol</li>
+<li>Relay chain runtime upgrades to recognize v4 descriptors and perform commitment matching</li>
+<li>Once all three are deployed, messages begin flowing through the new path</li>
+</ol>
+<h3 id="92-per-channel-gating-optional">9.2 Per-Channel Gating (Optional)</h3>
+<p>For finer control, a parachain runtime config can list which source chains to use
+speculative messaging with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#a6e22e">parameter_types!</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> SpeculativeMessagingSources: Vec<span style="color:#f92672">&lt;</span>ParaId<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">vec!</span>[
+</span></span><span style="display:flex;"><span>        ParaId(<span style="color:#ae81ff">1000</span>),
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ParaId(2000),  // still use HRMP for para 2000
+</span></span></span><span style="display:flex;"><span>    ];
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Sources not in this list continue to receive messages via HRMP only.</p>
+<hr>
+<h2 id="10-implementation-plan">10. Implementation Plan</h2>
+<p>Implement in the following order.</p>
+<h3 id="101-step-1-primitives-and-version-gating">10.1 Step 1: Primitives and Version Gating</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li><code>polkadot/primitives/src/v10/mod.rs</code></li>
+<li><code>polkadot/primitives/src/lib.rs</code></li>
+<li><code>polkadot/primitives/test-helpers/src/lib.rs</code></li>
+</ul>
+<p>Add <code>ProvidesCommitment</code>, <code>RequiresCommitment</code>, <code>MessageBatch</code>, <code>OutgoingMessage</code>,
+<code>SpeculativeIngress</code>, and v10 <code>CandidateCommitments</code>. Extend descriptor-version
+handling for v4 speculative candidates. Update test helpers.</p>
+<h3 id="102-step-2-receiver-runtime-ingress-path">10.2 Step 2: Receiver Runtime Ingress Path</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>new <code>cumulus/pallets/speculative-inbox/</code></li>
+<li><code>cumulus/pallets/parachain-system/src/lib.rs</code></li>
+<li>chosen POC runtime (e.g., <code>cumulus/parachains/runtimes/testing/penpal/src/lib.rs</code>)</li>
+</ul>
+<p>Add <code>IncomingState</code>, <code>ConsumedSourcesThisBlock</code>, <code>ingest_verified_messages</code>,
+<code>ProvideInherent</code>. Re-verify subtree proofs, message continuity, subtree-root
+reconstruction, and the one-root-per-source-per-block invariant. Dispatch through
+<code>T::XcmpMessageHandler::handle_xcmp_messages(...)</code>. Expose
+<code>get_requires_commitments()</code> runtime API.</p>
+<h3 id="103-step-3-sender-runtime-outbox-path">10.3 Step 3: Sender Runtime Outbox Path</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>new <code>cumulus/pallets/speculative-outbox/</code></li>
+<li><code>cumulus/pallets/parachain-system/src/lib.rs</code></li>
+<li>chosen POC runtime</li>
+</ul>
+<p>Wrap the existing outbound XCMP path. Maintain per-destination <code>OutgoingMMRs</code>.
+Implement canonical top-level root construction. Expose <code>compute_provides_root()</code>
+runtime API.</p>
+<h3 id="104-step-4-collator-side-inherent-injection-and-commitment-assembly">10.4 Step 4: Collator-Side Inherent Injection and Commitment Assembly</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li><code>cumulus/client/consensus/aura/src/collator.rs</code></li>
+<li><code>substrate/primitives/inherents/src/client_side.rs</code></li>
+</ul>
+<p>Add node-local speculative fetch/precheck component. Extend inherent-data
+creation to inject <code>SpeculativeIngress</code>. After block execution, read
+runtime-produced <code>provides</code> and <code>requires</code> and construct v4 commitments.</p>
+<h3 id="105-step-5-pvf--wasm-validation-abi">10.5 Step 5: PVF / Wasm Validation ABI</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li><code>polkadot/parachain/src/primitives.rs</code></li>
+<li><code>polkadot/parachain/src/wasm_api.rs</code></li>
+<li><code>cumulus/pallets/parachain-system/src/validate_block/implementation.rs</code></li>
+</ul>
+<p>Extend the wasm validation result shape for v4 speculative candidates. In
+<code>validate_block</code>, assemble speculative outputs from post-execution runtime state.
+Ensure wasm result serialization returns the extended shape.</p>
+<h3 id="106-step-6-node-side-candidate-validation">10.6 Step 6: Node-Side Candidate Validation</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li><code>polkadot/node/core/candidate-validation/src/lib.rs</code></li>
+</ul>
+<p>Decode the extended validation result for v4 candidates. Reconstruct v10
+<code>CandidateCommitments</code> from returned outputs. Keep pre-v4 candidates on the
+legacy path. Continue hash-checking against the candidate receipt.</p>
+<h3 id="107-step-7-late-block-proofs-pvf--provider">10.7 Step 7: Late Block Proofs (PVF + Provider)</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li><code>cumulus/pallets/parachain-system/src/validate_block/implementation.rs</code></li>
+<li><code>polkadot/parachain/src/primitives.rs</code> (extend <code>ValidationResult</code>)</li>
+<li><code>polkadot/parachain/src/wasm_api.rs</code> (PoV parsing)</li>
+<li>provider/relayer process (same as step 9)</li>
+</ul>
+<p>Add <code>LateBlockProof</code> and <code>MMRExtensionProof</code> types to <code>v10</code> primitives. Implement
+PoV-based proof verification: collator fetches and prechecks proofs, uses
+transformed root in candidate commitments, appends proofs to PoV. PVF reads
+proofs from PoV during <code>validate_block</code>, verifies, and transforms requires.
+Collator precheck and PVF verification use the same logic; mismatches cause
+commitments hash mismatch (candidate rejected).</p>
+<h3 id="108-step-8-relay-chain-runtime-enactment-rules">10.8 Step 8: Relay-Chain Runtime Enactment Rules</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>new <code>polkadot/runtime/parachains/src/speculative_messaging.rs</code></li>
+<li><code>polkadot/runtime/parachains/src/inclusion/mod.rs</code></li>
+</ul>
+<p>Add <code>ProvidesRoots</code> storage. Keep <code>process_candidates()</code> for backing admission.
+Extend the enactment path to check v4 <code>RequiresCommitment</code> against persisted
+roots only. Add <code>UnsatisfiedRequires</code> error.</p>
+<h3 id="109-step-9-off-chain-networking">10.9 Step 9: Off-Chain Networking</h3>
+<p><strong>Files:</strong> new node-side protocol module under <code>cumulus/client/...</code></p>
+<p>Add a provider/relayer process serving bounded recent history of both
+<code>MessageBatch</code> data and <code>LateBlockProof</code> data. Add destination-side fetcher with
+static <code>ParaId -&gt; Vec&lt;ProviderEndpoint&gt;</code> configuration. Optionally add native
+collator request/response later.</p>
+<h3 id="1010-step-10-poc-runtime-and-tests">10.10 Step 10: POC Runtime and Tests</h3>
+<p>Target one contained parachain runtime (Penpal, Rococo parachain, or similar).</p>
+<p><strong>Test milestones:</strong></p>
+<ol>
+<li>sender runtime emits a stable cumulative <code>provides</code> root</li>
+<li>receiver runtime accepts valid <code>SpeculativeIngress</code> and rejects invalid proofs/ordering/mixed-root cases</li>
+<li>PVF returns matching v4 validation outputs (including transformed requires from late block proofs)</li>
+<li>node-side candidate validation reconstructs the correct v4 commitments hash</li>
+<li>relay-chain enactment accepts satisfied dependencies (batch root matches persisted ProvidesRoots, including late-block-proof cases) and rejects unsatisfied ones</li>
+<li>collator networking can fetch, precheck, and inject a recent batch end-to-end</li>
+<li>late block proof: receiver can consume messages from a source that has advanced past the root the receiver built against</li>
+<li>resubmission: collator detects candidate rejection, fetches fresh data, rebuilds, and delivers the message on a subsequent attempt</li>
+</ol>
+<hr>
+<h2 id="11-whats-not-in-this-poc">11. What&rsquo;s NOT In This POC</h2>
+<ul>
+<li><strong>Speculative (acknowledged) delivery mode</strong>: requires Low-Latency v2&rsquo;s collator acknowledgement signatures, which are not yet implemented in the codebase. The receiver cannot optimistically build on an un-included sender block without a signed canonicality commitment from the sender&rsquo;s collators.</li>
+<li><strong>Super-chain (intra-block) delivery mode</strong>: unlike speculative mode, super-chain does NOT require LLv2 (no cross-collator trust — one collator authors everything). It IS blocked by collator infrastructure that doesn&rsquo;t exist: collators today are tied to a single parachain; producing blocks for multiple parachains in one slot needs multi-parachain collator assignment, intra-block message dependency ordering (A&rsquo;s block before B&rsquo;s within the same slot), and atomic inclusion semantics on the relay chain. All three are design-only, not implemented.</li>
+<li><strong>Trust domains</strong>: a concept from the high-level design (§8) where parachains declare which peers&rsquo; collators they trust for speculative (acknowledged) delivery. Trust domains require three things that don&rsquo;t exist yet: LLv2 collator acknowledgement signatures, a <code>TrustedPeers: Vec&lt;ParaId&gt;</code> runtime configuration, and collator logic for trust-domain-aware acknowledgement rules. The POC uses inclusion-based delivery only, which relies purely on relay chain enforcement of <code>ProvidesRoots</code> — no trust assumptions between chains.</li>
+<li><strong>Low-Latency v2 integration</strong>: LLv2 is the most invasive dependency in the speculative messaging design space — its core components touch consensus-critical code across the codebase. It requires: new <code>scheduling_parent</code> and <code>scheduling_session_index</code> fields in the candidate descriptor (decoupling scheduling from relay parent); backing group selection based on scheduling parent (relay chain runtime, security-critical); inclusion rules for candidates with relay parents up to ~14,400 blocks old; collator acknowledgement signatures (new primitives + gossip protocol); slashing rules for ACK&rsquo;d-but-never-included blocks; and PVF header-chain proofs. The POC establishes the integration model (descriptor version gating, PVF validation ABI extension, relay-chain enactment-time rules) that LLv2 builds on, but does not reduce LLv2&rsquo;s own scope — it is a separate large project.</li>
+<li><strong>Relaxed or unordered delivery semantics</strong>: Phase 1 requires contiguous per-source subtree advancement</li>
+<li><strong>Message pruning or MMR garbage collection</strong>: leaves grow indefinitely</li>
+<li><strong>Economic incentives</strong>: no fee mechanism for relayers/collators</li>
+<li><strong>Cycle prevention</strong>: handled by &ldquo;don&rsquo;t process messages from blocks that haven&rsquo;t been built yet&rdquo;</li>
+</ul>
+<hr>
+<h2 id="12-follow-up-roadmap">12. Follow-Up Roadmap</h2>
+<h3 id="delivery-bounds-and-pruning">Delivery Bounds and Pruning</h3>
+<ul>
+<li>Define what &ldquo;eventual delivery&rdquo; means operationally.</li>
+<li>Bound maximum message age and maximum catch-up per block.</li>
+<li>Define message retention windows and pruning triggers.</li>
+</ul>
+<h3 id="rate-limiting-and-dos-protection">Rate Limiting and DoS Protection</h3>
+<ul>
+<li>Add per-channel message and byte limits.</li>
+<li>Enforce limits on outbox and inbox paths.</li>
+</ul>
+<h3 id="proof-and-storage-bounds">Proof and Storage Bounds</h3>
+<ul>
+<li>Define fallback behavior when late-block-proofs exceed PoV size limits.</li>
+<li>Confirm relay-chain storage remains bounded to latest-per-para data only.</li>
+</ul>
+<h3 id="trust-domains-and-acknowledgements">Trust Domains and Acknowledgements</h3>
+<ul>
+<li>Define when speculative mode is allowed.</li>
+<li>Clarify unilateral trust, revocation, and fallback behavior.</li>
+<li>Integrate acknowledgements when Low-Latency v2 is available.</li>
+</ul>
+<h3 id="migration-and-coexistence">Migration and Coexistence</h3>
+<ul>
+<li>Define how HRMP and speculative messaging run in parallel.</li>
+<li>Clarify per-channel or per-parachain enablement.</li>
+<li>Add rollback and upgrade sequencing guidance.</li>
+</ul>
+<h3 id="production-hardening">Production Hardening</h3>
+<ul>
+<li>Formalize PoV / validation ABI extensions.</li>
+<li>Tighten proof size and storage growth guarantees.</li>
+<li>Expand adversarial testing and security review scope.</li>
+</ul>
+<h3 id="optional-future-directions">Optional Future Directions</h3>
+<ul>
+<li>Super-chain / intra-block messaging.</li>
+<li>Relaxed or unordered delivery semantics.</li>
+<li>Enhanced pruning and garbage collection strategies.</li>
+</ul>
+<hr>
+<h2 id="13-related-documents">13. Related Documents</h2>
+<ul>
+<li><a href="speculative-messaging-design.md">speculative-messaging-design.md</a> — Full high-level design including Late Block Proofs, trust domains, super chains, and LLv2 integration.</li>
+<li><a href="xcmp-mmd-minimal-poc.md">xcmp-mmd-minimal-poc.md</a> — Superseded earlier POC using BEEFY-anchored proofs. Retained for historical reference.</li>
+</ul>
+
+    </article>
+
+    
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2026-05-08-speculative-messaging-impl-design/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Speculative%20Messaging%20%e2%80%94%20POC%20Implementation%20Design%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2026-05-08-speculative-messaging-impl-design/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/post/2026-06-15-psy-protocol-investigation-report/" data-toggle="tooltip" data-placement="top" title="Investigation Report: Psy Protocol">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/post/2026-05-04-speculative-messaging-design/" data-toggle="tooltip" data-placement="top" title="Speculative Messaging — Original Design Document">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

@@ -42,6 +42,78 @@
   <div class="main" role="main">
     <section class="list home-list">
       <article class="article">
+        <a href="/blog/post/2022-02-01-solidity-pattern/" class="article-titles">
+          <h2 class="article-title">Solidity patterns</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>February 1, 2022</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/ethereum/">
+              <i class="fa-solid fa-tag"></i>
+              Ethereum
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/solidity/">
+              <i class="fa-solid fa-tag"></i>
+              Solidity
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <h2 id="solidity-设计模式汇总笔记">Solidity 设计模式汇总笔记</h2>
+<p>本笔记总结了用于优化 Gas 消耗、增强安全性以及改善开发体验的核心 Solidity 编程模式。</p>
+<h3 id="1-重入保护模式-reentrancy-protection">1. 重入保护模式 (Reentrancy Protection)</h3>
+<p>问题：当合约发起外部调用时，执行控制权会转移给另一方。攻击者可以利用此机会在原始操作完成前再次调用合约函数，从而导致资产被超额提取。</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2022-02-01-solidity-pattern/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/post/2021-10-09-polkadot/" class="article-titles">
+          <h2 class="article-title">Terminology in Polkadot</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>October 9, 2021</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              Polkadot
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <h1 id="terminology">Terminology</h1>
+<h2 id="pov-proof-of-validity">PoV (Proof of Validity)</h2>
+<p>The PoV is the data package produced by parachain collators and sent to Relay Chain validators.</p>
+<ul>
+<li>
+<p>Purpose: It acts as the &ldquo;argument&rdquo; or evidence that a parachain has transitioned its state correctly</p>
+</li>
+<li>
+<p>Contents: It typically includes the L2&rsquo;s state proof and the witness data (extra data needed for verification)</p>
+</li>
+<li>
+<p>Size: A PoV block is often around 5MB of untrusted data provided to the validator group</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2021-10-09-polkadot/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/post/2021-07-10-bridge/" class="article-titles">
           <h2 class="article-title">Light client bridge</h2>
           
@@ -473,98 +545,6 @@ let msg = Xcm::Transact {
 <p>目前市面上比较流行的流程图绘图框架大致有 jointjs、jsplumb、mxgraph、bpmnjs、antv g6 等。对以上框架进行技术调研，从商业版权、易用性、功能完善性、可定制性、浏览器兼容性、社区支持方面进行评估，大致得出如下结果：</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2018-07-08-mxgraph/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
-      <article class="article">
-        <a href="/blog/post/2018-06-09-nestjs/" class="article-titles">
-          <h2 class="article-title">Introduction to nestjs</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>June 9, 2018</time></li>
-          <li class="article-meta-tags">
-            <a href="/tags/typescript/">
-              <i class="fa-solid fa-tag"></i>
-              typescript
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <h2 id="代码分析">代码分析</h2>
-<p>入口main.ts</p>
-<pre tabindex="0"><code>import { NestFactory } from &#39;@nestjs/core&#39;;
-import { ApplicationModule } from &#39;./app.module&#39;;
-
-async function bootstrap() {
-  const app = await NestFactory.create(ApplicationModule);
-  await app.listen(3000);
-}
-bootstrap();
-</code></pre><p>NestFactory构造</p>
-<pre tabindex="0"><code>public async create(
-    module: any,
-    serverOrOptions?: any,
-    options?: NestApplicationOptions,
-  ): Promise&lt;
-    INestApplication &amp; (INestExpressApplication | INestFastifyApplication)
-  &gt; {
-    const isHttpServer = serverOrOptions &amp;&amp; serverOrOptions.patch;
-    // tslint:disable-next-line:prefer-const
-    let [httpServer, appOptions] = isHttpServer
-      ? [serverOrOptions, options]
-      : [ExpressFactory.create()/* 默认使用Express*/, serverOrOptions];
-
-    const applicationConfig = new ApplicationConfig();
-    const container = new NestContainer(applicationConfig);//生成容器container;传入了配置对象
-    httpServer = this.applyExpressAdapter(httpServer);//初始化http服务
-
-    this.applyLogger(appOptions);//日志输出对象
-    await this.initialize(module, container, applicationConfig, httpServer);
-    return this.createNestInstance&lt;NestApplication&gt;(
-      new NestApplication(container, httpServer, applicationConfig, appOptions),
-    );
-  }
-</code></pre><ul>
-<li>第一个参数是使用是传入的类似angularmodule的对象</li>
-<li>第二个参数可以是设置参数，也可以是类似express的MVC，如官网提到的fastify，覆盖默认使用的express</li>
-<li>第三个参数就是设置参数</li>
-</ul>
-<p>初始化模块</p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2018-06-09-nestjs/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
-      <article class="article">
-        <a href="/blog/post/2018-04-09-skynet/" class="article-titles">
-          <h2 class="article-title">Introduction to Skynet</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>April 9, 2018</time></li>
-          <li class="article-meta-tags">
-            <a href="/tags/lua/">
-              <i class="fa-solid fa-tag"></i>
-              lua
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <h2 id="代码结构">代码结构</h2>
-<p>首先要关注一下config.path文件。</p>
-<p>skynet/example/config.path</p>
-<pre tabindex="0"><code>root = &#34;./&#34;
-luaservice = root..&#34;service/?.lua;&#34;..root..&#34;test/?.lua;&#34;..root..&#34;examples/?.lua;&#34;..root..&#34;test/?/init.lua&#34;
-lualoader = root .. &#34;lualib/loader.lua&#34;
-lua_path = root..&#34;lualib/?.lua;&#34;..root..&#34;lualib/?/init.lua&#34;
-lua_cpath = root .. &#34;luaclib/?.so&#34;
-snax = root..&#34;examples/?.lua;&#34;..root..&#34;test/?.lua&#34;
-</code></pre><p>root代表的是skynet所在的目录。
-luaservice代表服务所在的目录。
-lualoader 用哪一段 lua 代码加载 lua 服务。通常配置为 lualib/loader.lua ，再由这段代码解析服务名称，进一步加载 lua 代码。不用去修改它。
-lua_path和lua_cpath代表require要加载的文件所在的目录。
-snax代表使用snax框架写的服务所在的目录。</p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2018-04-09-skynet/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
     </section>

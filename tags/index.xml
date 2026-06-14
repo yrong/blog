@@ -9,8 +9,78 @@
     <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
     <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
-    <lastBuildDate>Mon, 04 May 2026 15:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 15 Jun 2026 00:13:00 +0800</lastBuildDate>
     <atom:link href="https://yrong.github.io/blog/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Bitcoin</title>
+      <link>https://yrong.github.io/blog/tags/bitcoin/</link>
+      <pubDate>Mon, 15 Jun 2026 00:13:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/tags/bitcoin/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Bitvm</title>
+      <link>https://yrong.github.io/blog/tags/bitvm/</link>
+      <pubDate>Mon, 15 Jun 2026 00:13:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/tags/bitvm/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Cryptography</title>
+      <link>https://yrong.github.io/blog/tags/cryptography/</link>
+      <pubDate>Mon, 15 Jun 2026 00:13:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/tags/cryptography/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Dogecoin</title>
+      <link>https://yrong.github.io/blog/tags/dogecoin/</link>
+      <pubDate>Mon, 15 Jun 2026 00:13:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/tags/dogecoin/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Psy-Protocol</title>
+      <link>https://yrong.github.io/blog/tags/psy-protocol/</link>
+      <pubDate>Mon, 15 Jun 2026 00:13:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/tags/psy-protocol/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Zk-Rollup</title>
+      <link>https://yrong.github.io/blog/tags/zk-rollup/</link>
+      <pubDate>Mon, 15 Jun 2026 00:13:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/tags/zk-rollup/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Design</title>
+      <link>https://yrong.github.io/blog/tags/design/</link>
+      <pubDate>Fri, 08 May 2026 16:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/tags/design/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Implementation</title>
+      <link>https://yrong.github.io/blog/tags/implementation/</link>
+      <pubDate>Fri, 08 May 2026 16:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/tags/implementation/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Polkadot</title>
+      <link>https://yrong.github.io/blog/tags/polkadot/</link>
+      <pubDate>Fri, 08 May 2026 16:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/tags/polkadot/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Xcm</title>
+      <link>https://yrong.github.io/blog/tags/xcm/</link>
+      <pubDate>Fri, 08 May 2026 16:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/tags/xcm/</guid>
+      <description></description>
+    </item>
     <item>
       <title>Cross-Chain</title>
       <link>https://yrong.github.io/blog/tags/cross-chain/</link>
@@ -19,31 +89,10 @@
       <description></description>
     </item>
     <item>
-      <title>Design</title>
-      <link>https://yrong.github.io/blog/tags/design/</link>
-      <pubDate>Mon, 04 May 2026 15:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
-      <guid>https://yrong.github.io/blog/tags/design/</guid>
-      <description></description>
-    </item>
-    <item>
       <title>Merkle-Tree</title>
       <link>https://yrong.github.io/blog/tags/merkle-tree/</link>
       <pubDate>Mon, 04 May 2026 15:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/tags/merkle-tree/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Polkadot</title>
-      <link>https://yrong.github.io/blog/tags/polkadot/</link>
-      <pubDate>Mon, 04 May 2026 15:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
-      <guid>https://yrong.github.io/blog/tags/polkadot/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Xcm</title>
-      <link>https://yrong.github.io/blog/tags/xcm/</link>
-      <pubDate>Mon, 04 May 2026 15:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
-      <guid>https://yrong.github.io/blog/tags/xcm/</guid>
       <description></description>
     </item>
     <item>
@@ -72,13 +121,6 @@
       <link>https://yrong.github.io/blog/tags/ismp/</link>
       <pubDate>Thu, 22 Jun 2023 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/tags/ismp/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Cryptography</title>
-      <link>https://yrong.github.io/blog/tags/cryptography/</link>
-      <pubDate>Thu, 15 Sep 2022 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
-      <guid>https://yrong.github.io/blog/tags/cryptography/</guid>
       <description></description>
     </item>
     <item>

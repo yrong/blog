@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Implementation - yrong blog</title>
+  <meta property="og:title" content="Implementation - yrong blog" />
+  <meta name="twitter:title" content="Implementation - yrong blog" />
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/tags/implementation/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link href="/blog/tags/implementation/index.xml" rel="alternate" type="application/rss+xml" title="yrong blog" />
+  <link href="/blog/tags/implementation/index.xml" rel="feed" type="application/rss+xml" title="yrong blog" />
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <section class="list term-list">
+      <article class="article">
+        <a href="/blog/post/2026-05-08-speculative-messaging-impl-design/" class="article-titles">
+          <h2 class="article-title">Speculative Messaging — POC Implementation Design</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>May 8, 2026</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/polkadot/">
+              <i class="fa-solid fa-tag"></i>
+              polkadot
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/xcm/">
+              <i class="fa-solid fa-tag"></i>
+              xcm
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/implementation/">
+              <i class="fa-solid fa-tag"></i>
+              implementation
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/design/">
+              <i class="fa-solid fa-tag"></i>
+              design
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <h1 id="speculative-messaging--minimal-poc-implementation-design">Speculative Messaging — Minimal POC Implementation Design</h1>
+<p>Based on <a href="speculative-messaging-design.md">speculative-messaging-design.md</a>.</p>
+<p>This is the <strong>single source of truth</strong> for the minimal speculative-messaging POC
+on the current codebase, covering implementation design, end-to-end workflow,
+off-chain networking, and the follow-up roadmap.</p>
+<p><strong>Phase 1 scope — Inclusion-based messaging with Late Block Proofs.</strong> Removes
+message storage from relay chain state while keeping latency at ~6–12s (1–2 relay
+blocks for inclusion). This is the first implementation slice of the broader
+offchain-XCMP replacement direction — the conservative inclusion-based path of
+the general commitment-driven speculative messaging model.</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2026-05-08-speculative-messaging-impl-design/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+    </section>
+    
+  </div>
+
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-rsslink">
+      <a href="/blog/tags/implementation/index.xml" type="application/rss+xml" target="_blank" title="RSS">
+        <i class="fa-solid fa-rss"></i>
+      </a>
+    </li>
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>
