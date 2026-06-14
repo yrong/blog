@@ -45,57 +45,6 @@
   <div class="main" role="main">
     <section class="list section-list">
       <article class="article">
-        <a href="/blog/post/2026-06-15-psy-protocol-investigation-report/" class="article-titles">
-          <h2 class="article-title">Investigation Report: Psy Protocol</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>June 15, 2026</time></li>
-          <li class="article-meta-tags">
-            <a href="/tags/bitcoin/">
-              <i class="fa-solid fa-tag"></i>
-              bitcoin
-            </a>&nbsp;
-          </li>
-          <li class="article-meta-tags">
-            <a href="/tags/dogecoin/">
-              <i class="fa-solid fa-tag"></i>
-              dogecoin
-            </a>&nbsp;
-          </li>
-          <li class="article-meta-tags">
-            <a href="/tags/zk-rollup/">
-              <i class="fa-solid fa-tag"></i>
-              zk-rollup
-            </a>&nbsp;
-          </li>
-          <li class="article-meta-tags">
-            <a href="/tags/cryptography/">
-              <i class="fa-solid fa-tag"></i>
-              cryptography
-            </a>&nbsp;
-          </li>
-          <li class="article-meta-tags">
-            <a href="/tags/bitvm/">
-              <i class="fa-solid fa-tag"></i>
-              bitvm
-            </a>&nbsp;
-          </li>
-          <li class="article-meta-tags">
-            <a href="/tags/psy-protocol/">
-              <i class="fa-solid fa-tag"></i>
-              psy-protocol
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <h2 id="project-overview--background">Project Overview &amp; Background</h2>
-<p>Psy Protocol (formerly known as QED Protocol) is a trustless, horizontally scalable Layer-1 blockchain and ZK-rollup network<sup>1, 2</sup>. Founded by Carter Jack Feldman, the project has secured substantial backing from prominent venture capital firms including Blockchain Capital, Arrington Capital, StarkWare, and Anagram<sup>1, 3</sup>. Its core mission is to enable internet-scale throughput for Web3 applications (such as high-frequency orderbook exchanges and agentic AI payments) while inheriting the base-layer security of Proof-of-Work networks like Bitcoin and Dogecoin<sup>2, 4, 5</sup>.</p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2026-06-15-psy-protocol-investigation-report/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
-      <article class="article">
         <a href="/blog/post/2026-05-08-speculative-messaging-impl-design/" class="article-titles">
           <h2 class="article-title">Speculative Messaging — POC Implementation Design</h2>
           
@@ -534,6 +483,41 @@ inclusion time, we achieve:</p>
 <p><strong>HRMP (Horizontally Relay-routed Message Passing)</strong> lets parachains send bytes to each other using the <strong>same conceptual model as XCMP</strong> (channels, queues), but <strong>full message payloads live in relay-chain storage</strong>. That keeps semantics simpler and makes relay resource use higher. It is described as an interim mechanism until XCMP is fully available.</p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2022-05-09-polkadot-hrmp-protocol/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
+        <a href="/blog/post/2022-02-01-solidity-pattern/" class="article-titles">
+          <h2 class="article-title">Solidity patterns</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>February 1, 2022</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/blockchain/">
+              <i class="fa-solid fa-tag"></i>
+              BlockChain
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/ethereum/">
+              <i class="fa-solid fa-tag"></i>
+              Ethereum
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/solidity/">
+              <i class="fa-solid fa-tag"></i>
+              Solidity
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <h2 id="solidity-设计模式汇总笔记">Solidity 设计模式汇总笔记</h2>
+<p>本笔记总结了用于优化 Gas 消耗、增强安全性以及改善开发体验的核心 Solidity 编程模式。</p>
+<h3 id="1-重入保护模式-reentrancy-protection">1. 重入保护模式 (Reentrancy Protection)</h3>
+<p>问题：当合约发起外部调用时，执行控制权会转移给另一方。攻击者可以利用此机会在原始操作完成前再次调用合约函数，从而导致资产被超额提取。</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2022-02-01-solidity-pattern/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
     </section>
