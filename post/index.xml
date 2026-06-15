@@ -9,8 +9,15 @@
     <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
     <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
-    <lastBuildDate>Fri, 08 May 2026 16:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 15 Jun 2026 00:13:00 +0800</lastBuildDate>
     <atom:link href="https://yrong.github.io/blog/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Investigation Report: Psy Protocol</title>
+      <link>https://yrong.github.io/blog/post/2026-06-15-psy-protocol-investigation-report/</link>
+      <pubDate>Mon, 15 Jun 2026 00:13:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2026-06-15-psy-protocol-investigation-report/</guid>
+      <description>&lt;h2 id=&#34;project-overview--background&#34;&gt;Project Overview &amp;amp; Background&lt;/h2&gt;&#xA;&lt;p&gt;Psy Protocol (formerly known as QED Protocol) is a trustless, horizontally scalable Layer-1 blockchain and ZK-rollup network&lt;sup&gt;1, 2&lt;/sup&gt;. Founded by Carter Jack Feldman, the project has secured substantial backing from prominent venture capital firms including Blockchain Capital, Arrington Capital, StarkWare, and Anagram&lt;sup&gt;1, 3&lt;/sup&gt;. Its core mission is to enable internet-scale throughput for Web3 applications (such as high-frequency orderbook exchanges and agentic AI payments) while inheriting the base-layer security of Proof-of-Work networks like Bitcoin and Dogecoin&lt;sup&gt;2, 4, 5&lt;/sup&gt;.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Speculative Messaging — POC Implementation Design</title>
       <link>https://yrong.github.io/blog/post/2026-05-08-speculative-messaging-impl-design/</link>
@@ -38,6 +45,13 @@
       <pubDate>Thu, 09 Apr 2026 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/post/2026-04-09-xcmp-mmd-minimal-poc/</guid>
       <description>&lt;p&gt;Forum background: &lt;a href=&#34;https://forum.polkadot.network/t/xcmp-design-discussion/7328&#34;&gt;XCMP Design Discussion (Polkadot)&lt;/a&gt;.&lt;/p&gt;&#xA;&lt;h1 id=&#34;xcmp-mmd---design-document&#34;&gt;XCMP MMD - Design Document&lt;/h1&gt;&#xA;&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;&#xA;&lt;p&gt;XCMP MMD (Merkle Mountain Range based cross-chain messaging) is a proof-of-concept for trustless cross-chain message delivery between parachains. It uses a three-tier cryptographic proof system that leverages the relay chain&amp;rsquo;s BEEFY finality gadget and Merkle structures.&lt;/p&gt;&#xA;&lt;h2 id=&#34;problem-statement&#34;&gt;Problem Statement&lt;/h2&gt;&#xA;&lt;p&gt;&lt;strong&gt;HRMP&lt;/strong&gt; (Horizontal Relay-routed Message Passing) stores message payloads on the relay chain, which is expensive in terms of storage and execution costs.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Investigation Report: Zcash</title>
+      <link>https://yrong.github.io/blog/post/2023-08-15-zcash-investigation-report/</link>
+      <pubDate>Tue, 15 Aug 2023 11:12:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2023-08-15-zcash-investigation-report/</guid>
+      <description>&lt;h2 id=&#34;project-overview--background&#34;&gt;Project Overview &amp;amp; Background&lt;/h2&gt;&#xA;&lt;p&gt;Zcash is a decentralized protocol and privacy-protecting digital currency designed to function as encrypted electronic cash. It holds the distinction of being the first cryptocurrency to pioneer and implement zero-knowledge encryption specifically for private peer-to-peer payments. Its core mission is to protect users&amp;rsquo; right to privacy through end-to-end encryption, ensuring that individuals retain full control over their funds without relying on traditional banks.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Hyperbridge ISMP — state vs log, coprocessor GET flow, and relayer queue</title>
@@ -542,13 +556,6 @@
       <pubDate>Wed, 13 Jul 2016 15:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/post/2016-07-13-tinyacs/</guid>
       <description>&lt;p&gt;A blazing fast TR-069 auto configuration server (ACS) built with Vertx,Redis, and MongoDB&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title></title>
-      <link>https://yrong.github.io/blog/post/2026-06-15-psy-protocol-investigation-report/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
-      <guid>https://yrong.github.io/blog/post/2026-06-15-psy-protocol-investigation-report/</guid>
-      <description>&lt;h1 id=&#34;investigation-report-psy-protocol-with-references&#34;&gt;Investigation Report: Psy Protocol (With References)&lt;/h1&gt;&#xA;&lt;p&gt;&lt;strong&gt;Project Overview &amp;amp; Background&lt;/strong&gt;&#xA;&lt;a href=&#34;https://psy.xyz/&#34;&gt;Psy Protocol&lt;/a&gt; (formerly known as &lt;a href=&#34;https://qedprotocol.com/&#34;&gt;QED Protocol&lt;/a&gt;) is a trustless, horizontally scalable Layer-1 blockchain and ZK-rollup network. Founded by Carter Jack Feldman, the project has secured substantial backing from prominent venture capital firms including Blockchain Capital, Arrington Capital, StarkWare, and Anagram. Its core mission is to enable internet-scale throughput for Web3 applications (such as high-frequency orderbook exchanges and agentic AI payments) while inheriting the base-layer security of Proof-of-Work networks like Bitcoin and Dogecoin.&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

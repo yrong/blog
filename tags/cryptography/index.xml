@@ -9,8 +9,22 @@
     <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
     <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
     <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
-    <lastBuildDate>Thu, 15 Sep 2022 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 15 Jun 2026 00:13:00 +0800</lastBuildDate>
     <atom:link href="https://yrong.github.io/blog/tags/cryptography/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Investigation Report: Psy Protocol</title>
+      <link>https://yrong.github.io/blog/post/2026-06-15-psy-protocol-investigation-report/</link>
+      <pubDate>Mon, 15 Jun 2026 00:13:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2026-06-15-psy-protocol-investigation-report/</guid>
+      <description>&lt;h2 id=&#34;project-overview--background&#34;&gt;Project Overview &amp;amp; Background&lt;/h2&gt;&#xA;&lt;p&gt;Psy Protocol (formerly known as QED Protocol) is a trustless, horizontally scalable Layer-1 blockchain and ZK-rollup network&lt;sup&gt;1, 2&lt;/sup&gt;. Founded by Carter Jack Feldman, the project has secured substantial backing from prominent venture capital firms including Blockchain Capital, Arrington Capital, StarkWare, and Anagram&lt;sup&gt;1, 3&lt;/sup&gt;. Its core mission is to enable internet-scale throughput for Web3 applications (such as high-frequency orderbook exchanges and agentic AI payments) while inheriting the base-layer security of Proof-of-Work networks like Bitcoin and Dogecoin&lt;sup&gt;2, 4, 5&lt;/sup&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Investigation Report: Zcash</title>
+      <link>https://yrong.github.io/blog/post/2023-08-15-zcash-investigation-report/</link>
+      <pubDate>Tue, 15 Aug 2023 11:12:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2023-08-15-zcash-investigation-report/</guid>
+      <description>&lt;h2 id=&#34;project-overview--background&#34;&gt;Project Overview &amp;amp; Background&lt;/h2&gt;&#xA;&lt;p&gt;Zcash is a decentralized protocol and privacy-protecting digital currency designed to function as encrypted electronic cash. It holds the distinction of being the first cryptocurrency to pioneer and implement zero-knowledge encryption specifically for private peer-to-peer payments. Its core mission is to protect users&amp;rsquo; right to privacy through end-to-end encryption, ensuring that individuals retain full control over their funds without relying on traditional banks.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Merkle 叶子哈希、域分离与稀疏树证明（MerkleDropHelper）</title>
       <link>https://yrong.github.io/blog/post/2022-09-15-merkle-leaf-domain-separation-and-sparse-tree/</link>
