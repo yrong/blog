@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <title>Investigation Report: Psy Protocol - yrong blog</title>
-  <meta property="og:title" content="Investigation Report: Psy Protocol - yrong blog" />
-  <meta name="twitter:title" content="Investigation Report: Psy Protocol - yrong blog" />
-  <meta name="description" content="Project Overview &amp; Background
-Psy Protocol (formerly known as QED Protocol) is a trustless, horizontally scalable Layer-1 blockchain and ZK-rollup network1, 2. Founded by Carter Jack Feldman, the project has secured substantial backing from prominent venture capital firms including Blockchain Capital, Arrington Capital, StarkWare, and Anagram1, 3. Its core mission is to enable internet-scale throughput for Web3 applications (such as high-frequency orderbook exchanges and agentic AI payments) while inheriting the base-layer security of Proof-of-Work networks like Bitcoin and Dogecoin2, 4, 5.">
-  <meta property="og:description" content="Project Overview &amp; Background
-Psy Protocol (formerly known as QED Protocol) is a trustless, horizontally scalable Layer-1 blockchain and ZK-rollup network1, 2. Founded by Carter Jack Feldman, the project has secured substantial backing from prominent venture capital firms including Blockchain Capital, Arrington Capital, StarkWare, and Anagram1, 3. Its core mission is to enable internet-scale throughput for Web3 applications (such as high-frequency orderbook exchanges and agentic AI payments) while inheriting the base-layer security of Proof-of-Work networks like Bitcoin and Dogecoin2, 4, 5.">
-  <meta name="twitter:description" content="Project Overview &amp; Background
-Psy Protocol (formerly known as QED Protocol) is a trustless, horizontally scalable Layer-1 blockchain and ZK-rollup network1, 2. Founded by Carter Jack Feldman, the …">
+  <title>深度调研报告：Psy Protocol（最新完整版） - yrong blog</title>
+  <meta property="og:title" content="深度调研报告：Psy Protocol（最新完整版） - yrong blog" />
+  <meta name="twitter:title" content="深度调研报告：Psy Protocol（最新完整版） - yrong blog" />
+  <meta name="description" content="项目概述与背景
+Psy Protocol（前身为 QED Protocol）是一个无需信任、可水平扩展的 Layer-1 区块链和 ZK-Rollup 网络1, 2。其核心使命是打破传统区块链的“串行处理监狱”，通过重新定义状态存储方式和计算发生地，为高频订单簿 DEX、全链游戏 and AI 代理经济等高并发 Web3 应用提供互联网级的吞吐量（TPS），同时继承比特币和狗狗币等 PoW 基础层的安全性2, 4, 5。">
+  <meta property="og:description" content="项目概述与背景
+Psy Protocol（前身为 QED Protocol）是一个无需信任、可水平扩展的 Layer-1 区块链和 ZK-Rollup 网络1, 2。其核心使命是打破传统区块链的“串行处理监狱”，通过重新定义状态存储方式和计算发生地，为高频订单簿 DEX、全链游戏 and AI 代理经济等高并发 Web3 应用提供互联网级的吞吐量（TPS），同时继承比特币和狗狗币等 PoW 基础层的安全性2, 4, 5。">
+  <meta name="twitter:description" content="项目概述与背景
+Psy Protocol（前身为 QED Protocol）是一个无需信任、可水平扩展的 Layer-1 区块链和 ZK-Rollup 网络1, 2。其核心使命是打破传统区块链的“串行处理监狱”，通过重新定义状态存储方式和计算发生地，为高频订单簿 DEX、全链游戏 and AI 代理经济等高并发 Web3 应用提供互联网级的吞吐量（TPS），同时继承比特币和狗狗币等 PoW 基础层 …">
   <meta name="author" content="Ronyang"/>
   <meta property="og:site_name" content="yrong blog" />
   <meta property="og:url" content="https://yrong.github.io/blog/post/2026-06-15-psy-protocol-investigation-report/" />
@@ -47,7 +47,7 @@ Psy Protocol (formerly known as QED Protocol) is a trustless, horizontally scala
     <article class="article">
       
       
-      <h1 class="article-title">Investigation Report: Psy Protocol</h1>
+      <h1 class="article-title">深度调研报告：Psy Protocol（最新完整版）</h1>
       
       <hr class="article-title-bottom">
       <ul class="article-meta">
@@ -93,66 +93,92 @@ Psy Protocol (formerly known as QED Protocol) is a trustless, horizontally scala
 <aside class="toc">
   <nav id="TableOfContents">
   <ul>
-    <li><a href="#project-overview--background">Project Overview &amp; Background</a></li>
-    <li><a href="#1-psy_vm-a-domain-specific-zkvm">1. psy_vm: A Domain-Specific zkVM</a>
+    <li><a href="#项目概述与背景">项目概述与背景</a></li>
+    <li><a href="#1-打破扩展性困境zk--parth-架构">1. 打破扩展性困境：ZK + PARTH 架构</a>
       <ul>
-        <li><a href="#code-example-software-defined-circuits-sdc">Code Example: Software Defined Circuits (SDC)</a></li>
+        <li><a href="#parth-状态下的并行-token-转移机制">PARTH 状态下的并行 Token 转移机制</a></li>
       </ul>
     </li>
-    <li><a href="#2-the-parth-state-model-parallel-trading">2. The PARTH State Model (Parallel Trading)</a>
+    <li><a href="#2-计算下放与硬件分工用户级-vs-矿工级">2. 计算下放与硬件分工：用户级 vs 矿工级</a>
       <ul>
-        <li><a href="#step-by-step-transaction-walkthrough">Step-by-Step Transaction Walkthrough</a></li>
+        <li><a href="#软件定义电路sdc代码示例">软件定义电路（SDC）代码示例</a></li>
       </ul>
     </li>
-    <li><a href="#3-bitcoin-l1-verification--bitvm-architecture">3. Bitcoin L1 Verification &amp; BitVM Architecture</a>
+    <li><a href="#3-树状递归与克服短板效应">3. 树状递归与克服“短板效应”</a>
       <ul>
-        <li><a href="#challenge-response-verification-architecture">Challenge-Response Verification Architecture</a></li>
+        <li><a href="#对数级出块时间与-tps-估算">对数级出块时间与 TPS 估算</a></li>
+        <li><a href="#解决短板效应straggler-problem">解决“短板效应”（Straggler Problem）</a></li>
+        <li><a href="#交易证明聚合流程-user-proving-session">交易证明聚合流程 (User Proving Session)</a></li>
       </ul>
     </li>
-    <li><a href="#4-cross-chain-expansions-dogecoin--solana">4. Cross-Chain Expansions: Dogecoin &amp; Solana</a>
+    <li><a href="#4-横向架构对比">4. 横向架构对比</a></li>
+    <li><a href="#5-比特币-l1-验证与跨链扩展">5. 比特币 L1 验证与跨链扩展</a>
       <ul>
-        <li><a href="#bridge-smart-contract-tutorial-solana-side">Bridge Smart Contract Tutorial (Solana Side)</a></li>
+        <li><a href="#跨链桥智能合约示例-solana-端">跨链桥智能合约示例 (Solana 端)</a></li>
+        <li><a href="#生产环境跨链桥的工程约束">生产环境跨链桥的工程约束</a></li>
       </ul>
     </li>
-    <li><a href="#5-developer-ecosystem-status">5. Developer Ecosystem Status</a></li>
+    <li><a href="#6-开发者生态与现状">6. 开发者生态与现状</a></li>
+    <li><a href="#核心参考资料">核心参考资料</a></li>
   </ul>
 </nav>
 </aside>
-      <h2 id="project-overview--background">Project Overview &amp; Background</h2>
-<p>Psy Protocol (formerly known as QED Protocol) is a trustless, horizontally scalable Layer-1 blockchain and ZK-rollup network<sup>1, 2</sup>. Founded by Carter Jack Feldman, the project has secured substantial backing from prominent venture capital firms including Blockchain Capital, Arrington Capital, StarkWare, and Anagram<sup>1, 3</sup>. Its core mission is to enable internet-scale throughput for Web3 applications (such as high-frequency orderbook exchanges and agentic AI payments) while inheriting the base-layer security of Proof-of-Work networks like Bitcoin and Dogecoin<sup>2, 4, 5</sup>.</p>
-<h2 id="1-psy_vm-a-domain-specific-zkvm">1. psy_vm: A Domain-Specific zkVM</h2>
-<p>Unlike general-purpose zero-knowledge virtual machines (zkVMs) like RISC Zero or SP1, which emulate standard CPU architectures (like RISC-V) to run Rust or C++ code, psy_vm abandons general-purpose emulation entirely<sup>4, 6</sup>.</p>
+      <h2 id="项目概述与背景">项目概述与背景</h2>
+<p>Psy Protocol（前身为 QED Protocol）是一个无需信任、可水平扩展的 Layer-1 区块链和 ZK-Rollup 网络<sup>1, 2</sup>。其核心使命是打破传统区块链的“串行处理监狱”，通过重新定义状态存储方式和计算发生地，为高频订单簿 DEX、全链游戏 and AI 代理经济等高并发 Web3 应用提供互联网级的吞吐量（TPS），同时继承比特币和狗狗币等 PoW 基础层的安全性<sup>2, 4, 5</sup>。</p>
+<h2 id="1-打破扩展性困境zk--parth-架构">1. 打破扩展性困境：ZK + PARTH 架构</h2>
+<p>传统区块链面临三大扩展性困境：TPS与去中心化安全的负相关、全局状态下的串行执行与竞态条件（Race Conditions）、以及多 Rollup 导致的流动性碎片化。Psy Protocol 通过结合零知识证明（ZK）与 PARTH（并行递增递归树层级）模型彻底解决这些问题<sup>10, 11</sup>。</p>
 <ul>
-<li><strong>High-Level Language Support:</strong> The psy-compiler natively supports JavaScript, TypeScript, Python, and a custom Psy Domain-Specific Language (DSL)<sup>4, 7</sup>.</li>
-<li><strong>Direct Constraint Generation:</strong> Instead of compiling these languages into standard machine instructions (opcodes), the compiler translates them directly into highly optimized mathematical logic circuits and constraints<sup>7, 8</sup>.</li>
-<li><strong>The Goldilocks Field vs. Baby Bear:</strong> While systems like RISC Zero utilize the Baby Bear field and rely heavily on server-side or cloud-based GPU/FPGA proof generation, psy_vm&rsquo;s cryptographic backend (Plonky2) operates strictly over the 64-bit Goldilocks prime field ($p = 2^{64} - 2^{32} + 1$)<sup>4, 8, 9</sup>. Because this field perfectly fits standard 64-bit CPU registers, it enables client-side local proving with minimal latency directly on consumer devices (like mobile phones or browsers)<sup>6, 9</sup>.</li>
+<li><strong>写入分离（Write Separation）：</strong> 传统链强制所有交易排队更新同一个全局账本。PARTH 彻底抛弃了全局状态，为每个用户分配专属的本地状态树（UCON）<sup>10</sup>。用户交互时会生成专门的状态切片（CSTATE）。由于交易只更新独立的本地树，完全消除了全局状态争夺和读写冲突，实现了真正的无限并发。</li>
+<li><strong>软件定义密钥（SDKEY）：</strong> 用户的公钥不再是单纯的密码学私钥推导，而是作为一个 ZK 逻辑电路的哈希值存在，从而在底层实现了原生账户抽象和智能签名。</li>
 </ul>
-<h3 id="code-example-software-defined-circuits-sdc">Code Example: Software Defined Circuits (SDC)</h3>
-<p>Below is a conceptual example of how developer code written in JavaScript/TypeScript is translated into Software Defined Circuits (SDC) by the compiler. It defines mathematical constraints directly without CPU opcode emulation:</p>
+<h3 id="parth-状态下的并行-token-转移机制">PARTH 状态下的并行 Token 转移机制</h3>
+<p>在典型网络中，Token 余额由全局映射（如 <code>address =&gt; balance</code>）管理。并发交易会导致写热点冲突，从而被迫串行化。PARTH 通过以下机制实现并发：</p>
+<ol>
+<li>每个用户的本地状态树独立维护 Token 余额。</li>
+<li>本地状态包含两个映射：<code>claimedFrom[sender]</code>（从发送者领取的 Token）和 <code>sentTo[recipient]</code>（向接收者发送的 Token）。</li>
+<li><strong>发送方（Alice 向 Bob 转账）：</strong> Alice 在<strong>自己的</strong>状态树中减少余额并增加 <code>sentTo[Bob]</code>，这是一个完全隔离的本地写入，无锁且无需并发等待。</li>
+<li><strong>接收方（Bob 领取余额）：</strong> Bob 在后续区块中通过提交 Alice 状态树更新的 Merkle 证明，更新<strong>自己的</strong>状态树并增加 <code>claimedFrom[Alice]</code> 与自身余额。</li>
+</ol>
+<hr>
+<h2 id="2-计算下放与硬件分工用户级-vs-矿工级">2. 计算下放与硬件分工：用户级 vs 矿工级</h2>
+<p>Psy Protocol 的核心范式转变在于：将繁重且容易引起冲突的“交易执行”下放到用户设备，将高度可并行的“数学验证”交给矿工网络。</p>
+<ul>
+<li><strong>用户级硬件（Client-Side Proving）：</strong> 终端用户只需使用普通手机或浏览器插件（如 Psy Wallet），通过 <code>psy_vm</code> 和高度契合 64 位 CPU 寄存器的 Goldilocks 域，在本地执行智能合约<sup>6, 9</sup>。这不仅实现了零成本的极低延迟，还因为敏感数据不离本地，提供了绝对的原生隐私。用户执行后，生成零知识 execution trace 和“加密状态增量”<sup>10</sup>。</li>
+<li><strong>矿工级硬件（有用工作量证明 PoUW 2.0）：</strong> 矿工不再计算无意义的随机哈希，而是投入高性能硬件（CPU/GPU/ASIC），负责接收数百万用户的本地证明，并对这些证明进行数学验证和聚合<sup>7, 11</sup>。</li>
+</ul>
+<h3 id="软件定义电路sdc代码示例">软件定义电路（SDC）代码示例</h3>
+<p>以下是开发者使用 TypeScript 编写的智能合约代码，通过编译器直接被翻译为软件定义电路（SDC），而无需任何 CPU 指令集模拟：</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">Circuit</span>, <span style="color:#a6e22e">Field</span>, <span style="color:#a6e22e">Assert</span> } <span style="color:#66d9ef">from</span> <span style="color:#e6db74">&#34;@psy-protocol/sdk&#34;</span>;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">// Define a circuit directly using mathematical constraints
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 直接使用数学约束定义电路
 </span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">TransferCircuit</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Circuit</span>((<span style="color:#a6e22e">aliceBalance</span>: <span style="color:#66d9ef">Field</span>, <span style="color:#a6e22e">amount</span>: <span style="color:#66d9ef">Field</span>) <span style="color:#f92672">=&gt;</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Generate mathematical constraint: Alice must have enough funds
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 生成数学约束：Alice 余额必须充足
 </span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">remainingBalance</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">aliceBalance</span>.<span style="color:#a6e22e">sub</span>(<span style="color:#a6e22e">amount</span>);
 </span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Assert that the remaining balance is greater than or equal to 0
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 断言剩余余额大于或等于 0
 </span></span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Assert</span>.<span style="color:#a6e22e">greaterThanOrEqual</span>(<span style="color:#a6e22e">remainingBalance</span>, <span style="color:#a6e22e">Field</span>(<span style="color:#ae81ff">0</span>));
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// The output is compiled directly to Plonky2 constraints over the Goldilocks Field
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 编译结果将直接映射为 Goldilocks 域上的 Plonky2 约束关系
 </span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">remainingBalance</span>;
 </span></span><span style="display:flex;"><span>});
-</span></span></code></pre></div><p>To compile this code, developers run the <code>psy-compiler</code>:</p>
+</span></span></code></pre></div><p>编译命令：</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>psy-compiler compile --input ./transfer.ts --output ./build/circuit.json
 </span></span></code></pre></div><hr>
-<h2 id="2-the-parth-state-model-parallel-trading">2. The PARTH State Model (Parallel Trading)</h2>
-<p>Psy Protocol circumvents the &ldquo;sequential processing prison&rdquo; of traditional blockchains (like Ethereum) via its PARTH (Parallel Arithmetic Recursive Turing-complete Hybrid) state model<sup>10, 11</sup>.</p>
+<h2 id="3-树状递归与克服短板效应">3. 树状递归与克服“短板效应”</h2>
+<p>为了将数百万个独立的本地证明同步 to 网络，Psy 采用了**树状递归（Tree Recursion）**机制。这非但没有成为性能瓶颈，反而是实现百万级 TPS 的关键。</p>
+<h3 id="对数级出块时间与-tps-估算">对数级出块时间与 TPS 估算</h3>
+<p>矿工将证明两两合并，生成包含之前所有计算的新证明。出块时间计算公式如下：</p>
+<p>$$\text{Block Time}(u) = \log_2(u) * (k_r + k_{net})$$</p>
 <ul>
-<li><strong>Elimination of Global State Contention:</strong> Traditional chains force all transactions to wait in a single line to update a global ledger. In PARTH, every user maintains their own individualized local state tree (UCON)<sup>10</sup>.</li>
-<li><strong>Local Execution &amp; Encrypted Deltas:</strong> When Alice transacts with Bob, her transaction executes locally on her device via the psy-prover<sup>10</sup>. The client generates a zero-knowledge execution trace and an encrypted &ldquo;state delta&rdquo; proving the balance transfer<sup>10</sup>.</li>
-<li><strong>Asynchronous Global Aggregation:</strong> These local state deltas are sent to network miners. The network uses &ldquo;Proof of Useful Work&rdquo; to recursively compress millions of these local zero-knowledge proofs in parallel into a single, succinct block proof<sup>7, 11</sup>. This updates a global Merkle Root, and Bob&rsquo;s personal tree is updated passively and asynchronously the next time he syncs with the network, completely avoiding execution bottlenecks.</li>
+<li>$k_r$（递归证明合并时间）：合并两个 ZK 证明的计算开销（约 $250\text{ms}$）。</li>
+<li>$k_{net}$（证明传输网络延迟）：证明数据包（约 $30\text{KB}$）在节点间的传输延迟（约 $100\text{ms}$）。</li>
 </ul>
-<h3 id="step-by-step-transaction-walkthrough">Step-by-Step Transaction Walkthrough</h3>
+<p>处理 $u$ 个用户的高并发任务时间复杂度降至 $O(\log_2(u))$，理论上仅需不到 10 秒。系统整体 TPS 估算为：</p>
+<p>$$\text{TPS}(u) = \frac{t_{max} * u}{\text{Block Time}(u)} = \frac{3u}{0.9 + \log_2(u) * 0.35}$$</p>
+<p>其中 $t_{max}$ 表示每个用户的平均交易笔数（保守设为 3）。系统的吞吐量随着并发用户数 $u$ 的增加呈水平线性扩展。</p>
+<h3 id="解决短板效应straggler-problem">解决“短板效应”（Straggler Problem）</h3>
+<p>在传统分布式架构中，最慢的节点会拖慢全网速度。但在 Psy 的 PoUW 2.0 中，聚合任务的分发是一个开放的算力竞争市场。多个矿工可以同时竞争处理同一个聚合分支，谁最先算出正确结果并生成上一层 ZK 证明，谁就获得奖励。因此，系统的吞吐量由网络整体的算力储备和最高效的节点决定，最慢的矿工只会被淘汰，从而实现了完美的水平并行扩展（Horizontal Scalability）。</p>
+<h3 id="交易证明聚合流程-user-proving-session">交易证明聚合流程 (User Proving Session)</h3>
 <pre tabindex="0"><code class="language-mermaid" data-lang="mermaid">sequenceDiagram
     autonumber
     actor Alice
@@ -160,43 +186,67 @@ Psy Protocol (formerly known as QED Protocol) is a trustless, horizontally scala
     participant Miner as Network Miner
     participant L1 as Bitcoin L1
 
-    Alice-&gt;&gt;Alice: Executes tx locally via psy-prover
-    Alice-&gt;&gt;Alice: Generates ZK proof &amp; encrypted State Delta
-    Alice-&gt;&gt;Miner: Submits local proof and state delta
-    Note over Miner: Miner aggregates millions of proofs recursively
-    Miner-&gt;&gt;Miner: Produces a single succinct Block Proof
-    Miner-&gt;&gt;L1: Publishes Block Proof / Commitment
-    Bob-&gt;&gt;Miner: Syncs state asynchronously
-    Miner-&gt;&gt;Bob: Delivers updated State Tree (UCON)
+    Alice-&gt;&gt;Alice: 本地执行交易并生成本地 End Cap 证明
+    Alice-&gt;&gt;Alice: 生成 ZK 证明和加密状态增量 (CSTATE)
+    Alice-&gt;&gt;Miner: 提交本地证明与状态增量
+    Note over Miner: 矿工利用树状递归，并发、递归地聚合数百万证明
+    Miner-&gt;&gt;Miner: 生成单一的区块证明 (Block Proof)
+    Miner-&gt;&gt;L1: 发布区块证明 commitment 结算
+    Bob-&gt;&gt;Miner: 异步同步状态
+    Miner-&gt;&gt;Bob: 投递更新后的状态树 (UCON)
 </code></pre><hr>
-<h2 id="3-bitcoin-l1-verification--bitvm-architecture">3. Bitcoin L1 Verification &amp; BitVM Architecture</h2>
-<p>While Psy operates locally at massive scale, it uses Bitcoin&rsquo;s Layer-1 for settlement security—specifically targeting withdrawal transactions that move assets from the L2 rollup back to Bitcoin<sup>2</sup>.</p>
-<ul>
-<li><strong>BitVM Principles:</strong> Because Bitcoin Core lacks native opcodes to verify Plonky2 ZK proofs, Psy translates its verification logic into massive logic circuits built from primitive Bitcoin Script opcodes, inspired by BitVM<sup>12</sup>.</li>
-<li><strong>1,000 UTXO Sharding:</strong> Since a complete ZK verifier script is too large (e.g., 20MB) to fit into a 4MB Bitcoin block, the protocol distributes the logic circuit across approximately 1,000 Unspent Transaction Outputs (UTXOs)<sup>12, 13</sup>. Using Taproot, these scripts are efficiently committed to the blockchain, allowing Psy to achieve direct cryptographic verification on Bitcoin L1 without requiring any network hard forks<sup>12</sup>.</li>
-</ul>
-<h3 id="challenge-response-verification-architecture">Challenge-Response Verification Architecture</h3>
-<p>To verify a Plonky2 proof on Bitcoin without changing the protocol, a BitVM challenge-response mechanism is used. The logic is sharded across UTXOs structured as a binary search tree:</p>
-<pre tabindex="0"><code>                  [Root UTXO: Commitment]
-                         /      \
-               [UTXO Left]      [UTXO Right]
-                 /     \          /     \
-               ...     ...      ...     ...
-            [Leaf 1] [Leaf 2] [Leaf 3] [Leaf 4] (Primitive operations in Bitcoin Script)
-</code></pre><ol>
-<li><strong>Assertion:</strong> The operator asserts the proof by locking collaterals on the Root UTXO.</li>
-<li><strong>Challenge:</strong> If a validator detects a false assertion, they challenge it on-chain by spending a specific child UTXO, forcing the operator to reveal intermediate states.</li>
-<li><strong>Resolution:</strong> Through a binary search game (taking $O(\log N)$ transactions), the dispute resolves on a leaf transaction that executes a tiny snippet of Bitcoin Script. If the operator fails the check, their collateral is slashed.</li>
-</ol>
+<h2 id="4-横向架构对比">4. 横向架构对比</h2>
+<p>Psy Protocol 的设计理念与当前主流网络截然不同：</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">特性维度</th>
+          <th style="text-align: left">Psy Protocol</th>
+          <th style="text-align: left">Solana</th>
+          <th style="text-align: left">Polkadot</th>
+          <th style="text-align: left">Zcash</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><strong>状态模型</strong></td>
+          <td style="text-align: left">写入分离 (PARTH) / 独立本地状态树 (UCON)</td>
+          <td style="text-align: left">单一全局账本</td>
+          <td style="text-align: left">异构分片多状态树 (Parachains)</td>
+          <td style="text-align: left">单一全局账本</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>计算发生地</strong></td>
+          <td style="text-align: left">客户端本地 (链下执行)</td>
+          <td style="text-align: left">验证者链上执行</td>
+          <td style="text-align: left">平行链验证者链上重执行</td>
+          <td style="text-align: left">验证者链上执行</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>并行验证方式</strong></td>
+          <td style="text-align: left">矿工并行 ZK 递归验证</td>
+          <td style="text-align: left">验证者流水线串行/并发执行</td>
+          <td style="text-align: left">子集验证者重执行区块验证</td>
+          <td style="text-align: left">全局验证者全节点验证</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>ZK 应用目的</strong></td>
+          <td style="text-align: left">压缩海量并发计算，吞吐扩展 (隐私为副产品)</td>
+          <td style="text-align: left">无原生 ZK (主要用于外部 Rollup 验证)</td>
+          <td style="text-align: left">无原生 ZK (用以太坊桥时可能间接使用)</td>
+          <td style="text-align: left">屏蔽发送/接收方及金额，实现纯隐私</td>
+      </tr>
+  </tbody>
+</table>
 <hr>
-<h2 id="4-cross-chain-expansions-dogecoin--solana">4. Cross-Chain Expansions: Dogecoin &amp; Solana</h2>
-<p>Psy Protocol is heavily involved in expanding its infrastructure beyond Bitcoin:</p>
+<h2 id="5-比特币-l1-验证与跨链扩展">5. 比特币 L1 验证与跨链扩展</h2>
+<p>Psy 在利用高性能并发处理 L2 业务的同时，通过极其创新的机制继承了比特币的绝对安全性：</p>
 <ul>
-<li><strong>Dogecoin Scaling:</strong> Psy partnered with Nexus to launch a zkVM on Dogecoin. This involves a proposed new operation code, <code>OP_CHECKGROTH16VERIFY</code>, which would allow Dogecoin to natively verify Groth16 proofs, paving the way for Dogecoin-native smart contracts, DEXs, and NFTs<sup>5, 14, 15</sup>.</li>
-<li><strong>Trustless Bridging:</strong> The protocol has open-sourced infrastructures like <code>psy-doge-solana-bridge</code> and <code>doge-on-solana</code>, which run full Dogecoin consensus verification within the Solana execution environment. This enables trust-minimized, zero-knowledge bridges that do not rely on centralized multi-sig wallets<sup>16, 17</sup>.</li>
+<li><strong>1,000 UTXO 分片验证（BitVM 架构）：</strong> 由于一个完整的 ZK 验证器脚本（约 20MB）无法塞入比特币 4MB 的区块中<sup>12, 13</sup>。协议将逻辑电路拆分到约 1,000 个 UTXO 中。利用 Taproot（P2TR）和 MAST（默克尔抽象语法树）的特性，只需在发生争议或处理提款（Withdrawals）时揭示特定的脚本分支，从而在不分叉比特币的前提下实现原生 ZK 验证<sup>12</sup>。</li>
+<li><strong>狗狗币扩展：</strong> 协议正与 Nexus 合作开发 Dogecoin zkVM，推动 <code>OP_CHECKGROTH16VERIFY</code> 操作码提案以原生验证 Groth16 证明，并已开源如 <code>doge-on-solana</code> 等无需信任的零知识跨链桥组件<sup>5, 14, 15, 16, 17</sup>。</li>
 </ul>
-<h3 id="bridge-smart-contract-tutorial-solana-side">Bridge Smart Contract Tutorial (Solana Side)</h3>
-<p>Here is a simplified Rust snippet showing how the Solana program verifies a Dogecoin block header locally to implement a trustless bridge:</p>
+<h3 id="跨链桥智能合约示例-solana-端">跨链桥智能合约示例 (Solana 端)</h3>
+<p>以下 Rust 代码展示了 Solana 智能合约如何通过计算 PoW 难度并校验哈希来本地验证 Dogecoin 区块头：</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">use</span> anchor_lang::prelude::<span style="color:#f92672">*</span>;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#a6e22e">declare_id!</span>(<span style="color:#e6db74">&#34;DogeBridgeSolana1111111111111111111111111&#34;</span>);
@@ -206,11 +256,11 @@ Psy Protocol (formerly known as QED Protocol) is a trustless, horizontally scala
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">use</span> <span style="color:#66d9ef">super</span>::<span style="color:#f92672">*</span>;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">verify_doge_block</span>(ctx: <span style="color:#a6e22e">Context</span><span style="color:#f92672">&lt;</span>VerifyDogeBlock<span style="color:#f92672">&gt;</span>, header: <span style="color:#a6e22e">DogeHeader</span>) -&gt; Result<span style="color:#f92672">&lt;</span>()<span style="color:#f92672">&gt;</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 1. Calculate difficulty target and verify PoW hash
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 1. 计算 PoW 难度哈希并进行校验
 </span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> hash <span style="color:#f92672">=</span> header.calculate_hash();
 </span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">require!</span>(hash <span style="color:#f92672">&lt;=</span> header.target, BridgeError::InvalidProofOfWork);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 2. Update the verified tip of the Dogecoin chain state on Solana
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 2. 更新 Solana 链上记录的最新 Dogecoin 状态
 </span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> bridge_state <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span><span style="color:#66d9ef">mut</span> ctx.accounts.bridge_state;
 </span></span><span style="display:flex;"><span>        bridge_state.tip_height <span style="color:#f92672">=</span> header.height;
 </span></span><span style="display:flex;"><span>        bridge_state.tip_hash <span style="color:#f92672">=</span> hash;
@@ -249,12 +299,28 @@ Psy Protocol (formerly known as QED Protocol) is a trustless, horizontally scala
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">#[msg(</span><span style="color:#e6db74">&#34;Proof of Work hash is invalid or doesn&#39;t meet the target difficulty.&#34;</span><span style="color:#75715e">)]</span>
 </span></span><span style="display:flex;"><span>    InvalidProofOfWork,
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><hr>
-<h2 id="5-developer-ecosystem-status">5. Developer Ecosystem Status</h2>
+</span></span></code></pre></div><h3 id="生产环境跨链桥的工程约束">生产环境跨链桥的工程约束</h3>
+<p>上述合约仅为基础逻辑骨架，在生产环境中，一个无需信任的 Dogecoin 桥必须解决以下约束：</p>
+<ol>
+<li><strong>Solana 上的 Scrypt 算力限制</strong>：Dogecoin 采用 Scrypt 算法。在 Solana 上直接计算 Scrypt 会消耗海量 Compute Unit (CU)，极易超出单笔交易的 CU 上限。生产级实现会要求算力节点在链下计算 Scrypt 并生成 ZK 证明，Solana 合约仅验证 ZK 证明。</li>
+<li><strong>区块分叉与重组</strong>：为应对分叉，合约必须在链上记录区块的 DAG（有向无环图）路径，并在区块达到一定确认数（如 6 个确认）后才触发解锁。</li>
+<li><strong>科学记数法目标解析</strong>：区块头中的难度目标通过 32 位 <code>bits</code> 的 compact 格式存储，合约必须在链上将其还原为 256 位无符号整数才能与 hash 进行大小对比。</li>
+<li><strong>DigiShield 难度动态计算</strong>：Dogecoin 采用 DigiShield 逐块调整难度。合约必须在链上计算历史区块的时间戳间隔以校验 <code>target</code> 的合法性，防御恶意节点提交伪造低难度区块的攻击。</li>
+</ol>
+<hr>
+<h2 id="6-开发者生态与现状">6. 开发者生态与现状</h2>
 <ul>
-<li><strong>Open Source Stack:</strong> The core infrastructure, including <code>psy-compiler</code>, <code>psy-prover</code> (Rust), and <code>psy-sdk</code> (TypeScript), is completely open-source<sup>4, 7</sup>. The repositories reveal support for advanced concepts like Software Defined Circuits (SDC).</li>
-<li><strong>Tutorials &amp; IDE:</strong> Currently, official developer guides (such as &ldquo;Smart Contract 0-to-1&rdquo;) and the planned Dapen Browser IDE (which will allow in-browser compiling and debugging) are listed as &ldquo;Coming Soon&rdquo; by the team. Web3 developers looking to build immediately must rely on exploring the raw GitHub repositories until the official SDK documentation goes live.</li>
+<li><strong>多语言支持：</strong> <code>psy-compiler</code> 面向 Web2 开发者，原生支持将 JavaScript、TypeScript 和 Python 直接编译为 ZK 逻辑电路约束，无需传统的虚拟机操作码。</li>
+<li><strong>进展：</strong> 核心组件（<code>psy-compiler</code>, <code>psy-prover</code>, <code>psy-sdk</code>）已在 GitHub 开源。目前针对大众开发者的教程和在浏览器内运行的 Dapen IDE 仍在“即将推出（Coming Soon）”状态，想要抢先体验的开发者需直接查阅开源代码库。</li>
 </ul>
+<hr>
+<h2 id="核心参考资料">核心参考资料</h2>
+<ol>
+<li><strong>QED Protocol Blog:</strong> <em>ZK + PARTH: An Architecture for Building Horizontally Scalable Blockchains</em></li>
+<li><strong>BitVM 架构解析:</strong> <em>BitVM 2: Permissionless Verification on Bitcoin</em></li>
+<li><strong>Psy Protocol GitHub:</strong> <a href="https://github.com/psyprotocol">github.com/psyprotocol</a></li>
+<li><strong>相关新闻:</strong> <em>CryptoBriefing / Business Wire (关于狗狗币 zkVM 与千万美元融资报道)</em></li>
+</ol>
     </article>
 
     
@@ -272,7 +338,7 @@ Psy Protocol (formerly known as QED Protocol) is a trustless, horizontally scala
 
   
   <li>
-    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Investigation%20Report:%20Psy%20Protocol%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2026-06-15-psy-protocol-investigation-report/" target="_blank" rel="noopener" aria-label="Twitter">
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=%e6%b7%b1%e5%ba%a6%e8%b0%83%e7%a0%94%e6%8a%a5%e5%91%8a%ef%bc%9aPsy%20Protocol%ef%bc%88%e6%9c%80%e6%96%b0%e5%ae%8c%e6%95%b4%e7%89%88%ef%bc%89%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2026-06-15-psy-protocol-investigation-report/" target="_blank" rel="noopener" aria-label="Twitter">
       <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
     </a>
   </li>
