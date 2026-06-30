@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Claude on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/claude/</link>
+    <description>Recent content in Claude on yrong blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
+    <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
+    <lastBuildDate>Tue, 01 Jul 2025 00:30:00 +0800</lastBuildDate>
+    <atom:link href="https://yrong.github.io/blog/tags/claude/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Building Effective AI Agents &amp; Claude Code Best Practices</title>
+      <link>https://yrong.github.io/blog/post/2025-07-01-building-effective-ai-agents/</link>
+      <pubDate>Tue, 01 Jul 2025 00:30:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2025-07-01-building-effective-ai-agents/</guid>
+      <description>&lt;p&gt;When building AI agents, the most successful implementations typically rely on simple, composable patterns rather than overly complex frameworks. Agentic systems generally fall into two categories: &lt;strong&gt;workflows&lt;/strong&gt;, where LLMs and tools are orchestrated through predefined code paths, and &lt;strong&gt;agents&lt;/strong&gt;, where LLMs dynamically direct their own processes and tool usage.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

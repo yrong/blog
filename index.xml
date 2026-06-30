@@ -47,6 +47,13 @@
       <description>&lt;p&gt;Forum background: &lt;a href=&#34;https://forum.polkadot.network/t/xcmp-design-discussion/7328&#34;&gt;XCMP Design Discussion (Polkadot)&lt;/a&gt;.&lt;/p&gt;&#xA;&lt;h1 id=&#34;xcmp-mmd---design-document&#34;&gt;XCMP MMD - Design Document&lt;/h1&gt;&#xA;&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;&#xA;&lt;p&gt;XCMP MMD (Merkle Mountain Range based cross-chain messaging) is a proof-of-concept for trustless cross-chain message delivery between parachains. It uses a three-tier cryptographic proof system that leverages the relay chain&amp;rsquo;s BEEFY finality gadget and Merkle structures.&lt;/p&gt;&#xA;&lt;h2 id=&#34;problem-statement&#34;&gt;Problem Statement&lt;/h2&gt;&#xA;&lt;p&gt;&lt;strong&gt;HRMP&lt;/strong&gt; (Horizontal Relay-routed Message Passing) stores message payloads on the relay chain, which is expensive in terms of storage and execution costs.&lt;/p&gt;</description>
     </item>
     <item>
+      <title>Building Effective AI Agents &amp; Claude Code Best Practices</title>
+      <link>https://yrong.github.io/blog/post/2025-07-01-building-effective-ai-agents/</link>
+      <pubDate>Tue, 01 Jul 2025 00:30:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2025-07-01-building-effective-ai-agents/</guid>
+      <description>&lt;p&gt;When building AI agents, the most successful implementations typically rely on simple, composable patterns rather than overly complex frameworks. Agentic systems generally fall into two categories: &lt;strong&gt;workflows&lt;/strong&gt;, where LLMs and tools are orchestrated through predefined code paths, and &lt;strong&gt;agents&lt;/strong&gt;, where LLMs dynamically direct their own processes and tool usage.&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>Investigation Report: Zcash</title>
       <link>https://yrong.github.io/blog/post/2023-08-15-zcash-investigation-report/</link>
       <pubDate>Tue, 15 Aug 2023 11:12:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>

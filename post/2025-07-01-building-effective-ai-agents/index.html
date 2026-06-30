@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Building Effective AI Agents &amp; Claude Code Best Practices - yrong blog</title>
+  <meta property="og:title" content="Building Effective AI Agents &amp; Claude Code Best Practices - yrong blog" />
+  <meta name="twitter:title" content="Building Effective AI Agents &amp; Claude Code Best Practices - yrong blog" />
+  <meta name="description" content="When building AI agents, the most successful implementations typically rely on simple, composable patterns rather than overly complex frameworks. Agentic systems generally fall into two categories: workflows, where LLMs and tools are orchestrated through predefined code paths, and agents, where LLMs dynamically direct their own processes and tool usage.">
+  <meta property="og:description" content="When building AI agents, the most successful implementations typically rely on simple, composable patterns rather than overly complex frameworks. Agentic systems generally fall into two categories: workflows, where LLMs and tools are orchestrated through predefined code paths, and agents, where LLMs dynamically direct their own processes and tool usage.">
+  <meta name="twitter:description" content="When building AI agents, the most successful implementations typically rely on simple, composable patterns rather than overly complex frameworks. Agentic systems generally fall into two categories: …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2025-07-01-building-effective-ai-agents/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">Building Effective AI Agents &amp; Claude Code Best Practices</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>July 1, 2025</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/ai/">
+            <i class="fa-solid fa-tag"></i>
+            ai
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/agents/">
+            <i class="fa-solid fa-tag"></i>
+            agents
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/claude/">
+            <i class="fa-solid fa-tag"></i>
+            claude
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/best-practices/">
+            <i class="fa-solid fa-tag"></i>
+            best-practices
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#core-architectural-patterns">Core Architectural Patterns</a></li>
+        <li><a href="#core-principles-for-building-agents">Core Principles for Building Agents</a></li>
+      </ul>
+    </li>
+    <li><a href="#using-claude-code-with-best-practices">Using Claude Code with Best Practices</a>
+      <ul>
+        <li><a href="#interaction-best-practices">Interaction Best Practices</a></li>
+        <li><a href="#context-and-safety-management">Context and Safety Management</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+</aside>
+      <p>When building AI agents, the most successful implementations typically rely on simple, composable patterns rather than overly complex frameworks. Agentic systems generally fall into two categories: <strong>workflows</strong>, where LLMs and tools are orchestrated through predefined code paths, and <strong>agents</strong>, where LLMs dynamically direct their own processes and tool usage.</p>
+<h3 id="core-architectural-patterns">Core Architectural Patterns</h3>
+<ol>
+<li><strong>The Augmented LLM:</strong> The foundational building block consisting of an LLM enhanced with capabilities like retrieval, external tools, and memory.</li>
+<li><strong>Prompt Chaining:</strong> Decomposing a task into a sequence of steps, where the output of one LLM call becomes the input for the next.</li>
+<li><strong>Routing:</strong> Classifying an input to direct it to a specialized prompt, tool, or downstream process.</li>
+<li><strong>Parallelization:</strong> Having LLMs work simultaneously. This includes <strong>sectioning</strong> (breaking a task into independent, parallel subtasks) and <strong>voting</strong> (running the same task multiple times to aggregate diverse outputs).</li>
+<li><strong>Orchestrator-Workers:</strong> A central orchestrator LLM dynamically breaks down a complex task, delegates subtasks to worker LLMs, and synthesizes their results.</li>
+<li><strong>Evaluator-Optimizer:</strong> An iterative loop where one LLM generates a response and another LLM evaluates it and provides feedback for refinement.</li>
+<li><strong>Autonomous Agents:</strong> Systems where an LLM operates independently in a loop, using tools based on environmental feedback to accomplish open-ended tasks.</li>
+</ol>
+<h3 id="core-principles-for-building-agents">Core Principles for Building Agents</h3>
+<ul>
+<li><strong>Maintain Simplicity:</strong> Start with the simplest solution (like single LLM calls) and only add multi-step agentic complexity when it demonstrably improves outcomes.</li>
+<li><strong>Prioritize Transparency:</strong> Explicitly expose the agent&rsquo;s planning steps so its reasoning is clear.</li>
+<li><strong>Craft the Agent-Computer Interface (ACI):</strong> Treat tool definitions with the same care as user interfaces. Provide clear descriptions, example usages, and boundaries so the model knows exactly how to use them without making formatting errors.</li>
+</ul>
+<hr>
+<h2 id="using-claude-code-with-best-practices">Using Claude Code with Best Practices</h2>
+<p>Claude Code is an agentic coding assistant that runs in your terminal, capable of reading your codebase, running shell commands, and making edits. It operates on an <strong>agentic loop</strong> that consists of gathering context, taking action, and verifying results.</p>
+<h3 id="interaction-best-practices">Interaction Best Practices</h3>
+<ul>
+<li><strong>Be Specific Upfront:</strong> The more precise your initial prompt (e.g., referencing specific files or constraints), the fewer corrections you will need.</li>
+<li><strong>Explore Before Implementing:</strong> Use <strong>Plan mode</strong> (by pressing <code>Shift+Tab</code> twice) to ask Claude to analyze the codebase and propose a plan <em>before</em> editing source files.</li>
+<li><strong>Give Claude Something to Verify Against:</strong> Include test cases, expected outputs, or UI screenshots so Claude can automatically check its own work.</li>
+<li><strong>Delegate, Don&rsquo;t Dictate:</strong> Treat Claude like a capable colleague. Give it context and a goal, and trust it to figure out which files to read or commands to run.</li>
+<li><strong>Interrupt and Steer:</strong> You do not need to wait for a turn to finish. Press <code>Esc</code> to stop a tool immediately, or simply type a correction and press <code>Enter</code> to steer Claude mid-task.</li>
+</ul>
+<h3 id="context-and-safety-management">Context and Safety Management</h3>
+<ul>
+<li><strong>Use CLAUDE.md for Persistent Rules:</strong> Claude Code manages context by automatically compacting older messages. To ensure Claude never forgets project-specific instructions, conventions, or preferred libraries, store them in a <code>CLAUDE.md</code> file in your project root.</li>
+<li><strong>Rely on Checkpoints:</strong> Every file edit made by Claude Code is completely reversible. Before making changes, it takes a snapshot of the file. If something goes wrong, you can press <code>Esc</code> twice to rewind to the previous state.</li>
+<li><strong>Manage Context with Subagents:</strong> For very long sessions, offload delegated work to subagents, as they receive their own fresh context and prevent your main conversation history from bloating.</li>
+<li><strong>Ask for Help:</strong> You can ask Claude Code meta-questions (like &ldquo;how do I set up hooks?&rdquo;) or use built-in commands like <code>/init</code> (to set up your <code>CLAUDE.md</code>), <code>/agents</code>, and <code>/doctor</code>.</li>
+</ul>
+    </article>
+
+    
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2025-07-01-building-effective-ai-agents/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=Building%20Effective%20AI%20Agents%20&amp;%20Claude%20Code%20Best%20Practices%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2025-07-01-building-effective-ai-agents/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/post/2026-04-09-xcmp-mmd-minimal-poc/" data-toggle="tooltip" data-placement="top" title="Polkadot XCMP MMD — Minimal POC">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/post/2023-08-15-zcash-investigation-report/" data-toggle="tooltip" data-placement="top" title="Investigation Report: Zcash">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>
