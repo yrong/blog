@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>x402 协议笔记：Stripe 如何让 AI 代理自主支付 - yrong blog</title>
+  <meta property="og:title" content="x402 协议笔记：Stripe 如何让 AI 代理自主支付 - yrong blog" />
+  <meta name="twitter:title" content="x402 协议笔记：Stripe 如何让 AI 代理自主支付 - yrong blog" />
+  <meta name="description" content="x402 是一种面向机器对机器（M2M）支付的开放协议，核心思路是复活 HTTP 402「Payment Required」状态码，让 API 在返回付费要求时，客户端（尤其是 AI Agent）能自动完成支付并重试请求，无需人工介入、无需预先注册账号。
+Stripe 在 2026 年将其接入现有支付基础设施：开发者仍用熟悉的 PaymentIntent 和 Dashboard，底层走 USDC 链上结算；Coinbase 则围绕同一协议构建了 Agent.market 代理经济生态。本文综合 BitKan 解读、Stripe 官方文档 与示例代码，整理一份学习笔记。">
+  <meta property="og:description" content="x402 是一种面向机器对机器（M2M）支付的开放协议，核心思路是复活 HTTP 402「Payment Required」状态码，让 API 在返回付费要求时，客户端（尤其是 AI Agent）能自动完成支付并重试请求，无需人工介入、无需预先注册账号。
+Stripe 在 2026 年将其接入现有支付基础设施：开发者仍用熟悉的 PaymentIntent 和 Dashboard，底层走 USDC 链上结算；Coinbase 则围绕同一协议构建了 Agent.market 代理经济生态。本文综合 BitKan 解读、Stripe 官方文档 与示例代码，整理一份学习笔记。">
+  <meta name="twitter:description" content="x402 是一种面向机器对机器（M2M）支付的开放协议，核心思路是复活 HTTP 402「Payment Required」状态码，让 API 在返回付费要求时，客户端（尤其是 AI Agent）能自动完成支付并重试请求，无需人工介入、无需预先注册账号。
+Stripe 在 2026 年将其接入现有支付基础设施：开发者仍用熟悉的 PaymentIntent 和 Dashboard，底层走 USDC …">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2026-07-03-stripe-x402-ai-agent-payments/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">x402 协议笔记：Stripe 如何让 AI 代理自主支付</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>July 3, 2026</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/ai/">
+            <i class="fa-solid fa-tag"></i>
+            ai
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/agents/">
+            <i class="fa-solid fa-tag"></i>
+            agents
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/blockchain/">
+            <i class="fa-solid fa-tag"></i>
+            blockchain
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/ethereum/">
+            <i class="fa-solid fa-tag"></i>
+            ethereum
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-背景为什么需要-x402">1. 背景：为什么需要 x402？</a></li>
+    <li><a href="#2-支付流程">2. 支付流程</a></li>
+    <li><a href="#3-facilitator验签与链上结算">3. Facilitator：验签与链上结算</a>
+      <ul>
+        <li><a href="#31-在架构中的位置">3.1 在架构中的位置</a></li>
+        <li><a href="#32-密码学基础eip-3009--eip-712">3.2 密码学基础：EIP-3009 + EIP-712</a></li>
+        <li><a href="#33-两个标准-apiverify-与-settle">3.3 两个标准 API：<code>/verify</code> 与 <code>/settle</code></a></li>
+        <li><a href="#34-安全性质">3.4 安全性质</a></li>
+      </ul>
+    </li>
+    <li><a href="#4-stripe-的实现要点">4. Stripe 的实现要点</a>
+      <ul>
+        <li><a href="#41-与开放协议的关系">4.1 与开放协议的关系</a></li>
+        <li><a href="#42-为什么要创建-paymentintent">4.2 为什么要创建 PaymentIntent？</a></li>
+        <li><a href="#43-技术栈">4.3 技术栈</a></li>
+        <li><a href="#44-createpaytoaddress动态收款地址">4.4 <code>createPayToAddress</code>：动态收款地址</a></li>
+        <li><a href="#45-中间件配置">4.5 中间件配置</a></li>
+        <li><a href="#46-支持的网络与代币">4.6 支持的网络与代币</a></li>
+        <li><a href="#47-接入前提">4.7 接入前提</a></li>
+      </ul>
+    </li>
+    <li><a href="#5-coinbase-侧agentmarket-与代理经济">5. Coinbase 侧：Agent.market 与代理经济</a></li>
+    <li><a href="#6-x402-vs-其他-agent-支付方案">6. x402 vs 其他 Agent 支付方案</a></li>
+    <li><a href="#7-机遇与挑战">7. 机遇与挑战</a></li>
+    <li><a href="#8-最小可运行示例结构">8. 最小可运行示例结构</a></li>
+    <li><a href="#9-结论">9. 结论</a></li>
+    <li><a href="#参考链接">参考链接</a></li>
+  </ul>
+</nav>
+</aside>
+      <p>x402 是一种面向机器对机器（M2M）支付的开放协议，核心思路是<strong>复活 HTTP 402「Payment Required」状态码</strong>，让 API 在返回付费要求时，客户端（尤其是 AI Agent）能自动完成支付并重试请求，无需人工介入、无需预先注册账号。</p>
+<p>Stripe 在 2026 年将其接入现有支付基础设施：开发者仍用熟悉的 PaymentIntent 和 Dashboard，底层走 USDC 链上结算；Coinbase 则围绕同一协议构建了 Agent.market 代理经济生态。本文综合 BitKan 解读、<a href="https://docs.stripe.com/payments/machine/x402">Stripe 官方文档</a> 与示例代码，整理一份学习笔记。</p>
+<h2 id="1-背景为什么需要-x402">1. 背景：为什么需要 x402？</h2>
+<p>传统 API 付费模式对 AI Agent 极不友好：</p>
+<table>
+  <thead>
+      <tr>
+          <th>模式</th>
+          <th>问题</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>API Key + 订阅</td>
+          <td>Agent 需预先注册、绑定信用卡，无法按次按需付费</td>
+      </tr>
+      <tr>
+          <td>OAuth / 账号体系</td>
+          <td>人类身份验证流程，Agent 难以自动化</td>
+      </tr>
+      <tr>
+          <td>链上直接转账</td>
+          <td>每笔交易需单独签名、确认，延迟高、集成复杂</td>
+      </tr>
+  </tbody>
+</table>
+<p>x402 把「付费」嵌入 HTTP 请求本身：服务端返回 402 + 支付条件，客户端签名授权后带 <code>payment</code> 头重试，<strong>一次 HTTP 往返完成议价与结算</strong>。这对 $0.01 级别的微支付、7×24 运行的自主 Agent 尤为合适。</p>
+<p>协议最初由 Coinbase 在 2025 年开源，x402 Foundation（Coinbase + Cloudflare 共同发起）维护规范；Stripe、Google、Cloudflare 等均已接入或提供兼容实现。</p>
+<h2 id="2-支付流程">2. 支付流程</h2>
+<pre tabindex="0"><code class="language-mermaid" data-lang="mermaid">sequenceDiagram
+    participant Agent as AI Agent / Client
+    participant Server as Resource Server
+    participant Facilitator as Facilitator
+    participant Stripe as Stripe
+    participant Chain as Base (USDC)
+
+    Agent-&gt;&gt;Server: GET /paid
+    Server-&gt;&gt;Stripe: 创建 PaymentIntent（获取充值地址）
+    Stripe--&gt;&gt;Server: deposit address
+    Server--&gt;&gt;Agent: 402 + payment-required 头
+
+    Agent-&gt;&gt;Agent: 签名 USDC 支付授权
+    Agent-&gt;&gt;Server: GET /paid + payment 头
+    Server-&gt;&gt;Facilitator: 验证支付证明
+    Facilitator-&gt;&gt;Chain: 链上结算
+    Facilitator--&gt;&gt;Server: 验证通过
+    Server--&gt;&gt;Agent: 200 + 资源内容
+    Stripe-&gt;&gt;Stripe: 检测到链上到账，自动 capture PaymentIntent
+</code></pre><p>关键角色：</p>
+<ul>
+<li><strong>Resource Server</strong>：你的 API，声明哪些路由需要付费、价格多少、收款地址。</li>
+<li><strong>Facilitator</strong>：验证支付签名、执行链上结算的第三方服务（测试可用 x402.org testnet facilitator；主网可用 <a href="https://docs.cdp.coinbase.com">Coinbase CDP Facilitator</a>）。</li>
+<li><strong>Stripe</strong>：管理充值地址生命周期、PaymentIntent 状态、Dashboard 对账与合规。</li>
+</ul>
+<p>未付款时，服务端返回：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#66d9ef">HTTP</span><span style="color:#f92672">/</span><span style="color:#ae81ff">1.1</span> <span style="color:#ae81ff">402</span> <span style="color:#a6e22e">Payment Required</span>
+</span></span><span style="display:flex;"><span>payment-required<span style="color:#f92672">:</span> <span style="color:#ae81ff">eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiO...</span>
+</span></span></code></pre></div><p><code>payment-required</code> 头是 base64 编码的 JSON，包含金额、网络、收款地址、scheme 等信息。</p>
+<h2 id="3-facilitator验签与链上结算">3. Facilitator：验签与链上结算</h2>
+<p><strong>Facilitator</strong>（协调者）是 x402 协议中的第三方服务，负责<strong>验证客户端的支付证明</strong>，并在通过后<strong>执行链上结算</strong>。Resource Server 不必自己跑全节点、验签名、发交易，而是通过 <code>HTTPFacilitatorClient</code> 把链上操作委托给 Facilitator。</p>
+<h3 id="31-在架构中的位置">3.1 在架构中的位置</h3>
+<table>
+  <thead>
+      <tr>
+          <th>角色</th>
+          <th>职责</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Resource Server</strong></td>
+          <td>声明价格、返回 402、保护付费路由</td>
+      </tr>
+      <tr>
+          <td><strong>Facilitator</strong></td>
+          <td>验签、链上结算、向 Server 背书「支付有效」</td>
+      </tr>
+      <tr>
+          <td><strong>Stripe</strong>（可选）</td>
+          <td>生成充值地址、监听到账、capture PaymentIntent、Dashboard 对账</td>
+      </tr>
+  </tbody>
+</table>
+<p>Facilitator 管的是<strong>协议层链上结算</strong>；Stripe 管的是<strong>商户收款侧认账</strong>。两者分工不同，在 Stripe x402 集成里通常同时使用。</p>
+<p>常见 Facilitator：测试网用 x402.org testnet facilitator；主网可用 <a href="https://docs.cdp.coinbase.com">Coinbase CDP Facilitator</a>（<code>https://api.cdp.coinbase.com/platform/v2/x402</code>）。协议开放，也可自建。</p>
+<h3 id="32-密码学基础eip-3009--eip-712">3.2 密码学基础：EIP-3009 + EIP-712</h3>
+<p>Facilitator 的验签与结算建立在 USDC 的 <strong>EIP-3009（TransferWithAuthorization）</strong> 和 <strong>EIP-712（结构化数据签名）</strong> 上：</p>
+<ul>
+<li>Agent <strong>只签名授权，不自己发链上交易</strong>，也<strong>不需要持有 ETH 付 gas</strong></li>
+<li>Facilitator 验签通过后，代付 gas 调用 USDC 合约完成转账</li>
+</ul>
+<p>收到 402 后，Agent 钱包对 <code>TransferWithAuthorization</code> 做 EIP-712 签名，授权内容示例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;from&#34;</span>: <span style="color:#e6db74">&#34;0xAgentWallet...&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;to&#34;</span>: <span style="color:#e6db74">&#34;0xDepositAddress...&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;10000&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;validAfter&#34;</span>: <span style="color:#e6db74">&#34;1740672089&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;validBefore&#34;</span>: <span style="color:#e6db74">&#34;1740672154&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;nonce&#34;</span>: <span style="color:#e6db74">&#34;0xf3746613...&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>签名时附带 <strong>domain separator</strong>（合约地址、chainId、代币名 <code>&quot;USD Coin&quot;</code> 等），防止签名被挪到其他链/合约复用。结果 base64 编码后放入 HTTP <code>payment</code> 头，重试请求。</p>
+<h3 id="33-两个标准-apiverify-与-settle">3.3 两个标准 API：<code>/verify</code> 与 <code>/settle</code></h3>
+<p><a href="https://github.com/coinbase/x402/blob/main/specs/x402-specification-v2.md">x402 规范</a> 定义了 Facilitator 的标准 HTTP 接口，<code>x402ResourceServer</code> 通过 <code>HTTPFacilitatorClient</code> 调用：</p>
+<table>
+  <thead>
+      <tr>
+          <th>端点</th>
+          <th>作用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>POST /verify</code></td>
+          <td>验签 + 预检，<strong>不上链</strong></td>
+      </tr>
+      <tr>
+          <td><code>POST /settle</code></td>
+          <td>验签通过后，<strong>广播链上交易</strong></td>
+      </tr>
+      <tr>
+          <td><code>GET /supported</code></td>
+          <td>返回支持的 scheme、网络列表</td>
+      </tr>
+  </tbody>
+</table>
+<p>Server 将 <code>payment</code> 头解码后的 payload 与原始 <code>paymentRequirements</code>（402 里声明的金额、地址、网络）一并发给 Facilitator。</p>
+<h4 id="verify-检查项exact-scheme--evm"><code>/verify</code> 检查项（exact scheme / EVM）</h4>
+<p>依据 <a href="https://github.com/x402-foundation/x402/blob/main/specs/schemes/exact/scheme_exact_evm.md">scheme_exact_evm 规范</a>：</p>
+<ol>
+<li><code>ecrecover</code> 恢复签名者 → 必须等于 <code>authorization.from</code></li>
+<li>链上 <code>balanceOf(from)</code> → 余额 ≥ <code>value</code></li>
+<li><code>authorization.value</code> == <code>paymentRequirements.amount</code>（精确金额）</li>
+<li><code>authorization.to</code> == <code>paymentRequirements.payTo</code></li>
+<li>当前时间在 <code>[validAfter, validBefore]</code> 窗口内</li>
+<li><code>nonce</code> 未被使用过（防重放）</li>
+<li>token 合约地址、network 与要求一致</li>
+<li><code>eth_call</code> 模拟 <code>transferWithAuthorization(...)</code> → 必须成功</li>
+</ol>
+<p>通过返回 <code>{ &quot;isValid&quot;: true, &quot;payer&quot;: &quot;0x...&quot; }</code>；失败返回 <code>invalid_signature</code>、<code>insufficient_funds</code>、<code>nonce_already_used</code> 等。</p>
+<h4 id="settle-链上执行"><code>/settle</code> 链上执行</h4>
+<p>Facilitator 用自己的钱包（持有 ETH 作 gas）调用 USDC 合约：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span>USDC.transferWithAuthorization(
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">from</span>, to, value,
+</span></span><span style="display:flex;"><span>    validAfter, validBefore, nonce,
+</span></span><span style="display:flex;"><span>    v, r, s   <span style="color:#75715e">// 从 payload.signature 拆出
+</span></span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><p>合约内部再次验签、检查 nonce、执行 <code>transfer(from → to, value)</code> 并标记 nonce 已消费。确认后返回交易哈希。</p>
+<pre tabindex="0"><code class="language-mermaid" data-lang="mermaid">sequenceDiagram
+    participant Agent
+    participant Server
+    participant Facilitator
+    participant USDC as USDC 合约
+
+    Agent-&gt;&gt;Agent: EIP-712 签名 TransferWithAuthorization
+    Agent-&gt;&gt;Server: GET /paid + payment 头
+
+    Server-&gt;&gt;Facilitator: POST /verify
+    Facilitator-&gt;&gt;USDC: eth_call 模拟 + balanceOf
+    Facilitator--&gt;&gt;Server: isValid: true
+
+    Server-&gt;&gt;Facilitator: POST /settle
+    Facilitator-&gt;&gt;USDC: transferWithAuthorization(v,r,s)
+    USDC-&gt;&gt;USDC: 验签 + 转账 + 消耗 nonce
+    Facilitator--&gt;&gt;Server: tx hash
+
+    Server--&gt;&gt;Agent: 200 + 资源
+</code></pre><p><code>paymentMiddleware</code> 将 verify/settle 封装在请求处理流程中，开发者通常不直接调用这两个 API。</p>
+<h3 id="34-安全性质">3.4 安全性质</h3>
+<p>规范明确：<strong>Facilitator 不能修改金额或收款地址</strong>，它仅是交易广播员，替 Agent 付 gas。签名里 <code>to</code> 和 <code>value</code> 已固定，合约只按签名执行。</p>
+<table>
+  <thead>
+      <tr>
+          <th>机制</th>
+          <th>防什么</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>EIP-712 domain（chainId + 合约地址）</td>
+          <td>跨链/跨合约重放签名</td>
+      </tr>
+      <tr>
+          <td>一次性 nonce</td>
+          <td>同一授权付两次</td>
+      </tr>
+      <tr>
+          <td><code>validBefore</code> 时间窗</td>
+          <td>过期授权被滥用</td>
+      </tr>
+      <tr>
+          <td>exact scheme</td>
+          <td>金额必须精确匹配</td>
+      </tr>
+      <tr>
+          <td><code>eth_call</code> 模拟</td>
+          <td>避免广播必失败的交易</td>
+      </tr>
+  </tbody>
+</table>
+<p>在 Stripe 集成中：Facilitator 完成 Agent → Stripe 充值地址的 USDC 链上转账；Stripe 监听该地址到账并 capture 对应 PaymentIntent。</p>
+<h2 id="4-stripe-的实现要点">4. Stripe 的实现要点</h2>
+<h3 id="41-与开放协议的关系">4.1 与开放协议的关系</h3>
+<p>需要区分两个概念：</p>
+<ul>
+<li><strong>x402 协议</strong>：开放的 HTTP 402 握手规范，Apache 2.0，不绑定厂商。</li>
+<li><strong>Stripe Machine Payments</strong>：Stripe 提供的托管层，负责充值地址、链上监控、PaymentIntent capture、退款与 Dashboard 报表。</li>
+</ul>
+<p>Stripe 还另有 <strong>MPP（Machine Payments Protocol）</strong>——基于会话的流式支付，适合高频连续扣费；x402 则是<strong>按请求精确付费</strong>（exact scheme）。两者可并存，按场景选型。</p>
+<h3 id="42-为什么要创建-paymentintent">4.2 为什么要创建 PaymentIntent？</h3>
+<p>流程图里「Server → Stripe: 创建 PaymentIntent」这一步容易让人困惑：x402 协议本身只要求 402 响应里带上金额和收款地址，为什么不能直接写死一个钱包地址？</p>
+<p><strong>核心原因：Stripe 需要把链上 USDC 转账映射成一笔可追踪的 Stripe 订单。</strong></p>
+<p>纯 x402（Coinbase 原生路径）可以配置静态 <code>payTo: &quot;0xYourWallet&quot;</code>，由 Facilitator 验证签名和链上结算，不经过任何支付网关。但一旦接入 Stripe，<strong>PaymentIntent + deposit address</strong> 就是它的集成方式——多这一步，换来 Dashboard 对账、自动 capture 和退款能力。</p>
+<h4 id="动态生成专属充值地址">动态生成专属充值地址</h4>
+<p><code>paymentIntents.create</code> 返回的 <code>deposit_addresses.base.address</code> 是 Stripe 为<strong>这一笔</strong> PaymentIntent 专门分配的地址，不是商户的固定收款钱包。Agent 往这个地址打 USDC 后，Stripe 监听链上到账并自动 <strong>capture</strong> 对应 PI，资金进入 Stripe 余额。</p>
+<h4 id="纳入-stripe-账务体系">纳入 Stripe 账务体系</h4>
+<table>
+  <thead>
+      <tr>
+          <th>无 PaymentIntent</th>
+          <th>有 PaymentIntent</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Agent 往某地址打 USDC</td>
+          <td>Agent 往 Stripe 分配的地址打 USDC</td>
+      </tr>
+      <tr>
+          <td>自行扫链、对账</td>
+          <td>Stripe 自动检测到账并 capture</td>
+      </tr>
+      <tr>
+          <td>无 Dashboard 记录</td>
+          <td>Payments 页面可见</td>
+      </tr>
+      <tr>
+          <td>退款需自建</td>
+          <td>可走 Stripe 退款流程</td>
+      </tr>
+  </tbody>
+</table>
+<p>PaymentIntent 的 <code>amount</code> 还绑定了期望收款金额，Stripe 到账检测时会校验该地址应收多少 USDC，避免少付、多付混乱。</p>
+<h4 id="防止伪造收款地址">防止伪造收款地址</h4>
+<p><code>createPayToAddress</code> 在客户端重试时从 <code>payment</code> 头解码 <code>authorization.to</code>，并与服务端缓存比对——只有<strong>本服务器最近通过 Stripe 创建过 PI 的地址</strong>才合法，攻击者无法把随机地址塞进 payment 头骗过验证。</p>
+<h4 id="与纯-x402-的对比">与纯 x402 的对比</h4>
+<pre tabindex="0"><code>纯 Coinbase x402:  payTo = 静态钱包 → Facilitator 验证 → 完成
+Stripe x402:       payTo = PI 动态地址 → Facilitator 验证 → Stripe capture PI → 完成
+</code></pre><p>一句话：<strong>402 响应里的 <code>payTo</code> 不是随便写的钱包，而是 Stripe 说「往这个地址打钱，我会认账」。</strong></p>
+<h3 id="43-技术栈">4.3 技术栈</h3>
+<table>
+  <thead>
+      <tr>
+          <th>组件</th>
+          <th>作用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>@x402/hono</code> / <code>@x402/express</code></td>
+          <td>框架中间件，拦截路由、返回 402、校验 payment 头</td>
+      </tr>
+      <tr>
+          <td><code>@x402/core/server</code></td>
+          <td><code>HTTPFacilitatorClient</code>、<code>x402ResourceServer</code></td>
+      </tr>
+      <tr>
+          <td><code>@x402/evm/exact/server</code></td>
+          <td>EVM 链「精确金额」支付 scheme</td>
+      </tr>
+      <tr>
+          <td>Stripe SDK <code>2026-03-04.preview</code></td>
+          <td>创建 crypto PaymentIntent，获取充值地址</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="44-createpaytoaddress动态收款地址">4.4 <code>createPayToAddress</code>：动态收款地址</h3>
+<p>Stripe 模式下，<code>payTo</code> 不是写死的钱包地址，而是一个<strong>异步函数</strong>：</p>
+<ol>
+<li><strong>首次请求</strong>：调用 <code>stripe.paymentIntents.create</code>，<code>payment_method_types: [&quot;crypto&quot;]</code>，<code>mode: &quot;deposit&quot;</code>，指定 <code>networks: [&quot;base&quot;]</code>；从 <code>next_action.crypto_display_details.deposit_addresses.base.address</code> 取出充值地址。</li>
+<li><strong>重试/验证请求</strong>：从 <code>payment</code> 头解码出 <code>authorization.to</code>，与缓存中的地址比对，防止伪造收款方。</li>
+<li><strong>缓存</strong>：示例用 <code>node-cache</code>（TTL 5 分钟）；生产环境应换 Redis 等分布式缓存。</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">paymentIntent</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">stripe</span>.<span style="color:#a6e22e">paymentIntents</span>.<span style="color:#a6e22e">create</span>({
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">amount</span>: <span style="color:#66d9ef">amountInCents</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">currency</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;usd&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">payment_method_types</span><span style="color:#f92672">:</span> [<span style="color:#e6db74">&#34;crypto&#34;</span>],
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">payment_method_data</span><span style="color:#f92672">:</span> { <span style="color:#66d9ef">type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;crypto&#34;</span> },
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">payment_method_options</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">crypto</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">mode</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;deposit&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">deposit_options</span><span style="color:#f92672">:</span> { <span style="color:#a6e22e">networks</span><span style="color:#f92672">:</span> [<span style="color:#e6db74">&#34;base&#34;</span>] },
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">confirm</span>: <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><p>链上到账后，Stripe 自动 capture 对应 PaymentIntent，资金进入 Stripe 余额。</p>
+<h3 id="45-中间件配置">4.5 中间件配置</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">use</span>(
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">paymentMiddleware</span>(
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;GET /paid&#34;</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">accepts</span><span style="color:#f92672">:</span> [{
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">scheme</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;exact&#34;</span>,           <span style="color:#75715e">// 精确金额
+</span></span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">price</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;$0.01&#34;</span>,            <span style="color:#75715e">// 每次请求 $0.01
+</span></span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">network</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;eip155:84532&#34;</span>,   <span style="color:#75715e">// Base Sepolia 测试网
+</span></span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">payTo</span>: <span style="color:#66d9ef">createPayToAddress</span>, <span style="color:#75715e">// 动态地址
+</span></span></span><span style="display:flex;"><span>        }],
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">description</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;Data retrieval endpoint&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mimeType</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;application/json&#34;</span>,
+</span></span><span style="display:flex;"><span>      },
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">x402ResourceServer</span>(<span style="color:#a6e22e">facilitatorClient</span>).<span style="color:#a6e22e">register</span>(
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;eip155:84532&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">ExactEvmScheme</span>(),
+</span></span><span style="display:flex;"><span>    ),
+</span></span><span style="display:flex;"><span>  ),
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><p>网络标识使用 <a href="https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md">CAIP-2</a> 格式：<code>eip155:84532</code>（Base Sepolia）、<code>eip155:8453</code>（Base 主网）。</p>
+<h3 id="46-支持的网络与代币">4.6 支持的网络与代币</h3>
+<p>Stripe crypto PaymentIntent（deposit 模式）当前支持：</p>
+<table>
+  <thead>
+      <tr>
+          <th>网络</th>
+          <th>代币</th>
+          <th>合约地址</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Base</td>
+          <td>USDC</td>
+          <td><code>0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913</code></td>
+      </tr>
+      <tr>
+          <td>Solana</td>
+          <td>USDC</td>
+          <td><code>EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v</code></td>
+      </tr>
+      <tr>
+          <td>Tempo</td>
+          <td>USDC</td>
+          <td><code>0x20c000000000000000000000b9537d11c60e8b50</code></td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="47-接入前提">4.7 接入前提</h3>
+<ol>
+<li>Stripe 账户已开通 <strong>Stablecoins and Crypto</strong> 支付方式（Dashboard 申请，美国商户可用；客户全球可用稳定币付款）。</li>
+<li>环境变量：<code>STRIPE_SECRET_KEY</code>、<code>FACILITATOR_URL</code>。</li>
+<li>API 版本：<code>2026-03-04.preview</code>。</li>
+</ol>
+<p>测试：无 payment 头时 <code>curl -iv http://localhost:4242/paid</code> 应得 402；可用 Stripe 的 <code>purl</code> 工具模拟完整客户端流程。沙箱环境不监听测试网链上交易，需用 test helper 模拟充值。</p>
+<h2 id="5-coinbase-侧agentmarket-与代理经济">5. Coinbase 侧：Agent.market 与代理经济</h2>
+<p>Coinbase 孵化的 x402 生态推出了 <strong><a href="https://agent.market">Agent.market</a></strong>——统一的 AI Agent 应用商店，聚合推理、数据、搜索、媒体、基础设施、社交、交易等类别的工具与 API。</p>
+<p><strong>代理经济的运作方式：</strong></p>
+<ul>
+<li><strong>按量计费</strong>：Agent 调用 API、检索数据、使用算力时实时扣费。</li>
+<li><strong>订阅模型</strong>：高频工作负载可选用包月/包量。</li>
+<li><strong>Agentic Premium</strong>：高价值 AI 服务的分级定价。</li>
+</ul>
+<p><strong>生态集成方</strong>包括 OpenAI、Bloomberg、CoinGecko、LinkedIn、X、AWS Lambda 等，Agent 可在同一平台串联多工具完成复杂任务。</p>
+<p><strong>网络规模（截至 2026 年初报道）：</strong> 约 69,000 活跃 Agent，累计 1.65 亿+ 笔交易，总交易量约 $5,000 万。Stripe 入局进一步把 x402 从加密原生场景推向主流支付基础设施。</p>
+<h2 id="6-x402-vs-其他-agent-支付方案">6. x402 vs 其他 Agent 支付方案</h2>
+<table>
+  <thead>
+      <tr>
+          <th>维度</th>
+          <th>x402</th>
+          <th>Stripe MPP</th>
+          <th>传统 API Key</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>付费粒度</td>
+          <td>按请求微支付</td>
+          <td>会话内流式扣费</td>
+          <td>订阅/配额</td>
+      </tr>
+      <tr>
+          <td>开放程度</td>
+          <td>开放协议，多 Facilitator</td>
+          <td>Stripe 托管</td>
+          <td>各平台私有</td>
+      </tr>
+      <tr>
+          <td>身份要求</td>
+          <td>钱包签名即可</td>
+          <td>Stripe 账户体系</td>
+          <td>注册 + Key</td>
+      </tr>
+      <tr>
+          <td>合规/对账</td>
+          <td>需自建或选 Stripe 层</td>
+          <td>Dashboard 内置</td>
+          <td>平台负责</td>
+      </tr>
+      <tr>
+          <td>典型场景</td>
+          <td>单次 API 调用 $0.01</td>
+          <td>长时间 Agent 会话</td>
+          <td>人类开发者</td>
+      </tr>
+  </tbody>
+</table>
+<p>Google 的 Pay.sh（Solana + x402 SDK）是另一条路线：代理 HTTP 请求、注入 402 握手、用 Solana USDC 结算，适合已部署在 Google Cloud 的 Agent 工作流。</p>
+<h2 id="7-机遇与挑战">7. 机遇与挑战</h2>
+<p><strong>机遇：</strong></p>
+<ul>
+<li>Agent 成为独立经济参与者，7×24 自主购买算力、数据、工具。</li>
+<li>USDC 提供价格稳定，Base 提供低 gas、亚秒级确认。</li>
+<li>无需重构现有 HTTP API，加一层中间件即可 monetize。</li>
+</ul>
+<p><strong>挑战：</strong></p>
+<ul>
+<li>退款与争议：全自动场景下的纠纷处理尚无成熟范式。</li>
+<li>合规：制裁地址筛查、KYC/AML 在纯链上路径中需额外设计。</li>
+<li>安全：动态充值地址缓存、Facilitator 信任、Agent 钱包私钥管理。</li>
+<li>测试与主网：沙箱不监听测试网，主网需对接支持主网的 Facilitator。</li>
+</ul>
+<h2 id="8-最小可运行示例结构">8. 最小可运行示例结构</h2>
+<pre tabindex="0"><code>stripe-samples/machine-payments/
+├── server.ts          # Hono + paymentMiddleware + Stripe PI
+├── .env               # STRIPE_SECRET_KEY, FACILITATOR_URL
+└── package.json       # @x402/hono, @x402/core, @x402/evm, stripe
+</code></pre><p>核心依赖关系：</p>
+<pre tabindex="0"><code>paymentMiddleware(routes, x402ResourceServer)
+    ├── routes: 定价 + payTo 地址解析
+    ├── x402ResourceServer: 注册 network → scheme 处理器
+    └── HTTPFacilitatorClient: 连接 Facilitator 验证/结算
+</code></pre><h2 id="9-结论">9. 结论</h2>
+<p>x402 把「付费墙」变成了 HTTP 原生能力：服务端说「402，请先付 $0.01 USDC」，Agent 自动签名、付款、重试，全程无需人类点击确认。Stripe 的价值在于<strong>用 PaymentIntent 和 Dashboard 承接运营复杂度</strong>（地址管理、到账检测、capture、报表），开发者仍用熟悉的 Stripe 工作流；Coinbase 则用 Agent.market 把协议扩展为可发现、可计费的 Agent 服务市场。</p>
+<p>对构建自主 Agent 的开发者，x402 是目前最轻量的「按次付费 API」路径之一；若已在 Stripe 生态内，官方 quickstart 可在数十行代码内跑通 Base Sepolia 测试流程。</p>
+<h2 id="参考链接">参考链接</h2>
+<ul>
+<li><a href="https://docs.stripe.com/payments/machine/x402/quickstart">Stripe x402 Quickstart</a></li>
+<li><a href="https://docs.stripe.com/payments/machine/x402">Stripe x402 概述</a></li>
+<li><a href="https://bitkan.com/zh/learn/%E4%BB%80%E4%B9%88%E6%98%AFstripe%E7%9A%84x402%E5%8D%8F%E8%AE%AE-%E5%AE%83%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0ai%E4%BB%A3%E7%90%86%E6%94%AF%E4%BB%98-71597">BitKan：什么是 Stripe 的 x402 协议</a></li>
+<li><a href="https://bitkan.com/zh/learn/coinbase-x402-%E4%BB%A3%E7%90%86%E5%B8%82%E5%9C%BA%E8%A7%A3%E6%9E%90-%E5%85%B6%E4%BB%A3%E7%90%86%E7%BB%8F%E6%B5%8E%E5%A6%82%E4%BD%95%E8%BF%90%E4%BD%9C-73420">BitKan：Coinbase x402 代理市场解析</a></li>
+<li><a href="https://github.com/stripe-samples/machine-payments">stripe-samples/machine-payments</a></li>
+<li><a href="https://github.com/coinbase/x402/blob/main/specs/x402-specification-v2.md">x402 规范 v2</a></li>
+<li><a href="https://github.com/x402-foundation/x402/blob/main/specs/schemes/exact/scheme_exact_evm.md">exact scheme on EVM</a></li>
+</ul>
+    </article>
+
+    
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2026-07-03-stripe-x402-ai-agent-payments/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=x402%20%e5%8d%8f%e8%ae%ae%e7%ac%94%e8%ae%b0%ef%bc%9aStripe%20%e5%a6%82%e4%bd%95%e8%ae%a9%20AI%20%e4%bb%a3%e7%90%86%e8%87%aa%e4%b8%bb%e6%94%af%e4%bb%98%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2026-07-03-stripe-x402-ai-agent-payments/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer pager-noitem">&lt; Newer</li>
+      <li class="pager-older">
+        <a href="/blog/post/2026-06-15-psy-protocol-investigation-report/" data-toggle="tooltip" data-placement="top" title="深度调研报告：Psy Protocol（最新完整版）">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

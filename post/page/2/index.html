@@ -45,6 +45,51 @@
   <div class="main" role="main">
     <section class="list section-list">
       <article class="article">
+        <a href="/blog/post/2022-09-15-merkle-leaf-domain-separation-and-sparse-tree/" class="article-titles">
+          <h2 class="article-title">Merkle 叶子哈希、域分离与稀疏树证明（MerkleDropHelper）</h2>
+          
+        </a>
+        <ul class="article-meta">
+          <li class="article-meta-date"><time>September 15, 2022</time></li>
+          <li class="article-meta-tags">
+            <a href="/tags/cryptography/">
+              <i class="fa-solid fa-tag"></i>
+              cryptography
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/ethereum/">
+              <i class="fa-solid fa-tag"></i>
+              ethereum
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/merkle/">
+              <i class="fa-solid fa-tag"></i>
+              merkle
+            </a>&nbsp;
+          </li>
+          <li class="article-meta-tags">
+            <a href="/tags/security/">
+              <i class="fa-solid fa-tag"></i>
+              security
+            </a>&nbsp;
+          </li>
+        </ul>
+        <div class="article-content">
+          <h2 id="结论速记">结论速记</h2>
+<ul>
+<li><strong>关键不是“多 hash 一次更强”</strong>：<code>keccak256(keccak256(...))</code> 的主要价值在于<strong>域分离（domain separation）</strong>，让“叶子哈希”和“内部节点哈希”的构造形状不同，避免 Merkle 结构里的“角色混淆”讨论。</li>
+<li><strong>更标准</strong>：显式前缀（leaf/internal）通常比 <code>~hash</code> 或双 keccak 更容易被审计/跨语言实现接受。</li>
+<li><strong>验证端必须逐字对齐</strong>：叶子公式、内部节点哈希顺序（是否排序）、稀疏缺失节点默认值（0）必须完全一致。</li>
+</ul>
+<h2 id="keccak256keccak256abiencodemember-amount-是否足以避免-second-preimage"><code>keccak256(keccak256(abi.encode(member, amount)))</code> 是否足以避免 second preimage？</h2>
+<p>在 Merkle 语境里，大家常担心的不是去破 Keccak 的 preimage，而是：</p>
+        </div>
+        <div class="article-readmore"><a href="/blog/post/2022-09-15-merkle-leaf-domain-separation-and-sparse-tree/">Read more...</a></div>
+        <div class="article-floatclear"></div>
+      </article>
+      <article class="article">
         <a href="/blog/post/2022-05-10-polkadot-validate-block-pvf/" class="article-titles">
           <h2 class="article-title">Polkadot validate_block, PVF, and relay validators</h2>
           
@@ -439,26 +484,6 @@ let msg = Xcm::Transact {
 <p><a href="https://docs.darwinia.network/docs/en/wiki-tut-wormhole-general/">wiki</a></p>
         </div>
         <div class="article-readmore"><a href="/blog/post/2021-04-02-darwinia-bridger/">Read more...</a></div>
-        <div class="article-floatclear"></div>
-      </article>
-      <article class="article">
-        <a href="/blog/post/2021-03-07-phragmen/" class="article-titles">
-          <h2 class="article-title">Phragmen election</h2>
-          
-        </a>
-        <ul class="article-meta">
-          <li class="article-meta-date"><time>March 7, 2021</time></li>
-          <li class="article-meta-tags">
-            <a href="/tags/blockchain/">
-              <i class="fa-solid fa-tag"></i>
-              BlockChain
-            </a>&nbsp;
-          </li>
-        </ul>
-        <div class="article-content">
-          <p>The problem that Phragmén’s methods try to solve is that of electing a set of a given numbers of persons from a larger set of candidates. Phragmén discussed this in the context of a parliamentary election in a multi-member constituency; the same problem can, of course, also occur in local elections, but also in many other situations such as electing a board or a committee in an organization.</p>
-        </div>
-        <div class="article-readmore"><a href="/blog/post/2021-03-07-phragmen/">Read more...</a></div>
         <div class="article-floatclear"></div>
       </article>
     </section>

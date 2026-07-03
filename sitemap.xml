@@ -2,6 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://yrong.github.io/blog/tags/agents/</loc>
+    <lastmod>2026-07-03T20:00:00+08:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/tags/ai/</loc>
+    <lastmod>2026-07-03T20:00:00+08:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/tags/blockchain/</loc>
+    <lastmod>2026-07-03T20:00:00+08:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/tags/ethereum/</loc>
+    <lastmod>2026-07-03T20:00:00+08:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/post/</loc>
+    <lastmod>2026-07-03T20:00:00+08:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/tags/</loc>
+    <lastmod>2026-07-03T20:00:00+08:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/post/2026-07-03-stripe-x402-ai-agent-payments/</loc>
+    <lastmod>2026-07-03T20:00:00+08:00</lastmod>
+  </url><url>
+    <loc>https://yrong.github.io/blog/</loc>
+    <lastmod>2026-07-03T20:00:00+08:00</lastmod>
+  </url><url>
     <loc>https://yrong.github.io/blog/tags/bitcoin/</loc>
     <lastmod>2026-06-15T00:13:00+08:00</lastmod>
   </url><url>
@@ -14,16 +38,7 @@
     <loc>https://yrong.github.io/blog/tags/dogecoin/</loc>
     <lastmod>2026-06-15T00:13:00+08:00</lastmod>
   </url><url>
-    <loc>https://yrong.github.io/blog/post/</loc>
-    <lastmod>2026-06-15T00:13:00+08:00</lastmod>
-  </url><url>
     <loc>https://yrong.github.io/blog/tags/psy-protocol/</loc>
-    <lastmod>2026-06-15T00:13:00+08:00</lastmod>
-  </url><url>
-    <loc>https://yrong.github.io/blog/tags/</loc>
-    <lastmod>2026-06-15T00:13:00+08:00</lastmod>
-  </url><url>
-    <loc>https://yrong.github.io/blog/</loc>
     <lastmod>2026-06-15T00:13:00+08:00</lastmod>
   </url><url>
     <loc>https://yrong.github.io/blog/tags/zk-rollup/</loc>
@@ -59,20 +74,11 @@
     <loc>https://yrong.github.io/blog/post/2026-05-03-polkadot-speculative-messaging/</loc>
     <lastmod>2026-05-03T14:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://yrong.github.io/blog/tags/blockchain/</loc>
-    <lastmod>2026-04-09T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://yrong.github.io/blog/post/2026-04-09-xcmp-mmd-minimal-poc/</loc>
     <lastmod>2026-04-09T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://yrong.github.io/blog/tags/xcmp/</loc>
     <lastmod>2026-04-09T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://yrong.github.io/blog/tags/agents/</loc>
-    <lastmod>2025-07-01T00:30:00+08:00</lastmod>
-  </url><url>
-    <loc>https://yrong.github.io/blog/tags/ai/</loc>
-    <lastmod>2025-07-01T00:30:00+08:00</lastmod>
   </url><url>
     <loc>https://yrong.github.io/blog/tags/best-practices/</loc>
     <lastmod>2025-07-01T00:30:00+08:00</lastmod>
@@ -109,9 +115,6 @@
   </url><url>
     <loc>https://yrong.github.io/blog/post/2023-04-11-hyperbridge-ismp-state-overlay-mmr/</loc>
     <lastmod>2023-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://yrong.github.io/blog/tags/ethereum/</loc>
-    <lastmod>2022-09-15T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://yrong.github.io/blog/tags/merkle/</loc>
     <lastmod>2022-09-15T00:00:00+00:00</lastmod>
