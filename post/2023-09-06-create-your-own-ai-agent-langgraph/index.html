@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>实战教程：如何使用 LangGraph 和 LLM Studio 构建专属 AI Agent - yrong blog</title>
+  <meta property="og:title" content="实战教程：如何使用 LangGraph 和 LLM Studio 构建专属 AI Agent - yrong blog" />
+  <meta name="twitter:title" content="实战教程：如何使用 LangGraph 和 LLM Studio 构建专属 AI Agent - yrong blog" />
+  <meta name="description" content="本篇笔记基于 TensorOps 机器学习工程师 Clara Gadelho 的视频教程 How to Create Your Own AI Agent - Tutorial with Clara Gadelho 整理，详细记录了如何基于现代 LLM 框架构建一个具备工具调用和记忆能力的 ReAct 智能体（旅行助理）。">
+  <meta property="og:description" content="本篇笔记基于 TensorOps 机器学习工程师 Clara Gadelho 的视频教程 How to Create Your Own AI Agent - Tutorial with Clara Gadelho 整理，详细记录了如何基于现代 LLM 框架构建一个具备工具调用和记忆能力的 ReAct 智能体（旅行助理）。">
+  <meta name="twitter:description" content="本篇笔记基于 TensorOps 机器学习工程师 Clara Gadelho 的视频教程 How to Create Your Own AI Agent - Tutorial with Clara Gadelho 整理，详细记录了如何基于现代 LLM 框架构建一个具备工具调用和记忆能力的 ReAct 智能体（旅行助理）。">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2023-09-06-create-your-own-ai-agent-langgraph/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">实战教程：如何使用 LangGraph 和 LLM Studio 构建专属 AI Agent</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>September 6, 2023</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/ai/">
+            <i class="fa-solid fa-tag"></i>
+            ai
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/agents/">
+            <i class="fa-solid fa-tag"></i>
+            agents
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/langgraph/">
+            <i class="fa-solid fa-tag"></i>
+            langgraph
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/llm-studio/">
+            <i class="fa-solid fa-tag"></i>
+            llm-studio
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一-ai-agent-与-react-架构基础">一、 AI Agent 与 ReAct 架构基础</a>
+      <ul>
+        <li><a href="#1-react-reasoning-and-acting-架构">1. ReAct (Reasoning and Acting) 架构</a></li>
+        <li><a href="#2-构建-agent-的三大核心要素">2. 构建 Agent 的三大核心要素</a></li>
+      </ul>
+    </li>
+    <li><a href="#二-技术选型">二、 技术选型</a></li>
+    <li><a href="#三-实战构建一个智能旅行助手">三、 实战：构建一个智能旅行助手</a>
+      <ul>
+        <li><a href="#1-前置准备">1. 前置准备</a></li>
+        <li><a href="#2-核心代码实现步骤">2. 核心代码实现步骤</a></li>
+      </ul>
+    </li>
+    <li><a href="#四-运行与多轮对话测试">四、 运行与多轮对话测试</a>
+      <ul>
+        <li><a href="#1-首轮提问规划行程">1. 首轮提问：规划行程</a></li>
+        <li><a href="#2-第二轮提问测试会话记忆">2. 第二轮提问：测试会话记忆</a></li>
+      </ul>
+    </li>
+    <li><a href="#五-总结与启发">五、 总结与启发</a></li>
+  </ul>
+</nav>
+</aside>
+      <p>本篇笔记基于 TensorOps 机器学习工程师 Clara Gadelho 的视频教程 <a href="https://www.youtube.com/watch?v=6Dvj4VZsscg">How to Create Your Own AI Agent - Tutorial with Clara Gadelho</a> 整理，详细记录了如何基于现代 LLM 框架构建一个具备工具调用和记忆能力的 ReAct 智能体（旅行助理）。</p>
+<hr>
+<h2 id="一-ai-agent-与-react-架构基础">一、 AI Agent 与 ReAct 架构基础</h2>
+<p>在现代大语言模型应用中，<strong>Agent（智能体）</strong> 是能够自主决策、调用外部工具并执行复杂任务的实体。</p>
+<h3 id="1-react-reasoning-and-acting-架构">1. ReAct (Reasoning and Acting) 架构</h3>
+<p>ReAct 是构建 Agent 最主流的架构之一。它的核心思想是<strong>交替进行“思考”与“行动”</strong>：</p>
+<ol>
+<li><strong>Reasoning（推理）</strong>：模型根据用户的输入进行思考，分析当前状态，并决定下一步需要做什么。</li>
+<li><strong>Acting（行动）</strong>：如果需要外部信息，模型会调用指定的 <strong>Tools（工具）</strong>（如搜索引擎、API、计算器）。</li>
+<li>模型将工具返回的结果与此前的推理结合，继续进行下一步推理，直至得到最终答案返回给用户。</li>
+</ol>
+<pre tabindex="0"><code class="language-mermaid" data-lang="mermaid">graph TD
+    User[用户] --&gt; Agent[Agent 推理环]
+    subgraph &#34;Agent 内部&#34;
+        LLM[LLM 决策核] &lt;--&gt; Memory[Memory 记忆库]
+        LLM &lt;--&gt; Tools[Tools 工具集]
+    end
+    Agent --&gt;|最终答案| User
+</code></pre><h3 id="2-构建-agent-的三大核心要素">2. 构建 Agent 的三大核心要素</h3>
+<ul>
+<li><strong>Tools（工具）</strong>：Agent 与外界交互的桥梁，可以是 API、数据库查询或任意 Python 函数。</li>
+<li><strong>Memory（记忆）</strong>：使 Agent 能够记住上下文及历史多轮对话信息。</li>
+<li><strong>Planning（规划）</strong>：控制推理的环路及图流向。</li>
+</ul>
+<hr>
+<h2 id="二-技术选型">二、 技术选型</h2>
+<p>本教程使用了两个核心库：</p>
+<ul>
+<li><strong>LLM Studio</strong>：TensorOps 开源的模型路由与管理库。它作为大模型的统一网关，允许开发者在无需修改业务代码的前提下，轻松在 GPT-4o、Gemini 等不同模型之间进行无缝切换。</li>
+<li><strong>LangGraph</strong>：由 LangChain 团队开发的基于图（Graph）的 Agent 构建框架。它高度模块化，提供开箱即用的状态管理和循环控制能力，极大简化了复杂 Agent 架构（如多 Agent 协同）的开发。</li>
+</ul>
+<hr>
+<h2 id="三-实战构建一个智能旅行助手">三、 实战：构建一个智能旅行助手</h2>
+<h3 id="1-前置准备">1. 前置准备</h3>
+<p>在运行代码前，需要安装依赖并配置环境变量：</p>
+<ul>
+<li><strong>环境依赖</strong>：Python 3.10+，安装 <code>langchain</code>、<code>langgraph</code>、<code>requests</code>、<code>python-dotenv</code> 和 <code>llm-studio</code>。</li>
+<li><strong>API 密钥</strong>：
+<ul>
+<li>模型提供商 API 密钥（如 OpenAI Key）。</li>
+<li><strong>Weatherbit API</strong> Key：用于查询目的地的实时天气。</li>
+<li><strong>Tavily Search API</strong> Key：用于实现高性能的网页搜索。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-核心代码实现步骤">2. 核心代码实现步骤</h3>
+<h4 id="步骤-1导入依赖与初始化-llm">步骤 1：导入依赖与初始化 LLM</h4>
+<p>使用 <code>llm-studio</code> 作为路由器连接 OpenAI 的 <code>gpt-4o</code> 模型，并将其包装为可被 LangChain 兼容调用的接口。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> sys
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> dotenv <span style="color:#f92672">import</span> load_dotenv
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> llm_studio <span style="color:#f92672">import</span> LLM  <span style="color:#75715e"># 导入 LLM Studio</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>load_dotenv()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 初始化大语言模型路由器</span>
+</span></span><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> LLM(provider<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;openai&#34;</span>)
+</span></span><span style="display:flex;"><span>model <span style="color:#f92672">=</span> llm<span style="color:#f92672">.</span>get_model(<span style="color:#e6db74">&#34;gpt-4o&#34;</span>)
+</span></span></code></pre></div><h4 id="步骤-2定义-agent-工具-tools">步骤 2：定义 Agent 工具 (Tools)</h4>
+<p>为了完成旅行规划，我们为 Agent 装备了三种工具：</p>
+<ol>
+<li><strong>获取系统当前时间</strong>：让 Agent 知晓“今天”的日期，以便推算预订时间。</li>
+<li><strong>网络搜索工具</strong>：使用预置的 <code>TavilySearchResults</code>。</li>
+<li><strong>获取天气工具</strong>：调用外部 Weatherbit API 接口。</li>
+</ol>
+<blockquote>
+<p><strong>重要提示</strong>：在编写自定义工具时，必须为函数添加详细的 <strong>Docstring（文档字符串）</strong>。Agent 在运行时会读取 Docstring 来判断该工具的作用以及何时去调用它。</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_core.tools <span style="color:#f92672">import</span> tool
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain_community.tools.tavily_search <span style="color:#f92672">import</span> TavilySearchResults
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> datetime <span style="color:#f92672">import</span> datetime
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1. 自定义获取当前时间的工具</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@tool</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_system_date</span>() <span style="color:#f92672">-&gt;</span> str:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Get the current system date. Useful for calculating relative travel dates.&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    current_date <span style="color:#f92672">=</span> datetime<span style="color:#f92672">.</span>now()<span style="color:#f92672">.</span>strftime(<span style="color:#e6db74">&#34;%Y-%m-</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;The current date is: </span><span style="color:#e6db74">{</span>current_date<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2. 初始化网络搜索工具（限制返回 3 条结果以防超长）</span>
+</span></span><span style="display:flex;"><span>web_search_tool <span style="color:#f92672">=</span> TavilySearchResults(max_results<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3. 自定义天气查询工具（调用外部 Weatherbit API）</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@tool</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_weather</span>(location: str) <span style="color:#f92672">-&gt;</span> str:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Fetch the weather forecast for a given location.&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># （此处省略具体的 HTTP 请求解析代码）</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Weather forecast for </span><span style="color:#e6db74">{</span>location<span style="color:#e6db74">}</span><span style="color:#e6db74">: Sunny, 25°C.&#34;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>tools <span style="color:#f92672">=</span> [get_system_date, web_search_tool, get_weather]
+</span></span></code></pre></div><h4 id="步骤-3构建-react-agent-与会话记忆">步骤 3：构建 ReAct Agent 与会话记忆</h4>
+<p>使用 LangGraph 的 <code>create_react_agent</code> 快速装配。通过引入 <code>MemorySaver</code> 来持久化对话状态，允许 Agent 在多轮对话中通过 <code>thread_id</code> 自动找回历史记忆。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> langgraph.prebuilt <span style="color:#f92672">import</span> create_react_agent
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langgraph.checkpoint.memory <span style="color:#f92672">import</span> MemorySaver
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 定义 Agent 系统级提示词（State Modifier）</span>
+</span></span><span style="display:flex;"><span>system_prompt <span style="color:#f92672">=</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;You are a helpful travel assistant. If given a duration for a trip, &#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;suggest a detailed daily itinerary with activities, meals, and accommodations. &#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Include weather forecasts in your decisions and search the web for real-time flights or hotels. &#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Make sure to provide direct links if you suggest booking.&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 实例化会话记忆组件</span>
+</span></span><span style="display:flex;"><span>memory <span style="color:#f92672">=</span> MemorySaver()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 构建 Agent 流程图</span>
+</span></span><span style="display:flex;"><span>agent <span style="color:#f92672">=</span> create_react_agent(
+</span></span><span style="display:flex;"><span>    model<span style="color:#f92672">=</span>model,
+</span></span><span style="display:flex;"><span>    tools<span style="color:#f92672">=</span>tools,
+</span></span><span style="display:flex;"><span>    state_modifier<span style="color:#f92672">=</span>system_prompt,
+</span></span><span style="display:flex;"><span>    checkpointer<span style="color:#f92672">=</span>memory
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><h4 id="步骤-4可视化图结构">步骤 4：可视化图结构</h4>
+<p>LangGraph 允许直接生成 Mermaid 架构图，其拓扑结构非常直观：</p>
+<pre tabindex="0"><code class="language-mermaid" data-lang="mermaid">graph LR
+    __start__([Start]) --&gt; Agent[Agent 逻辑控制]
+    Agent --&gt;|需要工具| Action[调用 Tools]
+    Action --&gt; Agent
+    Agent --&gt;|推理完成| __end__([End])
+</code></pre><hr>
+<h2 id="四-运行与多轮对话测试">四、 运行与多轮对话测试</h2>
+<h3 id="1-首轮提问规划行程">1. 首轮提问：规划行程</h3>
+<p>配置会话 <code>thread_id</code> 为 <code>1</code>，输入任务需求：“帮我规划两周后去米兰的 3 天行程，我从波尔图出发。”</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>config <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;configurable&#34;</span>: {<span style="color:#e6db74">&#34;thread_id&#34;</span>: <span style="color:#e6db74">&#34;1&#34;</span>}}
+</span></span><span style="display:flex;"><span>inputs <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;messages&#34;</span>: [(<span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;Plan a 3-day trip to Milan that will happen in two weeks. I&#39;m traveling from Porto.&#34;</span>)]}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> event <span style="color:#f92672">in</span> agent<span style="color:#f92672">.</span>stream(inputs, config):
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 打印运行中的事件与消息流</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pass</span>
+</span></span></code></pre></div><ul>
+<li><strong>运行轨迹</strong>：
+<ol>
+<li>Agent 自动触发 <code>get_system_date</code> 获取今天日期，算出两周后的精确出行时间。</li>
+<li>调用 <code>get_weather(&quot;Milan&quot;)</code> 查询届时的天气。</li>
+<li>调用 <code>Tavily</code> 搜索从波尔图飞往米兰的航班以及酒店价格信息。</li>
+<li>最后，结合所有数据生成带有预订链接的精细化 3 天行程单。</li>
+</ol>
+</li>
+</ul>
+<h3 id="2-第二轮提问测试会话记忆">2. 第二轮提问：测试会话记忆</h3>
+<p>紧接着在同一个 <code>thread_id</code> 下提问：“我去的时候那里的圣诞集市开了吗？”（<strong>注意：此提问中没有提到“米兰”以及出行时间</strong>）。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>inputs_2 <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;messages&#34;</span>: [(<span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;Will Christmas markets be open when I go there?&#34;</span>)]}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> event <span style="color:#f92672">in</span> agent<span style="color:#f92672">.</span>stream(inputs_2, config):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pass</span>
+</span></span></code></pre></div><ul>
+<li><strong>结果</strong>：Agent 成功从 Memory 中检索出之前的目的地为“米兰”，并且出发时间是两周后。它利用这些信息再次自动联网搜索当年米兰圣诞集市的开放时间，并给出了准确的答复。</li>
+</ul>
+<hr>
+<h2 id="五-总结与启发">五、 总结与启发</h2>
+<p>本教程展示了如何使用极少的代码搭建一个生产级别的 Agent 原型：</p>
+<ol>
+<li><strong>极简构建</strong>：LangGraph 的 <code>create_react_agent</code> 屏蔽了底层图状态维护的复杂细节，使得快速验证思路变得非常简单。</li>
+<li><strong>Docstring 即代码</strong>：在 Tool 设计中，Python 函数的 Docstring 直接被充当了大模型的系统提示词，决定了模型的调用时机，凸显了“Prompt Engineering”在 Agent 时代的重要性。</li>
+<li><strong>大模型网关的作用</strong>：配合 <code>llm-studio</code>，可以大幅度降低大模型升级换代时的适配成本。</li>
+</ol>
+    </article>
+
+    
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2023-09-06-create-your-own-ai-agent-langgraph/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=%e5%ae%9e%e6%88%98%e6%95%99%e7%a8%8b%ef%bc%9a%e5%a6%82%e4%bd%95%e4%bd%bf%e7%94%a8%20LangGraph%20%e5%92%8c%20LLM%20Studio%20%e6%9e%84%e5%bb%ba%e4%b8%93%e5%b1%9e%20AI%20Agent%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2023-09-06-create-your-own-ai-agent-langgraph/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/blog/post/2025-07-01-building-effective-ai-agents/" data-toggle="tooltip" data-placement="top" title="Building Effective AI Agents &amp; Claude Code Best Practices">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/blog/post/2023-08-15-zcash-investigation-report/" data-toggle="tooltip" data-placement="top" title="Investigation Report: Zcash">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>

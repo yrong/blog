@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Llm-Studio on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/llm-studio/</link>
+    <description>Recent content in Llm-Studio on yrong blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
+    <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
+    <lastBuildDate>Wed, 06 Sep 2023 00:46:00 +0800</lastBuildDate>
+    <atom:link href="https://yrong.github.io/blog/tags/llm-studio/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>实战教程：如何使用 LangGraph 和 LLM Studio 构建专属 AI Agent</title>
+      <link>https://yrong.github.io/blog/post/2023-09-06-create-your-own-ai-agent-langgraph/</link>
+      <pubDate>Wed, 06 Sep 2023 00:46:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2023-09-06-create-your-own-ai-agent-langgraph/</guid>
+      <description>&lt;p&gt;本篇笔记基于 TensorOps 机器学习工程师 Clara Gadelho 的视频教程 &lt;a href=&#34;https://www.youtube.com/watch?v=6Dvj4VZsscg&#34;&gt;How to Create Your Own AI Agent - Tutorial with Clara Gadelho&lt;/a&gt; 整理，详细记录了如何基于现代 LLM 框架构建一个具备工具调用和记忆能力的 ReAct 智能体（旅行助理）。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
