@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Knowledge-Representation on yrong blog</title>
+    <link>https://yrong.github.io/blog/tags/knowledge-representation/</link>
+    <description>Recent content in Knowledge-Representation on yrong blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <managingEditor>yrong1997@gmail.com (Ronyang)</managingEditor>
+    <webMaster>yrong1997@gmail.com (Ronyang)</webMaster>
+    <copyright>&amp;copy; Copyright 2026 Ronyang</copyright>
+    <lastBuildDate>Mon, 06 Jul 2026 00:18:00 +0800</lastBuildDate>
+    <atom:link href="https://yrong.github.io/blog/tags/knowledge-representation/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>学习笔记：知识表示与专家系统</title>
+      <link>https://yrong.github.io/blog/post/2026-07-06-knowledge-representation-expert-systems/</link>
+      <pubDate>Mon, 06 Jul 2026 00:18:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2026-07-06-knowledge-representation-expert-systems/</guid>
+      <description>&lt;p&gt;本篇笔记基于微软 &lt;a href=&#34;https://github.com/microsoft/AI-For-Beginners&#34;&gt;AI-For-Beginners&lt;/a&gt; 课程的第二章：&lt;strong&gt;符号人工智能 (Symbolic AI)&lt;/strong&gt; 进行整理，详细记录了符号 AI 与专家系统、知识表示、推理方法（前向与后向推理）以及本体与语义网的相关概念与核心架构。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

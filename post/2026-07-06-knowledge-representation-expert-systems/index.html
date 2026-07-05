@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>学习笔记：知识表示与专家系统 - yrong blog</title>
+  <meta property="og:title" content="学习笔记：知识表示与专家系统 - yrong blog" />
+  <meta name="twitter:title" content="学习笔记：知识表示与专家系统 - yrong blog" />
+  <meta name="description" content="本篇笔记基于微软 AI-For-Beginners 课程的第二章：符号人工智能 (Symbolic AI) 进行整理，详细记录了符号 AI 与专家系统、知识表示、推理方法（前向与后向推理）以及本体与语义网的相关概念与核心架构。">
+  <meta property="og:description" content="本篇笔记基于微软 AI-For-Beginners 课程的第二章：符号人工智能 (Symbolic AI) 进行整理，详细记录了符号 AI 与专家系统、知识表示、推理方法（前向与后向推理）以及本体与语义网的相关概念与核心架构。">
+  <meta name="twitter:description" content="本篇笔记基于微软 AI-For-Beginners 课程的第二章：符号人工智能 (Symbolic AI) 进行整理，详细记录了符号 AI 与专家系统、知识表示、推理方法（前向与后向推理）以及本体与语义网的相关概念与核心架构。">
+  <meta name="author" content="Ronyang"/>
+  <meta property="og:site_name" content="yrong blog" />
+  <meta property="og:url" content="https://yrong.github.io/blog/post/2026-07-06-knowledge-representation-expert-systems/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.159.1">
+  <link rel="stylesheet" href="/blog/css/style.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/blog/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/blog/css/custom.css" media="all" />
+
+  <script src="/blog/js/script.js"></script>
+  <script src="/blog/js/custom.js"></script>
+  <script defer src="/blog/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">yrong blog</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-tags"><a href="/blog/tags/" title="Tags">Tags</a></li>
+      <li class="site-navi-item-archives"><a href="/blog/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/blog/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">学习笔记：知识表示与专家系统</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>July 6, 2026</time></li>
+        <li class="article-meta-tags">
+          <a href="/tags/ai/">
+            <i class="fa-solid fa-tag"></i>
+            ai
+          </a>&nbsp;
+        </li>
+        <li class="article-meta-tags">
+          <a href="/tags/knowledge-representation/">
+            <i class="fa-solid fa-tag"></i>
+            knowledge-representation
+          </a>&nbsp;
+        </li>
+      </ul>
+      
+<aside class="toc">
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一-知识与信息数据的区别">一、 知识与信息/数据的区别</a>
+      <ul>
+        <li><a href="#1-dikw-金字塔模型">1. DIKW 金字塔模型</a></li>
+      </ul>
+    </li>
+    <li><a href="#二-计算机知识表示-knowledge-representation">二、 计算机知识表示 (Knowledge Representation)</a>
+      <ul>
+        <li><a href="#知识表示的分类">知识表示的分类</a></li>
+      </ul>
+    </li>
+    <li><a href="#三-专家系统-expert-systems">三、 专家系统 (Expert Systems)</a>
+      <ul>
+        <li><a href="#1-系统架构">1. 系统架构</a></li>
+        <li><a href="#2-推理方式">2. 推理方式</a></li>
+      </ul>
+    </li>
+    <li><a href="#四-本体与语义网-ontologies--semantic-web">四、 本体与语义网 (Ontologies &amp; Semantic Web)</a>
+      <ul>
+        <li><a href="#1-语义网技术栈">1. 语义网技术栈</a></li>
+        <li><a href="#2-本体-ontology">2. 本体 (Ontology)</a></li>
+        <li><a href="#3-代表性项目">3. 代表性项目</a></li>
+        <li><a href="#4-实践案例家族本体推理-family-ontology-inference">4. 实践案例：家族本体推理 (Family Ontology Inference)</a></li>
+      </ul>
+    </li>
+    <li><a href="#五-概念图与主题分类-concept-graph--theme-classification">五、 概念图与主题分类 (Concept Graph &amp; Theme Classification)</a>
+      <ul>
+        <li><a href="#1-实践案例利用概念图进行新闻主题分类">1. 实践案例：利用概念图进行新闻主题分类</a></li>
+      </ul>
+    </li>
+    <li><a href="#六-总结与展望">六、 总结与展望</a></li>
+  </ul>
+</nav>
+</aside>
+      <p>本篇笔记基于微软 <a href="https://github.com/microsoft/AI-For-Beginners">AI-For-Beginners</a> 课程的第二章：<strong>符号人工智能 (Symbolic AI)</strong> 进行整理，详细记录了符号 AI 与专家系统、知识表示、推理方法（前向与后向推理）以及本体与语义网的相关概念与核心架构。</p>
+<h2 id="一-知识与信息数据的区别">一、 知识与信息/数据的区别</h2>
+<p>在符号 AI（Top-down 自上而下方法）中，核心思想是将人类知识转化为机器可读的形式，以此来解决问题。</p>
+<h3 id="1-dikw-金字塔模型">1. DIKW 金字塔模型</h3>
+<p>为了定义什么是“知识”，通常使用 <strong>DIKW 金字塔</strong> 来对相关概念进行分层：</p>
+<ul>
+<li><strong>数据 (Data)</strong>：存在于物理介质（如书本、网页）中的符号、文字或声音。它独立于人类而存在，并可在人与人之间传递。</li>
+<li><strong>信息 (Information)</strong>：人类大脑对数据的解读与理解。</li>
+<li><strong>知识 (Knowledge)</strong>：将信息整合进人类个体的主动世界模型中。它通过主动的<strong>学习过程</strong>获得，形成一个互相关联的概念网络。</li>
+<li><strong>智慧 (Wisdom)</strong>：更高层级的理解，代表“元知识 (Meta-knowledge)”，即关于如何以及何时使用这些知识的认知。</li>
+</ul>
+<hr>
+<h2 id="二-计算机知识表示-knowledge-representation">二、 计算机知识表示 (Knowledge Representation)</h2>
+<p>知识表示的目标是寻找一种有效的方法，将知识以<strong>数据</strong>的形式存储在计算机中，使其能够被自动利用。知识表示方法存在一个光谱：</p>
+<ul>
+<li><strong>左端（简单/算法化）</strong>：如直接用程序代码表示，灵活性极低，但计算机极易处理。</li>
+<li><strong>右端（自然语言文本）</strong>：表达能力最强，但计算机很难直接对其进行自动推理。</li>
+</ul>
+<h3 id="知识表示的分类">知识表示的分类</h3>
+<h4 id="1-网络表示法-network-representations">1. 网络表示法 (Network Representations)</h4>
+<ul>
+<li><strong>语义网络 (Semantic Network)</strong>：将大脑中相互关联的概念用图形（图结构）在计算机中进行复现。</li>
+<li><strong>对象-属性-值三元组 (Object-Attribute-Value triplets, OAV)</strong>：图在计算机中可表示为节点和边，因此可通过三元组列表构建语义网络。
+<ul>
+<li><em>示例</em>：
+<ul>
+<li><code>Python</code> - <code>is</code> - <code>Untyped-Language</code></li>
+<li><code>Python</code> - <code>invented-by</code> - <code>Guido van Rossum</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-层次表示法-hierarchical-representations">2. 层次表示法 (Hierarchical Representations)</h4>
+<ul>
+<li><strong>框架表示法 (Frame Representation)</strong>：模仿人类对事物的分类。将每个对象或类表示为一个<strong>框架 (Frame)</strong>，其中包含多个<strong>槽 (Slot)</strong>。
+<ul>
+<li>槽可以拥有默认值、取值限制或在获取值时触发的存储过程（类似于面向对象编程中的类与属性）。</li>
+</ul>
+</li>
+<li><strong>场景 (Scenarios)</strong>：一种特殊的框架，用于表示随时间展开的复杂情境。</li>
+</ul>
+<h4 id="3-过程表示法-procedural-representations">3. 过程表示法 (Procedural Representations)</h4>
+<ul>
+<li><strong>产生式规则 (Production Rules)</strong>：使用 <code>IF-THEN</code> 语句来表达逻辑因果关系。
+<ul>
+<li><em>示例</em>：<code>IF 动物吃肉 OR (有锋利牙齿 AND 有爪子 AND 双眼向前) THEN 该动物是肉食动物</code>。</li>
+</ul>
+</li>
+<li><strong>算法 (Algorithms)</strong>：虽然是过程表示，但在知识库系统中很少直接使用。</li>
+</ul>
+<h4 id="4-逻辑表示法-logic">4. 逻辑表示法 (Logic)</h4>
+<ul>
+<li><strong>谓词逻辑 (Predicate Logic)</strong>：过于复杂以至于难以完全计算，因此通常使用其子集（如 Prolog 中使用的 Horn 子句）。</li>
+<li><strong>描述逻辑 (Description Logic, DL)</strong>：用于表示和推理对象层次结构，是语义网 (Semantic Web) 的理论基石。</li>
+</ul>
+<hr>
+<h2 id="三-专家系统-expert-systems">三、 专家系统 (Expert Systems)</h2>
+<p><strong>专家系统</strong>是符号 AI 早期最成功的应用之一，旨在特定受限领域中扮演人类专家的角色。</p>
+<h3 id="1-系统架构">1. 系统架构</h3>
+<p>专家系统的结构模拟了人类的神经与推理系统：</p>
+<ul>
+<li><strong>知识库 (Knowledge Base)</strong>：保存从人类专家处提取的长期知识（相当于长期记忆）。</li>
+<li><strong>问题内存 (Problem Memory)</strong>：保存当前正在解决的具体问题的数据与状态（相当于短期记忆/工作内存）。</li>
+<li><strong>推理引擎 (Inference Engine)</strong>：在问题内存和知识库之上执行推理。</li>
+</ul>
+<pre tabindex="0"><code class="language-mermaid" data-lang="mermaid">graph TD
+    subgraph &#34;专家系统架构&#34;
+        KB[知识库 Knowledge Base &lt;br&gt;长期记忆]
+        PM[问题内存 Problem Memory &lt;br&gt;短期记忆/工作内存]
+        IE[推理引擎 Inference Engine]
+        
+        IE --&gt;|读取规则| KB
+        IE &lt;--&gt;|读写当前状态| PM
+    end
+    
+    User[用户] &lt;--&gt;|交互输入/输出| IE
+</code></pre><h3 id="2-推理方式">2. 推理方式</h3>
+<h4 id="前向推理-forward-inference">前向推理 (Forward Inference)</h4>
+<p>从已知的数据出发，主动推导结论。</p>
+<ol>
+<li><strong>冲突集合</strong>：寻找所有当前条件被满足的规则。</li>
+<li><strong>冲突解决</strong>：采用特定策略选择一条规则执行（如：选第一条、随机选、或选择条件最具体的规则）。</li>
+<li><strong>应用规则</strong>：执行规则，将推导出的新事实（三元组）存入工作内存。</li>
+<li><strong>循环</strong>：重复上述步骤，直至得到目标属性。</li>
+</ol>
+<h4 id="后向推理-backward-inference">后向推理 (Backward Inference)</h4>
+<p>由目标（Hypothesis/Goal）驱动，逆向寻找证据。</p>
+<ol>
+<li><strong>确定目标</strong>：寻找能够得出该目标的规则。</li>
+<li><strong>验证条件</strong>：如果规则的左侧（条件部分）未知，则将这些条件作为“子目标”进行递归证明。</li>
+<li><strong>询问用户</strong>：如果某个属性无法通过规则推导且无其他方法，则向用户提问获取。</li>
+<li><strong>回溯</strong>：若当前假设证明失败，则尝试其他候选规则。</li>
+</ol>
+<blockquote>
+<p><strong>可解释性</strong>是知识型专家系统的重要特点：系统做出的每一项决策，都可以通过其推理链路（应用了哪些规则）被清晰地解释。</p>
+</blockquote>
+<hr>
+<h2 id="四-本体与语义网-ontologies--semantic-web">四、 本体与语义网 (Ontologies &amp; Semantic Web)</h2>
+<h3 id="1-语义网技术栈">1. 语义网技术栈</h3>
+<p>在20世纪末，人们尝试用知识表示技术对互联网资源进行标注，以实现精准检索。</p>
+<ul>
+<li>基于<strong>描述逻辑 (DL)</strong> 提供严密的逻辑语义。</li>
+<li>使用全局 <strong>URI</strong> 标识概念，支持跨越互联网的分布式知识表示。</li>
+<li>采用 XML 语言家族：<strong>RDF</strong>、<strong>RDFS</strong>、<strong>OWL (Web Ontology Language)</strong>。</li>
+</ul>
+<h3 id="2-本体-ontology">2. 本体 (Ontology)</h3>
+<p>本体是对某一问题域的<strong>显式规格说明</strong>。最简单的本体是概念分类法，复杂的本体则包含推理规则。</p>
+<ul>
+<li><strong>三元组</strong>是语义网的核心。例如，用三元组表示“AI课程由Dmitry于2022年开发”：
+<ul>
+<li><code>课程链接</code> - <code>creator</code> - <code>作者主页</code></li>
+<li><code>课程链接</code> - <code>creation-date</code> - <code>&quot;Jan 1, 2022&quot;</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="3-代表性项目">3. 代表性项目</h3>
+<ul>
+<li><strong>WikiData</strong>：从维基百科信息框 (InfoBoxes) 中提取的机器可读知识库，支持使用 <strong>SPARQL</strong> 语言进行复杂查询。</li>
+<li><strong>DBpedia</strong>：与 WikiData 类似的维基百科知识提取项目。</li>
+<li><strong>Protégé</strong>：斯坦福大学开发的优秀可视化本体编辑器。</li>
+</ul>
+<h3 id="4-实践案例家族本体推理-family-ontology-inference">4. 实践案例：家族本体推理 (Family Ontology Inference)</h3>
+<p>在 <a href="https://github.com/microsoft/AI-For-Beginners/blob/main/lessons/2-Symbolic/FamilyOntology.ipynb">FamilyOntology.ipynb</a> 中，展示了如何使用语义网技术来自动化推理家族关系：</p>
+<ul>
+<li><strong>家谱数据源</strong>：使用 <code>python-gedcom</code> 库读取 Romanov 皇室家族的 GEDCOM 格式数据文件 (<code>data/tsars.ged</code>)。</li>
+<li><strong>本体定义 (onto.ttl)</strong>：通过 Turtle 格式定义了亲属关系规则。基础关系包括 <code>isFatherOf</code>, <code>isMotherOf</code>, <code>isBrotherOf</code>, <code>isSisterOf</code>，更高级的亲属关系通过推理链规则定义。
+<ul>
+<li>例如，<strong>阿姨</strong>的定义是：<em>父母的姐妹</em>。在 OWL 中以链式公理（<code>propertyChainAxiom</code>）表达：
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-turtle" data-lang="turtle"><span style="display:flex;"><span>fhkb:<span style="color:#f92672">isAuntOf</span> <span style="color:#66d9ef">a</span> owl:<span style="color:#f92672">ObjectProperty</span> ;
+</span></span><span style="display:flex;"><span>    rdfs:<span style="color:#f92672">domain</span> fhkb:<span style="color:#f92672">Woman</span> ;
+</span></span><span style="display:flex;"><span>    rdfs:<span style="color:#f92672">range</span> fhkb:<span style="color:#f92672">Person</span> ;
+</span></span><span style="display:flex;"><span>    owl:<span style="color:#f92672">propertyChainAxiom</span> ( fhkb:<span style="color:#f92672">isSisterOf</span> fhkb:<span style="color:#f92672">isParentOf</span> ) .
+</span></span></code></pre></div></li>
+</ul>
+</li>
+<li><strong>推理引擎与闭包生成</strong>：
+<ol>
+<li>脚本遍历 GEDCOM 文件，提取各成员的性别与亲缘关系，转换成对应的 RDF 三元组并追加到本体文件中。</li>
+<li>使用 <code>rdflib</code> 读取本体图。</li>
+<li>引入推理库 <code>owlrl</code>，调用 <code>DeductiveClosure(OWLRL_Extension).expand(g)</code> 计算逻辑闭包（Closure），自动生成所有能间接推导出的隐含关系。</li>
+</ol>
+</li>
+<li><strong>关系查询</strong>：基于推理后扩展的三元组图，使用 <strong>SPARQL</strong> 语言进行语义查询（如：<code>SELECT ?aname ?bname WHERE { ?a fhkb:isUncleOf ?b ... }</code>），可直接获取家谱中所有“叔叔/舅舅”关系的关联对，无需手动编写复杂的条件搜索代码。</li>
+</ul>
+<hr>
+<h2 id="五-概念图与主题分类-concept-graph--theme-classification">五、 概念图与主题分类 (Concept Graph &amp; Theme Classification)</h2>
+<ul>
+<li><strong>自动构建</strong>：与人工构建的本体不同，它是通过<strong>挖掘 (mining)</strong> 自然语言等非结构化文本自动生成的。</li>
+<li><strong>概率性 <code>is-a</code> 关系</strong>：例如 &ldquo;Microsoft&rdquo; 是 &ldquo;company&rdquo; 的概率为 0.87，是 &ldquo;brand&rdquo; 的概率为 0.75。这为机器理解人类概念提供了概率模型。</li>
+</ul>
+<h3 id="1-实践案例利用概念图进行新闻主题分类">1. 实践案例：利用概念图进行新闻主题分类</h3>
+<p>在 <a href="https://github.com/microsoft/AI-For-Beginners/blob/main/lessons/2-Symbolic/MSConceptGraph.ipynb">MSConceptGraph.ipynb</a> 中，展示了概念图在自然语言主题分类中的实际应用：</p>
+<ul>
+<li><strong>API 替代说明</strong>：由于原 Microsoft Concept Graph API 已下线，该示例现已切换为使用 <strong>ConceptNet</strong> (conceptnet.io) 的 REST API 接口。ConceptNet 拥有超 800 万个节点、2100 万条边，是一个包含 <code>IsA</code> (是一个), <code>PartOf</code> (一部分), <code>UsedFor</code> (用于) 等多种关系的多语言开源语义网。</li>
+<li><strong>应用流程</strong>：
+<ol>
+<li><strong>获取新闻标题</strong>：调用 <code>NewsApi.org</code> 接口，拉取最新的英美头条新闻标题。</li>
+<li><strong>名词提取 (NLP)</strong>：使用 <code>TextBlob</code> 库对新闻标题进行分析，提取出所有的名词短语 (Noun Phrases)。</li>
+<li><strong>概念泛化 (Abstraction)</strong>：直接根据名词短语进行分类会导致类别过于分散。因此，程序循环每个提取出的名词短语，通过 ConceptNet 的 <code>IsA</code> 接口查询其上级概念（例如，输入某个特定公司或产品名称，返回 <code>company</code>, <code>person</code>, <code>nation</code>, <code>economy</code> 等父类概念及其归一化权重）。</li>
+<li><strong>聚合分类</strong>：若泛化父概念的权重超过阈值 (0.1)，便将该新闻归类到对应的 <code>ECONOMY</code>（经济）、<code>NATION</code>（国家）、<code>PERSON</code>（人物）等核心主题下。</li>
+</ol>
+</li>
+<li><strong>核心价值</strong>：这种分类方式<strong>不需要任何有监督的标注数据</strong>（即不需要训练分类器），完全依赖现有的常识知识图谱，实现了对未知新闻标题的合理主题聚合，体现了符号 AI（知识驱动型）在概念抽象与语义泛化上的独特能力。</li>
+</ul>
+<h2 id="六-总结与展望">六、 总结与展望</h2>
+<p>在深度学习和神经网络大行其道的今天，符号 AI 的<strong>显式推理 (Explicit Reasoning)</strong> 依然不可或缺：</p>
+<ol>
+<li>神经网络通常难以提供决策的<strong>可解释性</strong>，而符号 AI 可以清晰回溯。</li>
+<li>在需要受控地修改系统行为、或者必须保证100%符合逻辑约束的实际项目中，知识库和推理机依然发挥着关键作用。</li>
+</ol>
+    </article>
+
+    
+<ul class="article-share">
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https://yrong.github.io/blog/post/2026-07-06-knowledge-representation-expert-systems/" target="_blank" rel="noopener" aria-label="Facebook">
+      <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <i class="fa-brands fa-facebook-f"></i></div>Facebook</div>
+    </a>
+  </li>
+
+  
+  
+
+  
+  <li>
+    <a class="resp-sharing-button__link" href="https://x.com/intent/tweet/?text=%e5%ad%a6%e4%b9%a0%e7%ac%94%e8%ae%b0%ef%bc%9a%e7%9f%a5%e8%af%86%e8%a1%a8%e7%a4%ba%e4%b8%8e%e4%b8%93%e5%ae%b6%e7%b3%bb%e7%bb%9f%20-%20yrong%20blog&amp;url=https://yrong.github.io/blog/post/2026-07-06-knowledge-representation-expert-systems/" target="_blank" rel="noopener" aria-label="Twitter">
+      <div class="resp-sharing-button resp-sharing-button--x resp-sharing-button--medium"><i class="fa-brands fa-x-twitter"></i></div>
+    </a>
+  </li>
+
+  
+  
+ 
+</ul>
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer pager-noitem">&lt; Newer</li>
+      <li class="pager-older">
+        <a href="/blog/post/2026-07-03-stripe-x402-ai-agent-payments/" data-toggle="tooltip" data-placement="top" title="x402 协议笔记：Stripe 如何让 AI 代理自主支付">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright">&copy; Copyright 2026 Ronyang</div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-about"><a href="/blog/about/" title="About">About</a></li>
+  </ul>
+  <div class="powerdby">
+    Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+
+</body>
+</html>
