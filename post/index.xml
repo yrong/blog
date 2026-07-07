@@ -19,13 +19,6 @@
       <description>&lt;p&gt;本篇笔记基于微软 &lt;a href=&#34;https://github.com/microsoft/AI-For-Beginners&#34;&gt;AI-For-Beginners&lt;/a&gt; 课程的第二章：&lt;strong&gt;符号人工智能 (Symbolic AI)&lt;/strong&gt; 进行整理，详细记录了符号 AI 与专家系统、知识表示、推理方法（前向与后向推理）以及本体与语义网的相关概念与核心架构。&lt;/p&gt;</description>
     </item>
     <item>
-      <title>x402 协议笔记：Stripe 如何让 AI 代理自主支付</title>
-      <link>https://yrong.github.io/blog/post/2026-07-03-stripe-x402-ai-agent-payments/</link>
-      <pubDate>Fri, 03 Jul 2026 20:00:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
-      <guid>https://yrong.github.io/blog/post/2026-07-03-stripe-x402-ai-agent-payments/</guid>
-      <description>&lt;p&gt;x402 是一种面向机器对机器（M2M）支付的开放协议，核心思路是&lt;strong&gt;复活 HTTP 402「Payment Required」状态码&lt;/strong&gt;，让 API 在返回付费要求时，客户端（尤其是 AI Agent）能自动完成支付并重试请求，无需人工介入、无需预先注册账号。&lt;/p&gt;&#xA;&lt;p&gt;Stripe 在 2026 年将其接入现有支付基础设施：开发者仍用熟悉的 PaymentIntent 和 Dashboard，底层走 USDC 链上结算；Coinbase 则围绕同一协议构建了 Agent.market 代理经济生态。本文综合 BitKan 解读、&lt;a href=&#34;https://docs.stripe.com/payments/machine/x402&#34;&gt;Stripe 官方文档&lt;/a&gt; 与示例代码，整理一份学习笔记。&lt;/p&gt;</description>
-    </item>
-    <item>
       <title>深度调研报告：Psy Protocol（最新完整版）</title>
       <link>https://yrong.github.io/blog/post/2026-06-15-psy-protocol-investigation-report/</link>
       <pubDate>Mon, 15 Jun 2026 00:13:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
@@ -59,6 +52,13 @@
       <pubDate>Thu, 09 Apr 2026 00:00:00 +0000</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
       <guid>https://yrong.github.io/blog/post/2026-04-09-xcmp-mmd-minimal-poc/</guid>
       <description>&lt;p&gt;Forum background: &lt;a href=&#34;https://forum.polkadot.network/t/xcmp-design-discussion/7328&#34;&gt;XCMP Design Discussion (Polkadot)&lt;/a&gt;.&lt;/p&gt;&#xA;&lt;h1 id=&#34;xcmp-mmd---design-document&#34;&gt;XCMP MMD - Design Document&lt;/h1&gt;&#xA;&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;&#xA;&lt;p&gt;XCMP MMD (Merkle Mountain Range based cross-chain messaging) is a proof-of-concept for trustless cross-chain message delivery between parachains. It uses a three-tier cryptographic proof system that leverages the relay chain&amp;rsquo;s BEEFY finality gadget and Merkle structures.&lt;/p&gt;&#xA;&lt;h2 id=&#34;problem-statement&#34;&gt;Problem Statement&lt;/h2&gt;&#xA;&lt;p&gt;&lt;strong&gt;HRMP&lt;/strong&gt; (Horizontal Relay-routed Message Passing) stores message payloads on the relay chain, which is expensive in terms of storage and execution costs.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>x402 协议笔记：Stripe 如何让 AI 代理自主支付</title>
+      <link>https://yrong.github.io/blog/post/2026-03-05-stripe-x402-ai-agent-payments/</link>
+      <pubDate>Thu, 05 Mar 2026 20:00:00 +0800</pubDate><author>yrong1997@gmail.com (Ronyang)</author>
+      <guid>https://yrong.github.io/blog/post/2026-03-05-stripe-x402-ai-agent-payments/</guid>
+      <description>&lt;p&gt;x402 是一种面向机器对机器（M2M）支付的开放协议，核心思路是&lt;strong&gt;复活 HTTP 402「Payment Required」状态码&lt;/strong&gt;，让 API 在返回付费要求时，客户端（尤其是 AI Agent）能自动完成支付并重试请求，无需人工介入、无需预先注册账号。&lt;/p&gt;&#xA;&lt;p&gt;Stripe 在 2026 年将其接入现有支付基础设施：开发者仍用熟悉的 PaymentIntent 和 Dashboard，底层走 USDC 链上结算；Coinbase 则围绕同一协议构建了 Agent.market 代理经济生态。本文综合 BitKan 解读、&lt;a href=&#34;https://docs.stripe.com/payments/machine/x402&#34;&gt;Stripe 官方文档&lt;/a&gt; 与示例代码，整理一份学习笔记。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Building Effective AI Agents &amp; Claude Code Best Practices</title>
